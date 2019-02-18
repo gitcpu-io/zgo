@@ -1,6 +1,10 @@
 package zgo
 
-import "github.com/rubinus/zgo/logic/zgo_mongo"
+import (
+	"context"
+	"github.com/globalsign/mgo"
+	"github.com/rubinus/zgo/logic/zgo_mongo"
+)
 
 var Mongo mongoer
 
@@ -9,9 +13,11 @@ func init() {
 }
 
 type mongoer interface {
-	Get(map[string]interface{}) (interface{}, error)
-	List(map[string]interface{}) ([]interface{}, error)
-	Create(map[string]interface{}) (interface{}, error)
-	Update(string, map[string]interface{}) (interface{}, error)
-	Delete(string, map[string]interface{}) (interface{}, error)
+	GetClientChan(name string) chan *mgo.Session
+	Get(ctx context.Context, session chan *mgo.Session, args map[string]interface{}) (chan interface{}, error) //返回chan
+
+	List(ctx context.Context, session chan *mgo.Session, args map[string]interface{}) ([]interface{}, error)
+	Create(ctx context.Context, session chan *mgo.Session, args map[string]interface{}) (interface{}, error)
+	Update(ctx context.Context, session chan *mgo.Session, key string, args map[string]interface{}) (interface{}, error)
+	Delete(ctx context.Context, session chan *mgo.Session, key string, args map[string]interface{}) (interface{}, error)
 }

@@ -1,42 +1,41 @@
 package zgo_mongo
 
 import (
+	"context"
+	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/rubinus/zgo/models/zgo_models_mongo"
 )
 
 type Mongo struct {
-	MongoResourcer zgo_models_mongo.MongoResourcer
 }
 
 func NewMongo() *Mongo {
-	//mongoMgr := new(Mongo)
-	//mongoMgr.MongoResourcer = zgo_models_mongo.Mongo
-	//
-	//return &mongoMgr
-	return &Mongo{
-		MongoResourcer: zgo_models_mongo.Mongo,
-	}
+	return &Mongo{}
 }
 
-func (mongoMgr Mongo) Create(args map[string]interface{}) (interface{}, error) {
-
-	return zgo_models_mongo.Create(mongoMgr.MongoResourcer, args["db"].(string), args["collection"].(string), args["args"])
+func (m *Mongo) GetClientChan(name string) chan *mgo.Session {
+	//name用来查找对应的库
+	return zgo_models_mongo.MongoClientChan()
 }
 
-func (mongoMgr Mongo) Update(key string, args map[string]interface{}) (interface{}, error) {
+func (m *Mongo) Create(ctx context.Context, ch chan *mgo.Session, args map[string]interface{}) (interface{}, error) {
+	return zgo_models_mongo.Create(ch, args["db"].(string), args["collection"].(string), args["args"])
+}
 
-	return nil, zgo_models_mongo.UpdateOne(mongoMgr.MongoResourcer, args["db"].(string), args["collection"].(string),
+func (m *Mongo) Update(ctx context.Context, ch chan *mgo.Session, key string, args map[string]interface{}) (interface{}, error) {
+
+	return nil, zgo_models_mongo.UpdateOne(ch, args["db"].(string), args["collection"].(string),
 		args["query"].(bson.M), args["update"].(bson.M))
 }
 
-func (mongoMgr Mongo) Delete(key string, args map[string]interface{}) (interface{}, error) {
+func (m *Mongo) Delete(ctx context.Context, ch chan *mgo.Session, key string, args map[string]interface{}) (interface{}, error) {
 
-	return nil, zgo_models_mongo.DeleteOne(mongoMgr.MongoResourcer, args["db"].(string), args["collection"].(string),
+	return nil, zgo_models_mongo.DeleteOne(ch, args["db"].(string), args["collection"].(string),
 		args["query"].(bson.M))
 }
 
-func (mongoMgr Mongo) List(args map[string]interface{}) ([]interface{}, error) {
+func (m *Mongo) List(ctx context.Context, ch chan *mgo.Session, args map[string]interface{}) ([]interface{}, error) {
 	sort := args["sort"]
 	if args["from"] == nil {
 		args["from"] = 0
@@ -45,18 +44,18 @@ func (mongoMgr Mongo) List(args map[string]interface{}) ([]interface{}, error) {
 		args["size"] = 10
 	}
 	if args["limit"] != 0 {
-		return zgo_models_mongo.ListByLimit(mongoMgr.MongoResourcer, args["db"].(string), args["collection"].(string),
+		return zgo_models_mongo.ListByLimit(ch, args["db"].(string), args["collection"].(string),
 			args["from"].(int), args["size"].(int), args["query"].(bson.M), args["select"].(bson.M), sort.([]string))
 	}
-	return zgo_models_mongo.List(mongoMgr.MongoResourcer, args["db"].(string), args["collection"].(string),
+	return zgo_models_mongo.List(ch, args["db"].(string), args["collection"].(string),
 		args["query"].(bson.M))
 }
 
-func (mongoMgr Mongo) Get(args map[string]interface{}) (interface{}, error) {
-	if args["select"] != nil {
-		return zgo_models_mongo.GetBySelect(mongoMgr.MongoResourcer, args["db"].(string), args["collection"].(string),
-			args["query"].(bson.M), args["select"].(bson.M))
-	}
-	return zgo_models_mongo.Get(mongoMgr.MongoResourcer, args["db"].(string), args["collection"].(string),
+func (m *Mongo) Get(ctx context.Context, ch chan *mgo.Session, args map[string]interface{}) (chan interface{}, error) {
+	//if args["select"] != nil {
+	//	return zgo_models_mongo.GetBySelect(ch,args["db"].(string), args["collection"].(string),
+	//		args["query"].(bson.M), args["select"].(bson.M))
+	//}
+	return zgo_models_mongo.Get(ch, args["db"].(string), args["collection"].(string),
 		args["query"].(bson.M))
 }
