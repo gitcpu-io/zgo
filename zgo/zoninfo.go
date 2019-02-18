@@ -1,6 +1,6 @@
 package zgo
 
-import "github.com/rubinus/zgo/logic/zgo_resource"
+import "git.zhugefang.com/gocore/zgo/logic/zgo_resource"
 
 var ZoneInfo zoneInfoer
 

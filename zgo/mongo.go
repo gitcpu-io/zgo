@@ -2,8 +2,8 @@ package zgo
 
 import (
 	"context"
+	"git.zhugefang.com/gocore/zgo/logic/zgo_mongo"
 	"github.com/globalsign/mgo"
-	"github.com/rubinus/zgo/logic/zgo_mongo"
 )
 
 var Mongo mongoer

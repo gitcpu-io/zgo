@@ -1,7 +1,7 @@
 package zgo
 
 import (
-	"github.com/rubinus/zgo/logic/zgo_utils"
+	"git.zhugefang.com/gocore/zgo/logic/zgo_utils"
 	"time"
 )
 

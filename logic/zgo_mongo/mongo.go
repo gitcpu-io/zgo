@@ -2,9 +2,9 @@ package zgo_mongo
 
 import (
 	"context"
+	"git.zhugefang.com/gocore/zgo/models/zgo_models_mongo"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"github.com/rubinus/zgo/models/zgo_models_mongo"
 )
 
 type Mongo struct {
