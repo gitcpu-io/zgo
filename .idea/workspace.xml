@@ -2,27 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c3109101-f0cb-41ba-bfc1-d2fb84b86d00" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/logic/zgo_kafka/kafka.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/logic/zgo_mysql/mysql.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/logic/zgo_nsq/nsq.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/logic/zgo_pika/pika.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/logic/zgo_pq/pq.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/logic/zgo_redis/redis.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/zgo_models_es/es.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/zgo_models_kafka/kafka.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/zgo_models_mysql/mysql.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/zgo_models_nsq/nsq.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/zgo_models_pika/pika.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/zgo_models_pq/pq.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/zgo_models_redis/redis.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/zgo/es.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/zgo/kafka.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/zgo/mysql.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/zgo/nsq.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/zgo/pika.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/zgo/redis.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -30,93 +10,33 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FUSProjectUsageTrigger">
+    <session id="781209106">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.open.time.1" value="1" />
+          <entry key="project.opened" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="go" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="Go" value="1" />
+        </counts>
+      </usages-collector>
+    </session>
+  </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/logic/zgo_mongo/mongo.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="15" selection-start-line="15" selection-end-line="15" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/README.md">
-          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-            <state split_layout="SPLIT">
-              <first_editor relative-caret-position="63">
-                <caret line="3" column="5" selection-start-line="3" selection-start-column="5" selection-end-line="3" selection-end-column="5" />
-              </first_editor>
-              <second_editor />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/models/zgo_models_es/es.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="21" selection-start-column="21" selection-end-column="21" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/models/zgo_models_mysql/mysql.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="24" selection-start-column="24" selection-end-column="24" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/models/zgo_models_nsq/nsq.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="22" selection-start-column="22" selection-end-column="22" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/models/zgo_models_pika/pika.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="23" selection-start-column="23" selection-end-column="23" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/models/zgo_models_pq/pq.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="21" selection-start-column="21" selection-end-column="21" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/models/zgo_models_redis/redis.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="24" selection-start-column="24" selection-end-column="24" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/logic/zgo_es/es.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="21">
-              <caret line="1" selection-start-line="1" selection-end-line="1" />
+            <state relative-caret-position="68">
+              <caret line="4" column="57" selection-start-line="4" selection-start-column="5" selection-end-line="4" selection-end-column="57" />
             </state>
           </provider>
         </entry>
@@ -160,7 +80,7 @@
       <dir>$PROJECT_DIR$</dir>
     </dirStrings>
   </component>
-  <component name="GOROOT" path="/usr/local/Cellar/go/1.11.1/libexec" />
+  <component name="GOROOT" path="/usr/local/Cellar/go/1.11.4/libexec" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="SET_USER_NAME_GLOBALLY" value="false" />
@@ -218,14 +138,23 @@
         <option value="$PROJECT_DIR$/models/zgo_models_redis/redis.go" />
         <option value="$PROJECT_DIR$/logic/zgo_es/es.go" />
         <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="y" value="23" />
-    <option name="width" value="1440" />
-    <option name="height" value="797" />
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
   </component>
+  <component name="ProjectFrameBounds" fullScreen="true">
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1382" />
+    <option name="height" value="744" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
@@ -248,101 +177,7 @@
               <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
               <item name="zgo" type="462c0819:PsiDirectoryNode" />
               <item name="logic" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_es" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="logic" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_kafka" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="logic" type="462c0819:PsiDirectoryNode" />
               <item name="zgo_mongo" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="logic" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_mysql" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="logic" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_nsq" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="logic" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_pika" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="logic" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_pq" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="logic" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_redis" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_models_es" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_models_kafka" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_models_mysql" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_models_nsq" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_models_pika" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_models_pq" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo_models_redis" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
-              <item name="zgo" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -437,6 +272,13 @@
       <pattern value="^TestInit$" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Go Test.TestGetTimeInFormatISO8601 in github.com/rubinus/zgo/sdk/zgo_utils" />
+      <item itemvalue="Go Test.TestGetTimeInFormatISO8601WithTZData in github.com/rubinus/zgo/sdk/zgo_utils" />
+      <item itemvalue="Go Test.TestGetTimeInFormatRFC2616WithTZData in github.com/rubinus/zgo/sdk/zgo_utils" />
+      <item itemvalue="Go Test.TestGetUrlFormedMap in github.com/rubinus/zgo/sdk/zgo_utils" />
+      <item itemvalue="Go Test.TestInit in github.com/rubinus/zgo/models/zgo_models_mongo" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Go Test.TestInit in github.com/rubinus/zgo/models/zgo_models_mongo" />
@@ -480,9 +322,9 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="797" extended-state="0" />
+    <frame x="0" y="0" width="1440" height="900" extended-state="0" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25679544" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26037195" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -493,8 +335,8 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Database Changes" order="8" />
-      <window_info anchor="bottom" id="Version Control" order="9" sideWeight="0.49928468" visible="true" weight="0.32907802" />
+      <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="9" sideWeight="0.49928468" weight="0.32907802" />
       <window_info anchor="bottom" id="Terminal" order="10" weight="0.32907802" />
       <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.5007153" side_tool="true" weight="0.32907802" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -506,13 +348,16 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="add zgo sdk" />
     <MESSAGE value="add zgo sdk init" />
-    <option name="LAST_COMMIT_MESSAGE" value="add zgo sdk init" />
+    <MESSAGE value="add zgo sdk readme.md" />
+    <option name="LAST_COMMIT_MESSAGE" value="add zgo sdk readme.md" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/../../aliyun/alibaba-cloud-sdk-go/integration/base.go" />
     <entry file="file://$PROJECT_DIR$/../../aliyun/alibaba-cloud-sdk-go/sdk/config.go" />
     <entry file="file://$PROJECT_DIR$/../../aliyun/alibaba-cloud-sdk-go/sdk/client_test.go" />
     <entry file="file://$PROJECT_DIR$/../../aliyun/alibaba-cloud-sdk-go/services/aegis/client.go" />
@@ -555,9 +400,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1218">
           <caret line="58" column="17" lean-forward="true" selection-start-line="58" selection-start-column="17" selection-end-line="58" selection-end-column="17" />
-          <folding>
-            <element signature="e#19#148#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -576,34 +418,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_mongo/connpool.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="987">
-          <caret line="51" column="13" selection-start-line="51" selection-start-column="13" selection-end-line="51" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_mongo/base.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="777">
-          <caret line="37" column="27" selection-start-line="37" selection-start-column="27" selection-end-line="37" selection-end-column="27" />
-          <folding>
-            <element signature="e#26#99#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/zgo/utils.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="168">
           <caret line="11" column="1" selection-start-line="11" selection-start-column="1" selection-end-line="11" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/zgo/mongo.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="11" selection-start-column="11" selection-end-column="11" />
         </state>
       </provider>
     </entry>
@@ -698,38 +516,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_es/es.go">
+    <entry file="file://$PROJECT_DIR$/logic/zgo_es/es.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="21" selection-start-column="21" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_mysql/mysql.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="24" selection-start-column="24" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_nsq/nsq.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="22" selection-start-column="22" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_pika/pika.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="23" selection-start-column="23" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_pq/pq.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="21" selection-start-column="21" selection-end-column="21" />
+        <state relative-caret-position="21">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
         </state>
       </provider>
     </entry>
@@ -740,27 +530,77 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/logic/zgo_es/es.go">
+    <entry file="file://$PROJECT_DIR$/models/zgo_models_pq/pq.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="21">
-          <caret line="1" selection-start-line="1" selection-end-line="1" />
+        <state>
+          <caret column="21" selection-start-column="21" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/zgo_models_pika/pika.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="23" selection-start-column="23" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/zgo_models_nsq/nsq.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="22" selection-start-column="22" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/zgo_models_mysql/mysql.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="24" selection-start-column="24" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/zgo_models_es/es.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="21" selection-start-column="21" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="5" column="12" lean-forward="true" selection-start-line="5" selection-start-column="12" selection-end-line="5" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md" />
+    <entry file="file://$PROJECT_DIR$/zgo/mongo.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="15" column="17" selection-start-line="15" selection-start-column="4" selection-end-line="15" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/zgo_models_mongo/base.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="256">
+          <caret line="40" column="7" selection-start-line="40" selection-start-column="7" selection-end-line="40" selection-end-column="7" />
+          <folding>
+            <element signature="e#26#99#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/zgo_models_mongo/connpool.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="799">
+          <caret line="51" column="13" selection-start-line="51" selection-start-column="13" selection-end-line="51" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/logic/zgo_mongo/mongo.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="15" selection-start-line="15" selection-end-line="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="63">
-            <caret line="3" column="5" selection-start-line="3" selection-start-column="5" selection-end-line="3" selection-end-column="5" />
-          </first_editor>
-          <second_editor />
+        <state relative-caret-position="68">
+          <caret line="4" column="57" selection-start-line="4" selection-start-column="5" selection-end-line="4" selection-end-column="57" />
         </state>
       </provider>
     </entry>
