@@ -1,7 +1,5 @@
-.idea/*
 *.xml
 *.iml
 workspace.xml
 node_modules/**/*
 lua/lib/*.so
-.idea/workspace.xml
