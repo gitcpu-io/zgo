@@ -2,7 +2,7 @@ package zgo
 
 import (
 	"context"
-	"git.zhugefang.com/gocore/zgo/logic/zgo_mongo"
+	"git.zhugefang.com/gocore/zgo.git/logic/zgo_mongo"
 	"github.com/globalsign/mgo"
 )
 
