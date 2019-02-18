@@ -8,6 +8,7 @@ import (
 )
 
 type Mongo struct {
+
 }
 
 func NewMongo() *Mongo {
