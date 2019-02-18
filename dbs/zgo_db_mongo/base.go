@@ -1,4 +1,4 @@
-package zgo_models_mongo
+package zgo_db_mongo
 
 import (
 	"github.com/globalsign/mgo"

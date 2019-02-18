@@ -2,7 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c3109101-f0cb-41ba-bfc1-d2fb84b86d00" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/zgo_db_es/es.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/zgo_db_es/es.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/zgo_models_kafka/kafka.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/zgo_db_kafka/kafka.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/zgo_models_mongo/base.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/zgo_db_mongo/base.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/zgo_models_mongo/connpool.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/zgo_db_mongo/connpool.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/zgo_models_mongo/defalut_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/zgo_db_mongo/defalut_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/zgo_models_mysql/mysql.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/zgo_db_mysql/mysql.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/zgo_models_nsq/nsq.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/zgo_db_nsq/nsq.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/zgo_models_pika/pika.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/zgo_db_pika/pika.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/zgo_models_pq/pq.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/zgo_db_pq/pq.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/zgo_models_redis/redis.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/zgo_db_redis/redis.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -32,8 +41,46 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+<<<<<<< HEAD
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/logic/zgo_mongo/mongo.go">
+=======
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/logic/zgo_mongo/mongo.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="195">
+              <caret line="18" column="33" selection-start-line="18" selection-start-column="33" selection-end-line="18" selection-end-column="33" />
+              <folding>
+                <element signature="e#19#163#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/zgo/mongo.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="345">
+              <caret line="23" selection-start-line="23" selection-end-line="23" />
+              <folding>
+                <element signature="e#13#115#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/dbs/zgo_db_es/es.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="15">
+              <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+>>>>>>> 720045f069d17a861e731525cf8bdcc4a420e89f
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="68">
               <caret line="4" column="57" selection-start-line="4" selection-start-column="5" selection-end-line="4" selection-end-column="57" />
@@ -88,7 +135,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/api/mongo/mongo.go" />
         <option value="$PROJECT_DIR$/api/utils/utils.go" />
         <option value="$PROJECT_DIR$/zgo/utils_impl.go" />
         <option value="$PROJECT_DIR$/api/utils_impl.go" />
@@ -139,6 +185,11 @@
         <option value="$PROJECT_DIR$/logic/zgo_es/es.go" />
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/.gitignore" />
+<<<<<<< HEAD
+=======
+        <option value="$PROJECT_DIR$/logic/zgo_mongo/mongo.go" />
+        <option value="$PROJECT_DIR$/models/zgo_db_es/es.go" />
+>>>>>>> 720045f069d17a861e731525cf8bdcc4a420e89f
       </list>
     </option>
   </component>
@@ -169,6 +220,7 @@
               <item name="zgo" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
+<<<<<<< HEAD
               <item name="zgo" type="b2602c69:ProjectViewProjectNode" />
               <item name="zgo" type="462c0819:PsiDirectoryNode" />
               <item name="logic" type="462c0819:PsiDirectoryNode" />
@@ -178,6 +230,11 @@
               <item name="zgo" type="462c0819:PsiDirectoryNode" />
               <item name="logic" type="462c0819:PsiDirectoryNode" />
               <item name="zgo_mongo" type="462c0819:PsiDirectoryNode" />
+=======
+              <item name="zgo.git" type="b2602c69:ProjectViewProjectNode" />
+              <item name="zgo.git" type="462c0819:PsiDirectoryNode" />
+              <item name="dbs" type="462c0819:PsiDirectoryNode" />
+>>>>>>> 720045f069d17a861e731525cf8bdcc4a420e89f
             </path>
           </expand>
           <select />
@@ -404,7 +461,7 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/models/zgo_models_mongo/interface.go" />
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_mongo/defalut_test.go">
+    <entry file="file://$PROJECT_DIR$/dbs/zgo_db_mongo/defalut_test.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
           <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
@@ -509,7 +566,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_kafka/kafka.go">
+    <entry file="file://$PROJECT_DIR$/dbs/zgo_db_kafka/kafka.go">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="24" selection-start-column="24" selection-end-column="24" />
@@ -523,49 +580,58 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_redis/redis.go">
+    <entry file="file://$PROJECT_DIR$/dbs/zgo_db_redis/redis.go">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="24" selection-start-column="24" selection-end-column="24" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_pq/pq.go">
+    <entry file="file://$PROJECT_DIR$/dbs/zgo_db_pq/pq.go">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="21" selection-start-column="21" selection-end-column="21" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_pika/pika.go">
+    <entry file="file://$PROJECT_DIR$/dbs/zgo_db_pika/pika.go">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="23" selection-start-column="23" selection-end-column="23" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_nsq/nsq.go">
+    <entry file="file://$PROJECT_DIR$/dbs/zgo_db_nsq/nsq.go">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="22" selection-start-column="22" selection-end-column="22" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/zgo_models_mysql/mysql.go">
+    <entry file="file://$PROJECT_DIR$/dbs/zgo_db_mysql/mysql.go">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="24" selection-start-column="24" selection-end-column="24" />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/models/zgo_models_es/es.go">
+=======
+    <entry file="file://$PROJECT_DIR$/README.md" />
+    <entry file="file://$PROJECT_DIR$/dbs/zgo_db_mongo/base.go">
+>>>>>>> 720045f069d17a861e731525cf8bdcc4a420e89f
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="21" selection-start-column="21" selection-end-column="21" />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/.gitignore">
+=======
+    <entry file="file://$PROJECT_DIR$/dbs/zgo_db_mongo/connpool.go">
+>>>>>>> 720045f069d17a861e731525cf8bdcc4a420e89f
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
           <caret line="5" column="12" lean-forward="true" selection-start-line="5" selection-start-column="12" selection-end-line="5" selection-end-column="12" />
@@ -592,12 +658,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/models/zgo_models_mongo/connpool.go">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
         <state relative-caret-position="799">
           <caret line="51" column="13" selection-start-line="51" selection-start-column="13" selection-end-line="51" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/logic/zgo_mongo/mongo.go">
+=======
+        <state relative-caret-position="345">
+          <caret line="23" selection-start-line="23" selection-end-line="23" />
+          <folding>
+            <element signature="e#13#115#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dbs/zgo_db_es/es.go">
+>>>>>>> 720045f069d17a861e731525cf8bdcc4a420e89f
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="4" column="57" selection-start-line="4" selection-start-column="5" selection-end-line="4" selection-end-column="57" />
