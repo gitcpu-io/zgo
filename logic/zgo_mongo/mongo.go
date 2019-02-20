@@ -8,7 +8,6 @@ import (
 )
 
 type Mongo struct {
-
 }
 
 func NewMongo() *Mongo {
@@ -52,11 +51,12 @@ func (m *Mongo) List(ctx context.Context, ch chan *mgo.Session, args map[string]
 		args["query"].(bson.M))
 }
 
-func (m *Mongo) Get(ctx context.Context, ch chan *mgo.Session, args map[string]interface{}) (chan interface{}, error) {
+func (m *Mongo) Get(ctx context.Context, ch chan *mgo.Session, args map[string]interface{}) (interface{}, error) {
 	//if args["select"] != nil {
 	//	return zgo_db_mongo.GetBySelect(ch,args["db"].(string), args["collection"].(string),
 	//		args["query"].(bson.M), args["select"].(bson.M))
 	//}
-	return zgo_db_mongo.Get(ch, args["db"].(string), args["collection"].(string),
+
+	return zgo_db_mongo.Get(ctx, ch, args["db"].(string), args["collection"].(string),
 		args["query"].(bson.M))
 }

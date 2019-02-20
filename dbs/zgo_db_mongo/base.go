@@ -1,6 +1,7 @@
 package zgo_db_mongo
 
 import (
+	"context"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
@@ -30,16 +31,23 @@ func Create(ch chan *mgo.Session, db, collection string, args ...interface{}) (i
 // test := bson.M{"name": "Jim"}
 // test := bson.M{"name": bson.M{"first": "Jim"}}
 
-func Get(ch chan *mgo.Session, db, collection string, query bson.M) (chan interface{}, error) {
-	out := make(chan interface{})
-	go func() {
-		//defer close(out)
-		s := <-ch
-		var res interface{}
-		s.DB(db).C(collection).Find(&query).One(&res)
-		out <- res
-	}()
-	return out, nil
+func Get(ctx context.Context, ch chan *mgo.Session, db, collection string, query bson.M) (interface{}, error) {
+	//out := make(chan interface{})
+	//go func(ctx context.Context) {
+	//	//defer close(out)
+	//	s := <-ch
+	//	var res interface{}
+	//
+	//	s.DB(db).C(collection).Find(&query).One(&res)
+	//	out <- res
+	//}(ctx)
+
+	s := <-ch
+	var res interface{}
+	s.DB(db).C(collection).Find(&query).One(&res)
+	//out <- res
+
+	return res, nil
 
 }
 

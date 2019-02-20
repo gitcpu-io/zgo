@@ -14,7 +14,7 @@ func init() {
 
 type mongoer interface {
 	GetClientChan(name string) chan *mgo.Session
-	Get(ctx context.Context, session chan *mgo.Session, args map[string]interface{}) (chan interface{}, error) //返回chan
+	Get(ctx context.Context, session chan *mgo.Session, args map[string]interface{}) (interface{}, error) //返回chan
 
 	List(ctx context.Context, session chan *mgo.Session, args map[string]interface{}) ([]interface{}, error)
 	Create(ctx context.Context, session chan *mgo.Session, args map[string]interface{}) (interface{}, error)
