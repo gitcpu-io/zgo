@@ -2,6 +2,8 @@ package zgo_db_mongo
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
@@ -31,7 +33,7 @@ func Create(ch chan *mgo.Session, db, collection string, args ...interface{}) (i
 // test := bson.M{"name": "Jim"}
 // test := bson.M{"name": bson.M{"first": "Jim"}}
 
-func Get(ctx context.Context, ch chan *mgo.Session, db, collection string, query bson.M) (interface{}, error) {
+func Get(ctx context.Context, ch chan *mgo.Session, args map[string]interface{} )(interface{}, error) {
 	//out := make(chan interface{})
 	//go func(ctx context.Context) {
 	//	//defer close(out)
@@ -41,28 +43,36 @@ func Get(ctx context.Context, ch chan *mgo.Session, db, collection string, query
 	//	s.DB(db).C(collection).Find(&query).One(&res)
 	//	out <- res
 	//}(ctx)
-
 	s := <-ch
 	var res interface{}
-	s.DB(db).C(collection).Find(&query).One(&res)
+	//judge if not exist
+	err := judgeMongo(args)
+	if err != nil{
+		return nil, err
+	}
+	s.DB(args["db"].(string)).C(args["collection"].(string)).Find(args["query"].(bson.M)).One(&res)
 	//out <- res
-
 	return res, nil
 
 }
 
-func GetBySelect(ch chan *mgo.Session, db, collection string, query, bySelect bson.M) (interface{}, error) {
+func GetBySelect(ch chan *mgo.Session, args map[string]interface{}) (interface{}, error) {
+	judgeMongo(args)
 	s := <-ch
 	var res interface{}
-	err := s.DB(db).C(collection).Find(&query).Select(&bySelect).One(&res)
+	query := map2Bson(args["query"].(map[string]interface{}))
+	err := s.DB(args["db"].(string)).C(args["collection"].(string)).Find(query).
+		Select(args["select"].(bson.M)).One(&res)
 	return res, err
 }
 
-func List(ch chan *mgo.Session, db, collection string, query bson.M) ([]interface{}, error) {
+func List(ch chan *mgo.Session, args map[string]interface{}) ([]interface{}, error) {
+	judgeMongo(args)
 	s := <-ch
-
-	ress := make([]interface{}, 0)
-	err := s.DB(db).C(collection).Find(&query).All(&ress)
+	//ress := make([]interface{}, 0)
+	ress := []interface{}{}
+	err := s.DB(args["db"].(string)).C(args["collection"].(string)).Find(args["query"].(bson.M)).
+		Select(args["select"].(bson.M)).Skip(args["from"].(int)).Limit(args["limit"].(int)).Sort(args["sort"].([]string)...).All(&ress)
 	return ress, err
 }
 
@@ -74,16 +84,15 @@ func ListByLimit(ch chan *mgo.Session, db, collection string, from, size int, qu
 	return ress, err
 }
 
-func UpdateOne(ch chan *mgo.Session, db, col string, query bson.M, update bson.M) error {
+func UpdateOne(ch chan *mgo.Session, args map[string]interface{}) error {
 	s := <-ch
-
-	return s.DB(db).C(col).Update(query, update)
+	return s.DB(args["db"].(string)).C(args["collection"].(string)).Update(args["query"].(bson.M), args["update"].(bson.M))
 }
 
-func UpdateAll(ch chan *mgo.Session, db, col string, query bson.M, update bson.M) error {
+func UpdateAll(ch chan *mgo.Session, args map[string]interface{}) error {
 	s := <-ch
 
-	_, err := s.DB(db).C(col).UpdateAll(query, update)
+	_, err := s.DB(args["db"].(string)).C(args["collection"].(string)).UpdateAll(args["query"].(bson.M), args["update"].(bson.M))
 	return err
 }
 
@@ -98,4 +107,34 @@ func DeleteAll(ch chan *mgo.Session, db, col string, query bson.M) error {
 
 	_, err := s.DB(db).C(col).RemoveAll(query)
 	return err
+}
+
+func judgeMongo(args map[string]interface{})error{
+	//switch args {
+	//case args["db"] == nil:
+	//	return errors.New("db is nil")
+	//case args["collection"] == nil:
+	//	return errors.New("collection is nil")
+	//case args["query"] == nil:
+	//	return errors.New("query is nil")
+	//}
+	if args["db"] == nil{
+		return errors.New("db is nil")
+	}else if  args["collection"] == nil{
+		return errors.New("collection is nil")
+	}else if  args["query"] == nil{
+		return errors.New("query is nil")
+	}
+	return nil
+}
+
+
+func map2Bson(arg map[string]interface{})*bson.M{
+	data, err := bson.Marshal(&arg)
+	if err != nil{
+		fmt.Println(err)
+	}
+	mmap := bson.M{}
+	bson.Unmarshal(data, &mmap)
+	return &mmap
 }

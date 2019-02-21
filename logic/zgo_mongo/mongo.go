@@ -23,10 +23,9 @@ func (m *Mongo) Create(ctx context.Context, ch chan *mgo.Session, args map[strin
 	return zgo_db_mongo.Create(ch, args["db"].(string), args["collection"].(string), args["args"])
 }
 
-func (m *Mongo) Update(ctx context.Context, ch chan *mgo.Session, key string, args map[string]interface{}) (interface{}, error) {
+func (m *Mongo) Update(ctx context.Context, ch chan *mgo.Session, args map[string]interface{}) (interface{}, error) {
 
-	return nil, zgo_db_mongo.UpdateOne(ch, args["db"].(string), args["collection"].(string),
-		args["query"].(bson.M), args["update"].(bson.M))
+	return nil, zgo_db_mongo.UpdateOne(ch, args)
 }
 
 func (m *Mongo) Delete(ctx context.Context, ch chan *mgo.Session, key string, args map[string]interface{}) (interface{}, error) {
@@ -36,27 +35,35 @@ func (m *Mongo) Delete(ctx context.Context, ch chan *mgo.Session, key string, ar
 }
 
 func (m *Mongo) List(ctx context.Context, ch chan *mgo.Session, args map[string]interface{}) ([]interface{}, error) {
-	sort := args["sort"]
+	//sort := args["sort"]
 	if args["from"] == nil {
 		args["from"] = 0
 	}
 	if args["size"] == nil {
 		args["size"] = 10
 	}
-	if args["limit"] != 0 {
-		return zgo_db_mongo.ListByLimit(ch, args["db"].(string), args["collection"].(string),
-			args["from"].(int), args["size"].(int), args["query"].(bson.M), args["select"].(bson.M), sort.([]string))
+	if args["limit"] == nil {
+		args["limit"] = 10
 	}
-	return zgo_db_mongo.List(ch, args["db"].(string), args["collection"].(string),
-		args["query"].(bson.M))
+	if args["sort"] == nil{
+		args["sort"] = []string{}
+	}
+	return zgo_db_mongo.List(ch, args)
+	//return zgo_db_mongo.List(ch, args["db"].(string), args["collection"].(string),
+	//	args["query"].(bson.M))
 }
 
 func (m *Mongo) Get(ctx context.Context, ch chan *mgo.Session, args map[string]interface{}) (interface{}, error) {
-	//if args["select"] != nil {
-	//	return zgo_db_mongo.GetBySelect(ch,args["db"].(string), args["collection"].(string),
-	//		args["query"].(bson.M), args["select"].(bson.M))
-	//}
+	if args["select"] != nil {
+		return zgo_db_mongo.GetBySelect(ch, args)
+	}
 
-	return zgo_db_mongo.Get(ctx, ch, args["db"].(string), args["collection"].(string),
-		args["query"].(bson.M))
+	return zgo_db_mongo.Get(ctx, ch, args)
 }
+
+
+//type Monargs struct {
+//	DB string `json:"db"`
+//	Collection string `json:"col"`
+//	Select string `json:"select"`
+//}
