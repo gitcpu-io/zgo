@@ -17,7 +17,7 @@ var (
 	mgoSessions []*mgo.Session
 )
 
-func init() {
+func Init() {
 	MongoChan = make(chan *mgo.Session, 10000)
 	mgoSessions = []*mgo.Session{}
 
