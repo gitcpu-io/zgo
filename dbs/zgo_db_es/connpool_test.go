@@ -1,7 +1,6 @@
 package zgo_db_es
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -13,6 +12,9 @@ func TestSearch(t *testing.T) {
 	uri := "http://101.201.28.195:9200/active_bj_house_sell/spider/_search?pretty"
 	dsl := `{"query": {"match_all": {}}}`
 	er := NewEsResource()
+
+	mp := map[string]interface{}{}
+
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -21,9 +23,12 @@ func TestSearch(t *testing.T) {
 		fmt.Println(err)
 	}
 	defer resp.Body.Close()
+	//json.NewDecoder(resp.Body).Decode(&mp)
+
 	r, _ := ioutil.ReadAll(resp.Body)
-	//fmt.Println(string(r))
-	mp := make(map[string]interface{})
+	////fmt.Println(string(r))
 	_ = json.Unmarshal(r, &mp)
+
+
 	fmt.Println(mp)
 }
