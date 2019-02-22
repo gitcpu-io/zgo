@@ -12,8 +12,6 @@ const (
 	file    = "file"
 )
 
-type Logger *log.Logger
-
 var logger *log.Logger
 
 type zlog struct {
@@ -25,7 +23,7 @@ func Newzlog() *zlog {
 	return &zlog{}
 }
 
-func (z *zlog) InitLog(projectName string, logLevel string) {
+func (z *zlog) NewLog(projectName string, logLevel string) {
 	z.project = projectName
 	z.setDebug(logLevel)
 	//return logger

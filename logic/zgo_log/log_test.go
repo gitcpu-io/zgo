@@ -7,6 +7,6 @@ import (
 func TestZlog_Info(t *testing.T) {
 
 	l := Newzlog()
-	l.InitLog("newProject", "debug")
+	l.NewLog("newProject", "debug")
 	l.Info("33333")
 }

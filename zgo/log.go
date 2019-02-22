@@ -13,7 +13,7 @@ func init() { //初始化Log
 }
 
 type logger interface {
-	InitLog(projectName string, logLevel string)
+	NewLog(projectName string, logLevel string)
 	Error(args ...interface{})
 	Info(args ...interface{})
 	Print(args ...interface{})
