@@ -24,15 +24,16 @@ func Login(ch chan *mgo.Session, db, user, pass string) (*mgo.Session, error) {
 	return s, err
 }
 
-func Create(ch chan *mgo.Session, db, collection string, args ...interface{}) (interface{}, error) {
+func Create(ch chan *mgo.Session,args map[string]interface{}) (interface{}, error) {
 	s := <-ch
-	return nil, s.DB(db).C(collection).Insert(args...)
+	return nil, s.DB(args["db"].(string)).C(args["collection"].(string)).Insert(args["items"])
 }
 
 // type bson.M map[string]interface{}
 // test := bson.M{"name": "Jim"}
 // test := bson.M{"name": bson.M{"first": "Jim"}}
 
+//获取一条数据，期望参数db collection update， query参数不传则为全部查询
 func Get(ctx context.Context, ch chan *mgo.Session, args map[string]interface{} )(interface{}, error) {
 	//out := make(chan interface{})
 	//go func(ctx context.Context) {
@@ -50,62 +51,63 @@ func Get(ctx context.Context, ch chan *mgo.Session, args map[string]interface{} 
 	if err != nil{
 		return nil, err
 	}
-	s.DB(args["db"].(string)).C(args["collection"].(string)).Find(args["query"].(bson.M)).One(&res)
+	preWorkForMongo(args)
+	s.DB(args["db"].(string)).C(args["collection"].(string)).Find(args["query"].(bson.M)).Select(args["select"].(bson.M)).One(&res)
 	//out <- res
 	return res, nil
 
 }
 
-func GetBySelect(ch chan *mgo.Session, args map[string]interface{}) (interface{}, error) {
-	judgeMongo(args)
-	s := <-ch
-	var res interface{}
-	query := map2Bson(args["query"].(map[string]interface{}))
-	err := s.DB(args["db"].(string)).C(args["collection"].(string)).Find(query).
-		Select(args["select"].(bson.M)).One(&res)
-	return res, err
-}
-
+//修改多条数据，期望参数db collection update query参数不传则为全部查询 select 为期望返回字段，若不填则自动为空
 func List(ch chan *mgo.Session, args map[string]interface{}) ([]interface{}, error) {
 	judgeMongo(args)
 	s := <-ch
-	//ress := make([]interface{}, 0)
+	preWorkForMongo(args)
 	ress := []interface{}{}
 	err := s.DB(args["db"].(string)).C(args["collection"].(string)).Find(args["query"].(bson.M)).
 		Select(args["select"].(bson.M)).Skip(args["from"].(int)).Limit(args["limit"].(int)).Sort(args["sort"].([]string)...).All(&ress)
 	return ress, err
 }
 
-func ListByLimit(ch chan *mgo.Session, db, collection string, from, size int, query, bySelect bson.M, sort []string) ([]interface{}, error) {
-	s := <-ch
-
-	ress := make([]interface{}, 0)
-	err := s.DB(db).C(collection).Find(&query).Select(&bySelect).Skip(from).Limit(size).Sort(sort...).All(&ress)
-	return ress, err
-}
-
+//修改多条数据，期望参数db collection update query参数不传则为最后一条更新
 func UpdateOne(ch chan *mgo.Session, args map[string]interface{}) error {
 	s := <-ch
+	preWorkForMongo(args)
 	return s.DB(args["db"].(string)).C(args["collection"].(string)).Update(args["query"].(bson.M), args["update"].(bson.M))
 }
 
+//修改多条数据，期望参数db collection update query参数不传则为全部查询
 func UpdateAll(ch chan *mgo.Session, args map[string]interface{}) error {
 	s := <-ch
-
+	preWorkForMongo(args)
 	_, err := s.DB(args["db"].(string)).C(args["collection"].(string)).UpdateAll(args["query"].(bson.M), args["update"].(bson.M))
 	return err
 }
 
-func DeleteOne(ch chan *mgo.Session, db, col string, query bson.M) error {
+func DeleteOne(ch chan *mgo.Session, args map[string]interface{}) error {
+	err := judgeMongo(args)
+	if err != nil{
+		return err
+	}
 	s := <-ch
-
-	return s.DB(db).C(col).Remove(query)
+	if args["query"] == nil{
+		return errors.New("query param can not empty when operate delete  ")
+	}
+	preWorkForMongo(args)
+	return s.DB(args["db"].(string)).C(args["collection"].(string)).Remove(args["query"])
 }
 
-func DeleteAll(ch chan *mgo.Session, db, col string, query bson.M) error {
+func DeleteAll(ch chan *mgo.Session, args map[string]interface{}) error {
+	err := judgeMongo(args)
+	if err != nil{
+		return err
+	}
 	s := <-ch
-
-	_, err := s.DB(db).C(col).RemoveAll(query)
+	if args["query"] == nil{
+		return errors.New("query param can not empty when operate delete  ")
+	}
+	preWorkForMongo(args)
+	_, err = s.DB(args["db"].(string)).C(args["collection"].(string)).RemoveAll(args["query"])
 	return err
 }
 
@@ -128,13 +130,53 @@ func judgeMongo(args map[string]interface{})error{
 	return nil
 }
 
-
-func map2Bson(arg map[string]interface{})*bson.M{
+//map转化成bson 内置函数
+func map2Bson(arg map[string]interface{})bson.M{
 	data, err := bson.Marshal(&arg)
 	if err != nil{
 		fmt.Println(err)
 	}
 	mmap := bson.M{}
 	bson.Unmarshal(data, &mmap)
-	return &mmap
+	return mmap
+}
+
+//map转换成bson 并且添加$set  避免修改导致对删除其他字段  内置函数
+func updateMap2Bson(arg map[string]interface{})bson.M{
+	set := map[string]map[string]interface{}{"$set": arg}
+	data, err := bson.Marshal(&set)
+	if err != nil{
+		fmt.Println(err)
+	}
+	mmap := bson.M{}
+	bson.Unmarshal(data, &mmap)
+	return mmap
+}
+
+//对mongo操作对前置工作 讲map类型转化为bson 内置函数
+func preWorkForMongo(args map[string]interface{})  {
+	if args["query"] != nil{
+		query := map2Bson(args["query"].(map[string]interface{}))
+		args["query"] = query
+	}else {
+		args["query"] = map[string]interface{}{}
+		query := map2Bson(args["query"].(map[string]interface{}))
+		args["query"] = query
+	}
+
+	if args["update"] != nil{
+		update := updateMap2Bson(args["update"].(map[string]interface{}))
+		args["update"] = update
+	}
+
+	if args["select"] != nil{
+		bySelect := map2Bson(args["select"].(map[string]interface{}))
+		args["select"] = bySelect
+	}else {
+		args["select"] = map[string]interface{}{}
+		bySelect := map2Bson(args["select"].(map[string]interface{}))
+		args["select"] = bySelect
+	}
+
+
 }
