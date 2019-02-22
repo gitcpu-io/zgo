@@ -13,7 +13,7 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 func Search(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
 	es := NewEsResource()
 	url := "http://101.201.28.195:9200"
-	uri := url + "/" + index + "/" + table + "_search?pretty"
+	uri := url + "/" + index + "/" + table + "/" + "_search?pretty"
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl))
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := es.GetEsClient().Do(req)

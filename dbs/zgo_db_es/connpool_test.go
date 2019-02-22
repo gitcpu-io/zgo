@@ -1,6 +1,7 @@
 package zgo_db_es
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -21,6 +22,7 @@ func TestSearch(t *testing.T) {
 	}
 	defer resp.Body.Close()
 	r, _ := ioutil.ReadAll(resp.Body)
+	//fmt.Println(string(r))
 	mp := make(map[string]interface{})
 	_ = json.Unmarshal(r, &mp)
 	fmt.Println(mp)
