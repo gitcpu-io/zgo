@@ -1,6 +1,8 @@
 package zgo
 
-import "zgo/logic/zgo_redis"
+import (
+	"git.zhugefang.com/gocore/zgo.git/logic/zgo_redis"
+)
 
 //todo  same as mongo or utils
 
