@@ -3,7 +3,7 @@ package zgo_db_es
 import (
 	"context"
 	"fmt"
-	jsoniter "github.com/json-iterator/go"
+	"github.com/json-iterator/go"
 	"net/http"
 	"strings"
 )
@@ -18,15 +18,18 @@ func Search(ctx context.Context, index string, table string, dsl string, args ma
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl))
 	if err != nil {
 		fmt.Print(err)
+		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := es.GetEsClient().Do(req)
 	defer resp.Body.Close()
 	if err != nil {
 		fmt.Print(err)
+		return nil, err
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&maps); err != nil {
 		fmt.Print(err)
+		return nil, err
 	}
 	return maps, err
 }

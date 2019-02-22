@@ -81,7 +81,12 @@ func QueryMongo(i int) chan int {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	//输入参数：上下文ctx，mongoChan里面是client的连接，args具体的查询操作参数
-	repChan, err := Get(ctx, mongoChan, "local", "startup_log", bson.M{})
+
+	var args = make(map[string]interface{})
+	args["db"] = "local"
+	args["collection"] = "local"
+	args["query"] = bson.M{}
+	repChan, err := Get(ctx, mongoChan, args)
 	if err != nil {
 		panic(err)
 	}
