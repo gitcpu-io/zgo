@@ -23,7 +23,7 @@ type Nsqer interface {
 
 func Nsq(label string) Nsqer {
 	return &zgonsq{
-		res: NewNsqResource(label),
+		res: NewNsqResourcer(label),
 	}
 }
 
@@ -48,7 +48,7 @@ func GetNsq(label ...string) (*zgonsq, error) {
 		return nil, err
 	}
 	return &zgonsq{
-		res: NewNsqResource(l),
+		res: NewNsqResourcer(l),
 	}, nil
 }
 

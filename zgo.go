@@ -20,21 +20,21 @@ func Engine(opt *Options) *engine {
 	}
 	opt.init() //把zgo_start中用户定义的，映射到zgo的内存变量上
 
-	if len(opt.mongo) > 0 {
+	if len(opt.Mongo) > 0 {
 		//todo someting
 		hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
 		//fmt.Println(hsm)
 		zgomongo.InitMongo(hsm)
 	}
 
-	if len(opt.mysql) > 0 {
+	if len(opt.Mysql) > 0 {
 		//todo someting
 
 	}
-	if len(opt.es) > 0 {
+	if len(opt.Es) > 0 {
 		//todo someting
 	}
-	if len(opt.redis) > 0 {
+	if len(opt.Redis) > 0 {
 		//todo someting
 	}
 	if len(opt.pika) > 0 {
@@ -45,7 +45,7 @@ func Engine(opt *Options) *engine {
 		//fmt.Println(hsm)
 		zgonsq.InitNsq(hsm)
 	}
-	if len(opt.kafka) > 0 {
+	if len(opt.Kafka) > 0 {
 		//todo someting
 	}
 

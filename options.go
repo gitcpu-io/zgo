@@ -3,14 +3,14 @@ package zgo
 import "git.zhugefang.com/gocore/zgo.git/config"
 
 type Options struct {
-	Env   string
-	mongo []string
-	mysql []string
-	es    []string
-	redis []string
-	pika  []string
-	kafka []string
-	Nsq   []string
+	Env   string   `json:"env"`
+	Mongo []string `json:"mongo"`
+	Mysql []string `json:"mysql"`
+	Es    []string `json:"es"`
+	Redis []string `json:"redis"`
+	pika  []string `json:"pika"`
+	Kafka []string `json:"kafka"`
+	Nsq   []string `json:"nsq"`
 }
 
 func (opt *Options) init() {

@@ -44,7 +44,7 @@ type nsqResource struct {
 	connpool ConnPooler
 }
 
-func NewNsqResource(label string) *nsqResource {
+func NewNsqResourcer(label string) NsqResourcer {
 	return &nsqResource{
 		label:    label,
 		connpool: NewConnPool(label), //使用connpool

@@ -22,10 +22,6 @@ type MongoResourcer interface {
 	DeleteAll(ctx context.Context, args map[string]interface{}) error
 }
 
-type A struct {
-	A string
-}
-
 //内部结构体
 type mongoResource struct {
 	label    string
@@ -33,7 +29,7 @@ type mongoResource struct {
 	connpool ConnPooler
 }
 
-func NewMongoResource(label string) MongoResourcer {
+func NewMongoResourcer(label string) MongoResourcer {
 	return &mongoResource{
 		label:    label,
 		connpool: NewConnPool(label), //使用connpool
