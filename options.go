@@ -6,7 +6,7 @@ type Options struct {
 	Env   string
 	mongo []string
 	mysql []string
-	es    []string
+	Es    []string
 	redis []string
 	pika  []string
 	kafka []string

@@ -10,6 +10,7 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
+
 func Add(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
 	//es := NewEsResource()
 

@@ -14,6 +14,10 @@ func TestEngine(t *testing.T) {
 			"label_bj",
 			//"label_sh",
 		},
+		Es: []string{
+			"new_write",
+			//"label_sh",
+		},
 	})
 
 	for {

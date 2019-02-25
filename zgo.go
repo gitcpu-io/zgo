@@ -1,6 +1,7 @@
 package zgo
 
 import (
+	"fmt"
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
@@ -31,8 +32,10 @@ func Engine(opt *Options) *engine {
 		//todo someting
 
 	}
-	if len(opt.es) > 0 {
-		//todo someting
+	if len(opt.Es) > 0 {
+		hsm := engine.getConfigByOption(config.Es, opt.Es)
+		fmt.Println(hsm)
+		return nil
 	}
 	if len(opt.redis) > 0 {
 		//todo someting
@@ -42,7 +45,7 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq
 		hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
-		//fmt.Println(hsm)
+		fmt.Println(hsm)
 		zgonsq.InitNsq(hsm)
 	}
 	if len(opt.kafka) > 0 {
