@@ -22,7 +22,7 @@ func Engine(opt *Options) *engine {
 
 	if len(opt.Mongo) > 0 {
 		//todo someting
-		hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
+		hsm := engine.getConfigByOption(config.Mongo, opt.Mongo)
 		//fmt.Println(hsm)
 		zgomongo.InitMongo(hsm)
 	}

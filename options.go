@@ -8,7 +8,7 @@ type Options struct {
 	Mysql []string `json:"mysql"`
 	Es    []string `json:"es"`
 	Redis []string `json:"redis"`
-	pika  []string `json:"pika"`
+	Pika  []string `json:"pika"`
 	Kafka []string `json:"kafka"`
 	Nsq   []string `json:"nsq"`
 }
