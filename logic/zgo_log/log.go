@@ -1,6 +1,7 @@
 package zgo_log
 
 import (
+	"errors"
 	"fmt"
 	"github.com/go-stack/stack"
 	log "github.com/sirupsen/logrus"
@@ -14,28 +15,36 @@ const (
 
 var logger *log.Logger
 
-type zlog struct {
+type zglog struct {
 	project  string
 	logLevel log.Level
 }
 
-func Newzlog() *zlog {
-	return &zlog{}
+func Newzglog() *zglog {
+	return &zglog{}
 }
 
-func (z *zlog) NewLog(projectName string, logLevel string) {
+func (z *zglog) NewLog(projectName string, logLevel string) error {
+	logger = &log.Logger{
+		Out:       os.Stdout,
+		Formatter: nil,
+		Hooks:     make(log.LevelHooks),
+		Level:     0,
+	}
 	z.project = projectName
-	z.setDebug(logLevel)
-	//return logger
+	err := z.setDebug(logLevel)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // debug: 使用text格式, Level是Debug, 打印所有级别
 // not debug: 使用json格式, level是Info, 不打印Debug级别
-func (z *zlog) setDebug(level string) {
+func (z *zglog) setDebug(level string) error {
 	l, err := log.ParseLevel(level)
 	if err != nil {
-		fmt.Errorf("请输入有效果的日志等级")
-		return
+		return errors.New("请输入有效的日志等级")
 	}
 	z.logLevel = l
 
@@ -63,17 +72,18 @@ func (z *zlog) setDebug(level string) {
 		logger.Level = log.InfoLevel
 		logger.Formatter = format
 	}
+	return nil
 }
 
-func (z *zlog) WithField(key string, value interface{}) *log.Entry {
+func (z *zglog) WithField(key string, value interface{}) *log.Entry {
 	return z.withCaller().WithField(key, value)
 }
 
-func (z *zlog) WithFields(fs log.Fields) *log.Entry {
+func (z *zglog) WithFields(fs log.Fields) *log.Entry {
 	return z.withCaller().WithFields(fs)
 }
 
-func (z *zlog) withCaller() *log.Entry {
+func (z *zglog) withCaller() *log.Entry {
 	var key = z.project
 	var value interface{}
 	if z.logLevel == log.DebugLevel {
@@ -89,53 +99,53 @@ func (z *zlog) withCaller() *log.Entry {
 	})
 }
 
-func (z *zlog) Error(args ...interface{}) {
+func (z *zglog) Error(args ...interface{}) {
 	z.withCaller().Error(args...)
 }
 
-func (z *zlog) Info(args ...interface{}) {
+func (z *zglog) Info(args ...interface{}) {
 	z.withCaller().Info(args...)
 }
 
-func (z *zlog) Print(args ...interface{}) {
+func (z *zglog) Print(args ...interface{}) {
 	z.withCaller().Print(args...)
 }
 
-func (z *zlog) Warn(args ...interface{}) {
+func (z *zglog) Warn(args ...interface{}) {
 	z.withCaller().Warn(args...)
 }
 
-func (z *zlog) Debug(args ...interface{}) {
+func (z *zglog) Debug(args ...interface{}) {
 	z.withCaller().Debug(args...)
 }
 
-func (z *zlog) Errorf(format string, args ...interface{}) {
+func (z *zglog) Errorf(format string, args ...interface{}) {
 	z.withCaller().Errorf(format, args...)
 }
 
-func (z *zlog) Infof(format string, args ...interface{}) {
+func (z *zglog) Infof(format string, args ...interface{}) {
 	z.withCaller().Infof(format, args...)
 }
 
-func (z *zlog) Printf(format string, args ...interface{}) {
+func (z *zglog) Printf(format string, args ...interface{}) {
 	z.withCaller().Printf(format, args...)
 }
 
-func (z *zlog) Warnf(format string, args ...interface{}) {
+func (z *zglog) Warnf(format string, args ...interface{}) {
 	z.withCaller().Warnf(format, args...)
 }
 
-func (z *zlog) Debugf(format string, args ...interface{}) {
+func (z *zglog) Debugf(format string, args ...interface{}) {
 	z.withCaller().Debugf(format, args...)
 }
 
 func init() {
-	logger = &log.Logger{
-		Out:       os.Stdout,
-		Formatter: nil,
-		Hooks:     make(log.LevelHooks),
-		Level:     0,
-	}
+	//logger = &log.Logger{
+	//	Out:       os.Stdout,
+	//	Formatter: nil,
+	//	Hooks:     make(log.LevelHooks),
+	//	Level:     0,
+	//}
 	//不能启用这个，否则会打印出zgo中的，而不是具体项目中的代码行数
 	//logger.SetReportCaller(true)
 }

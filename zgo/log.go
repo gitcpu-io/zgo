@@ -9,11 +9,11 @@ import (
 var Log logger
 
 func init() { //初始化Log
-	Log = zgo_log.Newzlog()
+	Log = zgo_log.Newzglog()
 }
 
 type logger interface {
-	NewLog(projectName string, logLevel string)
+	NewLog(projectName string, logLevel string) error
 	Error(args ...interface{})
 	Info(args ...interface{})
 	Print(args ...interface{})

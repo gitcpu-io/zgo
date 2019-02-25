@@ -1,31 +1,59 @@
-package zgo_db_mongo
+package zgomongo
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
 
-type mongoResource struct {
-	MongoChan chan *mgo.Session
+//NsqResourcer 给service使用
+type NsqResourcer interface {
+	GetConnChan(label string) chan *mgo.Session
+	List(ctx context.Context, args map[string]interface{}) ([]interface{}, error)
+	Get(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	Create(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	UpdateOne(ctx context.Context, args map[string]interface{}) error
+	UpdateAll(ctx context.Context, args map[string]interface{}) error
+	DeleteOne(ctx context.Context, args map[string]interface{}) error
+	DeleteAll(ctx context.Context, args map[string]interface{}) error
 }
 
-func NewMongoResource() *mongoResource {
+//内部结构体
+type mongoResource struct {
+	label    string
+	mu       sync.RWMutex
+	connpool ConnPooler
+}
+
+func NewMongoResource(label string) *mongoResource {
 	return &mongoResource{
-		MongoChan: MongoClientChan(),
+		label:    label,
+		connpool: NewConnPool(label), //使用connpool
 	}
 }
 
-func Login(ch chan *mgo.Session, db, user, pass string) (*mgo.Session, error) {
-	s := <-ch
+func InitMongoResource(hsm map[string][]string) {
+	InitConnPool(hsm)
+}
+
+//GetConnChan 返回存放连接的chan
+func (m *mongoResource) GetConnChan(label string) chan *mgo.Session {
+	return m.connpool.GetConnChan(label)
+}
+
+func (m *mongoResource) Login(ctx context.Context, db, user, pass string) (*mgo.Session, error) {
+	s := <-m.connpool.GetConnChan(m.label)
+
 	err := s.DB(db).Login(user, pass)
 	return s, err
 }
 
-func Create(ch chan *mgo.Session, args map[string]interface{}) (interface{}, error) {
-	s := <-ch
+func (m *mongoResource) Create(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+	s := <-m.connpool.GetConnChan(m.label)
 	return nil, s.DB(args["db"].(string)).C(args["collection"].(string)).Insert(args["items"])
 }
 
@@ -34,17 +62,8 @@ func Create(ch chan *mgo.Session, args map[string]interface{}) (interface{}, err
 // test := bson.M{"name": bson.M{"first": "Jim"}}
 
 //获取一条数据，期望参数db collection update， query参数不传则为全部查询
-func Get(ctx context.Context, ch chan *mgo.Session, args map[string]interface{}) (interface{}, error) {
-	//out := make(chan interface{})
-	//go func(ctx context.Context) {
-	//	//defer close(out)
-	//	s := <-ch
-	//	var res interface{}
-	//
-	//	s.DB(db).C(collection).Find(&query).One(&res)
-	//	out <- res
-	//}(ctx)
-	s := <-ch
+func (m *mongoResource) Get(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+	s := <-m.connpool.GetConnChan(m.label)
 	var res interface{}
 	//judge if not exist
 	err := judgeMongo(args)
@@ -53,15 +72,14 @@ func Get(ctx context.Context, ch chan *mgo.Session, args map[string]interface{})
 	}
 	preWorkForMongo(args)
 	s.DB(args["db"].(string)).C(args["collection"].(string)).Find(args["query"].(bson.M)).Select(args["select"].(bson.M)).One(&res)
-	//out <- res
 	return res, nil
 
 }
 
 //修改多条数据，期望参数db collection update query参数不传则为全部查询 select 为期望返回字段，若不填则自动为空
-func List(ch chan *mgo.Session, args map[string]interface{}) ([]interface{}, error) {
+func (m *mongoResource) List(ctx context.Context, args map[string]interface{}) ([]interface{}, error) {
 	judgeMongo(args)
-	s := <-ch
+	s := <-m.connpool.GetConnChan(m.label)
 	preWorkForMongo(args)
 	ress := []interface{}{}
 	err := s.DB(args["db"].(string)).C(args["collection"].(string)).Find(args["query"].(bson.M)).
@@ -70,26 +88,26 @@ func List(ch chan *mgo.Session, args map[string]interface{}) ([]interface{}, err
 }
 
 //修改多条数据，期望参数db collection update query参数不传则为最后一条更新
-func UpdateOne(ch chan *mgo.Session, args map[string]interface{}) error {
-	s := <-ch
+func (m *mongoResource) UpdateOne(ctx context.Context, args map[string]interface{}) error {
+	s := <-m.connpool.GetConnChan(m.label)
 	preWorkForMongo(args)
 	return s.DB(args["db"].(string)).C(args["collection"].(string)).Update(args["query"].(bson.M), args["update"].(bson.M))
 }
 
 //修改多条数据，期望参数db collection update query参数不传则为全部查询
-func UpdateAll(ch chan *mgo.Session, args map[string]interface{}) error {
-	s := <-ch
+func (m *mongoResource) UpdateAll(ctx context.Context, args map[string]interface{}) error {
+	s := <-m.connpool.GetConnChan(m.label)
 	preWorkForMongo(args)
 	_, err := s.DB(args["db"].(string)).C(args["collection"].(string)).UpdateAll(args["query"].(bson.M), args["update"].(bson.M))
 	return err
 }
 
-func DeleteOne(ch chan *mgo.Session, args map[string]interface{}) error {
+func (m *mongoResource) DeleteOne(ctx context.Context, args map[string]interface{}) error {
 	err := judgeMongo(args)
 	if err != nil {
 		return err
 	}
-	s := <-ch
+	s := <-m.connpool.GetConnChan(m.label)
 	if args["query"] == nil {
 		return errors.New("query param can not empty when operate delete  ")
 	}
@@ -97,12 +115,12 @@ func DeleteOne(ch chan *mgo.Session, args map[string]interface{}) error {
 	return s.DB(args["db"].(string)).C(args["collection"].(string)).Remove(args["query"])
 }
 
-func DeleteAll(ch chan *mgo.Session, args map[string]interface{}) error {
+func (m *mongoResource) DeleteAll(ctx context.Context, args map[string]interface{}) error {
 	err := judgeMongo(args)
 	if err != nil {
 		return err
 	}
-	s := <-ch
+	s := <-m.connpool.GetConnChan(m.label)
 	if args["query"] == nil {
 		return errors.New("query param can not empty when operate delete  ")
 	}
