@@ -1,0 +1,19 @@
+{
+  "env": "local",
+  "nsq": {
+    "label_bj": [
+      "localhost:4150"
+    ],
+    "label_sh": [
+      "localhost:4150"
+    ]
+  },
+  "mysql": {
+    "label_bj": [
+      "localhost:27017"
+    ],
+    "label_sh": [
+      "localhost:27017"
+    ]
+  }
+}
