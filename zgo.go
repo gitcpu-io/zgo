@@ -2,6 +2,7 @@ package zgo
 
 import (
 	"git.zhugefang.com/gocore/zgo.git/config"
+	"git.zhugefang.com/gocore/zgo.git/zgoes"
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
 	"github.com/nsqio/go-nsq"
@@ -32,12 +33,13 @@ func Engine(opt *Options) *engine {
 
 	}
 	if len(opt.Es) > 0 {
-		//todo someting
+		hsm := engine.getConfigByOption(config.Es, opt.Es)
+		zgoes.InitEs(hsm)
 	}
 	if len(opt.Redis) > 0 {
 		//todo someting
 	}
-	if len(opt.pika) > 0 {
+	if len(opt.Pika) > 0 {
 		//todo someting
 	}
 	if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq

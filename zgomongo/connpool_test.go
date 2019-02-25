@@ -16,6 +16,7 @@ const (
 	label_sh = "label_sh"
 )
 
+
 func TestMongoGet(t *testing.T) {
 
 	InitMongo(map[string][]string{
