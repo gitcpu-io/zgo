@@ -75,4 +75,5 @@ type (
 var (
 	Nsq   = zgonsq.Nsq("")
 	Mongo = zgomongo.Mongo("")
+	Es    = zgoes.Es("")
 )

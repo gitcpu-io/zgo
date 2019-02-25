@@ -2,19 +2,17 @@ package zgoes
 
 import (
 	"context"
-	"fmt"
 	jsoniter "github.com/json-iterator/go"
 	"net/http"
-	"strings"
 	"sync"
 )
 
 type EsResourcer interface {
-	Add(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error)
-	Del(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error)
-	Set(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error)
-	Get(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error)
-	Search(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error)
+	Add(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	Del(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	Set(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	Get(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	Search(ctx context.Context, args map[string]interface{}) (interface{}, error)
 }
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -44,14 +42,14 @@ func (e *esResource) GetConChan() *http.Client {
 	return &http.Client{}
 }
 
-func (e *esResource) Add(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
+func (e *esResource) Add(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 
 	maps := map[string]interface{}{} //定义es返回结构提
 
 	return maps, nil
 }
 
-func (e *esResource) Del(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
+func (e *esResource) Del(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 	//es := NewEsResource()
 
 	maps := map[string]interface{}{} //定义es返回结构提
@@ -59,7 +57,7 @@ func (e *esResource) Del(ctx context.Context, index string, table string, dsl st
 	return maps, nil
 }
 
-func (e *esResource) Set(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
+func (e *esResource) Set(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 	//es := NewEsResource()
 
 	maps := map[string]interface{}{} //定义es返回结构提
@@ -67,32 +65,32 @@ func (e *esResource) Set(ctx context.Context, index string, table string, dsl st
 	return maps, nil
 }
 
-func (e *esResource) Get(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
+func (e *esResource) Get(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 	maps := map[string]interface{}{} //定义es返回结构提
 	return maps, nil
 }
 
-func (e *esResource) Search(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
+func (e *esResource) Search(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 	maps := map[string]interface{}{} //定义es返回结构提
 
 	//url := "http://101.201.28.195:9200"
-
-	uri := e.url + "/" + index + "/" + table + "/" + "_search?pretty"
-	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl))
-	if err != nil {
-		fmt.Print(err)
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := e.GetConChan().Do(req)
-	defer resp.Body.Close()
-	if err != nil {
-		fmt.Print(err)
-		return nil, err
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&maps); err != nil {
-		fmt.Print(err)
-		return nil, err
-	}
-	return maps, err
+	//
+	//uri := e.url + "/" + index + "/" + table + "/" + "_search?pretty"
+	//req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl))
+	//if err != nil {
+	//	fmt.Print(err)
+	//	return nil, err
+	//}
+	//req.Header.Set("Content-Type", "application/json")
+	//resp, err := e.GetConChan().Do(req)
+	//defer resp.Body.Close()
+	//if err != nil {
+	//	fmt.Print(err)
+	//	return nil, err
+	//}
+	//if err := json.NewDecoder(resp.Body).Decode(&maps); err != nil {
+	//	fmt.Print(err)
+	//	return nil, err
+	//}
+	return maps, nil
 }
