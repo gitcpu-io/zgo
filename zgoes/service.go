@@ -34,9 +34,6 @@ func GetEs(label ...string) (*zgoes, error) {
 	}, nil
 }
 
-func (e *zgoes) NewEs(label ...string) (*zgoes, error) {
-	return GetEs(label...)
-}
 
 func Es(l string) Eser {
 	return &zgoes{
@@ -52,6 +49,10 @@ type Eser interface {
 	Set(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	Get(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	Search(ctx context.Context, args map[string]interface{}) (interface{}, error)
+}
+
+func (e *zgoes) NewEs(label ...string) (*zgoes, error) {
+	return GetEs(label...)
 }
 
 func (e *zgoes) Add(ctx context.Context, args map[string]interface{}) (interface{}, error) {

@@ -27,7 +27,6 @@ func Engine(opt *Options) *engine {
 		//fmt.Println(hsm)
 		zgomongo.InitMongo(hsm)
 	}
-
 	if len(opt.Mysql) > 0 {
 		//todo someting
 
