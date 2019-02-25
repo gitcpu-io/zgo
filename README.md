@@ -1,5 +1,7 @@
 #zgo Engine
 
+docker-compose up -d
+
 [![Go Report Card](https://goreportcard.com/badge/github.com/zgo-io/zgo?style=flat-square)](https://goreportcard.com/report/github.com/zgo-io/zgo)
 
 **Note**: The `master` branch 

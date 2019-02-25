@@ -12,9 +12,9 @@ var (
 	muLabel       sync.RWMutex
 )
 
-//Nsq 对外
+//Mongo 对外
 type Mongo interface {
-	NewNsq(label ...string) (*zgomongo, error)
+	NewMongo(label ...string) (*zgomongo, error)
 	GetConnChan(label ...string) (chan *mgo.Session, error)
 
 	Create(ctx context.Context, args map[string]interface{}) (interface{}, error)
@@ -27,7 +27,7 @@ type Mongo interface {
 
 //zgomong实现了Mongo的接口
 type zgomongo struct {
-	res NsqResourcer //使用resource另外的一个接口
+	res MongoResourcer //使用resource另外的一个接口
 }
 
 //InitMongo 初始化连接mongo
@@ -46,11 +46,11 @@ func GetMongo(label ...string) (*zgomongo, error) {
 		return nil, err
 	}
 	return &zgomongo{
-		res: NewMongoResource(l),
+		res: NewMongoResource(l), //interface
 	}, nil
 }
 
-func (n *zgomongo) NewNsq(label ...string) (*zgomongo, error) {
+func (n *zgomongo) NewMongo(label ...string) (*zgomongo, error) {
 	return GetMongo(label...)
 }
 

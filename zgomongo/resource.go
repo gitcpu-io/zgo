@@ -11,7 +11,7 @@ import (
 )
 
 //NsqResourcer 给service使用
-type NsqResourcer interface {
+type MongoResourcer interface {
 	GetConnChan(label string) chan *mgo.Session
 	List(ctx context.Context, args map[string]interface{}) ([]interface{}, error)
 	Get(ctx context.Context, args map[string]interface{}) (interface{}, error)
@@ -20,6 +20,10 @@ type NsqResourcer interface {
 	UpdateAll(ctx context.Context, args map[string]interface{}) error
 	DeleteOne(ctx context.Context, args map[string]interface{}) error
 	DeleteAll(ctx context.Context, args map[string]interface{}) error
+}
+
+type A struct {
+	A string
 }
 
 //内部结构体

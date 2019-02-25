@@ -22,13 +22,14 @@ func Engine(opt *Options) *engine {
 
 	if len(opt.mongo) > 0 {
 		//todo someting
+		hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
+		//fmt.Println(hsm)
+		zgomongo.InitMongo(hsm)
 	}
 
 	if len(opt.mysql) > 0 {
 		//todo someting
-		hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
-		//fmt.Println(hsm)
-		zgomongo.InitMongo(hsm)
+
 	}
 	if len(opt.es) > 0 {
 		//todo someting

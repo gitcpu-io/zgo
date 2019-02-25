@@ -17,6 +17,7 @@ const (
 )
 
 func TestMongoGet(t *testing.T) {
+
 	InitMongo(map[string][]string{
 		label_bj: []string{
 			"localhost:27017",
@@ -109,6 +110,7 @@ func getMongo(label string, client *zgomongo, i int) chan int {
 	args["db"] = "local"
 	args["collection"] = "startup_log"
 	args["query"] = bson.M{}
+
 	result, err := client.Get(ctx, args)
 	if err != nil {
 		panic(err)

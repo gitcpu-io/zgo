@@ -8,7 +8,7 @@
       "localhost:4150"
     ]
   },
-  "mysql": {
+  "mongo": {
     "label_bj": [
       "localhost:27017"
     ],
