@@ -33,7 +33,7 @@ type mongoResource struct {
 	connpool ConnPooler
 }
 
-func NewMongoResource(label string) *mongoResource {
+func NewMongoResource(label string) MongoResourcer {
 	return &mongoResource{
 		label:    label,
 		connpool: NewConnPool(label), //使用connpool
