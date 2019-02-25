@@ -7,7 +7,7 @@ import (
 type chat struct {
 	Topic   string
 	Channel string
-	Nsq     Nsq
+	Nsq     Nsqer
 }
 
 func (c *chat) Consumer() {

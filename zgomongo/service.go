@@ -13,16 +13,21 @@ var (
 )
 
 //Mongo 对外
-type Mongo interface {
+type Mongoer interface {
 	NewMongo(label ...string) (*zgomongo, error)
 	GetConnChan(label ...string) (chan *mgo.Session, error)
-
 	Create(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	Update(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	UpdateAll(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	Delete(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	List(ctx context.Context, args map[string]interface{}) ([]interface{}, error)
 	Get(ctx context.Context, args map[string]interface{}) (interface{}, error)
+}
+
+func Mongo(l string) Mongoer {
+	return &zgomongo{
+		res: NewMongoResource(l),
+	}
 }
 
 //zgomong实现了Mongo的接口

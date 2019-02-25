@@ -13,12 +13,18 @@ var (
 )
 
 //Nsq 对外
-type Nsq interface {
+type Nsqer interface {
 	NewNsq(label ...string) (*zgonsq, error)
 	GetConnChan(label ...string) (chan *nsq.Producer, error)
 	Producer(ctx context.Context, topic string, body []byte) (chan uint8, error)
 	ProducerMulti(ctx context.Context, topic string, body [][]byte) (chan uint8, error)
 	Consumer(topic, channel string, mode int, fn NsqHandlerFunc)
+}
+
+func Nsq(label string) Nsqer {
+	return &zgonsq{
+		res: NewNsqResource(label),
+	}
 }
 
 //zgonsq实现了Nsq的接口

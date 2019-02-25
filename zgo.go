@@ -71,6 +71,6 @@ type (
 )
 
 var (
-	Nsq, _   = zgonsq.GetNsq()
-	Mongo, _ = zgomongo.GetMongo()
+	Nsq   = zgonsq.Nsq("")
+	Mongo = zgomongo.Mongo("")
 )
