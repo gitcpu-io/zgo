@@ -22,7 +22,6 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 type esResource struct {
 	label    string
 	mu       sync.RWMutex
-	connpool ConnPooler
 }
 
 func (e *esResource) Add(ctx context.Context, args map[string]interface{}) (interface{}, error) {
