@@ -10,21 +10,21 @@ import (
 )
 
 type EsResourcer interface {
-	Add(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	Del(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	Set(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	Get(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	Add(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error)
+	Del(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error)
+	Set(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error)
+	Get(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error)
 	Search(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error)
 }
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type esResource struct {
-	label    string
-	mu       sync.RWMutex
+	label string
+	mu    sync.RWMutex
 }
 
-func (e *esResource) Add(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+func (e *esResource) Add(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
 	//es := NewEsResource()
 
 	maps := map[string]interface{}{} //定义es返回结构提
@@ -32,7 +32,7 @@ func (e *esResource) Add(ctx context.Context, args map[string]interface{}) (inte
 	return maps, nil
 }
 
-func (e *esResource) Del(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+func (e *esResource) Del(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
 	//es := NewEsResource()
 
 	maps := map[string]interface{}{} //定义es返回结构提
@@ -40,7 +40,7 @@ func (e *esResource) Del(ctx context.Context, args map[string]interface{}) (inte
 	return maps, nil
 }
 
-func (e *esResource) Set(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+func (e *esResource) Set(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
 	//es := NewEsResource()
 
 	maps := map[string]interface{}{} //定义es返回结构提
@@ -48,7 +48,7 @@ func (e *esResource) Set(ctx context.Context, args map[string]interface{}) (inte
 	return maps, nil
 }
 
-func (e *esResource) Get(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+func (e *esResource) Get(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
 	//es := NewEsResource()
 
 	maps := map[string]interface{}{} //定义es返回结构提

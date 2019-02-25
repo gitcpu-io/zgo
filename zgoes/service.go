@@ -2,7 +2,6 @@ package zgoes
 
 import (
 	"context"
-	"git.zhugefang.com/gocore/zgo.git/dbs/zgo_db_es"
 	"sync"
 )
 
@@ -24,21 +23,21 @@ type zgoes struct {
 }
 
 func (e *zgoes) Add(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
-	return zgo_db_es.Add(ctx, index, table, dsl, args)
+	return e.res.Add(ctx, index, table, dsl, args)
 }
 
 func (e *zgoes) Del(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
-	return zgo_db_es.Del(ctx, index, table, dsl, args)
+	return e.res.Del(ctx, index, table, dsl, args)
 }
 
 func (e *zgoes) Set(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
-	return zgo_db_es.Set(ctx, index, table, dsl, args)
+	return e.res.Set(ctx, index, table, dsl, args)
 }
 
 func (e *zgoes) Get(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
-	return zgo_db_es.Get(ctx, index, table, dsl, args)
+	return e.res.Get(ctx, index, table, dsl, args)
 }
 
 func (e *zgoes) Search(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
-	return zgo_db_es.Search(ctx, index, table, dsl, args)
+	return e.res.Search(ctx, index, table, dsl, args)
 }
