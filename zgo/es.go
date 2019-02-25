@@ -9,4 +9,3 @@ var Es *zgo_es.Es
 func init() {
 	Es = zgo_es.NewES()
 }
-

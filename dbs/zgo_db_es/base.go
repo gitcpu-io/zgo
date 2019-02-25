@@ -10,6 +10,46 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
+func Add(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
+	//es := NewEsResource()
+
+	maps := map[string]interface{}{} //定义es返回结构提
+
+	return maps, nil
+}
+
+func Del(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
+	//es := NewEsResource()
+
+	maps := map[string]interface{}{} //定义es返回结构提
+
+	return maps, nil
+}
+
+func Set(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
+	//es := NewEsResource()
+
+	maps := map[string]interface{}{} //定义es返回结构提
+
+	return maps, nil
+}
+
+func Get(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
+	//es := NewEsResource()
+
+	maps := map[string]interface{}{} //定义es返回结构提
+
+	return maps, nil
+}
+
+func List(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
+	//es := NewEsResource()
+
+	maps := map[string]interface{}{} //定义es返回结构提
+
+	return maps, nil
+}
+
 func Search(ctx context.Context, index string, table string, dsl string, args map[string]interface{}) (interface{}, error) {
 	es := NewEsResource()            //获取zgo封装的的client
 	maps := map[string]interface{}{} //定义es返回结构提
