@@ -3,6 +3,7 @@ package zgoes
 import (
 	"context"
 	"fmt"
+	"git.zhugefang.com/gocore/zgo.git/config"
 	jsoniter "github.com/json-iterator/go"
 	"net/http"
 	"strings"
@@ -22,8 +23,9 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 var uris = map[string]string{} //定义es返回结构提
 
 //项目初始化加载配置文件
-func InitEsResource(hsm map[string][]string) {
-	uris["sell_write"] = "http://101.201.28.195:9200"
+func InitEsResource(hsm map[string][]config.ConnDetail) {
+
+	//uris["sell_write"] = "http://101.201.28.195:9200"
 }
 
 //方法初始化从uris中获取uri
@@ -77,6 +79,8 @@ func (e *esResource) Search(ctx context.Context, args map[string]interface{}) (i
 	index := args["index"].(string)
 	table := args["table"].(string)
 	dsl := args["dsl"].(string)
+
+	fmt.Println(e.label, e.url, "000")
 
 	uri := e.url + "/" + index + "/" + table + "/" + "_search?pretty"
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl))

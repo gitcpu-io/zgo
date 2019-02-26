@@ -3,6 +3,7 @@ package zgomongo
 import (
 	"context"
 	"fmt"
+	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/globalsign/mgo/bson"
 	"github.com/json-iterator/go"
 	"testing"
@@ -16,17 +17,35 @@ const (
 	label_sh = "label_sh"
 )
 
-
 func TestMongoGet(t *testing.T) {
 
-	InitMongo(map[string][]string{
-		label_bj: []string{
-			"localhost:27017",
-		},
-		label_sh: []string{
-			"localhost:27017",
-		},
-	}) //测试时表示使用nsq，在zgo_start中使用一次
+	//-------------test for start engine---------
+	hsm := make(map[string][]config.ConnDetail)
+	cd_bj := config.ConnDetail{
+		C:        "北京主库-----mongo",
+		Host:     "localhost",
+		Port:     27017,
+		ConnSize: 50,
+		PoolSize: 20000,
+	}
+	cd_sh := config.ConnDetail{
+		C:        "上海主库-----mongo",
+		Host:     "localhost",
+		Port:     27017,
+		ConnSize: 50,
+		PoolSize: 20000,
+	}
+	var s1 []config.ConnDetail
+	var s2 []config.ConnDetail
+	s1 = append(s1, cd_bj)
+	s2 = append(s2, cd_sh)
+	hsm = map[string][]config.ConnDetail{
+		label_bj: s1,
+		label_sh: s2,
+	}
+	//----------------------
+
+	InitMongo(hsm) //测试时表示使用mongo，在zgo_start中使用一次
 
 	clientBj, err := GetMongo(label_bj)
 

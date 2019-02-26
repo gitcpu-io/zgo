@@ -3,16 +3,45 @@ package config
 import (
 	"errors"
 	"fmt"
-	"github.com/spf13/viper"
+	"github.com/json-iterator/go"
+	"io/ioutil"
 	"path/filepath"
 	"runtime"
 )
 
+var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
+
+type ConnDetail struct {
+	C        string `json:"c"`
+	Host     string `json:"host,omitempty"`
+	Port     int    `json:"limit"`
+	ConnSize int    `json:"connSize"`
+	PoolSize int    `json:"poolSize"`
+	Uri      string `json:"uri,omitempty"`
+}
+type LabelDetail struct {
+	Key    string `json:"key"`
+	Values []ConnDetail
+}
+
+type allConfig struct {
+	Dev   string        `json:"dev"`
+	Nsq   []LabelDetail `json:"nsq"`
+	Mongo []LabelDetail `json:"mongo"`
+	Mysql []LabelDetail `json:"mysql"`
+	Es    []LabelDetail `json:"es"`
+}
+
+type Labelconns struct {
+	Label string      `json:"label"`
+	Hosts *ConnDetail `json:"hosts"`
+}
+
 var (
 	Env   string
-	Nsq   map[string][]string
-	Es    map[string][]string
-	Mongo map[string][]string
+	Es    []LabelDetail
+	Mongo []LabelDetail
+	Nsq   []LabelDetail
 )
 
 func InitConfig(e string) {
@@ -25,20 +54,69 @@ func initConfig(e string) {
 		panic(errors.New("Can not get current file info"))
 	}
 	cf := fmt.Sprintf("%s/%s.json", filepath.Dir(f), e)
-	//fmt.Println(cf)
-	viper.SetConfigFile(cf)
 
-	err := viper.ReadInConfig()
+	bf, _ := ioutil.ReadFile(cf)
+	acfg := allConfig{}
+	err := jsonIterator.Unmarshal(bf, &acfg)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println("zgo engine is started on the ... ", viper.GetString("env"))
+	Nsq = acfg.Nsq
+	Es = acfg.Es
+	Mongo = acfg.Mongo
 
-	//nsq地址
-	Env = viper.GetString("env")
-	Nsq = viper.GetStringMapStringSlice("nsq")
-	Es = viper.GetStringMapStringSlice("es")
-	Mongo = viper.GetStringMapStringSlice("Mongo")
+	//fmt.Println(Nsq)
 
+	fmt.Println("zgo engine is started on the ... ", Env)
+
+	//fmt.Println(cf)
+
+	//viper.SetConfigFile(cf)
+	//err := viper.ReadInConfig()
+	//if err != nil {
+	//	panic(err)
+	//}
+
+	//for _, v := range acfg.Nsq  {
+	//	if "label_bj" == v.Key {
+	//		Nsq[v.Key] = v.Values
+	//		for _, vv := range v.Values  {
+	//			fmt.Println(vv.Host,vv.PoolSize)
+	//		}
+	//	}
+	//}
+
+	//Env = sjson.Get("env").MustString()
+	//FormateJsonToMap(sjson, "nsq", Nsq)
+	//FormateJsonToMap(sjson, "es", Es)
+	//FormateJsonToMap(sjson, "mongo", Mongo)
 }
+
+//func FormateJsonToMap(sjson *simplejson.Json, name string, m map[string][]comm.Clabels) {
+//	nsqJson, _ := sjson.Get(name).Map()
+//
+//	var cs []string
+//	for k, _ := range nsqJson {
+//		cs = append(cs, k)
+//	}
+//	for _, label := range cs {
+//		//v == label_bj 用户传来的label，它并不知道具体的连接地址
+//		//v == label_sh 用户传来的label，它并不知道具体的连接地址
+//
+//		tmpClabels := []comm.Clabels{}
+//
+//		if km, ok := nsqJson[label]; ok {
+//			b, _ := json.Marshal(km)
+//			json.Unmarshal(b, &tmpClabels)
+//
+//			m[label] = tmpClabels
+//
+//		}
+//
+//		//for k, v := range tmpClabels {
+//		//	fmt.Println(k,v)
+//		//}
+//
+//	}
+//}

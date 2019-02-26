@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/nsqio/go-nsq"
 	"sync"
 	"time"
@@ -51,7 +52,7 @@ func NewNsqResourcer(label string) NsqResourcer {
 	}
 }
 
-func InitNsqResource(hsm map[string][]string) {
+func InitNsqResource(hsm map[string][]config.ConnDetail) {
 	InitConnPool(hsm)
 }
 
@@ -132,7 +133,12 @@ func (n *nsqResource) Consumer(topic, channel string, mode int, fn NsqHandlerFun
 	defer n.mu.RUnlock()
 	var address string
 	if addr, ok := currentLabels[n.label]; ok {
-		address = addr[0]
+		for k, v := range addr {
+			if k == 0 && v.Host != "" && v.Port != 0 {
+				address = fmt.Sprintf("%s:%d", v.Host, v.Port)
+				break
+			}
+		}
 	}
 	if mode == 1 {
 		//建立NSQLookupd连接

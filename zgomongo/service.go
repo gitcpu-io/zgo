@@ -3,12 +3,13 @@ package zgomongo
 import (
 	"context"
 	"git.zhugefang.com/gocore/zgo.git/comm"
+	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/globalsign/mgo"
 	"sync"
 )
 
 var (
-	currentLabels = make(map[string][]string)
+	currentLabels = make(map[string][]config.ConnDetail)
 	muLabel       sync.RWMutex
 )
 
@@ -36,7 +37,7 @@ type zgomongo struct {
 }
 
 //InitMongo 初始化连接mongo
-func InitMongo(hsm map[string][]string) {
+func InitMongo(hsm map[string][]config.ConnDetail) {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 
