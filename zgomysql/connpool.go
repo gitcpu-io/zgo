@@ -52,8 +52,10 @@ func InitConnPool(hsm map[string][]*config.ConnDetail) {
 			db.LogMode(true)
 			//}
 			// 最大空闲连接 5
+			fmt.Println(value[i].MaxIdleSize)
 			db.DB().SetMaxIdleConns(value[i].MaxIdleSize)
 			// 最大打开链接 50
+			fmt.Println(value[i].MaxOpenConn)
 			db.DB().SetMaxOpenConns(value[i].MaxOpenConn)
 
 			// 禁用复数表名
