@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	label_bj = "label_bj"
-	label_sh = "label_sh"
+	label_bj = "nsq_label_bj"
+	label_sh = "nsq_label_sh"
 )
 
 func TestProducer(t *testing.T) {

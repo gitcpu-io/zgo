@@ -10,7 +10,14 @@ import (
 func TestConsumer(t *testing.T) {
 	hsm := make(map[string][]config.ConnDetail)
 	cd_bj := config.ConnDetail{
-		C:        "北京主库-----nsq",
+		C:        "北京从库1-----nsq",
+		Host:     "localhost",
+		Port:     4150,
+		ConnSize: 50,
+		PoolSize: 20000,
+	}
+	cd_bj2 := config.ConnDetail{
+		C:        "北京从库2-----nsq",
 		Host:     "localhost",
 		Port:     4150,
 		ConnSize: 50,
@@ -25,7 +32,7 @@ func TestConsumer(t *testing.T) {
 	}
 	var s1 []config.ConnDetail
 	var s2 []config.ConnDetail
-	s1 = append(s1, cd_bj)
+	s1 = append(s1, cd_bj, cd_bj2)
 	s2 = append(s2, cd_sh)
 	hsm = map[string][]config.ConnDetail{
 		label_bj: s1,
