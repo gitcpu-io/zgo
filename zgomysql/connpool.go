@@ -38,7 +38,7 @@ func GetPool(label string) *gorm.DB {
 }
 
 // 初始化连接池
-func InitConnPool(hsm map[string][]config.ConnDetail) {
+func InitConnPool(hsm map[string][]*config.ConnDetail) {
 	for key, value := range hsm {
 		for i := 0; i < len(value); i++ {
 			fmt.Println("initConnPool")
