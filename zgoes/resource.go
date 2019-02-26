@@ -10,7 +10,6 @@ import (
 	"context"
 	"fmt"
 	jsoniter "github.com/json-iterator/go"
-	"math/rand"
 	"net/http"
 	"strings"
 	"sync"
@@ -133,7 +132,6 @@ func (e *esResource) Set(ctx context.Context, args map[string]interface{}) (inte
 @parms: dsl:es原生语句
 */
 func (e *esResource) Get(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-
 	maps := map[string]interface{}{} //定义es返回结构提
 	return maps, nil
 }
@@ -152,15 +150,6 @@ func (e *esResource) Search(ctx context.Context, args map[string]interface{}) (i
 	index := args["index"].(string)
 	table := args["table"].(string)
 	dsl := args["dsl"].(string)
-
-	var url string
-	//r := e.hosts[rand.Intn(1)]
-	//if len(e.hosts) > 0 {
-	//	//从数组中随机选择一个
-	//	url = e.hosts[0].Uri
-	//}
-	fmt.Println(rand.Intn(1), "", url, "000")
-
 	uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl))
 	if err != nil {
