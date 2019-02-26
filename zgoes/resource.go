@@ -158,11 +158,11 @@ func (e *esResource) Search(ctx context.Context, args map[string]interface{}) (i
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := e.GetConChan().Do(req)
-	defer resp.Body.Close()
 	if err != nil {
 		fmt.Print(err)
 		return nil, err
 	}
+	defer resp.Body.Close()
 	if err := json.NewDecoder(resp.Body).Decode(&maps); err != nil {
 		fmt.Print(err)
 		return nil, err
