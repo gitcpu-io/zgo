@@ -5,11 +5,18 @@
       "key": "redis_label_bj",
       "values": [
         {
-          "c": "北京主库-----redis",
+          "c": "北京主库1-----redis",
           "host": "localhost",
           "port": 6379,
           "connSize": 50,
-          "poolSize": 20000
+          "poolSize": 234
+        },
+        {
+          "c": "北京主库2-----redis",
+          "host": "localhost",
+          "port": 6379,
+          "connSize": 50,
+          "poolSize": 678
         }
       ]
     },
@@ -17,11 +24,18 @@
       "key": "redis_label_sh",
       "values": [
         {
-          "c": "北京从库=====redis",
+          "c": "北京从库1=====redis",
           "host": "localhost",
           "port": 6379,
           "connSize": 50,
-          "poolSize": 20000
+          "poolSize": 111
+        },
+        {
+          "c": "北京从库3=====redis",
+          "host": "localhost",
+          "port": 6379,
+          "connSize": 50,
+          "poolSize": 222
         }
       ]
     }
@@ -31,11 +45,18 @@
       "key": "nsq_label_bj",
       "values": [
         {
-          "c": "北京主库-----nsq",
+          "c": "北京主库1-----nsq",
           "host": "localhost",
           "port": 4150,
           "connSize": 50,
-          "poolSize": 20000
+          "poolSize": 258
+        },
+        {
+          "c": "北京主库2-----nsq",
+          "host": "localhost",
+          "port": 4150,
+          "connSize": 50,
+          "poolSize": 369
         }
       ]
     },
@@ -57,11 +78,18 @@
       "key": "mongo_label_bj",
       "values": [
         {
-          "c": "北京主库-----mongo",
+          "c": "北京主库1-----mongo",
           "host": "localhost",
           "port": 27017,
-          "connSize": 50,
-          "poolSize": 20000
+          "connSize": 10,
+          "poolSize": 123
+        },
+        {
+          "c": "北京主库2-----mongo",
+          "host": "localhost",
+          "port": 27017,
+          "connSize": 5,
+          "poolSize": 456
         }
       ]
     },
@@ -69,11 +97,18 @@
       "key": "mongo_label_sh",
       "values": [
         {
-          "c": "北京从库=====mongo",
+          "c": "上海从库1=====mongo",
           "host": "localhost",
           "port": 27017,
           "connSize": 50,
-          "poolSize": 20000
+          "poolSize": 789
+        },
+        {
+          "c": "上海从库2=====mongo",
+          "host": "localhost",
+          "port": 27017,
+          "connSize": 50,
+          "poolSize": 456
         }
       ]
     }

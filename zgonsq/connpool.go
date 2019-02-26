@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/nsqio/go-nsq"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -16,7 +17,7 @@ const (
 
 var (
 	connChanMap map[string]chan *nsq.Producer
-	mu          sync.RWMutex
+	mu          sync.RWMutex //用于锁定connChanMap
 	hsmu        sync.RWMutex
 )
 
@@ -27,7 +28,7 @@ type ConnPooler interface {
 
 type connPool struct {
 	label        string
-	hosts        *config.ConnDetail
+	m            sync.RWMutex
 	connChan     chan *nsq.Producer
 	clients      []*nsq.Producer
 	connChanChan chan chan *nsq.Producer
@@ -40,11 +41,11 @@ func NewConnPool(label string) *connPool {
 }
 
 //InitConnPool 对外暴露
-func InitConnPool(hsm map[string][]config.ConnDetail) {
+func InitConnPool(hsm map[string][]*config.ConnDetail) {
 	initConnPool(hsm)
 }
 
-func initConnPool(hsm map[string][]config.ConnDetail) { //仅跑一次
+func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 	hsmu.RLock()
 	defer hsmu.RUnlock()
 
@@ -56,28 +57,28 @@ func initConnPool(hsm map[string][]config.ConnDetail) { //仅跑一次
 			label := lahosts.Label
 			hosts := lahosts.Hosts
 
-			c := &connPool{
-				label:        label,
-				hosts:        hosts,
-				connChan:     make(chan *nsq.Producer, hosts.PoolSize),
-				connChanChan: make(chan chan *nsq.Producer, hosts.ConnSize),
+			for k, v := range hosts {
+				index := fmt.Sprintf("%s:%d", label, k)
+				c := &connPool{
+					label:        label,
+					connChan:     make(chan *nsq.Producer, v.PoolSize),
+					connChanChan: make(chan chan *nsq.Producer, v.ConnSize),
+				}
+				connChanMap[index] = c.connChan
+				go c.setConnPoolToChan(index, v) //call 创建连接到chan中
 			}
-			connChanMap[label] = c.connChan
-			go c.setConnPoolToChan(label, hosts) //call 创建连接到chan中
+
 			//fmt.Println(label, hosts, "hsm=====",len(hsm), connChanMap)
 		}
 	}()
 
 	for label, val := range hsm {
-		for _, v := range val {
-			fmt.Println(label, v.C)
-
-			lcs := &config.Labelconns{
-				Label: label,
-				Hosts: &v,
-			}
-			ch <- lcs
+		lcs := &config.Labelconns{
+			Label: label,
+			Hosts: val,
 		}
+		//fmt.Println(lcs,"-----")
+		ch <- lcs
 	}
 	close(ch)
 
@@ -85,13 +86,19 @@ func initConnPool(hsm map[string][]config.ConnDetail) { //仅跑一次
 
 //GetConnChan 通过label并发安全读map
 func (cp *connPool) GetConnChan(label string) chan *nsq.Producer {
-	mu.RLock()
-	defer mu.RUnlock()
-	return connChanMap[label]
+	cp.m.RLock()
+	defer cp.m.RUnlock()
+
+	labLen := 0
+	if v, ok := currentLabels[label]; ok {
+		labLen = len(v)
+	}
+	index := rand.Intn(labLen) //随机取一个相同label下的连接
+	return connChanMap[fmt.Sprintf("%s:%d", label, index)]
 }
 
 func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
-
+	//fmt.Sprintf(label, "--", hosts)
 	//每个host:port连接创建50个连接，放入slice中
 	go func() {
 		for sessionCh := range cp.connChanChan {
@@ -122,7 +129,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 				//大多时间是在执行下面一行sleep
 				time.Sleep(sleepTime * time.Millisecond)
 				//fmt.Println(len(cp.connChan), "--connChan--", label, hosts.Host, hosts.Port)
-				fmt.Println(len(connChanMap), "--connChanMap--", label, hosts.Host, hosts.Port)
+				//fmt.Println(len(connChanMap), "--connChanMap--", label, hosts.Host, hosts.Port)
 			}
 		}
 
@@ -130,7 +137,8 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 
 	go func() {
 		time.Sleep(2000 * time.Millisecond) //仅仅为了查看创建的连接数，创建数据库连接时间：90ms
-		fmt.Println("init nsq connection to connChan ...", len(cp.connChan), label, hosts)
+		fmt.Printf("init Nsq to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
+			len(cp.connChan), label, hosts.Host, hosts.Port, hosts.ConnSize, hosts.PoolSize, hosts.C)
 	}()
 }
 

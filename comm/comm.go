@@ -7,7 +7,7 @@ import (
 )
 
 //getCurrentLabel 着重判断输入的label与zgo engine 在内存中的用户态的label
-func GetCurrentLabel(label []string, mu sync.RWMutex, cm map[string][]config.ConnDetail) (string, error) {
+func GetCurrentLabel(label []string, mu sync.RWMutex, cm map[string][]*config.ConnDetail) (string, error) {
 	mu.RLock()
 	defer mu.RUnlock()
 

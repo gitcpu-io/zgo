@@ -14,12 +14,12 @@ import (
 )
 
 var (
-	currentLabels = make(map[string][]config.ConnDetail)
+	currentLabels = make(map[string][]*config.ConnDetail)
 	muLabel       sync.RWMutex
 )
 
 //项目初始化  根据用户选择label 初始化Es实例
-func InitEs(hsm map[string][]config.ConnDetail) {
+func InitEs(hsm map[string][]*config.ConnDetail) {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 	currentLabels = hsm

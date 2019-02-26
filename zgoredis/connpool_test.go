@@ -22,13 +22,20 @@ const (
 )
 
 func TestRedisGet(t *testing.T) {
-	hsm := make(map[string][]config.ConnDetail)
+	hsm := make(map[string][]*config.ConnDetail)
 	cd_bj := config.ConnDetail{
-		C:        "北京主库-----redis",
+		C:        "北京主库-----redis1",
 		Host:     "localhost",
 		Port:     6379,
 		ConnSize: 10,
-		PoolSize: 20000,
+		PoolSize: 345,
+	}
+	cd_bj2 := config.ConnDetail{
+		C:        "北京从库-----redis2",
+		Host:     "localhost",
+		Port:     6379,
+		ConnSize: 5,
+		PoolSize: 200,
 	}
 	cd_sh := config.ConnDetail{
 		C:        "上海主库-----redis",
@@ -37,11 +44,11 @@ func TestRedisGet(t *testing.T) {
 		ConnSize: 10,
 		PoolSize: 20000,
 	}
-	var s1 []config.ConnDetail
-	var s2 []config.ConnDetail
-	s1 = append(s1, cd_bj)
-	s2 = append(s2, cd_sh)
-	hsm = map[string][]config.ConnDetail{
+	var s1 []*config.ConnDetail
+	var s2 []*config.ConnDetail
+	s1 = append(s1, &cd_bj, &cd_bj2)
+	s2 = append(s2, &cd_sh)
+	hsm = map[string][]*config.ConnDetail{
 		label_bj: s1,
 		label_sh: s2,
 	}

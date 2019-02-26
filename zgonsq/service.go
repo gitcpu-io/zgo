@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	currentLabels = make(map[string][]config.ConnDetail)
+	currentLabels = make(map[string][]*config.ConnDetail)
 	muLabel       sync.RWMutex
 )
 
@@ -34,7 +34,7 @@ type zgonsq struct {
 }
 
 //InitNsq 初始化连接nsq
-func InitNsq(hsm map[string][]config.ConnDetail) {
+func InitNsq(hsm map[string][]*config.ConnDetail) {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 

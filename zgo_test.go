@@ -11,11 +11,11 @@ func TestEngine(t *testing.T) {
 	Engine(&Options{
 		Env: "local",
 		Nsq: []string{
-			"label_bj",
+			"nsq_label_bj",
 			//"label_sh",
 		},
 		Es: []string{
-			"new_write",
+			"es_new_write",
 			//"label_sh",
 		},
 	})

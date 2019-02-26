@@ -35,8 +35,8 @@ type allConfig struct {
 }
 
 type Labelconns struct {
-	Label string      `json:"label"`
-	Hosts *ConnDetail `json:"hosts"`
+	Label string        `json:"label"`
+	Hosts []*ConnDetail `json:"hosts"`
 }
 
 var (

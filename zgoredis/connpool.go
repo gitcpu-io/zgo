@@ -4,19 +4,26 @@ import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/mediocregopher/radix"
+	"math/rand"
 	"sync"
 	"time"
 )
 
 const (
-	limitConn = 50   //如果是连接集群就是每台数据库长连接50个，单机连也是50个
-	mchSize   = 1000 //mchSize越大，越用不完，会休眠越久，不用长时间塞连接进channel
-	sleepTime = 100  //goroutine休眠时间为1000毫秒
+	//limitConn = 50   //如果是连接集群就是每台数据库长连接50个，单机连也是50个
+	//mchSize   = 1000 //mchSize越大，越用不完，会休眠越久，不用长时间塞连接进channel
+	sleepTime = 100 //goroutine休眠时间为1000毫秒
+)
+
+var (
+	connChanMap map[string]chan *radix.Pool
+	mu          sync.RWMutex
+	hsmu        sync.RWMutex
 )
 
 type connPool struct {
 	label        string
-	hosts        *config.ConnDetail
+	m            sync.RWMutex
 	connChan     chan *radix.Pool
 	clients      []*radix.Pool
 	connChanChan chan chan *radix.Pool
@@ -28,23 +35,17 @@ func NewConnPool(label string) *connPool {
 	}
 }
 
-var (
-	connChanMap map[string]chan *radix.Pool
-	mu          sync.RWMutex
-	hsmu        sync.RWMutex
-)
-
 //连接对外的接口
 type ConnPooler interface {
 	GetConnChan(label string) chan *radix.Pool
 }
 
 //InitConnPool 对外暴露
-func InitConnPool(hsm map[string][]config.ConnDetail) {
+func InitConnPool(hsm map[string][]*config.ConnDetail) {
 	initConnPool(hsm)
 }
 
-func initConnPool(hsm map[string][]config.ConnDetail) { //仅跑一次
+func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 	hsmu.RLock()
 	defer hsmu.RUnlock()
 	connChanMap = make(map[string]chan *radix.Pool)
@@ -55,28 +56,28 @@ func initConnPool(hsm map[string][]config.ConnDetail) { //仅跑一次
 			label := lahosts.Label
 			hosts := lahosts.Hosts
 
-			c := &connPool{
-				label:        label,
-				hosts:        hosts,
-				connChan:     make(chan *radix.Pool, hosts.PoolSize),
-				connChanChan: make(chan chan *radix.Pool, hosts.ConnSize),
+			for k, v := range hosts {
+				index := fmt.Sprintf("%s:%d", label, k)
+				c := &connPool{
+					label:        label,
+					connChan:     make(chan *radix.Pool, v.PoolSize),
+					connChanChan: make(chan chan *radix.Pool, v.ConnSize),
+				}
+				connChanMap[index] = c.connChan
+				go c.setConnPoolToChan(index, v) //call 创建连接到chan中
 			}
-			connChanMap[label] = c.connChan
-			go c.setConnPoolToChan(label, hosts) //call 创建连接到chan中
+
 			//fmt.Println(label, hosts, "hsm=====",len(hsm), connChanMap)
 		}
 	}()
 
 	for label, val := range hsm {
-		for _, v := range val {
-			fmt.Println(label, v.C)
-
-			lcs := &config.Labelconns{
-				Label: label,
-				Hosts: &v,
-			}
-			ch <- lcs
+		lcs := &config.Labelconns{
+			Label: label,
+			Hosts: val,
 		}
+		//fmt.Println(lcs,"-----")
+		ch <- lcs
 	}
 	close(ch)
 
@@ -84,9 +85,15 @@ func initConnPool(hsm map[string][]config.ConnDetail) { //仅跑一次
 
 //GetConnChan 通过label并发安全读map
 func (cp *connPool) GetConnChan(label string) chan *radix.Pool {
-	mu.RLock()
-	defer mu.RUnlock()
-	return connChanMap[label]
+	cp.m.RLock()
+	defer cp.m.RUnlock()
+
+	labLen := 0
+	if v, ok := currentLabels[label]; ok {
+		labLen = len(v)
+	}
+	index := rand.Intn(labLen) //随机取一个相同label下的连接
+	return connChanMap[fmt.Sprintf("%s:%d", label, index)]
 }
 
 func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
@@ -128,7 +135,8 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 
 	go func() {
 		time.Sleep(2000 * time.Millisecond) //仅仅为了查看创建的连接数，创建数据库连接时间：90ms
-		fmt.Println("init redis connection to connChan ...", len(cp.connChan), label, hosts)
+		fmt.Printf("init Redis to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
+			len(cp.connChan), label, hosts.Host, hosts.Port, hosts.ConnSize, hosts.PoolSize, hosts.C)
 	}()
 }
 

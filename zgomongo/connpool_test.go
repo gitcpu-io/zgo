@@ -20,13 +20,20 @@ const (
 func TestMongoGet(t *testing.T) {
 
 	//-------------test for start engine---------
-	hsm := make(map[string][]config.ConnDetail)
+	hsm := make(map[string][]*config.ConnDetail)
 	cd_bj := config.ConnDetail{
-		C:        "北京主库-----mongo",
+		C:        "北京主库-----mongo1",
 		Host:     "localhost",
 		Port:     27017,
 		ConnSize: 50,
-		PoolSize: 20000,
+		PoolSize: 789,
+	}
+	cd_bj2 := config.ConnDetail{
+		C:        "北京从库-----mongo2",
+		Host:     "localhost",
+		Port:     27017,
+		ConnSize: 5,
+		PoolSize: 456,
 	}
 	cd_sh := config.ConnDetail{
 		C:        "上海主库-----mongo",
@@ -35,11 +42,11 @@ func TestMongoGet(t *testing.T) {
 		ConnSize: 50,
 		PoolSize: 20000,
 	}
-	var s1 []config.ConnDetail
-	var s2 []config.ConnDetail
-	s1 = append(s1, cd_bj)
-	s2 = append(s2, cd_sh)
-	hsm = map[string][]config.ConnDetail{
+	var s1 []*config.ConnDetail
+	var s2 []*config.ConnDetail
+	s1 = append(s1, &cd_bj, &cd_bj2)
+	s2 = append(s2, &cd_sh)
+	hsm = map[string][]*config.ConnDetail{
 		label_bj: s1,
 		label_sh: s2,
 	}
@@ -51,7 +58,6 @@ func TestMongoGet(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	clientBj, err := GetMongo(label_bj)
-
 	clientSh, err := GetMongo(label_sh)
 	if err != nil {
 		panic(err)

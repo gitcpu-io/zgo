@@ -36,7 +36,7 @@ func NewMongoResourcer(label string) MongoResourcer {
 	}
 }
 
-func InitMongoResource(hsm map[string][]config.ConnDetail) {
+func InitMongoResource(hsm map[string][]*config.ConnDetail) {
 	InitConnPool(hsm)
 }
 

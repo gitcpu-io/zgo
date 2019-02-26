@@ -65,17 +65,18 @@ func Engine(opt *Options) *engine {
 }
 
 //getConfigByOption 把zgo_start中的[]和config中的map进行match并取到关系
-func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[string][]config.ConnDetail {
-	m := make(map[string][]config.ConnDetail)
+func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[string][]*config.ConnDetail {
+	m := make(map[string][]*config.ConnDetail)
 	for _, label := range us {
 		//v == label_bj 用户传来的label，它并不知道具体的连接地址
 		//v == label_sh 用户传来的label，它并不知道具体的连接地址
 		for _, v := range lds {
 			if label == v.Key {
-				m[v.Key] = v.Values
-				//for _, vv := range v.Values  {
-				//	fmt.Println(vv.Host,vv.PoolSize)
-				//}
+				var tmp []*config.ConnDetail
+				for _, vv := range v.Values {
+					tmp = append(tmp, &vv)
+				}
+				m[v.Key] = tmp
 			}
 		}
 	}

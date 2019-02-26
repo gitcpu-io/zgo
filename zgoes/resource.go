@@ -36,7 +36,7 @@ func NewEsResourcer(label string) EsResourcer {
 	mu.RLock()
 	defer mu.RUnlock()
 
-	var hosts []config.ConnDetail
+	var hosts []*config.ConnDetail
 	if al, ok := currentLabels[label]; ok {
 		for _, v := range al {
 			hosts = append(hosts, v)
@@ -52,7 +52,7 @@ func NewEsResourcer(label string) EsResourcer {
 type esResource struct {
 	label string
 	mu    sync.RWMutex
-	hosts []config.ConnDetail
+	hosts []*config.ConnDetail
 }
 
 func (e *esResource) GetConChan() *http.Client {

@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	currentLabels = make(map[string][]config.ConnDetail)
+	currentLabels = make(map[string][]*config.ConnDetail)
 	muLabel       sync.RWMutex
 )
 
@@ -37,7 +37,7 @@ type zgomongo struct {
 }
 
 //InitMongo 初始化连接mongo
-func InitMongo(hsm map[string][]config.ConnDetail) {
+func InitMongo(hsm map[string][]*config.ConnDetail) {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 

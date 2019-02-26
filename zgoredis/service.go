@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	currentLabels = make(map[string][]config.ConnDetail)
+	currentLabels = make(map[string][]*config.ConnDetail)
 	muLabel       sync.RWMutex
 )
 
@@ -30,7 +30,7 @@ type zgoredis struct {
 }
 
 //InitRedis 初始化连接redis
-func InitRedis(hsm map[string][]config.ConnDetail) {
+func InitRedis(hsm map[string][]*config.ConnDetail) {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 

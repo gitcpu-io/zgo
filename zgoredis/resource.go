@@ -20,7 +20,7 @@ type redisResource struct {
 	connpool ConnPooler
 }
 
-func InitRedisResource(hsm map[string][]config.ConnDetail) {
+func InitRedisResource(hsm map[string][]*config.ConnDetail) {
 	InitConnPool(hsm)
 }
 

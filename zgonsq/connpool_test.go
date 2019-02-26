@@ -14,13 +14,20 @@ const (
 )
 
 func TestProducer(t *testing.T) {
-	hsm := make(map[string][]config.ConnDetail)
+	hsm := make(map[string][]*config.ConnDetail)
 	cd_bj := config.ConnDetail{
 		C:        "北京主库-----nsq",
 		Host:     "localhost",
 		Port:     4150,
+		ConnSize: 5,
+		PoolSize: 246,
+	}
+	cd_bj2 := config.ConnDetail{
+		C:        "北京从库2-----nsq",
+		Host:     "localhost",
+		Port:     4150,
 		ConnSize: 50,
-		PoolSize: 20000,
+		PoolSize: 135,
 	}
 	cd_sh := config.ConnDetail{
 		C:        "上海主库-----nsq",
@@ -29,11 +36,11 @@ func TestProducer(t *testing.T) {
 		ConnSize: 50,
 		PoolSize: 20000,
 	}
-	var s1 []config.ConnDetail
-	var s2 []config.ConnDetail
-	s1 = append(s1, cd_bj)
-	s2 = append(s2, cd_sh)
-	hsm = map[string][]config.ConnDetail{
+	var s1 []*config.ConnDetail
+	var s2 []*config.ConnDetail
+	s1 = append(s1, &cd_bj, &cd_bj2)
+	s2 = append(s2, &cd_sh)
+	hsm = map[string][]*config.ConnDetail{
 		label_bj: s1,
 		label_sh: s2,
 	}

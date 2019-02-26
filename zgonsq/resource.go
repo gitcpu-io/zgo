@@ -52,7 +52,7 @@ func NewNsqResourcer(label string) NsqResourcer {
 	}
 }
 
-func InitNsqResource(hsm map[string][]config.ConnDetail) {
+func InitNsqResource(hsm map[string][]*config.ConnDetail) {
 	InitConnPool(hsm)
 }
 
