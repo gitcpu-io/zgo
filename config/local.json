@@ -46,7 +46,7 @@
         {
           "c": "北京从库=====mongo",
           "host": "localhost",
-          "port": 27107,
+          "port": 27017,
           "connSize": 50,
           "poolSize": 20000
         }

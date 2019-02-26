@@ -14,7 +14,7 @@ var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
 type ConnDetail struct {
 	C        string `json:"c"`
 	Host     string `json:"host,omitempty"`
-	Port     int    `json:"limit"`
+	Port     int    `json:"port,omitempty"`
 	ConnSize int    `json:"connSize"`
 	PoolSize int    `json:"poolSize"`
 	Uri      string `json:"uri,omitempty"`
@@ -25,7 +25,7 @@ type LabelDetail struct {
 }
 
 type allConfig struct {
-	Dev   string        `json:"dev"`
+	Env   string        `json:"env"`
 	Nsq   []LabelDetail `json:"nsq"`
 	Mongo []LabelDetail `json:"mongo"`
 	Mysql []LabelDetail `json:"mysql"`
@@ -62,6 +62,7 @@ func initConfig(e string) {
 		panic(err)
 	}
 
+	Env = acfg.Env
 	Nsq = acfg.Nsq
 	Es = acfg.Es
 	Mongo = acfg.Mongo
