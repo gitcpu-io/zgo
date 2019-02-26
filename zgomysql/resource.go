@@ -3,6 +3,7 @@ package zgomysql
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/jinzhu/gorm"
 )
@@ -51,6 +52,7 @@ func (mr *mysqlResource) GetPool() *gorm.DB {
 
 func (mr *mysqlResource) Get(ctx context.Context, args map[string]interface{}) error {
 	gormpoll := mr.connpool
-	err := gormpoll.Table(args["tablename"].(string)).Where(args["query"], args["args"].([]interface{})...).First(args["object"]).Error
+	fmt.Println("resource--Get")
+	err := gormpoll.Table(args["tablename"].(string)).Where(args["query"], args["args"].([]interface{})...).First(args["out"]).Error
 	return err
 }

@@ -12,12 +12,14 @@ import (
 var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type ConnDetail struct {
-	C        string `json:"c"`
-	Host     string `json:"host,omitempty"`
-	Port     int    `json:"port,omitempty"`
-	ConnSize int    `json:"connSize"`
-	PoolSize int    `json:"poolSize"`
-	Uri      string `json:"uri,omitempty"`
+	C           string `json:"c"`
+	Host        string `json:"host,omitempty"`
+	Port        int    `json:"port,omitempty"`
+	ConnSize    int    `json:"connSize"`
+	PoolSize    int    `json:"poolSize"`
+	MaxIdleSize int    `json:"maxIdleSize"`
+	MaxOpenConn int    `json:"maxOpenConn"`
+	Uri         string `json:"uri,omitempty"`
 }
 type LabelDetail struct {
 	Key    string `json:"key"`
