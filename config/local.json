@@ -115,7 +115,7 @@
   ],
   "es": [
     {
-      "key": "new",
+      "key": "label_new",
       "values": [
         {
           "c": "新房s集群",
@@ -128,7 +128,7 @@
       ]
     },
     {
-      "key": "sell",
+      "key": "label_sell",
       "values": [
         {
           "c": "二手房集群",
@@ -141,7 +141,7 @@
       ]
     },
     {
-      "key": "rent",
+      "key": "label_rent",
       "values": [
         {
           "c": "租房集群",
