@@ -32,10 +32,10 @@ func InitMysqlService(hsm map[string][]config.ConnDetail) {
 }
 
 // 对外接口
-func MysqlService(l string) MysqlServiceInterface {
+func MysqlService(l string) (MysqlServiceInterface, error) {
 	return &zgoMysqlService{
 		res: NewMysqlResourcer(l),
-	}
+	}, nil
 }
 
 // 内部就结构体
