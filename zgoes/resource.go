@@ -9,7 +9,6 @@ package zgoes
 import (
 	"context"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo.git/config"
 	jsoniter "github.com/json-iterator/go"
 	"math/rand"
 	"net/http"
@@ -32,27 +31,19 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 //方法初始化从uris中获取uri
 func NewEsResourcer(label string) EsResourcer {
-	//get hosts by label
-	mu.RLock()
-	defer mu.RUnlock()
-
-	var hosts []config.ConnDetail
-	if al, ok := currentLabels[label]; ok {
-		for _, v := range al {
-			hosts = append(hosts, v)
-		}
-	}
-
+	//mu.RLock()
+	//defer mu.RUnlock()
+	cl := currentLabels[label][0]
 	return &esResource{
 		label: label,
-		hosts: hosts,
+		uri:   cl.Uri,
 	}
 }
 
 type esResource struct {
 	label string
 	mu    sync.RWMutex
-	hosts []config.ConnDetail
+	uri   string
 }
 
 func (e *esResource) GetConChan() *http.Client {
@@ -163,14 +154,14 @@ func (e *esResource) Search(ctx context.Context, args map[string]interface{}) (i
 	dsl := args["dsl"].(string)
 
 	var url string
-	r := e.hosts[rand.Intn(1)]
-	if len(e.hosts) > 0 {
-		//从数组中随机选择一个
-		url = e.hosts[0].Uri
-	}
-	fmt.Println(rand.Intn(1), r, url, "000")
+	//r := e.hosts[rand.Intn(1)]
+	//if len(e.hosts) > 0 {
+	//	//从数组中随机选择一个
+	//	url = e.hosts[0].Uri
+	//}
+	fmt.Println(rand.Intn(1), "", url, "000")
 
-	uri := url + "/" + index + "/" + table + "/" + "_search?pretty"
+	uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl))
 	if err != nil {
 		fmt.Print(err)

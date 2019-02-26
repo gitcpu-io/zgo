@@ -9,13 +9,14 @@ import (
 )
 
 const (
-	label_sell = "es_label_sell"
-	label_rent = "es_label_rent"
+	label_new  = "new"
+	label_sell = "sell"
+	label_rent = "rents"
 )
 
 func TestEsSearch(t *testing.T) {
 	hsm := make(map[string][]config.ConnDetail)
-	cd_bj := config.ConnDetail{
+	new := config.ConnDetail{
 		C:        "北京主库-----es1",
 		Uri:      "http://101.201.28.195:9200",
 		Host:     "http://101.201.28.195",
@@ -23,7 +24,7 @@ func TestEsSearch(t *testing.T) {
 		ConnSize: 50,
 		PoolSize: 20000,
 	}
-	cd_bj2 := config.ConnDetail{
+	sell := config.ConnDetail{
 		C:        "北京主库-----es2",
 		Uri:      "http://101.201.28.195:9200",
 		Host:     "http://101.201.28.195",
@@ -31,7 +32,7 @@ func TestEsSearch(t *testing.T) {
 		ConnSize: 50,
 		PoolSize: 20000,
 	}
-	cd_sh := config.ConnDetail{
+	rent := config.ConnDetail{
 		C:        "上海主库-----es",
 		Uri:      "http://101.201.28.195:9200",
 		Host:     "http://101.201.28.195",
@@ -41,11 +42,14 @@ func TestEsSearch(t *testing.T) {
 	}
 	var s1 []config.ConnDetail
 	var s2 []config.ConnDetail
-	s1 = append(s1, cd_bj, cd_bj2)
-	s2 = append(s2, cd_sh)
+	var s3 []config.ConnDetail
+	s1 = append(s1, new)
+	s2 = append(s2, sell)
+	s3 = append(s3, rent)
 	hsm = map[string][]config.ConnDetail{
-		label_sell: s1,
-		label_rent: s2,
+		label_new:  s1,
+		label_sell: s2,
+		label_rent: s3,
 	}
 	InitEs(hsm)
 
