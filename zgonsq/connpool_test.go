@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	label_bj = "label_bj"
-	label_sh = "label_sh"
+	label_bj = "nsq_label_bj"
+	label_sh = "nsq_label_sh"
 )
 
 func TestProducer(t *testing.T) {
@@ -40,14 +40,14 @@ func TestProducer(t *testing.T) {
 
 	InitNsq(hsm) //测试时表示使用nsq，在zgo_start中使用一次
 
+	//测试读取nsq数据，wait for sdk init connection
+	time.Sleep(2 * time.Second)
+
 	clientBj, err := GetNsq(label_bj)
 	clientSh, err := GetNsq(label_sh)
 	if err != nil {
 		panic(err)
 	}
-
-	//测试读取nsq数据，wait for sdk init connection
-	time.Sleep(2 * time.Second)
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)

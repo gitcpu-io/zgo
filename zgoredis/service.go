@@ -3,11 +3,12 @@ package zgoredis
 import (
 	"context"
 	"git.zhugefang.com/gocore/zgo.git/comm"
+	"git.zhugefang.com/gocore/zgo.git/config"
 	"sync"
 )
 
 var (
-	currentLabels = make(map[string][]string)
+	currentLabels = make(map[string][]config.ConnDetail)
 	muLabel       sync.RWMutex
 )
 
@@ -29,7 +30,7 @@ type zgoredis struct {
 }
 
 //InitRedis 初始化连接redis
-func InitRedis(hsm map[string][]string) {
+func InitRedis(hsm map[string][]config.ConnDetail) {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 

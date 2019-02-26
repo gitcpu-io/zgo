@@ -5,6 +5,7 @@ import (
 	"git.zhugefang.com/gocore/zgo.git/zgoes"
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
+	"git.zhugefang.com/gocore/zgo.git/zgoredis"
 	"github.com/nsqio/go-nsq"
 )
 
@@ -29,7 +30,9 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Mysql) > 0 {
 		//todo someting
-
+		//hsm := engine.getConfigByOption(config.Mysql, opt.Mongo)
+		//fmt.Println(hsm)
+		//zgomysql.InitMysql(hsm)
 	}
 	if len(opt.Es) > 0 {
 		hsm := engine.getConfigByOption(config.Es, opt.Es)
@@ -37,6 +40,9 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Redis) > 0 {
 		//todo someting
+		hsm := engine.getConfigByOption(config.Redis, opt.Redis)
+		//fmt.Println(hsm)
+		zgoredis.InitRedis(hsm)
 	}
 	if len(opt.Pika) > 0 {
 		//todo someting
@@ -49,6 +55,10 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Kafka) > 0 {
 		//todo someting
+		//hsm := engine.getConfigByOption(config.Kafka, opt.Kafka)
+		//fmt.Println(hsm)
+		//return nil
+		//zgokafka.InitNsq(hsm)
 	}
 
 	return engine

@@ -2,6 +2,7 @@ package zgoredis
 
 import (
 	"context"
+	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/mediocregopher/radix"
 	"sync"
 )
@@ -19,7 +20,7 @@ type redisResource struct {
 	connpool ConnPooler
 }
 
-func InitRedisResource(hsm map[string][]string) {
+func InitRedisResource(hsm map[string][]config.ConnDetail) {
 	InitConnPool(hsm)
 }
 

@@ -1,5 +1,31 @@
 {
   "env": "local",
+  "redis": [
+    {
+      "key": "redis_label_bj",
+      "values": [
+        {
+          "c": "北京主库-----redis",
+          "host": "localhost",
+          "port": 6379,
+          "connSize": 50,
+          "poolSize": 20000
+        }
+      ]
+    },
+    {
+      "key": "redis_label_sh",
+      "values": [
+        {
+          "c": "北京从库=====redis",
+          "host": "localhost",
+          "port": 6379,
+          "connSize": 50,
+          "poolSize": 20000
+        }
+      ]
+    }
+  ],
   "nsq": [
     {
       "key": "nsq_label_bj",
@@ -45,7 +71,7 @@
         {
           "c": "北京从库=====mongo",
           "host": "localhost",
-          "port": 27107,
+          "port": 27017,
           "connSize": 50,
           "poolSize": 20000
         }

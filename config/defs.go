@@ -14,7 +14,7 @@ var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
 type ConnDetail struct {
 	C        string `json:"c"`
 	Host     string `json:"host,omitempty"`
-	Port     int    `json:"limit"`
+	Port     int    `json:"port,omitempty"`
 	ConnSize int    `json:"connSize"`
 	PoolSize int    `json:"poolSize"`
 	Uri      string `json:"uri,omitempty"`
@@ -25,10 +25,12 @@ type LabelDetail struct {
 }
 
 type allConfig struct {
-	Dev   string        `json:"dev"`
+	Env   string        `json:"env"`
 	Nsq   []LabelDetail `json:"nsq"`
 	Mongo []LabelDetail `json:"mongo"`
 	Mysql []LabelDetail `json:"mysql"`
+	Redis []LabelDetail `json:"redis"`
+	Kafka []LabelDetail `json:"kafka"`
 	Es    []LabelDetail `json:"es"`
 }
 
@@ -42,6 +44,9 @@ var (
 	Es    []LabelDetail
 	Mongo []LabelDetail
 	Nsq   []LabelDetail
+	Redis []LabelDetail
+	Mysql []LabelDetail
+	Kafka []LabelDetail
 )
 
 func InitConfig(e string) {
@@ -62,9 +67,12 @@ func initConfig(e string) {
 		panic(err)
 	}
 
+	Env = acfg.Env
 	Nsq = acfg.Nsq
 	Es = acfg.Es
 	Mongo = acfg.Mongo
+	Redis = acfg.Redis
+	Kafka = acfg.Kafka
 
 	//fmt.Println(Nsq)
 

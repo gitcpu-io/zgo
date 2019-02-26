@@ -70,6 +70,8 @@ func initConnPool(hsm map[string][]config.ConnDetail) { //仅跑一次
 
 	for label, val := range hsm {
 		for _, v := range val {
+			fmt.Println(label, v.C)
+
 			lcs := &config.Labelconns{
 				Label: label,
 				Hosts: &v,
@@ -120,6 +122,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 				//大多时间是在执行下面一行sleep
 				time.Sleep(sleepTime * time.Millisecond)
 				//fmt.Println(len(cp.connChan), "--connChan--", label, hosts.Host, hosts.Port)
+				fmt.Println(len(connChanMap), "--connChanMap--", label, hosts.Host, hosts.Port)
 			}
 		}
 

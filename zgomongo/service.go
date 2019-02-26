@@ -51,6 +51,7 @@ func GetMongo(label ...string) (*zgomongo, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &zgomongo{
 		res: NewMongoResourcer(l), //interface
 	}, nil
