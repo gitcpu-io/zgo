@@ -2,7 +2,7 @@
   "env": "local",
   "nsq": [
     {
-      "key": "label_bj",
+      "key": "nsq_label_bj",
       "values": [
         {
           "c": "北京主库-----nsq",
@@ -14,7 +14,7 @@
       ]
     },
     {
-      "key": "label_sh",
+      "key": "nsq_label_sh",
       "values": [
         {
           "c": "北京从库=====nsq",
@@ -28,7 +28,7 @@
   ],
   "mongo": [
     {
-      "key": "label_bj",
+      "key": "mongo_label_bj",
       "values": [
         {
           "c": "北京主库-----mongo",
@@ -40,7 +40,7 @@
       ]
     },
     {
-      "key": "label_sh",
+      "key": "mongo_label_sh",
       "values": [
         {
           "c": "北京从库=====mongo",
@@ -54,10 +54,18 @@
   ],
   "es": [
     {
-      "key": "label_sell",
+      "key": "es_label_sell",
       "values": [
         {
-          "c": "北京主库-----es",
+          "c": "北京主库-----es1",
+          "uri": "http://101.201.28.195:9200",
+          "host": "localhost",
+          "port": 9200,
+          "connSize": 50,
+          "poolSize": 20000
+        },
+        {
+          "c": "北京主库-----es2",
           "uri": "http://101.201.28.195:9200",
           "host": "localhost",
           "port": 9200,
@@ -67,7 +75,7 @@
       ]
     },
     {
-      "key": "label_rent",
+      "key": "es_label_rent",
       "values": [
         {
           "c": "北京从库=====es",
@@ -82,7 +90,7 @@
   ],
   "mysql": [
     {
-      "key": "sell_write",
+      "key": "mysql_sell_write",
       "values": [
         {
           "c": "北京主库-----es",
@@ -94,7 +102,7 @@
       ]
     },
     {
-      "key": "sell_read",
+      "key": "mysql_sell_read",
       "values": [
         {
           "c": "北京从库=====mysql1",

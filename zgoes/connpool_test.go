@@ -9,14 +9,22 @@ import (
 )
 
 const (
-	label_sell = "label_sell"
-	label_rent = "label_rent"
+	label_sell = "es_label_sell"
+	label_rent = "es_label_rent"
 )
 
 func TestEsSearch(t *testing.T) {
 	hsm := make(map[string][]config.ConnDetail)
 	cd_bj := config.ConnDetail{
-		C:        "北京主库-----es",
+		C:        "北京主库-----es1",
+		Uri:      "http://101.201.28.195:9200",
+		Host:     "http://101.201.28.195",
+		Port:     9200,
+		ConnSize: 50,
+		PoolSize: 20000,
+	}
+	cd_bj2 := config.ConnDetail{
+		C:        "北京主库-----es2",
 		Uri:      "http://101.201.28.195:9200",
 		Host:     "http://101.201.28.195",
 		Port:     9200,
@@ -33,13 +41,14 @@ func TestEsSearch(t *testing.T) {
 	}
 	var s1 []config.ConnDetail
 	var s2 []config.ConnDetail
-	s1 = append(s1, cd_bj)
+	s1 = append(s1, cd_bj, cd_bj2)
 	s2 = append(s2, cd_sh)
 	hsm = map[string][]config.ConnDetail{
 		label_sell: s1,
 		label_rent: s2,
 	}
 	InitEs(hsm)
+
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	args := map[string]interface{}{}
 	args["index"] = "active_bj_house_sell"

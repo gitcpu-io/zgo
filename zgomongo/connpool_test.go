@@ -13,8 +13,8 @@ import (
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
-	label_bj = "label_bj"
-	label_sh = "label_sh"
+	label_bj = "mongo_label_bj"
+	label_sh = "mongo_label_sh"
 )
 
 func TestMongoGet(t *testing.T) {
