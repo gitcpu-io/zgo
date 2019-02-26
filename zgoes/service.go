@@ -1,3 +1,9 @@
+/*
+@Time : 2019-02-26 12:23
+@Author : zhangjianguo
+@File : service
+@Software: GoLand
+*/
 package zgoes
 
 import (
@@ -16,7 +22,7 @@ func InitEs(hsm map[string][]string) {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 	currentLabels = hsm
-	InitEsResource(hsm)
+	//InitEsResource(hsm)
 }
 
 type zgoes struct {
@@ -33,7 +39,6 @@ func GetEs(label ...string) (*zgoes, error) {
 		res: NewEsResourcer(l), //interface
 	}, nil
 }
-
 
 func Es(l string) Eser {
 	return &zgoes{

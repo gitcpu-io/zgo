@@ -1,3 +1,9 @@
+/*
+@Time : 2019-02-26 12:23
+@Author : zhangjianguo
+@File : resource
+@Software: GoLand
+*/
 package zgoes
 
 import (
@@ -15,22 +21,16 @@ type EsResourcer interface {
 	Set(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	Get(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	Search(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	Match(ctx context.Context, args map[string]interface{}) (interface{}, error)
 }
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
-
-var uris = map[string]string{} //定义es返回结构提
-
-//项目初始化加载配置文件
-func InitEsResource(hsm map[string][]string) {
-	uris["sell_write"] = "http://101.201.28.195:9200"
-}
 
 //方法初始化从uris中获取uri
 func NewEsResourcer(label string) EsResourcer {
 	return &esResource{
 		label: label,
-		url:   uris[label],
+		url:   "",
 	}
 }
 
@@ -44,42 +44,107 @@ func (e *esResource) GetConChan() *http.Client {
 	return &http.Client{}
 }
 
+/*
+@Time : 2019-02-26 12:23
+@Author : zhangjianguo
+@File : service
+@Software: GoLand
+@parms: index:索引名称
+@parms: doc:文档类型
+@parms: dsl:es原生语句
+*/
 func (e *esResource) Add(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-
 	maps := map[string]interface{}{} //定义es返回结构提
-
 	return maps, nil
 }
 
+/*
+@Time : 2019-02-26 12:23
+@Author : zhangjianguo
+@File : service
+@Software: GoLand
+@parms: index:索引名称
+@parms: doc:文档类型
+@parms: dsl:es原生语句
+*/
 func (e *esResource) Del(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	//es := NewEsResource()
-
 	maps := map[string]interface{}{} //定义es返回结构提
-
 	return maps, nil
 }
 
+/*
+@Time : 2019-02-26 12:23
+@Author : zhangjianguo
+@File : service
+@Software: GoLand
+@parms: index:索引名称
+@parms: doc:文档类型
+@parms: dsl:es原生语句
+*/
+func (e *esResource) DelByQuery(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+	maps := map[string]interface{}{} //定义es返回结构提
+	return maps, nil
+}
+
+/*
+@Time : 2019-02-26 12:23
+@Author : zhangjianguo
+@File : service
+@Software: GoLand
+@des :
+@parms: index:索引名称
+@parms: doc:文档类型
+@parms: dsl:es原生语句
+*/
+func (e *esResource) DelById(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+	maps := map[string]interface{}{} //定义es返回结构提
+	return maps, nil
+}
+
+/*
+@Time : 2019-02-26 12:23
+@Author : zhangjianguo
+@File : service
+@Software: GoLand
+@parms: index:索引名称
+@parms: doc:文档类型
+@parms: dsl:es原生语句
+*/
 func (e *esResource) Set(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	//es := NewEsResource()
 
 	maps := map[string]interface{}{} //定义es返回结构提
 
 	return maps, nil
 }
 
+/*
+@Time : 2019-02-26 12:23
+@Author : zhangjianguo
+@File : service
+@Software: GoLand
+@parms: index:索引名称
+@parms: doc:文档类型
+@parms: dsl:es原生语句
+*/
 func (e *esResource) Get(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+
 	maps := map[string]interface{}{} //定义es返回结构提
 	return maps, nil
 }
 
+/*
+@Time : 2019-02-26 12:23
+@Author : zhangjianguo
+@File : service
+@Software: GoLand
+@parms: index:索引名称
+@parms: doc:文档类型
+@parms: dsl:es原生语句
+*/
 func (e *esResource) Search(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 	maps := map[string]interface{}{} //定义es返回结构提
-	index := args["index"].(string)
-	table := args["table"].(string)
-	dsl := args["dsl"].(string)
-
-	uri := e.url + "/" + index + "/" + table + "/" + "_search?pretty"
-	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl))
+	uri := e.url + "/" + args["index"].(string) + "/" + args["doc"].(string) + "/" + "_search?pretty"
+	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(args["dsl"].(string)))
 	if err != nil {
 		fmt.Print(err)
 		return nil, err
@@ -96,4 +161,32 @@ func (e *esResource) Search(ctx context.Context, args map[string]interface{}) (i
 		return nil, err
 	}
 	return maps, nil
+}
+
+/*
+@Time : 2019-02-26 12:23
+@Author : zhangjianguo
+@File : service
+@Software: GoLand
+@parms: index:索引名称
+@parms: doc:文档类型
+@parms: dsl:es原生语句
+*/
+func (e *esResource) bulk(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+	return nil, nil
+}
+
+/*
+@Time : 2019-02-26 12:23
+@Author : zhangjianguo
+@File : service
+@Software: GoLand
+@parms: index:索引名称
+@parms: doc:文档类型
+@parms: dsl:es原生语句
+*/
+func (e *esResource) Match(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+	maps := map[string]interface{}{} //定义es返回结构提
+	return maps, nil
+
 }
