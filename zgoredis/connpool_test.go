@@ -3,6 +3,7 @@ package zgoredis
 import (
 	"context"
 	"fmt"
+	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/json-iterator/go"
 	"testing"
 	"time"
@@ -15,19 +16,43 @@ const (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
-func TestRedisGet(t *testing.T) {
+const (
+	label_bj = "redis_label_bj"
+	label_sh = "redis_label_sh"
+)
 
-	InitRedis(map[string][]string{
-		local1: []string{
-			"127.0.0.1:6379",
-		},
-		spider: []string{
-			"127.0.0.1:6379",
-		},
-	}) //测试时表示使用nsq，在zgo_start中使用一次
-	//
-	clientLocal, err := GetRedis(local1)
-	clientSpider, err := GetRedis(spider)
+func TestRedisGet(t *testing.T) {
+	hsm := make(map[string][]config.ConnDetail)
+	cd_bj := config.ConnDetail{
+		C:        "北京主库-----redis",
+		Host:     "localhost",
+		Port:     6379,
+		ConnSize: 10,
+		PoolSize: 20000,
+	}
+	cd_sh := config.ConnDetail{
+		C:        "上海主库-----redis",
+		Host:     "localhost",
+		Port:     6379,
+		ConnSize: 10,
+		PoolSize: 20000,
+	}
+	var s1 []config.ConnDetail
+	var s2 []config.ConnDetail
+	s1 = append(s1, cd_bj)
+	s2 = append(s2, cd_sh)
+	hsm = map[string][]config.ConnDetail{
+		label_bj: s1,
+		label_sh: s2,
+	}
+
+	InitRedis(hsm) //测试时表示使用redis，在zgo_start中使用一次
+
+	//测试读取nsq数据，wait for sdk init connection
+	time.Sleep(2 * time.Second)
+
+	clientLocal, err := GetRedis(label_bj)
+	clientSpider, err := GetRedis(label_sh)
 
 	if err != nil {
 		panic(err)
@@ -124,10 +149,11 @@ func getSet(label string, client *zgoredis, i int) chan int {
 		out <- 10001
 		return out
 	default:
-		_, err := json.Marshal(result)
+		b, err := json.Marshal(result)
 		if err != nil {
 			panic(err)
 		}
+		fmt.Println(string(b))
 		out <- 1
 	}
 

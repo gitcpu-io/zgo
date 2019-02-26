@@ -47,15 +47,15 @@ func TestMongoGet(t *testing.T) {
 
 	InitMongo(hsm) //测试时表示使用mongo，在zgo_start中使用一次
 
+	//测试读取nsq数据，wait for sdk init connection
+	time.Sleep(2 * time.Second)
+
 	clientBj, err := GetMongo(label_bj)
 
 	clientSh, err := GetMongo(label_sh)
 	if err != nil {
 		panic(err)
 	}
-
-	//测试读取nsq数据，wait for sdk init connection
-	time.Sleep(2 * time.Second)
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)

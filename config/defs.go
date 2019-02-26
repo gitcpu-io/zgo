@@ -29,6 +29,8 @@ type allConfig struct {
 	Nsq   []LabelDetail `json:"nsq"`
 	Mongo []LabelDetail `json:"mongo"`
 	Mysql []LabelDetail `json:"mysql"`
+	Redis []LabelDetail `json:"redis"`
+	Kafka []LabelDetail `json:"kafka"`
 	Es    []LabelDetail `json:"es"`
 }
 
@@ -42,6 +44,9 @@ var (
 	Es    []LabelDetail
 	Mongo []LabelDetail
 	Nsq   []LabelDetail
+	Redis []LabelDetail
+	Mysql []LabelDetail
+	Kafka []LabelDetail
 )
 
 func InitConfig(e string) {
@@ -66,6 +71,8 @@ func initConfig(e string) {
 	Nsq = acfg.Nsq
 	Es = acfg.Es
 	Mongo = acfg.Mongo
+	Redis = acfg.Redis
+	Kafka = acfg.Kafka
 
 	//fmt.Println(Nsq)
 

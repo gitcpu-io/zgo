@@ -2,6 +2,7 @@ package zgoredis
 
 import (
 	"fmt"
+	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/mediocregopher/radix"
 	"sync"
 	"time"
@@ -15,7 +16,7 @@ const (
 
 type connPool struct {
 	label        string
-	hosts        []string
+	hosts        *config.ConnDetail
 	connChan     chan *radix.Pool
 	clients      []*radix.Pool
 	connChanChan chan chan *radix.Pool
@@ -39,33 +40,45 @@ type ConnPooler interface {
 }
 
 //InitConnPool 对外暴露
-func InitConnPool(hsm map[string][]string) {
+func InitConnPool(hsm map[string][]config.ConnDetail) {
 	initConnPool(hsm)
 }
 
-func initConnPool(hsm map[string][]string) { //仅跑一次
+func initConnPool(hsm map[string][]config.ConnDetail) { //仅跑一次
 	hsmu.RLock()
 	defer hsmu.RUnlock()
 	connChanMap = make(map[string]chan *radix.Pool)
-	for label, hosts := range hsm {
-		//fmt.Println(label)
-		//fmt.Println(hosts)
-		go func(label string, v []string, mu sync.RWMutex) { //并发连接多个不同的地址和端口
-			mu.Lock()
-			defer mu.RLock()
+
+	ch := make(chan *config.Labelconns)
+	go func() {
+		for lahosts := range ch {
+			label := lahosts.Label
+			hosts := lahosts.Hosts
+
 			c := &connPool{
 				label:        label,
 				hosts:        hosts,
-				connChan:     make(chan *radix.Pool, mchSize),
-				connChanChan: make(chan chan *radix.Pool, limitConn*len(hosts)),
+				connChan:     make(chan *radix.Pool, hosts.PoolSize),
+				connChanChan: make(chan chan *radix.Pool, hosts.ConnSize),
 			}
 			connChanMap[label] = c.connChan
-			c.setConnPoolToChan(label) //call 创建连接到chan中
+			go c.setConnPoolToChan(label, hosts) //call 创建连接到chan中
 			//fmt.Println(label, hosts, "hsm=====",len(hsm), connChanMap)
+		}
+	}()
 
-		}(label, hosts, mu)
+	for label, val := range hsm {
+		for _, v := range val {
+			fmt.Println(label, v.C)
 
+			lcs := &config.Labelconns{
+				Label: label,
+				Hosts: &v,
+			}
+			ch <- lcs
+		}
 	}
+	close(ch)
 
 }
 
@@ -76,7 +89,7 @@ func (cp *connPool) GetConnChan(label string) chan *radix.Pool {
 	return connChanMap[label]
 }
 
-func (cp *connPool) setConnPoolToChan(label string) {
+func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 	//每个host:port连接创建50个连接，放入slice中
 	go func() {
 		for sessionCh := range cp.connChanChan {
@@ -87,18 +100,16 @@ func (cp *connPool) setConnPoolToChan(label string) {
 		}
 	}()
 
-	for i := 0; i < limitConn; i++ {
-		for _, host := range cp.hosts {
-			//把并发创建的数据库的连接channel，放进channel中
-			cp.connChanChan <- cp.createClient(host)
-		}
+	for i := 0; i < hosts.ConnSize; i++ {
+		//把并发创建的数据库的连接channel，放进channel中
+		cp.connChanChan <- cp.createClient(fmt.Sprintf("%s:%d", hosts.Host, hosts.Port))
 	}
 
 	go func() {
 		for {
 			//如果连接全部创建完成，且channel中有了足够的mchSize个连接；循环确保channel中有连接
 			//mchSize越大，越用不完，会休眠越久，不用长时间塞连接进channel
-			if len(cp.connChan) < mchSize && len(cp.clients) == limitConn {
+			if len(cp.connChan) < hosts.PoolSize && len(cp.clients) >= hosts.ConnSize/2 {
 				for _, s := range cp.clients {
 					if s != nil {
 						cp.connChan <- s
@@ -108,7 +119,8 @@ func (cp *connPool) setConnPoolToChan(label string) {
 			} else {
 				//大多时间是在执行下面一行sleep
 				time.Sleep(sleepTime * time.Millisecond)
-				//fmt.Println(len(connChanMap), "--connChanMap--", label)
+				//fmt.Println(len(cp.connChan), "--connChan--", label, hosts.Host, hosts.Port)
+				//fmt.Println(len(connChanMap), "--connChanMap--", label, hosts.Host, hosts.Port)
 			}
 		}
 
@@ -116,7 +128,7 @@ func (cp *connPool) setConnPoolToChan(label string) {
 
 	go func() {
 		time.Sleep(2000 * time.Millisecond) //仅仅为了查看创建的连接数，创建数据库连接时间：90ms
-		fmt.Println("init redis connection to connChan ...", len(cp.connChan), label)
+		fmt.Println("init redis connection to connChan ...", len(cp.connChan), label, hosts)
 	}()
 }
 
