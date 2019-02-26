@@ -9,8 +9,10 @@ import (
 )
 
 var (
-	Env string
-	Nsq map[string][]string
+	Env   string
+	Nsq   map[string][]string
+	Es    map[string][]string
+	Mongo map[string][]string
 )
 
 func InitConfig(e string) {
@@ -36,5 +38,7 @@ func initConfig(e string) {
 	//nsq地址
 	Env = viper.GetString("env")
 	Nsq = viper.GetStringMapStringSlice("nsq")
+	Es = viper.GetStringMapStringSlice("es")
+	Mongo = viper.GetStringMapStringSlice("Mongo")
 
 }

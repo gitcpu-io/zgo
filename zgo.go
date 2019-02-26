@@ -2,6 +2,7 @@ package zgo
 
 import (
 	"git.zhugefang.com/gocore/zgo.git/config"
+	"git.zhugefang.com/gocore/zgo.git/zgoes"
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
 	"github.com/nsqio/go-nsq"
@@ -20,24 +21,24 @@ func Engine(opt *Options) *engine {
 	}
 	opt.init() //把zgo_start中用户定义的，映射到zgo的内存变量上
 
-	if len(opt.mongo) > 0 {
+	if len(opt.Mongo) > 0 {
 		//todo someting
-		hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
+		hsm := engine.getConfigByOption(config.Mongo, opt.Mongo)
 		//fmt.Println(hsm)
 		zgomongo.InitMongo(hsm)
 	}
-
-	if len(opt.mysql) > 0 {
+	if len(opt.Mysql) > 0 {
 		//todo someting
 
 	}
-	if len(opt.es) > 0 {
+	if len(opt.Es) > 0 {
+		hsm := engine.getConfigByOption(config.Es, opt.Es)
+		zgoes.InitEs(hsm)
+	}
+	if len(opt.Redis) > 0 {
 		//todo someting
 	}
-	if len(opt.redis) > 0 {
-		//todo someting
-	}
-	if len(opt.pika) > 0 {
+	if len(opt.Pika) > 0 {
 		//todo someting
 	}
 	if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq
@@ -45,7 +46,7 @@ func Engine(opt *Options) *engine {
 		//fmt.Println(hsm)
 		zgonsq.InitNsq(hsm)
 	}
-	if len(opt.kafka) > 0 {
+	if len(opt.Kafka) > 0 {
 		//todo someting
 	}
 
@@ -73,4 +74,5 @@ type (
 var (
 	Nsq   = zgonsq.Nsq("")
 	Mongo = zgomongo.Mongo("")
+	Es    = zgoes.Es("")
 )

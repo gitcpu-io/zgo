@@ -26,7 +26,7 @@ type Mongoer interface {
 
 func Mongo(l string) Mongoer {
 	return &zgomongo{
-		res: NewMongoResource(l),
+		res: NewMongoResourcer(l),
 	}
 }
 
@@ -51,7 +51,7 @@ func GetMongo(label ...string) (*zgomongo, error) {
 		return nil, err
 	}
 	return &zgomongo{
-		res: NewMongoResource(l), //interface
+		res: NewMongoResourcer(l), //interface
 	}, nil
 }
 

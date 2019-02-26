@@ -16,6 +16,7 @@ const (
 	label_sh = "label_sh"
 )
 
+
 func TestMongoGet(t *testing.T) {
 
 	InitMongo(map[string][]string{
@@ -28,6 +29,7 @@ func TestMongoGet(t *testing.T) {
 	}) //测试时表示使用nsq，在zgo_start中使用一次
 
 	clientBj, err := GetMongo(label_bj)
+
 	clientSh, err := GetMongo(label_sh)
 	if err != nil {
 		panic(err)
