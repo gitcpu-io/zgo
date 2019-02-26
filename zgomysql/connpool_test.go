@@ -25,7 +25,7 @@ type House struct {
 func TestMysqlGet(t *testing.T) {
 
 	//-------------test for start engine---------
-	hsm := make(map[string][]config.ConnDetail)
+	hsm := make(map[string][]*config.ConnDetail)
 	cd_bj := config.ConnDetail{
 		C:           "北京主库-----mysql",
 		Host:        "root:123456@(localhost:3306)/spider?charset=utf8&parseTime=True&loc=Local",
@@ -42,7 +42,7 @@ func TestMysqlGet(t *testing.T) {
 	var s2 []config.ConnDetail
 	s1 = append(s1, cd_bj)
 	s2 = append(s2, cd_sh)
-	hsm = map[string][]config.ConnDetail{
+	hsm = map[string][]*config.ConnDetail{
 		label_bj: s1,
 		label_sh: s2,
 	}

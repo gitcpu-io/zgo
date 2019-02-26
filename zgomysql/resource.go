@@ -9,7 +9,7 @@ import (
 )
 
 // 初始化 连接池
-func InitMysqlResource(hsm map[string][]config.ConnDetail) {
+func InitMysqlResource(hsm map[string][]*config.ConnDetail) {
 	InitConnPool(hsm)
 }
 

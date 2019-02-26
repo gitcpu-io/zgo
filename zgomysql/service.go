@@ -23,7 +23,7 @@ type MysqlServiceInterface interface {
 
 // 初始化
 //InitMongo 初始化连接mongo
-func InitMysqlService(hsm map[string][]config.ConnDetail) {
+func InitMysqlService(hsm map[string][]*config.ConnDetail) {
 	muLabel.Do(
 		func() {
 			InitMysqlResource(hsm)
