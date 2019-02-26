@@ -73,6 +73,7 @@ func initConfig(e string) {
 	Mongo = acfg.Mongo
 	Redis = acfg.Redis
 	Kafka = acfg.Kafka
+	Mysql = acfg.Mysql
 
 	//fmt.Println(Nsq)
 
