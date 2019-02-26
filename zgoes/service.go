@@ -23,7 +23,6 @@ func InitEs(hsm map[string][]*config.ConnDetail) {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 	currentLabels = hsm
-	//InitEsResource(hsm)
 }
 
 type zgoes struct {

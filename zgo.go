@@ -1,9 +1,11 @@
 package zgo
 
 import (
+	"fmt"
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"git.zhugefang.com/gocore/zgo.git/zgoes"
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
+	"git.zhugefang.com/gocore/zgo.git/zgomysql"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
 	"git.zhugefang.com/gocore/zgo.git/zgoredis"
 	"github.com/nsqio/go-nsq"
@@ -30,9 +32,9 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Mysql) > 0 {
 		//todo someting
-		//hsm := engine.getConfigByOption(config.Mysql, opt.Mongo)
-		//fmt.Println(hsm)
-		//zgomysql.InitMysql(hsm)
+		hsm := engine.getConfigByOption(config.Mysql, opt.Mongo)
+		fmt.Println(hsm)
+		zgomysql.InitMysqlService(hsm)
 	}
 	if len(opt.Es) > 0 {
 		hsm := engine.getConfigByOption(config.Es, opt.Es)
@@ -92,4 +94,5 @@ var (
 	Nsq   = zgonsq.Nsq("")
 	Mongo = zgomongo.Mongo("")
 	Es    = zgoes.Es("")
+	Redis = zgoredis.Redis("")
 )

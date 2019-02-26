@@ -115,18 +115,10 @@
   ],
   "es": [
     {
-      "key": "es_label_sell",
+      "key": "new",
       "values": [
         {
-          "c": "北京主库-----es1",
-          "uri": "http://101.201.28.195:9200",
-          "host": "localhost",
-          "port": 9200,
-          "connSize": 50,
-          "poolSize": 20000
-        },
-        {
-          "c": "北京主库-----es2",
+          "c": "新房s集群",
           "uri": "http://101.201.28.195:9200",
           "host": "localhost",
           "port": 9200,
@@ -136,10 +128,23 @@
       ]
     },
     {
-      "key": "es_label_rent",
+      "key": "sell",
       "values": [
         {
-          "c": "北京从库=====es",
+          "c": "二手房集群",
+          "uri": "http://101.201.28.195:9200",
+          "host": "localhost",
+          "port": 9200,
+          "connSize": 50,
+          "poolSize": 20000
+        }
+      ]
+    },
+    {
+      "key": "rent",
+      "values": [
+        {
+          "c": "租房集群",
           "uri": "http://101.201.28.195:9200",
           "host": "localhost",
           "port": 9200,
@@ -157,7 +162,10 @@
           "c": "北京主库-----es",
           "host": "localhost",
           "port": 3306,
+          "username": "root",
+          "password": "123456",
           "connSize": 50,
+          "mixSize": 10,
           "poolSize": 20000
         }
       ]
@@ -169,14 +177,20 @@
           "c": "北京从库=====mysql1",
           "host": "localhost",
           "port": 3306,
+          "username": "root",
+          "password": "123456",
           "connSize": 50,
+          "mixSize": 10,
           "poolSize": 20000
         },
         {
           "c": "北京从库=====mysql2",
           "host": "localhost",
           "port": 3306,
+          "username": "root",
+          "password": "123456",
           "connSize": 50,
+          "mixSize": 10,
           "poolSize": 20000
         }
       ]

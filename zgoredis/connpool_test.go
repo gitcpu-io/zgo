@@ -9,11 +9,6 @@ import (
 	"time"
 )
 
-const (
-	local1 = "local"
-	spider = "spider"
-)
-
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
@@ -87,14 +82,14 @@ func TestRedisGet(t *testing.T) {
 		go func(i int) {
 			countChan <- i //统计开出去的goroutine
 			if i%2 == 0 {
-				//ch := getSet(local1, clientLocal, i)
-				ch := setSet(local1, clientLocal, i)
+				ch := getSet(label_bj, clientLocal, i)
+				//ch := setSet(label_bj, clientLocal, i)
 				reply := <-ch
 				replyChan <- reply
 
 			} else {
-				ch := getSet(spider, clientSpider, i)
-				//ch := setSet(spider, clientSpider, i)
+				ch := getSet(label_sh, clientSpider, i)
+				//ch := setSet(label_sh, clientSpider, i)
 				reply := <-ch
 				replyChan <- reply
 			}
@@ -145,7 +140,7 @@ func getSet(label string, client *zgoredis, i int) chan int {
 	defer cancel()
 
 	var fooVal string
-	result, err := client.Do(ctx, &fooVal, "GET", "foo")
+	_, err := client.Do(ctx, &fooVal, "GET", "foo")
 	if err != nil {
 		panic(err)
 	}
@@ -156,11 +151,7 @@ func getSet(label string, client *zgoredis, i int) chan int {
 		out <- 10001
 		return out
 	default:
-		b, err := json.Marshal(result)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(string(b))
+		fmt.Println(fooVal)
 		out <- 1
 	}
 
