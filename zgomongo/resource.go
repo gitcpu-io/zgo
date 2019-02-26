@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
+	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"sync"
 )
 
 //NsqResourcer 给service使用
@@ -35,7 +36,7 @@ func NewMongoResourcer(label string) MongoResourcer {
 	}
 }
 
-func InitMongoResource(hsm map[string][]string) {
+func InitMongoResource(hsm map[string][]config.ConnDetail) {
 	InitConnPool(hsm)
 }
 

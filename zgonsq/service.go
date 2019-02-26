@@ -3,12 +3,13 @@ package zgonsq
 import (
 	"context"
 	"git.zhugefang.com/gocore/zgo.git/comm"
+	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/nsqio/go-nsq"
 	"sync"
 )
 
 var (
-	currentLabels = make(map[string][]string)
+	currentLabels = make(map[string][]config.ConnDetail)
 	muLabel       sync.RWMutex
 )
 
@@ -33,7 +34,7 @@ type zgonsq struct {
 }
 
 //InitNsq 初始化连接nsq
-func InitNsq(hsm map[string][]string) {
+func InitNsq(hsm map[string][]config.ConnDetail) {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 

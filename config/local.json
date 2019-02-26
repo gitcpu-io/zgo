@@ -1,82 +1,125 @@
 {
   "env": "local",
-  "nsq": {
-    "label_bj": [
-      "localhost:4150"
-    ],
-    "label_sh": [
-      "localhost:4150"
-    ]
-  },
-  "mongo": {
-    "label_bj": [
-      "localhost:27017"
-    ],
-    "label_sh": [
-      "localhost:27017"
-    ]
-  },
-  "redis": {
-    "local1": [
-      "127.0.0.1:6379"
-    ],
-    "spider": [
-      "127.0.0.1:6379"
-    ]
-  },
-  "es": {
-    "rent": "http://101.201.28.195:9200",
-    "sell": "http://101.201.28.195:9200",
-    "new": "http://101.201.28.195:9200"
-  },
-  "mysql": {
-    "new_write": [
-      {
-        "host": "http://101.201.28.195:9200",
-        "size": 100
-      }
-    ],
-    "new_read": [
-      {
-        "host": "http://101.201.28.195:9200",
-        "size": 100
-      },
-      {
-        "host": "http://101.201.28.195:9200",
-        "size": 100
-      }
-    ],
-    "sell_write": [
-      {
-        "host": "http://101.201.28.195:9200",
-        "size": 100
-      }
-    ],
-    "sell_read": [
-      {
-        "host": "http://101.201.28.195:9200",
-        "size": 100
-      },
-      {
-        "host": "http://101.201.28.195:9200",
-        "size": 100
-      }
-    ],
-    "rent_write": [
-      {
-        "host": "http://101.201.28.195:9200",
-        "size": 100
-      }
-    ],
-    "rent_read": [
-      {
-        "host": "http://101.201.28.195:9200",
-        "size": 100
-      },
-      {
-        "host": "http://101.201.28.195:9200",
-        "size": 100
-      }
-    ]
-  }
+
+  "nsq": [
+    {
+      "key": "nsq_label_bj",
+      "values": [
+        {
+          "c": "北京主库-----nsq",
+          "host": "localhost",
+          "port": 4150,
+          "connSize": 50,
+          "poolSize": 20000
+        }
+      ]
+    },
+    {
+      "key": "nsq_label_sh",
+      "values": [
+        {
+          "c": "北京从库=====nsq",
+          "host": "localhost",
+          "port": 4150,
+          "connSize": 50,
+          "poolSize": 20000
+        }
+      ]
+    }
+  ],
+  "mongo": [
+    {
+      "key": "mongo_label_bj",
+      "values": [
+        {
+          "c": "北京主库-----mongo",
+          "host": "localhost",
+          "port": 27017,
+          "connSize": 50,
+          "poolSize": 20000
+        }
+      ]
+    },
+    {
+      "key": "mongo_label_sh",
+      "values": [
+        {
+          "c": "北京从库=====mongo",
+          "host": "localhost",
+          "port": 27107,
+          "connSize": 50,
+          "poolSize": 20000
+        }
+      ]
+    }
+  ],
+  "es": [
+    {
+      "key": "es_label_sell",
+      "values": [
+        {
+          "c": "北京主库-----es1",
+          "uri": "http://101.201.28.195:9200",
+          "host": "localhost",
+          "port": 9200,
+          "connSize": 50,
+          "poolSize": 20000
+        },
+        {
+          "c": "北京主库-----es2",
+          "uri": "http://101.201.28.195:9200",
+          "host": "localhost",
+          "port": 9200,
+          "connSize": 50,
+          "poolSize": 20000
+        }
+      ]
+    },
+    {
+      "key": "es_label_rent",
+      "values": [
+        {
+          "c": "北京从库=====es",
+          "uri": "http://101.201.28.195:9200",
+          "host": "localhost",
+          "port": 9200,
+          "connSize": 50,
+          "poolSize": 20000
+        }
+      ]
+    }
+  ],
+  "mysql": [
+    {
+      "key": "mysql_sell_write",
+      "values": [
+        {
+          "c": "北京主库-----es",
+          "host": "localhost",
+          "port": 3306,
+          "connSize": 50,
+          "poolSize": 20000
+        }
+      ]
+    },
+    {
+      "key": "mysql_sell_read",
+      "values": [
+        {
+          "c": "北京从库=====mysql1",
+          "host": "localhost",
+          "port": 3306,
+          "connSize": 50,
+          "poolSize": 20000
+        },
+        {
+          "c": "北京从库=====mysql2",
+          "host": "localhost",
+          "port": 3306,
+          "connSize": 50,
+          "poolSize": 20000
+        }
+      ]
+    }
+  ]
 }

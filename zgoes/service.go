@@ -9,16 +9,17 @@ package zgoes
 import (
 	"context"
 	"git.zhugefang.com/gocore/zgo.git/comm"
+	"git.zhugefang.com/gocore/zgo.git/config"
 	"sync"
 )
 
 var (
-	currentLabels = make(map[string][]string)
+	currentLabels = make(map[string][]config.ConnDetail)
 	muLabel       sync.RWMutex
 )
 
 //项目初始化  根据用户选择label 初始化Es实例
-func InitEs(hsm map[string][]string) {
+func InitEs(hsm map[string][]config.ConnDetail) {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 	currentLabels = hsm

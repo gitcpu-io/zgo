@@ -44,6 +44,7 @@ func Engine(opt *Options) *engine {
 	if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq
 		hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
 		//fmt.Println(hsm)
+		//return nil
 		zgonsq.InitNsq(hsm)
 	}
 	if len(opt.Kafka) > 0 {
@@ -54,13 +55,18 @@ func Engine(opt *Options) *engine {
 }
 
 //getConfigByOption 把zgo_start中的[]和config中的map进行match并取到关系
-func (e *engine) getConfigByOption(cmap map[string][]string, us []string) map[string][]string {
-	m := make(map[string][]string)
-	for _, v := range us {
+func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[string][]config.ConnDetail {
+	m := make(map[string][]config.ConnDetail)
+	for _, label := range us {
 		//v == label_bj 用户传来的label，它并不知道具体的连接地址
 		//v == label_sh 用户传来的label，它并不知道具体的连接地址
-		if hp, ok := cmap[v]; ok {
-			m[v] = hp
+		for _, v := range lds {
+			if label == v.Key {
+				m[v.Key] = v.Values
+				//for _, vv := range v.Values  {
+				//	fmt.Println(vv.Host,vv.PoolSize)
+				//}
+			}
 		}
 	}
 	return m
