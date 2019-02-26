@@ -9,7 +9,6 @@ import (
 
 //NsqResourcer 给service使用
 type RedisResourcer interface {
-	//GetRedisClient() *radix.Pool
 	GetConnChan(label string) chan *radix.Pool
 	Do(ctx context.Context, rcv interface{}, cmd string, args ...string) (interface{}, error)
 }
@@ -26,8 +25,7 @@ func InitRedisResource(hsm map[string][]config.ConnDetail) {
 
 func NewRedisResource(label string) RedisResourcer {
 	return &redisResource{
-		label: label,
-		//RedisClient: NewConnPool(label)}
+		label:    label,
 		connpool: NewConnPool(label)}
 }
 
