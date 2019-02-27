@@ -33,7 +33,7 @@ func (e *grpcResource) Server(ctx context.Context, port string, sd *grpc.Service
 	s := grpc.NewServer()
 	s.RegisterService(sd, ss)
 	err = s.Serve(list)
-	return nil, nil
+	return port, err
 }
 func (e *grpcResource) Client(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 	return nil, nil

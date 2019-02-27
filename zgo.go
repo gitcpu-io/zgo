@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"git.zhugefang.com/gocore/zgo.git/zgoes"
+	"git.zhugefang.com/gocore/zgo.git/zgogrpc"
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
 	"git.zhugefang.com/gocore/zgo.git/zgomysql1"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
@@ -96,6 +97,7 @@ var (
 	Nsq   = zgonsq.Nsq("")
 	Mongo = zgomongo.Mongo("")
 	Es    = zgoes.Es("")
+	Grpc  = zgogrpc.Grpc()
 	Redis = zgoredis.Redis("")
 	Mysql = zgomysql1.Mysql("")
 
