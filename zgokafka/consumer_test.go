@@ -10,25 +10,25 @@ import (
 func TestConsumer(t *testing.T) {
 	hsm := make(map[string][]*config.ConnDetail)
 	cd_bj := config.ConnDetail{
-		C:        "北京从库1-----nsq",
+		C:        "北京主库-----kafka",
 		Host:     "localhost",
-		Port:     4150,
-		ConnSize: 5,
-		PoolSize: 246,
+		Port:     9092,
+		ConnSize: 2,
+		PoolSize: 100,
 	}
 	cd_bj2 := config.ConnDetail{
-		C:        "北京从库2-----nsq",
+		C:        "北京从库2-----kafka",
 		Host:     "localhost",
-		Port:     4150,
-		ConnSize: 10,
-		PoolSize: 135,
+		Port:     9092,
+		ConnSize: 2,
+		PoolSize: 100,
 	}
 	cd_sh := config.ConnDetail{
-		C:        "上海主库-----nsq",
+		C:        "上海主库-----kafka",
 		Host:     "localhost",
-		Port:     4150,
-		ConnSize: 50,
-		PoolSize: 20000,
+		Port:     9092,
+		ConnSize: 2,
+		PoolSize: 100,
 	}
 	var s1 []*config.ConnDetail
 	var s2 []*config.ConnDetail
@@ -38,7 +38,7 @@ func TestConsumer(t *testing.T) {
 		label_bj: s1,
 		label_sh: s2,
 	}
-	InitKafka(hsm) //测试时表示使用nsq，在zgo_start中使用一次
+	InitKafka(hsm) //测试时表示使用kafka，在zgo_start中使用一次
 
 	labelBj, err := GetKafka(label_bj)
 
@@ -48,17 +48,17 @@ func TestConsumer(t *testing.T) {
 	}
 	c := chat{
 		Topic:   label_bj,
-		Channel: label_bj,
-		Nsq:     labelBj,
+		GroupId: label_bj,
+		Kafka:   labelBj,
 	}
-	c.Consumer()
+	go c.Consumer()
 
 	c2 := chat{
 		Topic:   label_sh,
-		Channel: label_sh,
-		Nsq:     labelSh,
+		GroupId: label_sh,
+		Kafka:   labelSh,
 	}
-	c2.Consumer()
+	go c2.Consumer()
 
 	for {
 		select {

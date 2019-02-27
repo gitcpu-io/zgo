@@ -140,7 +140,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 
 	go func() {
 		time.Sleep(2000 * time.Millisecond) //仅仅为了查看创建的连接数，创建数据库连接时间：90ms
-		fmt.Printf("init Nsq to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
+		fmt.Printf("init Kafka to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
 			len(cp.connChan), label, hosts.Host, hosts.Port, hosts.ConnSize, hosts.PoolSize, hosts.C)
 	}()
 }
@@ -149,9 +149,9 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 func (cp *connPool) createClient(address []string) chan *sarama.AsyncProducer {
 	out := make(chan *sarama.AsyncProducer)
 	go func() {
-		config := sarama.NewConfig()
-		config.Producer.Return.Successes = true
-		p, err := sarama.NewAsyncProducer(address, config)
+		c := sarama.NewConfig()
+		c.Producer.Return.Successes = true
+		p, err := sarama.NewAsyncProducer(address, c)
 		if err != nil {
 			fmt.Printf("sarama.NewSyncProducer err:%s \n", err)
 			out <- nil
@@ -161,3 +161,19 @@ func (cp *connPool) createClient(address []string) chan *sarama.AsyncProducer {
 	}()
 	return out
 }
+
+//func CreateClient(address []string) chan *sarama.AsyncProducer {
+//	out := make(chan *sarama.AsyncProducer)
+//	go func() {
+//		c := sarama.NewConfig()
+//		c.Producer.Return.Successes = true
+//		p, err := sarama.NewAsyncProducer(address, c)
+//		if err != nil {
+//			fmt.Printf("sarama.NewSyncProducer err:%s \n", err)
+//			out <- nil
+//			return
+//		}
+//		out <- &p
+//	}()
+//	return out
+//}

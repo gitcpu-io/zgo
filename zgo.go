@@ -5,6 +5,7 @@ import (
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"git.zhugefang.com/gocore/zgo.git/zgoes"
 	"git.zhugefang.com/gocore/zgo.git/zgogrpc"
+	"git.zhugefang.com/gocore/zgo.git/zgokafka"
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
 	"git.zhugefang.com/gocore/zgo.git/zgomysql1"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
@@ -60,10 +61,10 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Kafka) > 0 {
 		//todo someting
-		//hsm := engine.getConfigByOption(config.Kafka, opt.Kafka)
+		hsm := engine.getConfigByOption(config.Kafka, opt.Kafka)
 		//fmt.Println(hsm)
 		//return nil
-		//zgokafka.InitNsq(hsm)
+		zgokafka.InitKafka(hsm)
 	}
 
 	return engine
@@ -94,6 +95,7 @@ type (
 )
 
 var (
+	Kafka = zgokafka.Kafka("")
 	Nsq   = zgonsq.Nsq("")
 	Mongo = zgomongo.Mongo("")
 	Es    = zgoes.Es("")
