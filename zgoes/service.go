@@ -49,31 +49,11 @@ func Es(l string) Eser {
 //Es 对外
 type Eser interface {
 	NewEs(label ...string) (*zgoes, error) //初始化方法
-	Add(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	Del(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	Set(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	Get(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	Search(ctx context.Context, args map[string]interface{}) (interface{}, error)
 }
 
 func (e *zgoes) NewEs(label ...string) (*zgoes, error) {
 	return GetEs(label...)
-}
-
-func (e *zgoes) Add(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	return e.res.Add(ctx, args)
-}
-
-func (e *zgoes) Del(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	return e.res.Del(ctx, args)
-}
-
-func (e *zgoes) Set(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	return e.res.Set(ctx, args)
-}
-
-func (e *zgoes) Get(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	return e.res.Get(ctx, args)
 }
 
 func (e *zgoes) Search(ctx context.Context, args map[string]interface{}) (interface{}, error) {
