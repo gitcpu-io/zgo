@@ -1,42 +1,39 @@
-package zgoredis
+package zgokafka
 
 import (
 	"context"
 	"fmt"
 	"git.zhugefang.com/gocore/zgo.git/config"
-	"github.com/json-iterator/go"
 	"testing"
 	"time"
 )
 
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
-
 const (
-	label_bj = "redis_label_bj"
-	label_sh = "redis_label_sh"
+	label_bj = "kafka_label_bj"
+	label_sh = "kafka_label_sh"
 )
 
-func TestRedisGet(t *testing.T) {
+func TestProducer(t *testing.T) {
 	hsm := make(map[string][]*config.ConnDetail)
 	cd_bj := config.ConnDetail{
-		C:        "北京主库-----redis1",
+		C:        "北京主库-----kafka",
 		Host:     "localhost",
-		Port:     6379,
-		ConnSize: 10,
-		PoolSize: 345,
+		Port:     4150,
+		ConnSize: 5,
+		PoolSize: 246,
 	}
 	cd_bj2 := config.ConnDetail{
-		C:        "北京从库-----redis2",
+		C:        "北京从库2-----kafka",
 		Host:     "localhost",
-		Port:     6379,
-		ConnSize: 5,
-		PoolSize: 200,
+		Port:     4150,
+		ConnSize: 50,
+		PoolSize: 135,
 	}
 	cd_sh := config.ConnDetail{
-		C:        "上海主库-----redis",
+		C:        "上海主库-----kafka",
 		Host:     "localhost",
-		Port:     6379,
-		ConnSize: 10,
+		Port:     4150,
+		ConnSize: 50,
 		PoolSize: 20000,
 	}
 	var s1 []*config.ConnDetail
@@ -48,31 +45,20 @@ func TestRedisGet(t *testing.T) {
 		label_sh: s2,
 	}
 
-	InitRedis(hsm) //测试时表示使用redis，在zgo_start中使用一次
+	InitKafka(hsm) //测试时表示使用kafka，在zgo_start中使用一次
 
-	//测试读取nsq数据，wait for sdk init connection
+	//测试读取kafka数据，wait for sdk init connection
 	time.Sleep(2 * time.Second)
 
-	clientLocal, err := GetRedis(label_bj)
-	clientSpider, err := GetRedis(label_sh)
-
+	clientBj, err := GetKafka(label_bj)
+	clientSh, err := GetKafka(label_sh)
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(clientLocal)
-	fmt.Println(clientSpider)
-
-	if err != nil {
-		panic(err)
-	}
-
-	//测试读取nsq数据，wait for sdk init connection
-	time.Sleep(2 * time.Second)
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 20000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 10 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
@@ -82,14 +68,12 @@ func TestRedisGet(t *testing.T) {
 		go func(i int) {
 			countChan <- i //统计开出去的goroutine
 			if i%2 == 0 {
-				ch := getSet(label_bj, clientLocal, i)
-				//ch := setSet(label_bj, clientLocal, i)
+				ch := producer(label_sh, clientBj, i, false)
 				reply := <-ch
 				replyChan <- reply
 
 			} else {
-				ch := getSet(label_sh, clientSpider, i)
-				//ch := setSet(label_sh, clientSpider, i)
+				ch := producer(label_bj, clientSh, i, false)
 				reply := <-ch
 				replyChan <- reply
 			}
@@ -131,56 +115,49 @@ func TestRedisGet(t *testing.T) {
 
 		}
 	}
-
+	time.Sleep(2 * time.Second)
 }
 
-func getSet(label string, client *zgoredis, i int) chan int {
+func producer(label string, client *zgokafka, i int, b bool) chan int {
+	var err error
+
 	//还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
+	//输入参数：上下文ctx，nsqClientChan里面是client的连接，args具体的查询操作参数
 
-	var fooVal string
-	_, err := client.Do(ctx, &fooVal, "GET", "foo")
-	if err != nil {
-		panic(err)
-	}
-	out := make(chan int, 1)
-	select {
-	case <-ctx.Done():
-		fmt.Println("超时")
-		out <- 10001
-		return out
-	default:
-		fmt.Println(fooVal)
-		out <- 1
-	}
-
-	return out
-}
-
-func setSet(label string, client *zgoredis, i int) chan int {
-	//还需要一个上下文用来控制开出去的goroutine是否超时
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	defer cancel()
-
-	//var fooVal string
-	result, err := client.Do(ctx, nil, "SET", "foo", "someval")
-	if err != nil {
-		panic(err)
-	}
-	out := make(chan int, 1)
-	select {
-	case <-ctx.Done():
-		fmt.Println("超时")
-		out <- 10001
-		return out
-	default:
-		_, err := json.Marshal(result)
-		if err != nil {
-			panic(err)
+	body := []byte(fmt.Sprintf("msg--%s--%d", label, i))
+	var rch chan uint8
+	if b == true { //一次发送多条
+		bodyMutil := [][]byte{
+			body,
+			body,
 		}
-		out <- 1
+		rch, err = client.ProducerMulti(ctx, label, bodyMutil)
+
+	} else {
+		rch, err = client.Producer(ctx, label, body)
+
+	}
+	if err != nil {
+		panic(err)
+	}
+
+	out := make(chan int, 1)
+	select {
+	case <-ctx.Done():
+		fmt.Println(label, "超时")
+		out <- 10001
+		return out
+	case b := <-rch:
+		if b == 1 {
+			out <- 1
+
+		} else {
+			out <- 10001
+		}
 	}
 
 	return out
+
 }

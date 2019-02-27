@@ -27,13 +27,15 @@ type LabelDetail struct {
 }
 
 type allConfig struct {
-	Env   string        `json:"env"`
-	Nsq   []LabelDetail `json:"nsq"`
-	Mongo []LabelDetail `json:"mongo"`
-	Mysql []LabelDetail `json:"mysql"`
-	Redis []LabelDetail `json:"redis"`
-	Kafka []LabelDetail `json:"kafka"`
-	Es    []LabelDetail `json:"es"`
+	Env      string        `json:"env"`
+	Project  string        `json:"project"`
+	Loglevel string        `json:"loglevel"`
+	Nsq      []LabelDetail `json:"nsq"`
+	Mongo    []LabelDetail `json:"mongo"`
+	Mysql    []LabelDetail `json:"mysql"`
+	Redis    []LabelDetail `json:"redis"`
+	Kafka    []LabelDetail `json:"kafka"`
+	Es       []LabelDetail `json:"es"`
 }
 
 type Labelconns struct {
@@ -42,13 +44,15 @@ type Labelconns struct {
 }
 
 var (
-	Env   string
-	Es    []LabelDetail
-	Mongo []LabelDetail
-	Nsq   []LabelDetail
-	Redis []LabelDetail
-	Mysql []LabelDetail
-	Kafka []LabelDetail
+	Env      string
+	Project  string
+	Loglevel string
+	Es       []LabelDetail
+	Mongo    []LabelDetail
+	Nsq      []LabelDetail
+	Redis    []LabelDetail
+	Mysql    []LabelDetail
+	Kafka    []LabelDetail
 )
 
 func InitConfig(e string) {
@@ -70,14 +74,14 @@ func initConfig(e string) {
 	}
 
 	Env = acfg.Env
+	Project = acfg.Project
+	Loglevel = acfg.Loglevel
 	Nsq = acfg.Nsq
 	Es = acfg.Es
 	Mongo = acfg.Mongo
 	Redis = acfg.Redis
 	Kafka = acfg.Kafka
 	Mysql = acfg.Mysql
-
-	//fmt.Println(Nsq)
 
 	fmt.Println("zgo engine is started on the ... ", Env)
 

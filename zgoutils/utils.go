@@ -1,4 +1,4 @@
-package zgo_utils
+package zgoutils
 
 import (
 	"crypto/md5"
@@ -15,13 +15,36 @@ import (
 	"time"
 )
 
+var Utils Utilser
+
+func init() {
+	Utils = NewUtils()
+}
+
+type Utilser interface {
+	Md5(body string) string
+	Sha1(s string) string
+	GetTimestamp(n int) int64
+	Marshal(res interface{}) (string, error)
+	ParseDns(strDns string) bool
+	GetIntranetIp() string
+
+	GetUUIDV4() string
+	GetMD5Base64([]byte) string
+	GetGMTLocation() (*time.Location, error)
+	GetTimeInFormatISO8601() string
+	GetTimeInFormatRFC2616() string
+	GetUrlFormedMap(map[string]string) string
+	InitStructWithDefaultTag(interface{})
+}
+
 var loadLocationFromTZData func(name string, data []byte) (*time.Location, error) = nil
 
 var tZData []byte = nil
 
 type utils struct{}
 
-func NewUtils() *utils {
+func NewUtils() Utilser {
 	return &utils{}
 }
 

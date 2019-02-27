@@ -1,5 +1,7 @@
 {
   "env": "local",
+  "project": "default",
+  "loglevel": "info",
   "redis": [
     {
       "key": "redis_label_bj",

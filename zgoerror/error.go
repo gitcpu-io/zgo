@@ -1,9 +1,20 @@
-package zgo_error
+package zgoerror
 
 import (
 	"fmt"
-	"git.zhugefang.com/gocore/zgo.git/zgo"
 )
+
+var HttpResponeError Error
+
+func init() {
+	//HttpResponeError =
+}
+
+type Error interface {
+	HttpStatus() int
+	ErrorCode() string
+	Message() string
+}
 
 type ServerError struct {
 	httpStatus int
@@ -16,7 +27,7 @@ func (err *ServerError) Error() string {
 		err.errorCode, err.message)
 }
 
-func NewServerError(httpStatus int, responseContent string) zgo.Error {
+func NewServerError(httpStatus int, responseContent string) Error {
 	result := &ServerError{
 		httpStatus: httpStatus,
 		message:    responseContent,

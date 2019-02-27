@@ -8,6 +8,8 @@ import (
 	"git.zhugefang.com/gocore/zgo.git/zgomysql1"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
 	"git.zhugefang.com/gocore/zgo.git/zgoredis"
+	"git.zhugefang.com/gocore/zgo.git/zgoutils"
+	"git.zhugefang.com/gocore/zgo.git/zgozoneinfo"
 	"github.com/nsqio/go-nsq"
 )
 
@@ -96,4 +98,7 @@ var (
 	Es    = zgoes.Es("")
 	Redis = zgoredis.Redis("")
 	Mysql = zgomysql1.Mysql("")
+
+	Utils    = zgoutils.NewUtils()
+	ZoneInfo = zgozoneinfo.NewZoneInfo()
 )

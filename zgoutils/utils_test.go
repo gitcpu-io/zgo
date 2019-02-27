@@ -1,4 +1,4 @@
-package zgo_utils
+package zgoutils
 
 import (
 	"fmt"

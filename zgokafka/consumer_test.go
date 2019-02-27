@@ -1,4 +1,4 @@
-package zgonsq
+package zgokafka
 
 import (
 	"fmt"
@@ -38,13 +38,11 @@ func TestConsumer(t *testing.T) {
 		label_bj: s1,
 		label_sh: s2,
 	}
-	InitNsq(hsm) //测试时表示使用nsq，在zgo_start中使用一次
+	InitKafka(hsm) //测试时表示使用nsq，在zgo_start中使用一次
 
-	time.Sleep(2 * time.Second)
+	labelBj, err := GetKafka(label_bj)
 
-	labelBj, err := GetNsq(label_bj)
-
-	labelSh, err := GetNsq(label_sh)
+	labelSh, err := GetKafka(label_sh)
 	if err != nil {
 		panic(err)
 	}
