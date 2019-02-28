@@ -6,6 +6,7 @@ import (
 	"git.zhugefang.com/gocore/zgo.git/zgoes"
 	"git.zhugefang.com/gocore/zgo.git/zgogrpc"
 	"git.zhugefang.com/gocore/zgo.git/zgokafka"
+	"git.zhugefang.com/gocore/zgo.git/zgolog"
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
 	"git.zhugefang.com/gocore/zgo.git/zgomysql1"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
@@ -67,6 +68,13 @@ func Engine(opt *Options) *engine {
 		zgokafka.InitKafka(hsm)
 	}
 
+	if opt.Project != "" {
+		config.Project = opt.Project
+	}
+	if opt.Loglevel != "" {
+		config.Loglevel = opt.Loglevel
+	}
+
 	return engine
 }
 
@@ -104,5 +112,6 @@ var (
 	Mysql = zgomysql1.Mysql("")
 
 	Utils    = zgoutils.NewUtils()
+	Log      = zgolog.Newzgolog()
 	ZoneInfo = zgozoneinfo.NewZoneInfo()
 )
