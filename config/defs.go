@@ -20,6 +20,9 @@ type ConnDetail struct {
 	MaxIdleSize int    `json:"maxIdleSize"`
 	MaxOpenConn int    `json:"maxOpenConn"`
 	Uri         string `json:"uri,omitempty"`
+	Username    string `json:"username,omitempty"`
+	Password    string `json:"password,omitempty"`
+	Db          int    `json:"db,omitempty"`
 }
 type LabelDetail struct {
 	Key    string `json:"key"`
