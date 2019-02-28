@@ -1,6 +1,6 @@
 {
   "env": "local",
-  "project": "default",
+  "project": "zgo",
   "loglevel": "info",
   "redis": [
     {
@@ -11,14 +11,18 @@
           "host": "localhost",
           "port": 6379,
           "connSize": 50,
-          "poolSize": 234
+          "poolSize": 234,
+          "username": "",
+          "password": ""
         },
         {
           "c": "北京主库2-----redis",
           "host": "localhost",
           "port": 6379,
           "connSize": 50,
-          "poolSize": 678
+          "poolSize": 678,
+          "username": "",
+          "password": ""
         }
       ]
     },
@@ -30,12 +34,56 @@
           "host": "localhost",
           "port": 6379,
           "connSize": 50,
-          "poolSize": 111
+          "poolSize": 111,
+          "username": "",
+          "password": ""
         },
         {
           "c": "北京从库3=====redis",
           "host": "localhost",
           "port": 6379,
+          "connSize": 50,
+          "poolSize": 222,
+          "username": "",
+          "password": ""
+        }
+      ]
+    }
+  ],
+  "kafka": [
+    {
+      "key": "kafka_label_bj",
+      "values": [
+        {
+          "c": "北京主库1-----kafka",
+          "host": "localhost",
+          "port": 9092,
+          "connSize": 50,
+          "poolSize": 234
+        },
+        {
+          "c": "北京主库2-----kafka",
+          "host": "localhost",
+          "port": 9092,
+          "connSize": 50,
+          "poolSize": 678
+        }
+      ]
+    },
+    {
+      "key": "kafka_label_sh",
+      "values": [
+        {
+          "c": "北京从库1=====kafka",
+          "host": "localhost",
+          "port": 9092,
+          "connSize": 50,
+          "poolSize": 111
+        },
+        {
+          "c": "北京从库3=====kafka",
+          "host": "localhost",
+          "port": 9092,
           "connSize": 50,
           "poolSize": 222
         }

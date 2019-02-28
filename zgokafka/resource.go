@@ -7,39 +7,15 @@ import (
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/Shopify/sarama"
 	"github.com/bsm/sarama-cluster"
-	"log"
-	"os"
-	"os/signal"
 	"sync"
 )
-
-type (
-	KafkaMessage     = *cluster.Consumer
-	KafkaHandlerFunc func(consumer KafkaMessage, signals chan os.Signal) error //定义一个对外的handlerfunc
-)
-
-//
-//type kafkaHandler interface {
-//	handleMessage(m *kafka.Message) error
-//	HandleMessage(m *kafka.Message) error
-//}
-//
-////实现kafka原生的方法
-//func (h KafkaHandlerFunc) handleMessage(m KafkaMessage) error {
-//	return h(m)
-//}
-//
-////实现kafka原生的方法
-//func (h KafkaHandlerFunc) HandleMessage(m *kafka.Message) error {
-//	return h(m)
-//}
 
 //KafkaResourcer 给service使用
 type KafkaResourcer interface {
 	GetConnChan(label string) chan *sarama.AsyncProducer
 	Producer(ctx context.Context, topic string, body []byte) (chan uint8, error)
 	ProducerMulti(ctx context.Context, topic string, body [][]byte) (chan uint8, error)
-	//Consumer(topic, channel string, mode int, fn KafkaHandlerFunc) //自定义的func
+	Consumer(topic, groupId string) (*cluster.Consumer, error) //自定义的func
 }
 
 //内部结构体
@@ -72,22 +48,9 @@ func (n *kafkaResource) Producer(ctx context.Context, topic string, body []byte)
 		out <- 0
 		return out, errors.New("message is empty")
 	}
-	doneChan := <-n.connpool.GetConnChan(n.label)
-	err := n.PublishAsync(topic, body, doneChan) // 发布消息
-	if err != nil {
-		out <- 0
-		return out, nil
-	}
-	//go func() {
-	//	r := <-doneChan //一定要消费掉这个，要不然会丢消息
-	//	if r == nil {
-	//		//fmt.Println(topic,"--发送到NSQ失败--",err)
-	//		out <- 0
-	//	} else {
-	//		//fmt.Println(topic,"==发送到NSQ成功==", string(body),err)
-	//		out <- 1
-	//	}
-	//}()
+	producer := <-n.connpool.GetConnChan(n.label)
+	n.PublishAsync(topic, body, producer, out) // 发布消息
+
 	return out, nil
 }
 
@@ -98,67 +61,73 @@ func (n *kafkaResource) ProducerMulti(ctx context.Context, topic string, body []
 		out <- 0
 		return out, errors.New("message is empty")
 	}
-	doneChan := <-n.connpool.GetConnChan(n.label)
-	err := n.PublishAsync(topic, []byte(""), doneChan) // 发布消息
-	if err != nil {
-		out <- 0
-		return out, nil
-	}
-	//go func() {
-	//	r := <-doneChan //一定要消费掉这个，要不然会丢消息
-	//	if r == nil {
-	//		//fmt.Println(topic,"--发送到NSQ失败--",err)
-	//		out <- 0
-	//	} else {
-	//		//fmt.Println(topic,"==发送到NSQ成功==", string(body),err)
-	//		out <- 1
-	//	}
-	//}()
+	connChan := <-n.connpool.GetConnChan(n.label)
+	n.PublishMultiAsync(topic, body, connChan, out) // 发布消息
+
 	return out, nil
 }
 
 //初始化消费者
-func (n *kafkaResource) Consumer(brokers, topics []string, groupId string, callback KafkaHandlerFunc) {
+func (n *kafkaResource) Consumer(topic, groupId string) (*cluster.Consumer, error) {
 	config := cluster.NewConfig()
-	//config.Consumer.Return.Errors = true
-	//config.Group.Return.Notifications = true
+	config.Consumer.Return.Errors = true
+	config.Group.Return.Notifications = true
 
-	config.Group.Mode = cluster.ConsumerModePartitions
+	//config.Group.Mode = cluster.ConsumerModePartitions
 
-	consumer, err := cluster.NewConsumer(brokers, groupId, topics, config)
-	if err != nil {
-		log.Println(brokers, err.Error())
-		//panic(err)
+	n.mu.RLock()
+	defer n.mu.RUnlock()
+	var brokers []string
+	if addr, ok := currentLabels[n.label]; ok {
+		for k, v := range addr {
+			if k == 0 && v.Host != "" && v.Port != 0 {
+				address := fmt.Sprintf("%s:%d", v.Host, v.Port)
+				brokers = append(brokers, address)
+				break
+			}
+		}
 	}
-	defer consumer.Close()
 
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt)
+	consumer, err := cluster.NewConsumer(brokers, groupId, []string{topic}, config)
+	if err != nil {
+		panic(err)
+	}
 
 	// consume errors
-	//go func() {
-	//	for err := range consumer.Errors() {
-	//		log.Printf("Error: %s\n", err.Error())
-	//	}
-	//}()
+	go func() {
+		for err := range consumer.Errors() {
+			fmt.Printf("Error: %s\n", err.Error())
+		}
+	}()
 
 	// consume notifications
-	//go func() {
-	//	for ntf := range consumer.Notifications() {
-	//		log.Printf("Kafka connection: %+v\n", ntf)
-	//	}
-	//}()
+	go func() {
+		for _ = range consumer.Notifications() {
+			//fmt.Printf("Kafka connection: %+v\n", ntf)
+		}
+	}()
 
-	callback(consumer, signals)
+	return consumer, err
+
+	//if err != nil {
+	//	log.Println(brokers, err.Error())
+	//panic(err)
+	//}
+	//defer consumer.Close()
+
+	//signals := make(chan os.Signal, 1)
+	//signal.Notify(signals, os.Interrupt)
+
+	//callback(consumer, signals)
 
 }
 
 // asyncProducer 异步生产者
 // 并发量大时，必须采用这种方式
-func (n *kafkaResource) PublishAsync(topics string, value []byte, ptr *sarama.AsyncProducer) error {
+func (n *kafkaResource) PublishAsync(topics string, value []byte, ptr *sarama.AsyncProducer, in chan uint8) {
 	p := *ptr
 	//必须有这个匿名函数内容
-	go func(p sarama.AsyncProducer) {
+	go func(p sarama.AsyncProducer, in chan uint8) {
 		errors := p.Errors()
 		success := p.Successes()
 		for {
@@ -167,19 +136,50 @@ func (n *kafkaResource) PublishAsync(topics string, value []byte, ptr *sarama.As
 				if err != nil {
 					fmt.Println("asyn send=", err, topics, value)
 				}
-
+				in <- 0
 			case <-success:
 				//fmt.Printf("Partition:%d\nOffset:%d\n%s\n%s",s.Partition,s.Offset,s.Value,s.Timestamp)
-				fmt.Fprintln(os.Stdout, "\n", value, "==done success==", topics)
+				//fmt.Fprintln(os.Stdout, "\n", string(value), "==done success==", topics)
+				in <- 1
 			}
 		}
-	}(p)
+	}(p, in)
 
 	msg := &sarama.ProducerMessage{
 		Topic: topics,
 		Value: sarama.ByteEncoder(value),
 	}
 	p.Input() <- msg
-	return nil
+
+}
+
+func (n *kafkaResource) PublishMultiAsync(topics string, value [][]byte, ptr *sarama.AsyncProducer, in chan uint8) {
+	p := *ptr
+	//必须有这个匿名函数内容
+	go func(p sarama.AsyncProducer, in chan uint8) {
+		errors := p.Errors()
+		success := p.Successes()
+		for {
+			select {
+			case err := <-errors:
+				if err != nil {
+					fmt.Println("asyn send=", err, topics, value)
+				}
+				in <- 0
+			case <-success:
+				//fmt.Printf("Partition:%d\nOffset:%d\n%s\n%s",s.Partition,s.Offset,s.Value,s.Timestamp)
+				//fmt.Fprintln(os.Stdout, "\n", string(value), "==done success==", topics)
+				in <- 1
+			}
+		}
+	}(p, in)
+
+	for _, v := range value {
+		msg := &sarama.ProducerMessage{
+			Topic: topics,
+			Value: sarama.ByteEncoder(v),
+		}
+		p.Input() <- msg
+	}
 
 }

@@ -5,6 +5,7 @@ import (
 	"git.zhugefang.com/gocore/zgo.git/comm"
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/Shopify/sarama"
+	"github.com/bsm/sarama-cluster"
 	"sync"
 )
 
@@ -19,7 +20,7 @@ type Kafkaer interface {
 	GetConnChan(label ...string) (chan *sarama.AsyncProducer, error)
 	Producer(ctx context.Context, topic string, body []byte) (chan uint8, error)
 	ProducerMulti(ctx context.Context, topic string, body [][]byte) (chan uint8, error)
-	Consumer(topic, channel string, mode int, fn KafkaHandlerFunc)
+	Consumer(topic, groupId string) (*cluster.Consumer, error)
 }
 
 func Kafka(label string) Kafkaer {
@@ -74,6 +75,6 @@ func (n *zgokafka) ProducerMulti(ctx context.Context, topic string, body [][]byt
 	return n.res.ProducerMulti(ctx, topic, body)
 }
 
-//func (n *zgokafka) Consumer(topic, channel string, mode int, fn KafkaHandlerFunc) {
-//	go n.res.Consumer(topic, channel, mode, fn)
-//}
+func (n *zgokafka) Consumer(topic, groupId string) (*cluster.Consumer, error) {
+	return n.res.Consumer(topic, groupId)
+}

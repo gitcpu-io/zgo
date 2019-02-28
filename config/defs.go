@@ -11,6 +11,8 @@ import (
 
 var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
 
+var Version = "0.0.1"
+
 type ConnDetail struct {
 	C           string `json:"c"`
 	Host        string `json:"host,omitempty"`
@@ -20,6 +22,9 @@ type ConnDetail struct {
 	MaxIdleSize int    `json:"maxIdleSize"`
 	MaxOpenConn int    `json:"maxOpenConn"`
 	Uri         string `json:"uri,omitempty"`
+	Username    string `json:"username,omitempty"`
+	Password    string `json:"password,omitempty"`
+	Db          int    `json:"db,omitempty"`
 }
 type LabelDetail struct {
 	Key    string `json:"key"`
@@ -83,7 +88,7 @@ func initConfig(e string) {
 	Kafka = acfg.Kafka
 	Mysql = acfg.Mysql
 
-	fmt.Println("zgo engine is started on the ... ", Env)
+	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Env)
 
 	//fmt.Println(cf)
 

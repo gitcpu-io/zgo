@@ -1,19 +1,43 @@
 package zgokafka
 
+import (
+	"fmt"
+	"github.com/bsm/sarama-cluster"
+)
+
 type chat struct {
 	Topic   string
-	Channel string
-	Nsq     Kafkaer
+	GroupId string
+	Kafka   Kafkaer
 }
 
-//func (c *chat) Consumer() {
-//	go c.Nsq.Consumer(c.Topic, c.Channel, 2, c.Deal)
-//}
-//
-////处理消息
-//func (c *chat) Deal(msg NsqMessage) error {
-//
-//	fmt.Println("接收到NSQ", msg.NSQDAddress, ",message:", string(msg.Body))
-//
-//	return nil
-//}
+func (c *chat) Consumer() {
+	consumer, _ := c.Kafka.Consumer(c.Topic, c.GroupId)
+	for {
+		select {
+		case part, ok := <-consumer.Partitions():
+
+			if !ok {
+				return
+			}
+			// start a separate goroutine to consume messages
+			go func(pc cluster.PartitionConsumer) {
+				for msg := range pc.Messages() {
+
+					fmt.Printf("==message===%d %s\n", msg.Offset, msg.Value)
+
+				}
+			}(part)
+		//case <-signals:
+		//	fmt.Println("activity no signals ...")
+		//	return
+
+		case msg, ok := <-consumer.Messages():
+			if ok {
+				fmt.Printf("==message===%d %s\n", msg.Offset, msg.Value)
+
+			}
+
+		}
+	}
+}

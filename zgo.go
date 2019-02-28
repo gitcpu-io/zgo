@@ -5,6 +5,8 @@ import (
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"git.zhugefang.com/gocore/zgo.git/zgoes"
 	"git.zhugefang.com/gocore/zgo.git/zgogrpc"
+	"git.zhugefang.com/gocore/zgo.git/zgokafka"
+	"git.zhugefang.com/gocore/zgo.git/zgolog"
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
 	"git.zhugefang.com/gocore/zgo.git/zgomysql1"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
@@ -13,8 +15,6 @@ import (
 	"git.zhugefang.com/gocore/zgo.git/zgozoneinfo"
 	"github.com/nsqio/go-nsq"
 )
-
-var Version = "0.1"
 
 type engine struct {
 	opt *Options
@@ -60,10 +60,17 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Kafka) > 0 {
 		//todo someting
-		//hsm := engine.getConfigByOption(config.Kafka, opt.Kafka)
+		hsm := engine.getConfigByOption(config.Kafka, opt.Kafka)
 		//fmt.Println(hsm)
 		//return nil
-		//zgokafka.InitNsq(hsm)
+		zgokafka.InitKafka(hsm)
+	}
+
+	if opt.Project != "" {
+		config.Project = opt.Project
+	}
+	if opt.Loglevel != "" {
+		config.Loglevel = opt.Loglevel
 	}
 
 	return engine
@@ -94,6 +101,7 @@ type (
 )
 
 var (
+	Kafka = zgokafka.Kafka("")
 	Nsq   = zgonsq.Nsq("")
 	Mongo = zgomongo.Mongo("")
 	Es    = zgoes.Es("")
@@ -102,5 +110,6 @@ var (
 	Mysql = zgomysql1.Mysql("")
 
 	Utils    = zgoutils.NewUtils()
+	Log      = zgolog.Newzgolog()
 	ZoneInfo = zgozoneinfo.NewZoneInfo()
 )

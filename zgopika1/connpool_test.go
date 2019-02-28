@@ -18,14 +18,24 @@ const (
 
 func TestRedisGet(t *testing.T) {
 	hsm := make(map[string][]*config.ConnDetail)
+	//cd_bj := config.ConnDetail{
+	//	C:        "北京主库-----redis1",
+	//	Host:     "localhost",
+	//	Port:     6379,
+	//	ConnSize: 100,
+	//	PoolSize: 20000,
+	//	Username: "",
+	//	Password: "",
+	//	Db:       5,
+	//}
 	cd_bj := config.ConnDetail{
 		C:        "北京主库-----redis1",
-		Host:     "localhost",
-		Port:     6379,
+		Host:     "redis.zhugefang.com",
+		Port:     9431,
 		ConnSize: 100,
-		PoolSize: 200,
-		Username: "",
-		Password: "",
+		PoolSize: 20000,
+		Username: "root",
+		Password: "zhugeZHAOFANG1116",
 		Db:       0,
 	}
 	cd_bj2 := config.ConnDetail{
@@ -33,7 +43,7 @@ func TestRedisGet(t *testing.T) {
 		Host:     "localhost",
 		Port:     6379,
 		ConnSize: 10,
-		PoolSize: 200,
+		PoolSize: 20000,
 		Username: "",
 		Password: "",
 		Db:       0,
@@ -43,7 +53,7 @@ func TestRedisGet(t *testing.T) {
 		Host:     "localhost",
 		Port:     6379,
 		ConnSize: 10,
-		PoolSize: 200,
+		PoolSize: 20000,
 		Username: "",
 		Password: "",
 		Db:       5,
@@ -59,8 +69,15 @@ func TestRedisGet(t *testing.T) {
 
 	InitRedis(hsm) //测试时表示使用redis，在zgo_start中使用一次
 
+	//测试读取nsq数据，wait for sdk init connection
+	time.Sleep(2 * time.Second)
+
 	clientLocal, err := GetRedis(label_bj)
 	clientSpider, err := GetRedis(label_sh)
+
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(clientLocal)
 	fmt.Println(clientSpider)
@@ -69,9 +86,70 @@ func TestRedisGet(t *testing.T) {
 		panic(err)
 	}
 
-	getSet(label_bj, clientLocal, 0)
+	//测试读取nsq数据，wait for sdk init connection
+	time.Sleep(2 * time.Second)
 
-	getSet(label_sh, clientSpider, 1)
+	var replyChan = make(chan int)
+	var countChan = make(chan int)
+	l := 10000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+
+	count := []int{}
+	total := []int{}
+	stime := time.Now()
+
+	for i := 0; i < l; i++ {
+		go func(i int) {
+			countChan <- i //统计开出去的goroutine
+			if i%2 == 0 {
+				ch := getSet(label_bj, clientLocal, i)
+				//ch := setSet(label_bj, clientLocal, i)
+				reply := <-ch
+				replyChan <- reply
+
+			} else {
+				ch := getSet(label_sh, clientSpider, i)
+				//ch := setSet(label_sh, clientSpider, i)
+				reply := <-ch
+				replyChan <- reply
+			}
+		}(i)
+	}
+
+	go func() {
+		for v := range replyChan {
+			if v != 10001 { //10001表示超时
+				count = append(count, v) //成功数
+			}
+		}
+	}()
+
+	go func() {
+		for v := range countChan { //总共的goroutine
+			total = append(total, v)
+		}
+	}()
+
+	for _, v := range count {
+		if v != 1 {
+			fmt.Println("有不成功的")
+		}
+	}
+
+	for {
+		if len(count) == l {
+			var timeLen time.Duration
+			timeLen = time.Now().Sub(stime)
+
+			fmt.Printf("总消耗时间：%s, 成功：%d, 总共开出来的goroutine：%d\n", timeLen, len(count), len(total))
+			break
+		}
+
+		select {
+		case <-time.Tick(time.Duration(1000 * time.Millisecond)):
+			fmt.Println("处理进度每1000毫秒", len(count))
+
+		}
+	}
 
 }
 

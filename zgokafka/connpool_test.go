@@ -14,26 +14,27 @@ const (
 )
 
 func TestProducer(t *testing.T) {
+
 	hsm := make(map[string][]*config.ConnDetail)
 	cd_bj := config.ConnDetail{
 		C:        "北京主库-----kafka",
 		Host:     "localhost",
-		Port:     4150,
-		ConnSize: 5,
-		PoolSize: 246,
+		Port:     9092,
+		ConnSize: 100,
+		PoolSize: 20000,
 	}
 	cd_bj2 := config.ConnDetail{
 		C:        "北京从库2-----kafka",
 		Host:     "localhost",
-		Port:     4150,
-		ConnSize: 50,
-		PoolSize: 135,
+		Port:     9092,
+		ConnSize: 100,
+		PoolSize: 20000,
 	}
 	cd_sh := config.ConnDetail{
 		C:        "上海主库-----kafka",
 		Host:     "localhost",
-		Port:     4150,
-		ConnSize: 50,
+		Port:     9092,
+		ConnSize: 100,
 		PoolSize: 20000,
 	}
 	var s1 []*config.ConnDetail
@@ -58,7 +59,7 @@ func TestProducer(t *testing.T) {
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 10 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 10000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
@@ -134,6 +135,7 @@ func producer(label string, client *zgokafka, i int, b bool) chan int {
 			body,
 		}
 		rch, err = client.ProducerMulti(ctx, label, bodyMutil)
+		//rch, err = client.Producer(ctx, label, bodyMutil)
 
 	} else {
 		rch, err = client.Producer(ctx, label, body)

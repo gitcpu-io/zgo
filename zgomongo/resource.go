@@ -174,8 +174,8 @@ func updateMap2Bson(arg map[string]interface{}) bson.M {
 //对mongo操作对前置工作 讲map类型转化为bson 内置函数
 func preWorkForMongo(args map[string]interface{}) {
 	if args["query"] != nil {
-		//query := map2Bson(args["query"].(map[string]interface{}))
-		//args["query"] = query
+		query := map2Bson(args["query"].(map[string]interface{}))
+		args["query"] = query
 	} else {
 		args["query"] = map[string]interface{}{}
 		query := map2Bson(args["query"].(map[string]interface{}))
