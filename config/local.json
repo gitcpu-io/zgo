@@ -1,6 +1,6 @@
 {
   "env": "local",
-  "project": "default",
+  "project": "zgo",
   "loglevel": "info",
   "redis": [
     {

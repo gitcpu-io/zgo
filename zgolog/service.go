@@ -32,6 +32,8 @@ type zgolog struct {
 	Entry    *log.Logger
 }
 
+var Log = Newzgolog()
+
 func Newzgolog() Logger {
 	z := &zgolog{
 		Project: config.Project,
@@ -106,8 +108,12 @@ func (z *zgolog) withCaller() *log.Entry {
 	} else {
 		value = fmt.Sprintf("%+v", stack.Caller(2))
 	}
+	p := config.Project
+	if p == "" {
+		p = "zgo"
+	}
 	en := z.Entry.WithFields(log.Fields{
-		project: config.Project,
+		project: p,
 		file:    value,
 	})
 	return en

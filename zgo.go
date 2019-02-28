@@ -22,13 +22,6 @@ type engine struct {
 	opt *Options
 }
 
-func init() {
-	Engine(&Options{ //zgo自已启动自己 build in project and loglevel and Log func
-		Project:  "zgo",
-		Loglevel: "debug",
-	})
-}
-
 //New init zgo engine
 func Engine(opt *Options) *engine {
 	engine := &engine{
