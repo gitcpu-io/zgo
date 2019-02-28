@@ -12,6 +12,59 @@ import (
 
 var u = NewUtils()
 
+var st = &struct {
+	A string
+}{
+	A: "niubi",
+}
+
+func TestUtils_IPs(t *testing.T) {
+	fmt.Println(u.IPs())
+
+	fmt.Println(u.IsPrivateIP("192.168.100.162"))
+	fmt.Println(u.IsPrivateIP("121.69.135.49"))
+
+	e, err := u.Extract("ba")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(e)
+	fmt.Println(u.GetIntranetIP())
+}
+
+func TestUtils_ServiceMethod(t *testing.T) {
+	a, b, c := u.GrpcServiceMethodConverts("Foo.Bar")
+	fmt.Println(a, b, c)
+}
+
+func TestUtils_StructToMap(t *testing.T) {
+	s := &struct {
+		A string
+	}{
+		A: "niubi",
+	}
+	m := u.StructToMap(s)
+	fmt.Println(m["A"])
+}
+
+func TestUtils_Marshal(t *testing.T) {
+	str, err := u.Marshal(st)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Print(string(str), err)
+}
+
+func TestUtils_Unmarshal(t *testing.T) {
+	st := &struct {
+		B string
+	}{}
+	var str = `{"B":"456"}`
+	u.Unmarshal([]byte(str), st)
+	fmt.Println(st)
+	fmt.Println(str)
+}
+
 func TestInitStructWithDefaultTag(t *testing.T) {
 	config := &struct {
 		B bool          `default:"true"`

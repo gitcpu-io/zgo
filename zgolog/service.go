@@ -13,7 +13,7 @@ const (
 )
 
 type Logger interface {
-	NewLog(projectName string, logLevel string) *zgolog
+	NewLog() *zgolog
 	Error(args ...interface{})
 	Info(args ...interface{})
 	Print(args ...interface{})
@@ -36,16 +36,24 @@ var Log = Newzgolog()
 
 func Newzgolog() Logger {
 	z := &zgolog{
-		Project: config.Project,
-		Entry:   log.New(),
+		Project:  config.Project,
+		LogLevel: config.Loglevel,
+		Entry:    log.New(),
 	}
 	return z
 }
 
-func (z *zgolog) NewLog(project string, logLevel string) *zgolog {
+func (z *zgolog) NewLog() *zgolog {
+	l := ""
+	if z.LogLevel == "" {
+		l = config.Loglevel
+	} else {
+		l = z.LogLevel
+	}
 	return &zgolog{
-		Project:  project,
-		LogLevel: logLevel,
+		Project:  config.Project,
+		LogLevel: l,
+		Entry:    log.New(),
 	}
 }
 
