@@ -16,8 +16,6 @@ import (
 	"github.com/nsqio/go-nsq"
 )
 
-var Version = "0.1"
-
 type engine struct {
 	opt *Options
 }
