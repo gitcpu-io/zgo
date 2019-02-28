@@ -1,11 +1,17 @@
 package zgo
 
 import (
+	"fmt"
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"git.zhugefang.com/gocore/zgo.git/zgoes"
+	"git.zhugefang.com/gocore/zgo.git/zgogrpc"
+	"git.zhugefang.com/gocore/zgo.git/zgokafka"
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
+	"git.zhugefang.com/gocore/zgo.git/zgomysql1"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
 	"git.zhugefang.com/gocore/zgo.git/zgoredis"
+	"git.zhugefang.com/gocore/zgo.git/zgoutils"
+	"git.zhugefang.com/gocore/zgo.git/zgozoneinfo"
 	"github.com/nsqio/go-nsq"
 )
 
@@ -30,9 +36,9 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Mysql) > 0 {
 		//todo someting
-		//hsm := engine.getConfigByOption(config.Mysql, opt.Mongo)
-		//fmt.Println(hsm)
-		//zgomysql.InitMysqlService(hsm)
+		hsm := engine.getConfigByOption(config.Mysql, opt.Mongo)
+		fmt.Println(hsm)
+		zgomysql1.InitMysql(hsm)
 	}
 	if len(opt.Es) > 0 {
 		hsm := engine.getConfigByOption(config.Es, opt.Es)
@@ -55,10 +61,10 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Kafka) > 0 {
 		//todo someting
-		//hsm := engine.getConfigByOption(config.Kafka, opt.Kafka)
+		hsm := engine.getConfigByOption(config.Kafka, opt.Kafka)
 		//fmt.Println(hsm)
 		//return nil
-		//zgokafka.InitNsq(hsm)
+		zgokafka.InitKafka(hsm)
 	}
 
 	return engine
@@ -89,8 +95,14 @@ type (
 )
 
 var (
+	Kafka = zgokafka.Kafka("")
 	Nsq   = zgonsq.Nsq("")
 	Mongo = zgomongo.Mongo("")
 	Es    = zgoes.Es("")
+	Grpc  = zgogrpc.Grpc()
 	Redis = zgoredis.Redis("")
+	Mysql = zgomysql1.Mysql("")
+
+	Utils    = zgoutils.NewUtils()
+	ZoneInfo = zgozoneinfo.NewZoneInfo()
 )

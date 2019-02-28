@@ -1,4 +1,4 @@
-package zgomysql
+package zgomysql1
 
 import (
 	"context"
@@ -13,51 +13,39 @@ const (
 	label_sh = "mysql_label_sh"
 )
 
-// 实体类
-type House struct {
-	Name string
-	Id   int
-}
-
-// 创建链接
-
-// 查询
 func TestMysqlGet(t *testing.T) {
 
 	//-------------test for start engine---------
 	hsm := make(map[string][]*config.ConnDetail)
 	cd_bj := config.ConnDetail{
-		C:           "北京主库-----mysql",
-		Host:        "root:123456@(localhost:3306)/spider?charset=utf8&parseTime=True&loc=Local",
-		MaxOpenConn: 5,
-		MaxIdleSize: 5,
+		C:        "北京主库-----mysql",
+		Host:     "root:123456@(localhost:3306)/spider?charset=utf8&parseTime=True&loc=Local",
+		ConnSize: 5,
+		PoolSize: 5000,
 	}
 	cd_sh := config.ConnDetail{
-		C:           "上海主库-----mysql",
-		Host:        "root:123456@(localhost:3306)/spider_sh?charset=utf8&parseTime=True&loc=Local",
-		MaxOpenConn: 5,
-		MaxIdleSize: 5,
+		C:        "上海主库-----mysql",
+		Host:     "root:123456@(localhost:3306)/spider_sh?charset=utf8&parseTime=True&loc=Local",
+		ConnSize: 5,
+		PoolSize: 5000,
 	}
 	var s1 []*config.ConnDetail
 	var s2 []*config.ConnDetail
-
 	s1 = append(s1, &cd_bj)
 	s2 = append(s2, &cd_sh)
-
 	hsm = map[string][]*config.ConnDetail{
 		label_bj: s1,
 		label_sh: s2,
 	}
 	//----------------------
 
-	InitMysqlService(hsm) //测试时表示使用mysql，在zgo_start中使用一次
+	InitMysql(hsm) //测试时表示使用mysql，在zgo_start中使用一次
 
 	//测试读取nsq数据，wait for sdk init connection
 	time.Sleep(2 * time.Second)
 
-	clientBj, err := MysqlService(label_bj)
-
-	clientSh, err := MysqlService(label_sh)
+	clientBj, err := GetMysql(label_bj)
+	clientSh, err := GetMysql(label_sh)
 	if err != nil {
 		panic(err)
 	}
@@ -74,14 +62,14 @@ func TestMysqlGet(t *testing.T) {
 		go func(i int) {
 			countChan <- i //统计开出去的goroutine
 			if i%2 == 0 {
-				//ch := getMongo(label_sh,clientBj,i)
-				ch := getMysql(clientBj, i)
+				//ch := getMysql(label_sh,clientBj,i)
+				ch := getMysql(label_sh, clientBj, i)
 				reply := <-ch
 				replyChan <- reply
 
 			} else {
-				//ch := getMongo(label_bj,clientSh,i)
-				ch := getMysql(clientSh, i)
+				//ch := getMysql(label_bj,clientSh,i)
+				ch := getMysql(label_bj, clientSh, i)
 				reply := <-ch
 				replyChan <- reply
 			}
@@ -93,6 +81,7 @@ func TestMysqlGet(t *testing.T) {
 			if v != 10001 { //10001表示超时
 				count = append(count, v) //成功数
 			} else {
+
 				fmt.Println("有不成功的")
 			}
 		}
@@ -103,12 +92,6 @@ func TestMysqlGet(t *testing.T) {
 			total = append(total, v)
 		}
 	}()
-
-	//for _, v := range count {
-	//	if v != 1 {
-	//		fmt.Println("有不成功的")
-	//	}
-	//}
 
 	for {
 		if len(count) == l {
@@ -122,17 +105,18 @@ func TestMysqlGet(t *testing.T) {
 		select {
 		case <-time.Tick(time.Duration(1000 * time.Millisecond)):
 			fmt.Println("处理进度每1000毫秒", len(count))
+
 		}
 	}
 	time.Sleep(2 * time.Second)
 }
 
-func getMysql(client MysqlServiceInterface, i int) chan int {
-
+func getMysql(label string, client *zgomysql, i int) chan int {
+	fmt.Println("开始")
 	//还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
-	//输入参数：上下文ctx，mongoChan里面是client的连接，args具体的查询操作参数
+	//输入参数：上下文ctx，mysqlChan里面是client的连接，args具体的查询操作参数
 	house := &House{}
 	args := make(map[string]interface{})
 	args["tablename"] = "house"
@@ -150,9 +134,16 @@ func getMysql(client MysqlServiceInterface, i int) chan int {
 		out <- 10001
 		return out
 	default:
-		//fmt.Println(string(bytes), err, "---from mongo successful---")
 		fmt.Println(house)
+		//fmt.Println(string(bytes), err, "---from mysql successful---")
 		out <- 1
 	}
+
 	return out
+
+}
+
+type House struct {
+	Name string `json:"name"`
+	Id   int    `json:"id"`
 }
