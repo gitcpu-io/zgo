@@ -1,5 +1,9 @@
 {
   "env": "local",
+  "file": {
+    "type": "local",
+    "home": "/tmp"
+  },
   "project": "zgo",
   "loglevel": "info",
   "redis": [

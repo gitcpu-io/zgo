@@ -1,6 +1,9 @@
 package zgo
 
-import "git.zhugefang.com/gocore/zgo.git/config"
+import (
+	"fmt"
+	"git.zhugefang.com/gocore/zgo.git/config"
+)
 
 type Options struct {
 	Env      string   `json:"env"`
@@ -16,16 +19,19 @@ type Options struct {
 }
 
 func (opt *Options) init() {
+	//init config
 	if opt.Env == "" {
 		opt.Env = "local"
 	}
+
+	config.InitConfig(opt.Env)
+
 	if opt.Project == "" {
 		opt.Project = config.Project
 	}
 	if opt.Loglevel == "" {
 		opt.Loglevel = config.Loglevel
 	}
+	fmt.Println("-------------------------------", opt.Project, opt.Loglevel)
 
-	//init config
-	config.InitConfig(opt.Env)
 }

@@ -95,6 +95,11 @@ func (z *zgolog) SetDebug(level string) *log.Logger {
 		format.TimestampFormat = "2006-01-02 15:04:05"
 		logger.Level = log.InfoLevel
 		logger.Formatter = format
+	default:
+		format := new(log.JSONFormatter)
+		format.TimestampFormat = "2006-01-02 15:04:05"
+		logger.Level = log.DebugLevel
+		logger.Formatter = format
 	}
 	return nil
 }

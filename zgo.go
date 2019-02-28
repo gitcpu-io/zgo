@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"git.zhugefang.com/gocore/zgo.git/zgoes"
+	"git.zhugefang.com/gocore/zgo.git/zgofile"
 	"git.zhugefang.com/gocore/zgo.git/zgogrpc"
 	"git.zhugefang.com/gocore/zgo.git/zgokafka"
 	"git.zhugefang.com/gocore/zgo.git/zgolog"
@@ -101,14 +102,14 @@ type (
 )
 
 var (
-	Kafka = zgokafka.Kafka("")
-	Nsq   = zgonsq.Nsq("")
-	Mongo = zgomongo.Mongo("")
-	Es    = zgoes.Es("")
-	Grpc  = zgogrpc.Grpc()
-	Redis = zgoredis.Redis("")
-	Mysql = zgomysql1.Mysql("")
-
+	Kafka    = zgokafka.Kafka("")
+	Nsq      = zgonsq.Nsq("")
+	Mongo    = zgomongo.Mongo("")
+	Es       = zgoes.Es("")
+	Grpc     = zgogrpc.Grpc()
+	Redis    = zgoredis.Redis("")
+	Mysql    = zgomysql1.Mysql("")
+	File     = zgofile.NewLocal()
 	Utils    = zgoutils.NewUtils()
 	Log      = zgolog.Newzgolog()
 	ZoneInfo = zgozoneinfo.NewZoneInfo()

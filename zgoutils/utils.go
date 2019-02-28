@@ -39,8 +39,10 @@ func init() {
 }
 
 type Utilser interface {
-	Md5(body string) string
+	//md5 对字符串md5
+	Md5(s string) string
 	Sha1(s string) string
+	//获取当前时间时间戳，n= 10/13/19 位时间戳
 	GetTimestamp(n int) int64
 	//Marshal 序列化为json
 	Marshal(in interface{}) ([]byte, error)
@@ -53,8 +55,10 @@ type Utilser interface {
 
 	ParseDns(strDns string) bool
 	IPs() []string
+	//是否是内网ip
 	IsPrivateIP(ipAddr string) bool
 	Extract(addr string) (string, error)
+	//获取内网ip
 	GetIntranetIP() string
 
 	GetUUIDV4() string

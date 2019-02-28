@@ -7,10 +7,6 @@ import (
 
 var HttpResponeError Error
 
-func init() {
-	//HttpResponeError =
-}
-
 type Error interface {
 	HttpStatus() int
 	ErrorCode() string
@@ -43,11 +39,9 @@ func NewServerError(errorCode, message string, httpStatus ...int) Error {
 }
 
 var (
-	OK                   = NewServerError("OK", "成功")
-	ErrBadParams         = NewServerError("ERR_BAD_PARAMS", "参数错误", http.StatusBadRequest)
-	ErrServerException   = NewServerError("ERR_SERVER_EXCEPTION", "系统服务异常", http.StatusInternalServerError)
-	ErrUserAlreadyExists = NewServerError("ERR_USER_ALREADY_EXISTS", "用户已存在")
-	ErrUserNotFound      = NewServerError("ERR_USER_NOT_FOUND", "用户不存在")
+	OK                 = NewServerError("OK", "成功")
+	ErrBadParams       = NewServerError("ERR_BAD_PARAMS", "参数错误", http.StatusBadRequest)
+	ErrServerException = NewServerError("ERR_SERVER_EXCEPTION", "系统服务异常", http.StatusInternalServerError)
 )
 
 func (err *ServerError) HttpStatus() int {

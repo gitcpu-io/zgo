@@ -31,8 +31,14 @@ type LabelDetail struct {
 	Values []ConnDetail
 }
 
+type FileStore struct {
+	Type string `json:"type"`
+	Home string `json:"home"`
+}
+
 type allConfig struct {
 	Env      string        `json:"env"`
+	File     FileStore     `json:"file"`
 	Project  string        `json:"project"`
 	Loglevel string        `json:"loglevel"`
 	Nsq      []LabelDetail `json:"nsq"`
@@ -50,6 +56,7 @@ type Labelconns struct {
 
 var (
 	Env      string
+	File     FileStore
 	Project  string
 	Loglevel string
 	Es       []LabelDetail
@@ -79,6 +86,7 @@ func initConfig(e string) {
 	}
 
 	Env = acfg.Env
+	File = acfg.File
 	Project = acfg.Project
 	Loglevel = acfg.Loglevel
 	Nsq = acfg.Nsq
