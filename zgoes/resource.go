@@ -16,7 +16,8 @@ import (
 )
 
 type EsResourcer interface {
-	Search(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
+	QueryTmp(ctx context.Context, index, table, tmp string, args map[string]interface{}) (interface{}, error)
 }
 
 var mu sync.RWMutex
@@ -25,6 +26,7 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 //方法初始化从uris中获取uri
 func NewEsResourcer(label string) EsResourcer {
+
 	//get hosts by label
 	mu.RLock()
 	defer mu.RUnlock()
@@ -66,12 +68,8 @@ func (e *esResource) GetConChan() *http.Client {
 @parms: doc:文档类型
 @parms: dsl:es原生语句
 */
-func (e *esResource) Search(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error) {
 	maps := map[string]interface{}{} //定义es返回结构提
-	index := args["index"].(string)
-	table := args["table"].(string)
-	dsl := args["dsl"].(string)
-
 	uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl))
 	if err != nil {
@@ -79,6 +77,22 @@ func (e *esResource) Search(ctx context.Context, args map[string]interface{}) (i
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	resp, err := e.GetConChan().Do(req)
+	defer resp.Body.Close()
+	if err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&maps); err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+	return maps, nil
+}
+func (e *esResource) QueryTmp(ctx context.Context, index, table, tmp string, args map[string]interface{}) (interface{}, error) {
+	maps := map[string]interface{}{} //定义es返回结构提
+	uri := e.uri + "/" + index + "/" + table + "/" + "_search/template?pretty"
+	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(tmp))
 	resp, err := e.GetConChan().Do(req)
 	defer resp.Body.Close()
 	if err != nil {

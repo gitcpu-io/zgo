@@ -69,13 +69,19 @@ func Es(l string) Eser {
 //Es 对外
 type Eser interface {
 	NewEs(label ...string) (*zgoes, error) //初始化方法
-	Search(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
+	QueryTmp(ctx context.Context, index, table, tmp string, args map[string]interface{}) (interface{}, error)
 }
 
 func (e *zgoes) NewEs(label ...string) (*zgoes, error) {
 	return GetEs(label...)
 }
 
-func (e *zgoes) Search(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	return e.res.Search(ctx, args)
+func (e *zgoes) SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error) {
+	return e.res.SearchDsl(ctx, index, table, dsl, args)
+}
+
+func (e *zgoes) QueryTmp(ctx context.Context, index, table, tmp string, args map[string]interface{}) (interface{}, error) {
+	return e.res.QueryTmp(ctx, index, table, tmp, args)
+
 }
