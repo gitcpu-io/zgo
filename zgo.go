@@ -40,7 +40,7 @@ func Engine(opt *Options) *engine {
 		hsm := engine.getConfigByOption(config.Mysql, opt.Mysql)
 		fmt.Println(hsm)
 		// 配置信息： 城市和数据库的关系
-		cdc := make(map[string]map[string]string)
+		cdc := config.CityDbConfig
 		zgomysql.InitMysqlService(hsm, cdc)
 	}
 	if len(opt.Es) > 0 {
@@ -116,7 +116,7 @@ var (
 	Grpc  = zgogrpc.Grpc()
 	Redis zgoredis.Rediser
 
-	Mysql = zgomysql.MysqlService()
+	Mysql    = zgomysql.MysqlService()
 	File     = zgofile.NewLocal()
 	Utils    = zgoutils.NewUtils()
 	Log      = zgolog.Newzgolog()
