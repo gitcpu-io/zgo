@@ -19,10 +19,30 @@ var (
 )
 
 //项目初始化  根据用户选择label 初始化Es实例
-func InitEs(hsm map[string][]*config.ConnDetail) {
+func InitEs(hsm map[string][]*config.ConnDetail) chan *zgoes {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 	currentLabels = hsm
+
+	//自动为变量初始化对象
+	initLabel := ""
+	for k, _ := range hsm {
+		if k != "" {
+			initLabel = k
+			break
+		}
+	}
+	out := make(chan *zgoes)
+	go func() {
+		in, err := GetEs(initLabel)
+		if err != nil {
+			out <- nil
+		}
+		out <- in
+		close(out)
+	}()
+	return out
+
 }
 
 type zgoes struct {
