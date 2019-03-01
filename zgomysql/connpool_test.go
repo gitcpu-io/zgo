@@ -134,22 +134,36 @@ func getMysql(client MysqlServiceInterface, i int) chan int {
 	//还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
-	//输入参数：上下文ctx，mongoChan里面是client的连接，args具体的查询操作参数
-	house := &House{}
-	//args := make(map[string]interface{})
-	//args["tablename"] = "house"
-	//args["query"] = " id = ? "
-	//args["args"] = []interface{}{1}
-	//args["out"] = house
-	label, _ := client.GetLabelByCity("bj", "sell", "r")
 
+	// 开始查询
+	// 获取对应的label
+	label, err := client.GetLabelByCity("bj", "sell", "r")
+	if err != nil {
+		panic(err)
+	}
+	// 获取re对象
 	re, err := client.NewRs(label)
 	if err != nil {
 		panic(err)
 	}
+
+	// 获取链接池对象
 	pool := re.GetPool()
-	dbName, _ := client.GetDbByCityBiz("bj", "sell")
+	dbName, _ := client.GetDbByCityBiz("sh", "sell")
+	house := &House{}
 	pool.Table(dbName+".house").Where(" id = ? ", 1).First(house)
+	fmt.Println(0, house)
+
+	//直接用resource查询
+	house1 := &House{}
+	args := make(map[string]interface{})
+	args["tablename"] = "house"
+	args["query"] = " id = ? "
+	args["args"] = []interface{}{1}
+	args["out"] = house1
+	re.Get(ctx, args)
+	fmt.Println(1, house1)
+
 	out := make(chan int, 1)
 	select {
 	case <-ctx.Done():
