@@ -17,13 +17,12 @@ const (
 
 var (
 	connChanMap map[string]chan *radix.Pool
-	mu          sync.RWMutex
 	hsmu        sync.RWMutex
 )
 
 type connPool struct {
-	label        string
-	m            sync.RWMutex
+	label string
+	m     sync.RWMutex
 }
 
 func NewConnPool(label string) *connPool {
@@ -55,7 +54,7 @@ func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 			for k, v := range hosts {
 				index := fmt.Sprintf("%s:%d", label, k)
 				c := &connPool{
-					label:        label,
+					label: label,
 				}
 				connChanMap[index] = c.createClient(fmt.Sprintf("redis://%s:%s@%s:%d", v.Username, v.Password, v.Host, v.Port), v.Db, v.PoolSize)
 			}

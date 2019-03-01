@@ -53,6 +53,6 @@ func GetRedis(label ...string) (*zgoredis, error) {
 	}, nil
 }
 
-func (m *zgoredis) Do(ctx context.Context, rcv interface{}, cmd string, args ...string) (interface{}, error) {
-	return m.res.Do(ctx, rcv, cmd, args...)
+func (r *zgoredis) Do(ctx context.Context, rcv interface{}, cmd string, args ...string) (interface{}, error) {
+	return r.res.Do(ctx, rcv, cmd, args...)
 }

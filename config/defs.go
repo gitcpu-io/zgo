@@ -25,6 +25,7 @@ type ConnDetail struct {
 	Username    string `json:"username,omitempty"`
 	Password    string `json:"password,omitempty"`
 	Db          int    `json:"db,omitempty"`
+	Prefix      string `json:"prefix,omitempty"`
 }
 type LabelDetail struct {
 	Key    string `json:"key"`
@@ -45,6 +46,7 @@ type allConfig struct {
 	Mongo    []LabelDetail `json:"mongo"`
 	Mysql    []LabelDetail `json:"mysql"`
 	Redis    []LabelDetail `json:"redis"`
+	Pika     []LabelDetail `json:"pika"`
 	Kafka    []LabelDetail `json:"kafka"`
 	Es       []LabelDetail `json:"es"`
 }
