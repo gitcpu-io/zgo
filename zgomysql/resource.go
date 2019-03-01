@@ -2,7 +2,6 @@ package zgomysql
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/jinzhu/gorm"
@@ -15,7 +14,6 @@ func InitMysqlResource(hsm map[string][]*config.ConnDetail) {
 
 // 对外接口
 type MysqlResourcerInterface interface {
-	GetConn() *sql.DB
 	GetPool() *gorm.DB
 	//List(ctx context.Context, args map[string]interface{}) ([]interface{}, error)
 	Get(ctx context.Context, args map[string]interface{}) error
@@ -38,11 +36,6 @@ func NewMysqlResourcer(label string) MysqlResourcerInterface {
 		label:    label,
 		connpool: GetPool(label), //使用connpool
 	}
-}
-
-// mysqlResourcer 实现方法
-func (mr *mysqlResource) GetConn() *sql.DB {
-	return mr.connpool.DB()
 }
 
 // mysqlResourcer 实现方法

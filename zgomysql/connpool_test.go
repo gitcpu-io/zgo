@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	label_bj = "mysql_label_bj"
-	label_sh = "mysql_label_sh"
+	label_bj = "mysql_sell_r1"
+	label_sh = "mysql_sell_r2"
 )
 
 // 实体类
@@ -38,6 +38,8 @@ func TestMysqlGet(t *testing.T) {
 		MaxOpenConn: 5,
 		MaxIdleSize: 5,
 	}
+	cityDbConfig := map[string]map[string]string{"sell": {"bj": "1"}}
+
 	var s1 []*config.ConnDetail
 	var s2 []*config.ConnDetail
 
@@ -50,17 +52,17 @@ func TestMysqlGet(t *testing.T) {
 	}
 	//----------------------
 
-	InitMysqlService(hsm) //测试时表示使用mysql，在zgo_start中使用一次
+	InitMysqlService(hsm, cityDbConfig) //测试时表示使用mysql，在zgo_start中使用一次
 
 	//测试读取nsq数据，wait for sdk init connection
 	time.Sleep(2 * time.Second)
 
-	clientBj, err := MysqlService(label_bj)
+	clientBj := MysqlService()
 
-	clientSh, err := MysqlService(label_sh)
-	if err != nil {
-		panic(err)
-	}
+	clientSh := MysqlService()
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
@@ -134,15 +136,20 @@ func getMysql(client MysqlServiceInterface, i int) chan int {
 	defer cancel()
 	//输入参数：上下文ctx，mongoChan里面是client的连接，args具体的查询操作参数
 	house := &House{}
-	args := make(map[string]interface{})
-	args["tablename"] = "house"
-	args["query"] = " id = ? "
-	args["args"] = []interface{}{1}
-	args["out"] = house
-	err := client.Get(ctx, args)
+	//args := make(map[string]interface{})
+	//args["tablename"] = "house"
+	//args["query"] = " id = ? "
+	//args["args"] = []interface{}{1}
+	//args["out"] = house
+	label, _ := client.GetLabelByCity("bj", "sell", "r")
+
+	re, err := client.NewRs(label)
 	if err != nil {
 		panic(err)
 	}
+	pool := re.GetPool()
+	dbName, _ := client.GetDbByCityBiz("bj", "sell")
+	pool.Table(dbName+".house").Where(" id = ? ", 1).First(house)
 	out := make(chan int, 1)
 	select {
 	case <-ctx.Done():

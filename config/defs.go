@@ -27,13 +27,14 @@ type LabelDetail struct {
 }
 
 type allConfig struct {
-	Env   string        `json:"env"`
-	Nsq   []LabelDetail `json:"nsq"`
-	Mongo []LabelDetail `json:"mongo"`
-	Mysql []LabelDetail `json:"mysql"`
-	Redis []LabelDetail `json:"redis"`
-	Kafka []LabelDetail `json:"kafka"`
-	Es    []LabelDetail `json:"es"`
+	Env          string                       `json:"env"`
+	Nsq          []LabelDetail                `json:"nsq"`
+	Mongo        []LabelDetail                `json:"mongo"`
+	Mysql        []LabelDetail                `json:"mysql"`
+	Redis        []LabelDetail                `json:"redis"`
+	Kafka        []LabelDetail                `json:"kafka"`
+	Es           []LabelDetail                `json:"es"`
+	CityDbConfig map[string]map[string]string `json:"cityDbConfig"`
 }
 
 type Labelconns struct {
@@ -42,13 +43,14 @@ type Labelconns struct {
 }
 
 var (
-	Env   string
-	Es    []LabelDetail
-	Mongo []LabelDetail
-	Nsq   []LabelDetail
-	Redis []LabelDetail
-	Mysql []LabelDetail
-	Kafka []LabelDetail
+	Env          string
+	Es           []LabelDetail
+	Mongo        []LabelDetail
+	Nsq          []LabelDetail
+	Redis        []LabelDetail
+	Mysql        []LabelDetail
+	Kafka        []LabelDetail
+	CityDbConfig map[string]map[string]string
 )
 
 func InitConfig(e string) {
@@ -76,6 +78,7 @@ func initConfig(e string) {
 	Redis = acfg.Redis
 	Kafka = acfg.Kafka
 	Mysql = acfg.Mysql
+	CityDbConfig = acfg.CityDbConfig
 
 	//fmt.Println(Nsq)
 

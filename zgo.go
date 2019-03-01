@@ -5,7 +5,7 @@ import (
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"git.zhugefang.com/gocore/zgo.git/zgoes"
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
-	"git.zhugefang.com/gocore/zgo.git/zgomysql1"
+	"git.zhugefang.com/gocore/zgo.git/zgomysql"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
 	"git.zhugefang.com/gocore/zgo.git/zgoredis"
 	"github.com/nsqio/go-nsq"
@@ -32,9 +32,11 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Mysql) > 0 {
 		//todo someting
-		hsm := engine.getConfigByOption(config.Mysql, opt.Mongo)
+		hsm := engine.getConfigByOption(config.Mysql, opt.Mysql)
 		fmt.Println(hsm)
-		zgomysql1.InitMysql(hsm)
+		// 配置信息： 城市和数据库的关系
+		cdc := make(map[string]map[string]string)
+		zgomysql.InitMysqlService(hsm, cdc)
 	}
 	if len(opt.Es) > 0 {
 		hsm := engine.getConfigByOption(config.Es, opt.Es)
@@ -95,5 +97,5 @@ var (
 	Mongo = zgomongo.Mongo("")
 	Es    = zgoes.Es("")
 	Redis = zgoredis.Redis("")
-	Mysql = zgomysql1.Mysql("")
+	Mysql = zgomysql.MysqlService()
 )
