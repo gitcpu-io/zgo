@@ -55,12 +55,31 @@ type zgopika struct {
 }
 
 //InitPika 初始化连接pika
-func InitPika(hsm map[string][]*config.ConnDetail) {
+func InitPika(hsm map[string][]*config.ConnDetail) chan *zgopika {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 
 	currentLabels = hsm
 	InitPikaResource(hsm)
+
+	//自动为变量初始化对象
+	initLabel := ""
+	for k, _ := range hsm {
+		if k != "" {
+			initLabel = k
+			break
+		}
+	}
+	out := make(chan *zgoredis)
+	go func() {
+		in, err := GetRedis(initLabel)
+		if err != nil {
+			out <- nil
+		}
+		out <- in
+		close(out)
+	}()
+	return out
 }
 
 func (n *zgopika) NewPika(label ...string) (*zgopika, error) {

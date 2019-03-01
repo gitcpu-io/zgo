@@ -11,6 +11,7 @@ import (
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
 	"git.zhugefang.com/gocore/zgo.git/zgomysql"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
+	"git.zhugefang.com/gocore/zgo.git/zgopika"
 	"git.zhugefang.com/gocore/zgo.git/zgoredis"
 	"git.zhugefang.com/gocore/zgo.git/zgoutils"
 	"git.zhugefang.com/gocore/zgo.git/zgozoneinfo"
@@ -57,6 +58,10 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Pika) > 0 {
 		//todo someting
+		hsm := engine.getConfigByOption(config.Pika, opt.Pika)
+		//fmt.Println(hsm)
+		in := <-zgopika.InitPika(hsm)
+		Pika = in
 	}
 	if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq
 		hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
@@ -115,6 +120,7 @@ var (
 	Es    zgoes.Eser
 	Grpc  = zgogrpc.Grpc()
 	Redis zgoredis.Rediser
+	Pika  zgopika.Pikaer
 
 	Mysql    = zgomysql.MysqlService()
 	File     = zgofile.NewLocal()

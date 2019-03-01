@@ -38,17 +38,17 @@ type FileStore struct {
 }
 
 type allConfig struct {
-	Env      string        `json:"env"`
-	File     FileStore     `json:"file"`
-	Project  string        `json:"project"`
-	Loglevel string        `json:"loglevel"`
-	Nsq      []LabelDetail `json:"nsq"`
-	Mongo    []LabelDetail `json:"mongo"`
-	Mysql    []LabelDetail `json:"mysql"`
-	Redis    []LabelDetail `json:"redis"`
-	Pika     []LabelDetail `json:"pika"`
-	Kafka    []LabelDetail `json:"kafka"`
-	Es       []LabelDetail `json:"es"`
+	Env          string                       `json:"env"`
+	File         FileStore                    `json:"file"`
+	Project      string                       `json:"project"`
+	Loglevel     string                       `json:"loglevel"`
+	Nsq          []LabelDetail                `json:"nsq"`
+	Mongo        []LabelDetail                `json:"mongo"`
+	Mysql        []LabelDetail                `json:"mysql"`
+	Redis        []LabelDetail                `json:"redis"`
+	Pika         []LabelDetail                `json:"pika"`
+	Kafka        []LabelDetail                `json:"kafka"`
+	Es           []LabelDetail                `json:"es"`
 	CityDbConfig map[string]map[string]string `json:"cityDbConfig"`
 }
 
@@ -58,16 +58,17 @@ type Labelconns struct {
 }
 
 var (
-	Env      string
-	File     FileStore
-	Project  string
-	Loglevel string
-	Es       []LabelDetail
-	Mongo    []LabelDetail
-	Nsq      []LabelDetail
-	Redis    []LabelDetail
-	Mysql    []LabelDetail
-	Kafka    []LabelDetail
+	Env          string
+	File         FileStore
+	Project      string
+	Loglevel     string
+	Es           []LabelDetail
+	Mongo        []LabelDetail
+	Nsq          []LabelDetail
+	Redis        []LabelDetail
+	Pika         []LabelDetail
+	Mysql        []LabelDetail
+	Kafka        []LabelDetail
 	CityDbConfig map[string]map[string]string
 )
 
@@ -97,6 +98,7 @@ func initConfig(e string) {
 	Es = acfg.Es
 	Mongo = acfg.Mongo
 	Redis = acfg.Redis
+	Pika = acfg.Pika
 	Kafka = acfg.Kafka
 	Mysql = acfg.Mysql
 	CityDbConfig = acfg.CityDbConfig
