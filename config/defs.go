@@ -11,6 +11,8 @@ import (
 
 var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
 
+var Version = "0.0.1"
+
 type ConnDetail struct {
 	C           string `json:"c"`
 	Host        string `json:"host,omitempty"`
@@ -20,20 +22,31 @@ type ConnDetail struct {
 	MaxIdleSize int    `json:"maxIdleSize"`
 	MaxOpenConn int    `json:"maxOpenConn"`
 	Uri         string `json:"uri,omitempty"`
+	Username    string `json:"username,omitempty"`
+	Password    string `json:"password,omitempty"`
+	Db          int    `json:"db,omitempty"`
 }
 type LabelDetail struct {
 	Key    string `json:"key"`
 	Values []ConnDetail
 }
 
+type FileStore struct {
+	Type string `json:"type"`
+	Home string `json:"home"`
+}
+
 type allConfig struct {
-	Env          string                       `json:"env"`
-	Nsq          []LabelDetail                `json:"nsq"`
-	Mongo        []LabelDetail                `json:"mongo"`
-	Mysql        []LabelDetail                `json:"mysql"`
-	Redis        []LabelDetail                `json:"redis"`
-	Kafka        []LabelDetail                `json:"kafka"`
-	Es           []LabelDetail                `json:"es"`
+	Env      string        `json:"env"`
+	File     FileStore     `json:"file"`
+	Project  string        `json:"project"`
+	Loglevel string        `json:"loglevel"`
+	Nsq      []LabelDetail `json:"nsq"`
+	Mongo    []LabelDetail `json:"mongo"`
+	Mysql    []LabelDetail `json:"mysql"`
+	Redis    []LabelDetail `json:"redis"`
+	Kafka    []LabelDetail `json:"kafka"`
+	Es       []LabelDetail `json:"es"`
 	CityDbConfig map[string]map[string]string `json:"cityDbConfig"`
 }
 
@@ -43,13 +56,16 @@ type Labelconns struct {
 }
 
 var (
-	Env          string
-	Es           []LabelDetail
-	Mongo        []LabelDetail
-	Nsq          []LabelDetail
-	Redis        []LabelDetail
-	Mysql        []LabelDetail
-	Kafka        []LabelDetail
+	Env      string
+	File     FileStore
+	Project  string
+	Loglevel string
+	Es       []LabelDetail
+	Mongo    []LabelDetail
+	Nsq      []LabelDetail
+	Redis    []LabelDetail
+	Mysql    []LabelDetail
+	Kafka    []LabelDetail
 	CityDbConfig map[string]map[string]string
 )
 
@@ -72,6 +88,9 @@ func initConfig(e string) {
 	}
 
 	Env = acfg.Env
+	File = acfg.File
+	Project = acfg.Project
+	Loglevel = acfg.Loglevel
 	Nsq = acfg.Nsq
 	Es = acfg.Es
 	Mongo = acfg.Mongo
@@ -80,9 +99,7 @@ func initConfig(e string) {
 	Mysql = acfg.Mysql
 	CityDbConfig = acfg.CityDbConfig
 
-	//fmt.Println(Nsq)
-
-	fmt.Println("zgo engine is started on the ... ", Env)
+	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Env)
 
 	//fmt.Println(cf)
 

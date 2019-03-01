@@ -5,3 +5,4 @@ workspace.xml
 node_modules/**/*
 lua/lib/*.so
 .idea/workspace.xml
+*.DS_Store

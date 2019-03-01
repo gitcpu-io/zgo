@@ -19,10 +19,30 @@ var (
 )
 
 //项目初始化  根据用户选择label 初始化Es实例
-func InitEs(hsm map[string][]*config.ConnDetail) {
+func InitEs(hsm map[string][]*config.ConnDetail) chan *zgoes {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 	currentLabels = hsm
+
+	//自动为变量初始化对象
+	initLabel := ""
+	for k, _ := range hsm {
+		if k != "" {
+			initLabel = k
+			break
+		}
+	}
+	out := make(chan *zgoes)
+	go func() {
+		in, err := GetEs(initLabel)
+		if err != nil {
+			out <- nil
+		}
+		out <- in
+		close(out)
+	}()
+	return out
+
 }
 
 type zgoes struct {
@@ -49,33 +69,19 @@ func Es(l string) Eser {
 //Es 对外
 type Eser interface {
 	NewEs(label ...string) (*zgoes, error) //初始化方法
-	Add(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	Del(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	Set(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	Get(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	Search(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
+	QueryTmp(ctx context.Context, index, table, tmp string, args map[string]interface{}) (interface{}, error)
 }
 
 func (e *zgoes) NewEs(label ...string) (*zgoes, error) {
 	return GetEs(label...)
 }
 
-func (e *zgoes) Add(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	return e.res.Add(ctx, args)
+func (e *zgoes) SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error) {
+	return e.res.SearchDsl(ctx, index, table, dsl, args)
 }
 
-func (e *zgoes) Del(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	return e.res.Del(ctx, args)
-}
+func (e *zgoes) QueryTmp(ctx context.Context, index, table, tmp string, args map[string]interface{}) (interface{}, error) {
+	return e.res.QueryTmp(ctx, index, table, tmp, args)
 
-func (e *zgoes) Set(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	return e.res.Set(ctx, args)
-}
-
-func (e *zgoes) Get(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	return e.res.Get(ctx, args)
-}
-
-func (e *zgoes) Search(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	return e.res.Search(ctx, args)
 }

@@ -34,12 +34,34 @@ type zgonsq struct {
 }
 
 //InitNsq 初始化连接nsq
-func InitNsq(hsm map[string][]*config.ConnDetail) {
+func InitNsq(hsm map[string][]*config.ConnDetail) chan *zgonsq {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 
 	currentLabels = hsm
 	InitNsqResource(hsm)
+
+	//自动为变量初始化对象
+	initLabel := ""
+	for k, _ := range hsm {
+		if k != "" {
+			initLabel = k
+			break
+		}
+	}
+	out := make(chan *zgonsq)
+	go func() {
+
+		in, err := GetNsq(initLabel)
+		if err != nil {
+			panic(err)
+		}
+		out <- in
+		close(out)
+	}()
+
+	return out
+
 }
 
 //GetNsq zgo内部获取一个连接nsq
