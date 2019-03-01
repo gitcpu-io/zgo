@@ -70,9 +70,9 @@ func InitPika(hsm map[string][]*config.ConnDetail) chan *zgopika {
 			break
 		}
 	}
-	out := make(chan *zgoredis)
+	out := make(chan *zgopika)
 	go func() {
-		in, err := GetRedis(initLabel)
+		in, err := GetPika(initLabel)
 		if err != nil {
 			out <- nil
 		}
