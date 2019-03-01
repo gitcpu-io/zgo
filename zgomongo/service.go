@@ -37,12 +37,32 @@ type zgomongo struct {
 }
 
 //InitMongo 初始化连接mongo
-func InitMongo(hsm map[string][]*config.ConnDetail) {
+func InitMongo(hsm map[string][]*config.ConnDetail) chan *zgomongo {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 
 	currentLabels = hsm
 	InitMongoResource(hsm)
+
+	//自动为变量初始化对象
+	initLabel := ""
+	for k, _ := range hsm {
+		if k != "" {
+			initLabel = k
+			break
+		}
+	}
+	out := make(chan *zgomongo)
+	go func() {
+		in, err := GetMongo(initLabel)
+		if err != nil {
+			out <- nil
+		}
+		out <- in
+		close(out)
+	}()
+	return out
+
 }
 
 //GetMongo zgo内部获取一个连接mongo

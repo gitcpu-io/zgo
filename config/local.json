@@ -242,14 +242,12 @@
   ],
   "mysql": [
     {
-      "key": "mysql_sell_write",
+      "key": "mysql_sell_w1",
       "values": [
         {
-          "c": "北京主库-----es",
+          "c": "北京二手房库 旧实例",
           "host": "localhost",
           "port": 3306,
-          "username": "root",
-          "password": "123456",
           "connSize": 50,
           "mixSize": 10,
           "poolSize": 20000
@@ -257,29 +255,56 @@
       ]
     },
     {
-      "key": "mysql_sell_read",
+      "key": "mysql_sell_w2",
       "values": [
         {
-          "c": "北京从库=====mysql1",
+          "c": "北京二手房库 新实例",
           "host": "localhost",
           "port": 3306,
-          "username": "root",
-          "password": "123456",
           "connSize": 50,
           "mixSize": 10,
           "poolSize": 20000
-        },
+        }
+      ]
+    },
+    {
+      "key": "mysql_sell_r1",
+      "values": [
         {
-          "c": "北京从库=====mysql2",
+          "c": "北京二手房从库=====旧实例",
           "host": "localhost",
           "port": 3306,
-          "username": "root",
-          "password": "123456",
+          "connSize": 50,
+          "mixSize": 10,
+          "poolSize": 20000
+        }
+      ]
+    },
+    {
+      "key": "mysql_sell_r2",
+      "values": [
+        {
+          "c": "北京二手房从库=====新实例",
+          "host": "localhost",
+          "port": 3306,
           "connSize": 50,
           "mixSize": 10,
           "poolSize": 20000
         }
       ]
     }
-  ]
+  ],
+  "cityDbConfig": {
+      "sell":{
+        "bj":"1",
+        "nj":"1",
+        "sh":"1",
+        "cd":"1",
+        "tj":"1",
+        "cq":"1",
+        "heb":"1"
+      }
+  }
+
 }
+

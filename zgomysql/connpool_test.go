@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	label_bj = "mysql_label_bj"
-	label_sh = "mysql_label_sh"
+	label_bj = "mysql_sell_r1"
+	label_sh = "mysql_sell_r2"
 )
 
 // 实体类
@@ -38,6 +38,8 @@ func TestMysqlGet(t *testing.T) {
 		MaxOpenConn: 5,
 		MaxIdleSize: 5,
 	}
+	cityDbConfig := map[string]map[string]string{"sell": {"bj": "1"}}
+
 	var s1 []*config.ConnDetail
 	var s2 []*config.ConnDetail
 
@@ -50,17 +52,17 @@ func TestMysqlGet(t *testing.T) {
 	}
 	//----------------------
 
-	InitMysqlService(hsm) //测试时表示使用mysql，在zgo_start中使用一次
+	InitMysqlService(hsm, cityDbConfig) //测试时表示使用mysql，在zgo_start中使用一次
 
 	//测试读取nsq数据，wait for sdk init connection
 	time.Sleep(2 * time.Second)
 
-	clientBj, err := MysqlService(label_bj)
+	clientBj := MysqlService()
 
-	clientSh, err := MysqlService(label_sh)
-	if err != nil {
-		panic(err)
-	}
+	clientSh := MysqlService()
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
@@ -132,17 +134,36 @@ func getMysql(client MysqlServiceInterface, i int) chan int {
 	//还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
-	//输入参数：上下文ctx，mongoChan里面是client的连接，args具体的查询操作参数
+
+	// 开始查询
+	// 获取对应的label
+	label, err := client.GetLabelByCity("bj", "sell", "r")
+	if err != nil {
+		panic(err)
+	}
+	// 获取re对象
+	re, err := client.NewRs(label)
+	if err != nil {
+		panic(err)
+	}
+
+	// 获取链接池对象
+	pool := re.GetPool()
+	dbName, _ := client.GetDbByCityBiz("sh", "sell")
 	house := &House{}
+	pool.Table(dbName+".house").Where(" id = ? ", 1).First(house)
+	fmt.Println(0, house)
+
+	//直接用resource查询
+	house1 := &House{}
 	args := make(map[string]interface{})
 	args["tablename"] = "house"
 	args["query"] = " id = ? "
 	args["args"] = []interface{}{1}
-	args["out"] = house
-	err := client.Get(ctx, args)
-	if err != nil {
-		panic(err)
-	}
+	args["out"] = house1
+	re.Get(ctx, args)
+	fmt.Println(1, house1)
+
 	out := make(chan int, 1)
 	select {
 	case <-ctx.Done():

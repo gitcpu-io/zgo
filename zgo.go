@@ -9,7 +9,7 @@ import (
 	"git.zhugefang.com/gocore/zgo.git/zgokafka"
 	"git.zhugefang.com/gocore/zgo.git/zgolog"
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
-	"git.zhugefang.com/gocore/zgo.git/zgomysql1"
+	"git.zhugefang.com/gocore/zgo.git/zgomysql"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
 	"git.zhugefang.com/gocore/zgo.git/zgoredis"
 	"git.zhugefang.com/gocore/zgo.git/zgoutils"
@@ -32,23 +32,28 @@ func Engine(opt *Options) *engine {
 		//todo someting
 		hsm := engine.getConfigByOption(config.Mongo, opt.Mongo)
 		//fmt.Println(hsm)
-		zgomongo.InitMongo(hsm)
+		in := <-zgomongo.InitMongo(hsm)
+		Mongo = in
 	}
 	if len(opt.Mysql) > 0 {
 		//todo someting
-		hsm := engine.getConfigByOption(config.Mysql, opt.Mongo)
+		hsm := engine.getConfigByOption(config.Mysql, opt.Mysql)
 		fmt.Println(hsm)
-		zgomysql1.InitMysql(hsm)
+		// 配置信息： 城市和数据库的关系
+		cdc := config.CityDbConfig
+		zgomysql.InitMysqlService(hsm, cdc)
 	}
 	if len(opt.Es) > 0 {
 		hsm := engine.getConfigByOption(config.Es, opt.Es)
-		zgoes.InitEs(hsm)
+		in := <-zgoes.InitEs(hsm)
+		Es = in
 	}
 	if len(opt.Redis) > 0 {
 		//todo someting
 		hsm := engine.getConfigByOption(config.Redis, opt.Redis)
 		//fmt.Println(hsm)
-		zgoredis.InitRedis(hsm)
+		in := <-zgoredis.InitRedis(hsm)
+		Redis = in
 	}
 	if len(opt.Pika) > 0 {
 		//todo someting
@@ -57,14 +62,16 @@ func Engine(opt *Options) *engine {
 		hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
 		//fmt.Println(hsm)
 		//return nil
-		zgonsq.InitNsq(hsm)
+		in := <-zgonsq.InitNsq(hsm)
+		Nsq = in
 	}
 	if len(opt.Kafka) > 0 {
 		//todo someting
 		hsm := engine.getConfigByOption(config.Kafka, opt.Kafka)
 		//fmt.Println(hsm)
 		//return nil
-		zgokafka.InitKafka(hsm)
+		k := <-zgokafka.InitKafka(hsm)
+		Kafka = k
 	}
 
 	if opt.Project != "" {
@@ -102,13 +109,14 @@ type (
 )
 
 var (
-	Kafka    = zgokafka.Kafka("")
-	Nsq      = zgonsq.Nsq("")
-	Mongo    = zgomongo.Mongo("")
-	Es       = zgoes.Es("")
-	Grpc     = zgogrpc.Grpc()
-	Redis    = zgoredis.Redis("")
-	Mysql    = zgomysql1.Mysql("")
+	Kafka zgokafka.Kafkaer
+	Nsq   zgonsq.Nsqer
+	Mongo zgomongo.Mongoer
+	Es    zgoes.Eser
+	Grpc  = zgogrpc.Grpc()
+	Redis zgoredis.Rediser
+
+	Mysql    = zgomysql.MysqlService()
 	File     = zgofile.NewLocal()
 	Utils    = zgoutils.NewUtils()
 	Log      = zgolog.Newzgolog()

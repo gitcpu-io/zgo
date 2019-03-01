@@ -49,6 +49,7 @@ type allConfig struct {
 	Pika     []LabelDetail `json:"pika"`
 	Kafka    []LabelDetail `json:"kafka"`
 	Es       []LabelDetail `json:"es"`
+	CityDbConfig map[string]map[string]string `json:"cityDbConfig"`
 }
 
 type Labelconns struct {
@@ -67,6 +68,7 @@ var (
 	Redis    []LabelDetail
 	Mysql    []LabelDetail
 	Kafka    []LabelDetail
+	CityDbConfig map[string]map[string]string
 )
 
 func InitConfig(e string) {
@@ -97,6 +99,7 @@ func initConfig(e string) {
 	Redis = acfg.Redis
 	Kafka = acfg.Kafka
 	Mysql = acfg.Mysql
+	CityDbConfig = acfg.CityDbConfig
 
 	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Env)
 

@@ -1,7 +1,6 @@
 package zgo
 
 import (
-	"fmt"
 	"git.zhugefang.com/gocore/zgo.git/config"
 )
 
@@ -32,6 +31,6 @@ func (opt *Options) init() {
 	if opt.Loglevel == "" {
 		opt.Loglevel = config.Loglevel
 	}
-	fmt.Println("-------------------------------", opt.Project, opt.Loglevel)
+	//fmt.Println("-------------------------------", opt.Project, opt.Loglevel)
 
 }
