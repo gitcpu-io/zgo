@@ -5,116 +5,116 @@
 		{
 			"checksumSHA1": "pTkHamoxPcrEuuy0ufWB42/orvI=",
 			"path": "git.zhugefang.com/gocore/zgo",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "LOftsQArpl1gE11ay+P6zygiNlE=",
 			"path": "git.zhugefang.com/gocore/zgo/comm",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "dd6C/z22VN+XdStJXzTjCbSN43c=",
 			"path": "git.zhugefang.com/gocore/zgo/config",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "ZlXI4RgoRTVkggAKwafBljlf7Ls=",
 			"path": "git.zhugefang.com/gocore/zgo/zgoerror",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "dcDJ1KUW7MGxW73xhY/xvJBDqXE=",
 			"path": "git.zhugefang.com/gocore/zgo/zgoes",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "JKM71d+4SbdM6HxsJ7goyNLZZoY=",
 			"path": "git.zhugefang.com/gocore/zgo/zgofile",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "tzunn45DlG8gEXVYVEwAzEk8d8w=",
 			"path": "git.zhugefang.com/gocore/zgo/zgogrpc",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "r9GP7OLbb5hN9qTx9WdT1Fqi0/A=",
 			"path": "git.zhugefang.com/gocore/zgo/zgohttp",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "Yiec3mh+zzJ+bbDuOP6wgWZ0u2k=",
 			"path": "git.zhugefang.com/gocore/zgo/zgokafka",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "o0A7Q+jCrfqHvkOfodoeN0of270=",
 			"path": "git.zhugefang.com/gocore/zgo/zgolog",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "0hOrOcdEt/HsLaLVEaImALCF36M=",
 			"path": "git.zhugefang.com/gocore/zgo/zgomongo",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "6UmfZnHMo18K/LfHBbFJnB+M1Y0=",
 			"path": "git.zhugefang.com/gocore/zgo/zgomysql",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "kfvZM1BXG+RyuE7m5SF+i+DQMAo=",
 			"path": "git.zhugefang.com/gocore/zgo/zgomysql1",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "FLl19OxaK/t6ZGYd4MHeaGbRKSs=",
 			"path": "git.zhugefang.com/gocore/zgo/zgonsq",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
-			"checksumSHA1": "mWOm+MB1sgpj+LHhSQRU74wz65w=",
+			"checksumSHA1": "v16CNx0SA80Q+nz3V2PNGkTW+Ro=",
 			"path": "git.zhugefang.com/gocore/zgo/zgopika",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
-			"checksumSHA1": "UCbks5PciHhAhL1fPu8tDqAyakk=",
+			"checksumSHA1": "RJIHcStCRX+ZgGgdOpmHQzlMo/A=",
 			"path": "git.zhugefang.com/gocore/zgo/zgoredis",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "/UgMDhIx7JEMqDAUpGhWR5tE7zw=",
 			"path": "git.zhugefang.com/gocore/zgo/zgoresponse",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "f52EQqSj64KzFjR287KW9R6wU3k=",
 			"path": "git.zhugefang.com/gocore/zgo/zgoutils",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "Q6j8rbiw+e2vguFkRFNvpgYJl2Y=",
 			"path": "git.zhugefang.com/gocore/zgo/zgozoneinfo",
-			"revision": "397b99a87a7b8a710c3d692d1b515a96080c0da1",
-			"revisionTime": "2019-03-02T07:03:26Z"
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
 			"checksumSHA1": "IgQxR/QxAn/EbXzHoz8aHSxQ/xg=",
