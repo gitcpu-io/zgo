@@ -8,36 +8,34 @@ package zgogrpc
 
 import (
 	"context"
-	"fmt"
 	"google.golang.org/grpc"
+	"log"
 	"net"
 )
 
 type GrpcResourcer interface {
-	Server(ctx context.Context, port string, sd *grpc.ServiceDesc, ss interface{}) (interface{}, error)
-	Client(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	Server(ctx context.Context) (*grpc.Server, error)
+	Run(ctx context.Context, s *grpc.Server, port string) error
 }
 type grpcResource struct {
 	res GrpcResourcer //使用resource另外的一个接口
 }
 
 func NewGrpcResourcer() GrpcResourcer {
-
 	return &grpcResource{}
 }
 
-func (e *grpcResource) Server(ctx context.Context, port string, sd *grpc.ServiceDesc, ss interface{}) (interface{}, error) {
-
-	list, err := net.Listen("tcp", port)
-	if err != nil {
-		fmt.Print(err)
-	}
-	s := grpc.NewServer()
-	s.RegisterService(sd, ss)
-
-	err = s.Serve(list)
-	return port, err
+func (e *grpcResource) Server(ctx context.Context) (*grpc.Server, error) {
+	return grpc.NewServer(), nil
 }
-func (e *grpcResource) Client(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	return nil, nil
+
+func (e *grpcResource) Run(ctx context.Context, s *grpc.Server, port string) error {
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+	return nil
 }

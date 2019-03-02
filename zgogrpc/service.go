@@ -17,8 +17,8 @@ type zgogrpc struct {
 
 type Grpcer interface {
 	NewGrpc() (*zgogrpc, error) //初始化方法
-	Server(ctx context.Context, port string, sd *grpc.ServiceDesc, ss interface{}) (interface{}, error)
-	Client(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	Run(ctx context.Context, s *grpc.Server, port string) error
+	Server(ctx context.Context) (*grpc.Server, error)
 }
 
 func GetGrpc() (*zgogrpc, error) {
@@ -37,9 +37,10 @@ func (e *zgogrpc) NewGrpc() (*zgogrpc, error) {
 	return GetGrpc()
 }
 
-func (e *zgogrpc) Server(ctx context.Context, port string, sd *grpc.ServiceDesc, ss interface{}) (interface{}, error) {
-	return e.res.Server(ctx, port, sd, ss)
+func (e *zgogrpc) Run(ctx context.Context, s *grpc.Server, port string) error {
+	return e.res.Run(ctx, s, port)
 }
-func (e *zgogrpc) Client(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	return e.res.Client(ctx, args)
+
+func (e *zgogrpc) Server(ctx context.Context) (*grpc.Server, error) {
+	return e.res.Server(ctx)
 }
