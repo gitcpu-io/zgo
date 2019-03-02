@@ -21,8 +21,11 @@ var (
 )
 
 type connPool struct {
-	label string
-	m     sync.RWMutex
+	label        string
+	m            sync.RWMutex
+	connChan     chan *radix.Pool
+	clients      []*radix.Pool
+	connChanChan chan chan *radix.Pool
 }
 
 func NewConnPool(label string) *connPool {
@@ -54,9 +57,12 @@ func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 			for k, v := range hosts {
 				index := fmt.Sprintf("%s:%d", label, k)
 				c := &connPool{
-					label: label,
+					label:        label,
+					connChan:     make(chan *radix.Pool, v.PoolSize),
+					connChanChan: make(chan chan *radix.Pool, v.ConnSize),
 				}
-				connChanMap[index] = c.createClient(fmt.Sprintf("redis://%s:%s@%s:%d", v.Username, v.Password, v.Host, v.Port), v.Db, v.PoolSize)
+				connChanMap[index] = c.connChan
+				go c.setConnPoolToChan(index, v)
 			}
 			//fmt.Println(label, hosts, "hsm==map=====", len(connChanMap), connChanMap)
 		}
@@ -71,6 +77,50 @@ func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 	}
 	close(ch)
 
+}
+
+func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
+	//每个host:port连接创建50个连接，放入slice中
+	go func() {
+		for sessionCh := range cp.connChanChan {
+			if session, ok := <-sessionCh; ok {
+				//保存channel中的连接到数组中
+				cp.clients = append(cp.clients, session)
+			}
+		}
+	}()
+
+	for i := 0; i < 2; i++ {
+		//把并发创建的数据库的连接channel，放进channel中
+		cp.connChanChan <- cp.createClient(fmt.Sprintf("redis://%s:%s@%s:%d", hosts.Username, hosts.Password, hosts.Host, hosts.Port), hosts.Db, hosts.PoolSize)
+	}
+
+	go func() {
+		for {
+			//如果连接全部创建完成，且channel中有了足够的mchSize个连接；循环确保channel中有连接
+			//mchSize越大，越用不完，会休眠越久，不用长时间塞连接进channel
+			if len(cp.connChan) < hosts.PoolSize && len(cp.clients) >= 1 {
+				for _, s := range cp.clients {
+					if s != nil {
+						cp.connChan <- s
+					}
+				}
+
+			} else {
+				//大多时间是在执行下面一行sleep
+				time.Sleep(sleepTime * time.Millisecond)
+				//fmt.Println(len(cp.connChan), "--connChan--", label, hosts.Host, hosts.Port)
+				//fmt.Println(len(connChanMap), "--connChanMap--", label, hosts.Host, hosts.Port)
+			}
+		}
+
+	}()
+
+	go func() {
+		time.Sleep(2000 * time.Millisecond) //仅仅为了查看创建的连接数，创建数据库连接时间：90ms
+		fmt.Printf("init Redis to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
+			len(cp.connChan), label, hosts.Host, hosts.Port, hosts.ConnSize, hosts.PoolSize, hosts.C)
+	}()
 }
 
 //GetConnChan 通过label并发安全读map
