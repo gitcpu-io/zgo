@@ -32,9 +32,9 @@ func TestRouter_GET(t *testing.T) {
 //}
 
 func Hello(w http.ResponseWriter, r *http.Request, ps Params) {
-	m, _ := ParseReq2Map(r)
-	ret := zgoresponse.NewServerResponse(200, m)
-	//ret := zgoresponse.NewServerError(404, "not found")
+	//m, _ := ParseReq2Map(r)
+	//ret := zgoresponse.NewServerResponse(200, m)
+	ret := zgoresponse.NewServerError(404, 404, "not found")
 	Json(w, ret)
 	//fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
 }

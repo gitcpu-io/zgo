@@ -13,11 +13,11 @@ type Response interface {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 type ServerJsonPResponse struct {
-	HttpStatus int
-	ErrorCode  int
-	Message    string
-	Data       interface{}
-	CallBack   string
+	HttpStatus int `json:"httpStatus"`
+	ErrorCode  int	`json:"errorCode"`
+	Message    string	`json:"message"`
+	Data       interface{} `json:"data"`
+	CallBack   string	`json:"callBack"`
 }
 
 func (this *ServerJsonPResponse) DataMessage() string {
@@ -64,10 +64,10 @@ func (this *ServerJsonPResponse) GetCallBack() string {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 type ServerResponse struct {
-	HttpStatus int
-	ErrorCode  int
-	Message    string
-	Data       interface{}
+	HttpStatus int `json:"httpStatus"`
+	ErrorCode  int	`json:"errorCode"`
+	Message    string	`json:"message"`
+	Data       interface{} `json:"data"`
 }
 
 func (this *ServerResponse) DataMessage() string {
@@ -111,9 +111,9 @@ func (this *ServerResponse) GetCallBack() string {
 
 
 type ServerError struct {
-	HttpStatus int
-	ErrorCode  int
-	Message    string
+	HttpStatus int `json:"httpStatus"`
+	ErrorCode  int `json:"errorCode"`
+	Message    string `json:"message"`
 }
 
 func (err *ServerError) Error() string {
@@ -121,9 +121,10 @@ func (err *ServerError) Error() string {
 		err.ErrorCode, err.Message)
 }
 
-func NewServerError(httpStatus int, responseContent string) Response {
+func NewServerError(httpStatus int, errcode int,responseContent string) Response {
 	result := &ServerError{
 		HttpStatus: httpStatus,
+		ErrorCode: errcode,
 		Message:    responseContent,
 	}
 
