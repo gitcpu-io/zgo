@@ -22,8 +22,8 @@ var (
 )
 
 type connPool struct {
-	label        string
-	m            sync.RWMutex
+	label string
+	m     sync.RWMutex
 	//connChan     chan *radix.Pool
 	//clients      []*radix.Pool
 	//connChanChan chan chan *radix.Pool
@@ -58,7 +58,7 @@ func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 			for k, v := range hosts {
 				index := fmt.Sprintf("%s:%d", label, k)
 				c := &connPool{
-					label:        label,
+					label: label,
 					//connChan:     make(chan *radix.Pool, v.PoolSize),
 					//connChanChan: make(chan chan *radix.Pool, v.ConnSize),
 				}
