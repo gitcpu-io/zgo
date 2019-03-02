@@ -51,12 +51,12 @@ func TestEsSearch(t *testing.T) {
 
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	args := map[string]interface{}{}
-	args["index"] = "active_bj_house_sell"
-	args["table"] = "spider"
-	args["dsl"] = `{"query": {"match_all": {}}}`
+	index := "active_bj_house_sell"
+	table := "spider"
+	dsl := `{"query": {"match_all": {}}}`
 
 	sellR, _ := GetEs(label_sell)
-	result, err := sellR.Search(ctx, args)
+	result, err := sellR.SearchDsl(ctx, index, table, dsl, args)
 
 	fmt.Print(result, err)
 
