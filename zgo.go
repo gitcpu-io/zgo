@@ -111,7 +111,9 @@ var (
 	Nsq   zgonsq.Nsqer
 	Mongo zgomongo.Mongoer
 	Es    zgoes.Eser
-	Grpc  = zgogrpc.Grpc()
+
+	Grpc zgogrpc.Grpcer
+
 	Redis zgoredis.Rediser
 
 	Mysql    = zgomysql1.Mysql("")

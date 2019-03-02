@@ -76,7 +76,6 @@ type Eser interface {
 func (e *zgoes) NewEs(label ...string) (*zgoes, error) {
 	return GetEs(label...)
 }
-
 func (e *zgoes) SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error) {
 	return e.res.SearchDsl(ctx, index, table, dsl, args)
 }
