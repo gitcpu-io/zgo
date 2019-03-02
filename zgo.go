@@ -9,8 +9,9 @@ import (
 	"git.zhugefang.com/gocore/zgo.git/zgokafka"
 	"git.zhugefang.com/gocore/zgo.git/zgolog"
 	"git.zhugefang.com/gocore/zgo.git/zgomongo"
-	"git.zhugefang.com/gocore/zgo.git/zgomysql1"
+	"git.zhugefang.com/gocore/zgo.git/zgomysql"
 	"git.zhugefang.com/gocore/zgo.git/zgonsq"
+	"git.zhugefang.com/gocore/zgo.git/zgopika"
 	"git.zhugefang.com/gocore/zgo.git/zgoredis"
 	"git.zhugefang.com/gocore/zgo.git/zgoutils"
 	"git.zhugefang.com/gocore/zgo.git/zgozoneinfo"
@@ -37,9 +38,11 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Mysql) > 0 {
 		//todo someting
-		hsm := engine.getConfigByOption(config.Mysql, opt.Mongo)
+		hsm := engine.getConfigByOption(config.Mysql, opt.Mysql)
 		fmt.Println(hsm)
-		zgomysql1.InitMysql(hsm)
+		// 配置信息： 城市和数据库的关系
+		cdc := config.CityDbConfig
+		zgomysql.InitMysqlService(hsm, cdc)
 	}
 	if len(opt.Es) > 0 {
 		hsm := engine.getConfigByOption(config.Es, opt.Es)
@@ -55,6 +58,10 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Pika) > 0 {
 		//todo someting
+		hsm := engine.getConfigByOption(config.Pika, opt.Pika)
+		//fmt.Println(hsm)
+		in := <-zgopika.InitPika(hsm)
+		Pika = in
 	}
 	if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq
 		hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
@@ -115,8 +122,9 @@ var (
 	Grpc zgogrpc.Grpcer
 
 	Redis zgoredis.Rediser
+	Pika  zgopika.Pikaer
 
-	Mysql    = zgomysql1.Mysql("")
+	Mysql    = zgomysql.MysqlService()
 	File     = zgofile.NewLocal()
 	Utils    = zgoutils.NewUtils()
 	Log      = zgolog.Newzgolog()

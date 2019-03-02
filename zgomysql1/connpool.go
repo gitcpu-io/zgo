@@ -99,6 +99,7 @@ func (cp *connPool) GetConnChan(label string) chan *gorm.DB {
 	return connChanMap[fmt.Sprintf("%s:%d", label, index)]
 }
 
+// 设置链接池
 func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 
 	//每个host:port连接创建50个连接，放入slice中
@@ -164,6 +165,7 @@ func (cp *connPool) createClient(value string) chan *gorm.DB {
 
 		// 禁用复数表名
 		db.SingularTable(true)
+		//db.Callback().Query().Before("gorm:query").Register("")
 		out <- db
 		//fmt.Println(time.Now().Sub(stime))	//创建数据库连接时间：90ms
 	}()

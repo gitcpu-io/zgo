@@ -54,14 +54,14 @@ func (m *mongoResource) Login(ctx context.Context, db, user, pass string) (*mgo.
 
 func (m *mongoResource) Create(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 	s := <-m.connpool.GetConnChan(m.label)
-	return nil, s.DB(args["db"].(string)).C(args["collection"].(string)).Insert(args["items"])
+	return nil, s.DB(args["db"].(string)).C(args["table"].(string)).Insert(args["items"])
 }
 
 // type bson.M map[string]interface{}
 // test := bson.M{"name": "Jim"}
 // test := bson.M{"name": bson.M{"first": "Jim"}}
 
-//获取一条数据，期望参数db collection update， query参数不传则为全部查询
+//获取一条数据，期望参数db table update， query参数不传则为全部查询
 func (m *mongoResource) Get(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 	s := <-m.connpool.GetConnChan(m.label)
 	var res interface{}
@@ -71,34 +71,39 @@ func (m *mongoResource) Get(ctx context.Context, args map[string]interface{}) (i
 		return nil, err
 	}
 	preWorkForMongo(args)
-	s.DB(args["db"].(string)).C(args["collection"].(string)).Find(args["query"].(bson.M)).Select(args["select"].(bson.M)).One(&res)
+	s.DB(args["db"].(string)).C(args["table"].(string)).Find(args["query"].(bson.M)).Select(args["select"].(bson.M)).One(&res)
 	return res, nil
 
 }
 
-//修改多条数据，期望参数db collection update query参数不传则为全部查询 select 为期望返回字段，若不填则自动为空
+//修改多条数据，期望参数db table update query参数不传则为全部查询 select 为期望返回字段，若不填则自动为空
 func (m *mongoResource) List(ctx context.Context, args map[string]interface{}) ([]interface{}, error) {
 	judgeMongo(args)
 	s := <-m.connpool.GetConnChan(m.label)
 	preWorkForMongo(args)
 	ress := []interface{}{}
-	err := s.DB(args["db"].(string)).C(args["collection"].(string)).Find(args["query"].(bson.M)).
+	err := s.DB(args["db"].(string)).C(args["table"].(string)).Find(args["query"].(bson.M)).
 		Select(args["select"].(bson.M)).Skip(args["from"].(int)).Limit(args["limit"].(int)).Sort(args["sort"].([]string)...).All(&ress)
 	return ress, err
 }
 
-//修改多条数据，期望参数db collection update query参数不传则为最后一条更新
+//修改多条数据，期望参数db table update query参数不传则为最后一条更新
 func (m *mongoResource) UpdateOne(ctx context.Context, args map[string]interface{}) error {
 	s := <-m.connpool.GetConnChan(m.label)
+	judgeMongo(args)
 	preWorkForMongo(args)
-	return s.DB(args["db"].(string)).C(args["collection"].(string)).Update(args["query"].(bson.M), args["update"].(bson.M))
+	return s.DB(args["db"].(string)).C(args["table"].(string)).Update(args["query"].(bson.M), args["update"].(bson.M))
 }
 
-//修改多条数据，期望参数db collection update query参数不传则为全部查询
+//修改多条数据，期望参数db table update query参数不传则为全部查询
 func (m *mongoResource) UpdateAll(ctx context.Context, args map[string]interface{}) error {
 	s := <-m.connpool.GetConnChan(m.label)
+	if args["query"] == nil{
+		return errors.New("query cannot be empty")
+	}
+	judgeMongo(args)
 	preWorkForMongo(args)
-	_, err := s.DB(args["db"].(string)).C(args["collection"].(string)).UpdateAll(args["query"].(bson.M), args["update"].(bson.M))
+	_, err := s.DB(args["db"].(string)).C(args["table"].(string)).UpdateAll(args["query"].(bson.M), args["update"].(bson.M))
 	return err
 }
 
@@ -108,11 +113,9 @@ func (m *mongoResource) DeleteOne(ctx context.Context, args map[string]interface
 		return err
 	}
 	s := <-m.connpool.GetConnChan(m.label)
-	if args["query"] == nil {
-		return errors.New("query param can not empty when operate delete  ")
-	}
+	judgeMongo(args)
 	preWorkForMongo(args)
-	return s.DB(args["db"].(string)).C(args["collection"].(string)).Remove(args["query"])
+	return s.DB(args["db"].(string)).C(args["table"].(string)).Remove(args["query"])
 }
 
 func (m *mongoResource) DeleteAll(ctx context.Context, args map[string]interface{}) error {
@@ -125,7 +128,7 @@ func (m *mongoResource) DeleteAll(ctx context.Context, args map[string]interface
 		return errors.New("query param can not empty when operate delete  ")
 	}
 	preWorkForMongo(args)
-	_, err = s.DB(args["db"].(string)).C(args["collection"].(string)).RemoveAll(args["query"])
+	_, err = s.DB(args["db"].(string)).C(args["table"].(string)).RemoveAll(args["query"])
 	return err
 }
 
@@ -133,15 +136,15 @@ func judgeMongo(args map[string]interface{}) error {
 	//switch args {
 	//case args["db"] == nil:
 	//	return errors.New("db is nil")
-	//case args["collection"] == nil:
-	//	return errors.New("collection is nil")
+	//case args["table"] == nil:
+	//	return errors.New("table is nil")
 	//case args["query"] == nil:
 	//	return errors.New("query is nil")
 	//}
 	if args["db"] == nil {
 		return errors.New("db is nil")
-	} else if args["collection"] == nil {
-		return errors.New("collection is nil")
+	} else if args["table"] == nil {
+		return errors.New("table is nil")
 	} else if args["query"] == nil {
 		return errors.New("query is nil")
 	}

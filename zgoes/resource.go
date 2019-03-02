@@ -89,6 +89,7 @@ func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, ar
 	}
 	return maps, nil
 }
+
 func (e *esResource) QueryTmp(ctx context.Context, index, table, tmp string, args map[string]interface{}) (interface{}, error) {
 	maps := map[string]interface{}{} //定义es返回结构提
 	uri := e.uri + "/" + index + "/" + table + "/" + "_search/template?pretty"
