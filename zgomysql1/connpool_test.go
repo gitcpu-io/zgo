@@ -20,13 +20,13 @@ func TestMysqlGet(t *testing.T) {
 	cd_bj := config.ConnDetail{
 		C:        "北京主库-----mysql",
 		Host:     "root:123456@(localhost:3306)/spider?charset=utf8&parseTime=True&loc=Local",
-		ConnSize: 5,
+		ConnSize: 1,
 		PoolSize: 5000,
 	}
 	cd_sh := config.ConnDetail{
 		C:        "上海主库-----mysql",
-		Host:     "root:123456@(localhost:3306)/spider_sh?charset=utf8&parseTime=True&loc=Local",
-		ConnSize: 5,
+		Host:     "root:123456@(localhost:3306)/spider?charset=utf8&parseTime=True&loc=Local",
+		ConnSize: 1,
 		PoolSize: 5000,
 	}
 	var s1 []*config.ConnDetail
@@ -52,7 +52,7 @@ func TestMysqlGet(t *testing.T) {
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 5000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 5 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
@@ -63,7 +63,7 @@ func TestMysqlGet(t *testing.T) {
 			countChan <- i //统计开出去的goroutine
 			if i%2 == 0 {
 				//ch := getMysql(label_sh,clientBj,i)
-				ch := getMysql(label_sh, clientBj, i)
+				ch := getMysqlTx(label_sh, clientBj, i)
 				reply := <-ch
 				replyChan <- reply
 
@@ -111,6 +111,47 @@ func TestMysqlGet(t *testing.T) {
 	time.Sleep(2 * time.Second)
 }
 
+func getMysqlTx(label string, client *zgomysql, i int) chan int {
+	fmt.Println("开始")
+	//还需要一个上下文用来控制开出去的goroutine是否超时
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	//输入参数：上下文ctx，mysqlChan里面是client的连接，args具体的查询操作参数
+	house := &House{}
+	args := make(map[string]interface{})
+	args["tablename"] = "house"
+	args["query"] = " id = ? "
+	args["args"] = []interface{}{1}
+	args["out"] = house
+	ch, _ := client.GetConnChan(label_bj)
+	db := <-ch
+	a := db.DB()
+	a.Begin()
+	fmt.Println("开启事务")
+	time.Sleep(10 * time.Second)
+	a.Query("select * from house")
+	fmt.Println("关闭事务")
+	db.DB().Close()
+	//err := client.Get(ctx, args)
+	//if err != nil {
+	//	panic(err)
+	//}
+	out := make(chan int, 1)
+	select {
+	case <-ctx.Done():
+		fmt.Println("超时")
+		out <- 10001
+		return out
+	default:
+		fmt.Println(house)
+		//fmt.Println(string(bytes), err, "---from mysql successful---")
+		out <- 1
+	}
+
+	return out
+
+}
+
 func getMysql(label string, client *zgomysql, i int) chan int {
 	fmt.Println("开始")
 	//还需要一个上下文用来控制开出去的goroutine是否超时
@@ -124,6 +165,7 @@ func getMysql(label string, client *zgomysql, i int) chan int {
 	args["args"] = []interface{}{1}
 	args["out"] = house
 	err := client.Get(ctx, args)
+	//err := client.Get(ctx, args)
 	if err != nil {
 		panic(err)
 	}

@@ -27,12 +27,6 @@ func (cp *connPool) GetConn(label string) *gorm.DB {
 	return connPoolMap[label]
 }
 
-func NewConnPool(label string) *connPool {
-	return &connPool{
-		label: label,
-	}
-}
-
 func GetPool(label string) *gorm.DB {
 	return connPoolMap[label]
 }
@@ -40,29 +34,44 @@ func GetPool(label string) *gorm.DB {
 // 初始化连接池
 func InitConnPool(hsm map[string][]*config.ConnDetail) {
 	for key, value := range hsm {
-		for i := 0; i < len(value); i++ {
-			fmt.Println("initConnPool")
-			db, err := gorm.Open("mysql", value[i].Host)
-			if err != nil {
-				// 	链接mysql异常时 打印并退出系统
-				log.Fatalf(err.Error())
-			}
-			// 开发模式打开日志
-			//if config.ServerConfig.Env == DevelopmentMode {
-			db.LogMode(true)
-			//}
-			// 最大空闲连接 5
-			fmt.Println(value[i].MaxIdleSize)
-			db.DB().SetMaxIdleConns(value[i].MaxIdleSize)
-			// 最大打开链接 50
-			fmt.Println(value[i].MaxOpenConn)
-			db.DB().SetMaxOpenConns(value[i].MaxOpenConn)
-
-			// 禁用复数表名
-			db.SingularTable(true)
-			// todo 如何区分mysql不同库？多从库模式下
-			connPoolMap[key] = db
+		c := &connPool{
+			label: key,
 		}
-
+		c.setConnPoolToChan(value)
 	}
+}
+
+func (cp *connPool) setConnPoolToChan(v []*config.ConnDetail) {
+	for i := 0; i < len(v); i++ {
+		pool, err := cp.createClient(v[i])
+		if err != nil {
+			fmt.Println("创建mysql链接池失败：", cp.label)
+			log.Fatalf(err.Error())
+		} else {
+			connPoolMap[fmt.Sprintf("%s:%d", cp.label, i)] = pool
+		}
+	}
+}
+
+func (cp *connPool) createClient(v *config.ConnDetail) (*gorm.DB, error) {
+	fmt.Println("initConnPool")
+	db, err := gorm.Open("mysql", v.Host)
+	if err != nil {
+		// 	链接mysql异常时 打印并退出系统
+		log.Fatalf(err.Error())
+		return nil, err
+	}
+	// 开发模式打开日志
+	//if config.ServerConfig.Env == DevelopmentMode {
+	db.LogMode(true)
+	//}
+	// 最大空闲连接 5
+	fmt.Println(v.MaxIdleSize)
+	db.DB().SetMaxIdleConns(v.MaxIdleSize)
+	// 最大打开链接 50
+	fmt.Println(v.MaxOpenConn)
+	db.DB().SetMaxOpenConns(v.MaxOpenConn)
+	// 禁用复数表名
+	db.SingularTable(true)
+	return db, nil
 }

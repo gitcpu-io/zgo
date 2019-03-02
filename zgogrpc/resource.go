@@ -22,16 +22,19 @@ type grpcResource struct {
 }
 
 func NewGrpcResourcer() GrpcResourcer {
+
 	return &grpcResource{}
 }
 
 func (e *grpcResource) Server(ctx context.Context, port string, sd *grpc.ServiceDesc, ss interface{}) (interface{}, error) {
+
 	list, err := net.Listen("tcp", port)
 	if err != nil {
 		fmt.Print(err)
 	}
 	s := grpc.NewServer()
 	s.RegisterService(sd, ss)
+
 	err = s.Serve(list)
 	return port, err
 }

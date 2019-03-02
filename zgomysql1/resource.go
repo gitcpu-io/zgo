@@ -3,7 +3,6 @@ package zgomysql1
 import (
 	"context"
 	"errors"
-	"fmt"
 	"git.zhugefang.com/gocore/zgo.git/config"
 	"github.com/jinzhu/gorm"
 	"sync"
@@ -50,10 +49,8 @@ func (m *mysqlResource) GetConnChan(label string) chan *gorm.DB {
 
 //获取一条数据，期望参数db collection update， query参数不传则为全部查询
 func (m *mysqlResource) Get(ctx context.Context, args map[string]interface{}) error {
-	fmt.Println("resource--Get", m.label)
 	s := <-m.connpool.GetConnChan(m.label)
 	err := s.Table(args["tablename"].(string)).Where(args["query"], args["args"].([]interface{})...).First(args["out"]).Error
-	fmt.Println("resource--Get", m.label, "over")
 	return err
 }
 

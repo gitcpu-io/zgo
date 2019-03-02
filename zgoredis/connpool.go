@@ -17,7 +17,6 @@ const (
 
 var (
 	connChanMap map[string]chan *radix.Pool
-	mu          sync.RWMutex
 	hsmu        sync.RWMutex
 )
 

@@ -35,12 +35,32 @@ type zgokafka struct {
 }
 
 //InitKafka 初始化连接kafka
-func InitKafka(hsm map[string][]*config.ConnDetail) {
+func InitKafka(hsm map[string][]*config.ConnDetail) chan *zgokafka {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 
 	currentLabels = hsm
 	InitKafkaResource(hsm)
+
+	//自动为变量初始化对象
+	initLabel := ""
+	for k, _ := range hsm {
+		if k != "" {
+			initLabel = k
+			break
+		}
+	}
+	out := make(chan *zgokafka)
+	go func() {
+		in, err := GetKafka(initLabel)
+		if err != nil {
+			out <- nil
+		}
+		out <- in
+		close(out)
+	}()
+	return out
+
 }
 
 //GetKafka zgo内部获取一个连接kafka

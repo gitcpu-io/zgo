@@ -12,8 +12,25 @@ import (
 	"net/url"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
+
+var (
+	ip_cache = ""
+)
+
+var (
+	privateBlocks []*net.IPNet
+)
+
+func init() {
+	for _, b := range []string{"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "100.64.0.0/10"} {
+		if _, block, err := net.ParseCIDR(b); err == nil {
+			privateBlocks = append(privateBlocks, block)
+		}
+	}
+}
 
 var Utils Utilser
 
@@ -22,18 +39,34 @@ func init() {
 }
 
 type Utilser interface {
-	Md5(body string) string
+	//md5 对字符串md5
+	Md5(s string) string
 	Sha1(s string) string
+	//获取当前时间时间戳，n= 10/13/19 位时间戳
 	GetTimestamp(n int) int64
-	Marshal(res interface{}) (string, error)
+	//Marshal 序列化为json
+	Marshal(in interface{}) ([]byte, error)
+	//Unmarshal 反序列化为go 内存对象
+	Unmarshal(message []byte, in interface{}) error
+	//结构体转map[string]interface{}
+	StructToMap(interface{}) map[string]interface{}
+	// GrpcServiceMethod converts a gRPC method to a Go method
+	GrpcServiceMethodConverts(m string) (string, string, error)
+
 	ParseDns(strDns string) bool
-	GetIntranetIp() string
+	IPs() []string
+	//是否是内网ip
+	IsPrivateIP(ipAddr string) bool
+	Extract(addr string) (string, error)
+	//获取内网ip
+	GetIntranetIP() string
 
 	GetUUIDV4() string
 	GetMD5Base64([]byte) string
 	GetGMTLocation() (*time.Location, error)
 	GetTimeInFormatISO8601() string
 	GetTimeInFormatRFC2616() string
+	//从一个map中返回a=123&b=456
 	GetUrlFormedMap(map[string]string) string
 	InitStructWithDefaultTag(interface{})
 }
@@ -42,10 +75,64 @@ var loadLocationFromTZData func(name string, data []byte) (*time.Location, error
 
 var tZData []byte = nil
 
+var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
+
 type utils struct{}
 
 func NewUtils() Utilser {
 	return &utils{}
+}
+
+//Marshal 序列化为json
+func (u *utils) Marshal(res interface{}) ([]byte, error) {
+	return jsonIterator.Marshal(res)
+}
+
+//Unmarshal 反序列化为go 内存对象
+func (u *utils) Unmarshal(message []byte, in interface{}) error {
+	return jsonIterator.Unmarshal(message, in)
+}
+
+//StructToMap 结构体转map[string]interface{}
+func (u *utils) StructToMap(input interface{}) map[string]interface{} {
+	var m map[string]interface{}
+	b, _ := jsonIterator.Marshal(input)
+	jsonIterator.Unmarshal(b, &m)
+	return m
+}
+
+// GrpcServiceMethodConverts converts a gRPC method to a Go method
+// Input:
+// Foo.Bar, /Foo/Bar, /package.Foo/Bar, /a.package.Foo/Bar
+// Output:
+// [Foo, Bar]
+func (u *utils) GrpcServiceMethodConverts(m string) (string, string, error) {
+	if len(m) == 0 {
+		return "", "", fmt.Errorf("malformed method name: %q", m)
+	}
+
+	// grpc method
+	if m[0] == '/' {
+		// [ , Foo, Bar]
+		// [ , package.Foo, Bar]
+		// [ , a.package.Foo, Bar]
+		parts := strings.Split(m, "/")
+		if len(parts) != 3 || len(parts[1]) == 0 || len(parts[2]) == 0 {
+			return "", "", fmt.Errorf("malformed method name: %q", m)
+		}
+		service := strings.Split(parts[1], ".")
+		return service[len(service)-1], parts[2], nil
+	}
+
+	// non grpc method
+	parts := strings.Split(m, ".")
+
+	// expect [Foo, Bar]
+	if len(parts) != 2 {
+		return "", "", fmt.Errorf("malformed method name: %q", m)
+	}
+
+	return parts[0], parts[1], nil
 }
 
 //Md5
@@ -59,13 +146,6 @@ func (u *utils) Md5(body string) string {
 func (u *utils) Sha1(s string) string {
 	r := sha1.Sum([]byte(s))
 	return hex.EncodeToString(r[:])
-}
-
-//Marshal
-func (u *utils) Marshal(res interface{}) (string, error) {
-	jsonIterator := jsoniter.ConfigCompatibleWithStandardLibrary
-	s, err := jsonIterator.Marshal(res)
-	return string(s), err
 }
 
 //GetTimestamp
@@ -82,12 +162,103 @@ func (u *utils) GetTimestamp(f int) int64 {
 	return result
 }
 
-var (
-	ip_cache = ""
-)
+//IsPrivateIP 是否是内网IP
+func (u *utils) IsPrivateIP(ipAddr string) bool {
+	ip := net.ParseIP(ipAddr)
+	for _, priv := range privateBlocks {
+		if priv.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
 
-//GetIntranetIp
-func (u *utils) GetIntranetIp() string {
+// Extract returns a real ip
+func (u *utils) Extract(addr string) (string, error) {
+	// if addr specified then its returned
+	if len(addr) > 0 && (addr != "0.0.0.0" && addr != "[::]") {
+		return addr, nil
+	}
+
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", fmt.Errorf("Failed to get interface addresses! Err: %v", err)
+	}
+
+	var ipAddr []byte
+
+	for _, rawAddr := range addrs {
+		var ip net.IP
+		switch addr := rawAddr.(type) {
+		case *net.IPAddr:
+			ip = addr.IP
+		case *net.IPNet:
+			ip = addr.IP
+		default:
+			continue
+		}
+
+		if ip.To4() == nil {
+			continue
+		}
+
+		if !u.IsPrivateIP(ip.String()) {
+			continue
+		}
+
+		ipAddr = ip
+		break
+	}
+
+	if ipAddr == nil {
+		return "", fmt.Errorf("No private IP address found, and explicit IP not provided")
+	}
+
+	return net.IP(ipAddr).String(), nil
+}
+
+// IPs returns all known ips
+func (u *utils) IPs() []string {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return nil
+	}
+
+	var ipAddrs []string
+
+	for _, i := range ifaces {
+		addrs, err := i.Addrs()
+		if err != nil {
+			continue
+		}
+
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+
+			if ip == nil {
+				continue
+			}
+
+			ip = ip.To4()
+			if ip == nil {
+				continue
+			}
+
+			ipAddrs = append(ipAddrs, ip.String())
+		}
+	}
+
+	return ipAddrs
+}
+
+//GetIntranetIP
+func (u *utils) GetIntranetIP() string {
 	if ip_cache != "" {
 		return ip_cache
 	}
@@ -172,6 +343,7 @@ func (u *utils) GetTimeInFormatRFC2616() (timeStr string) {
 	return time.Now().In(gmt).Format("Mon, 02 Jan 2006 15:04:05 GMT")
 }
 
+//GetUrlFormedMap 从一个map中返回a=123&b=456
 func (u *utils) GetUrlFormedMap(source map[string]string) (urlEncoded string) {
 	urlEncoder := url.Values{}
 	for key, value := range source {
