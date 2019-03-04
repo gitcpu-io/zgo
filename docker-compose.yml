@@ -30,14 +30,14 @@ services:
       - "2382:2380"
     command: /usr/local/bin/etcd --name s1 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster s1=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
 
-  pika-9221:
-    image: redis
-    ports:
-      - 9221:9221
-    volumes:
-      - ~/docker-data/pika-9221:/data
-    networks:
-      - link-network
+#  pika-9221:
+#    image: pikadb/pika
+#    ports:
+#      - 9221:9221
+#    volumes:
+#      - ~/docker-data/pika-9221:/data
+#    networks:
+#      - link-network
 
   redis-6379:
     image: redis

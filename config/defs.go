@@ -77,7 +77,7 @@ func InitConfig(e string) {
 		initConfig(e)
 	} else {
 		//用etcd
-		//InitConfigByEtcd()
+		InitConfigByEtcd()
 	}
 }
 

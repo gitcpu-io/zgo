@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"git.zhugefang.com/gocore/zgo/config"
 	"time"
 
 	"fmt"
@@ -43,27 +41,28 @@ func main() {
         }
       ]`
 
-	key := "zgo/nsq/label_bj"
+	key := "zgo/nsq/nsq_label_bj"
 	cli.KV.Put(context.TODO(), key, v)
-	gr, err := cli.KV.Get(context.TODO(), key, clientv3.WithPrevKV())
 
-	vv := gr.Kvs[0].Value
-	cnd := []config.ConnDetail{}
-	json.Unmarshal(vv, &cnd)
+	//gr, err := cli.KV.Get(context.TODO(), key, clientv3.WithPrevKV())
+	//
+	//vv := gr.Kvs[0].Value
+	//cnd := []config.ConnDetail{}
+	//json.Unmarshal(vv, &cnd)
+	//
+	//fmt.Println(cnd)
 
-	fmt.Println(cnd)
-
-	watcher := clientv3.NewWatcher(cli)
-	wch := watcher.Watch(context.TODO(), key, clientv3.WithPrevKV())
-	go func() {
-		for {
-			select {
-			case r := <-wch:
-				fmt.Println("----watch---")
-				fmt.Printf("%+v %s", r, "\n")
-			}
-		}
-	}()
+	//watcher := clientv3.NewWatcher(cli)
+	//wch := watcher.Watch(context.TODO(), key, clientv3.WithPrevKV())
+	//go func() {
+	//	for {
+	//		select {
+	//		case r := <-wch:
+	//			fmt.Println("----watch---")
+	//			fmt.Printf("%+v %s", r, "\n")
+	//		}
+	//	}
+	//}()
 
 	//sr, err := cli.Status(context.TODO(), "10.20.80.132:2379")
 	//if err != nil {

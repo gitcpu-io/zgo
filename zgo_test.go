@@ -9,7 +9,7 @@ import (
 func TestEngine(t *testing.T) {
 
 	Engine(&Options{
-		Env: "local",
+		Env: "dev",
 		Nsq: []string{
 			"nsq_label_bj",
 			//"label_sh",

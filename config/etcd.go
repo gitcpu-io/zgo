@@ -40,6 +40,7 @@ func InitConfigByEtcd() {
 	json.Unmarshal(vv, &cnd)
 
 	fmt.Println(cnd)
+	fmt.Println(cnd)
 
 	Watcher(cli, key)
 }
@@ -54,6 +55,14 @@ func Watcher(client *clientv3.Client, key string) {
 			case r := <-wch:
 				fmt.Println("----watch key do something---", key)
 				fmt.Printf("%+v %s", r, "\n")
+				for k, v := range r.Events {
+					fmt.Println("key==", string(v.Kv.Key))
+					b := v.Kv.Value
+					m := []ConnDetail{}
+					json.Unmarshal(b, &m)
+					fmt.Println(m, k)
+					fmt.Println("有没有变化", v.IsModify())
+				}
 			}
 		}
 	}()
