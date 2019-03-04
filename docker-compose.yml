@@ -3,7 +3,7 @@ version: '3'
 services:
 
 #  web:
-#    image: dck.zhuge.test/zgo_start
+#    image: dck.zhuge.test/zgo
 #    build:
 #      context: .
 #      dockerfile: Dockerfile
@@ -19,31 +19,83 @@ services:
 #  networks:
 #        - link-network
 
-  redis:
+  etcd:
+    image: quay.io/coreos/etcd:v3.3.12
+    networks:
+      - link-network
+    volumes:
+      - ~/docker-data/etcd-data:/etcd-data
+    ports:
+      - "2381:2379"
+      - "2382:2380"
+    command: /usr/local/bin/etcd --name s1 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster s1=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
+
+  pika-9221:
+    image: redis
+    ports:
+      - 9221:9221
+    volumes:
+      - ~/docker-data/pika-9221:/data
+    networks:
+      - link-network
+
+  redis-6379:
     image: redis
     ports:
       - 6379:6379
-    #    volumes:
-    #      - /opt/dbs/redisdb:/data
+    volumes:
+      - ~/docker-data/redis-6379:/data
     networks:
       - link-network
 
-  mongo:
+  redis-6380:
+    image: redis
+    ports:
+      - 6380:6379
+    volumes:
+      - ~/docker-data/redis-6380:/data
+    networks:
+      - link-network
+
+  mongo-27017:
     image: mongo
     ports:
       - 27017:27017
-    #    volumes:
-    #      - /opt/dbs/mongodb/configdb:/data/configdb
-    #      - /opt/dbs/mongodb/db:/data/db
+    volumes:
+      - ~/docker-data/mongo-27017/configdb:/data/configdb
+      - ~/docker-data/mongo-27017/db:/data/db
     networks:
       - link-network
 
-  mysql:
+  mongo-27018:
+    image: mongo
+    ports:
+      - 27018:27017
+    volumes:
+      - ~/docker-data/mongo-27018/configdb:/data/configdb
+      - ~/docker-data/mongo-27018/db:/data/db
+    networks:
+      - link-network
+
+  mysql-3307:
     image: mysql
     ports:
-      - 3306:3306
-    #    volumes:
-    #      - /opt/dbs/redisdb:/data
+      - 3307:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ~/docker-data/mysql-3307:/data
+    networks:
+      - link-network
+
+  mysql-3308:
+    image: mysql
+    ports:
+      - 3308:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ~/docker-data/mysql-3308:/data
     networks:
       - link-network
 
@@ -62,15 +114,14 @@ services:
     depends_on:
       - nsqlookupd
     hostname: nsqd
-    #    volumes:
-    #      - /opt/dbs/nsq:/data
+    volumes:
+      - ~/docker-data/nsq:/data
     networks:
       - link-network
     ports:
       - "4151:4151"
       - "4150:4150"
-    #    command: /nsqd --broadcast-address=nsqd --lookupd-tcp-address=nsqlookupd:4160 --data-path=/data
-    command: /nsqd --broadcast-address=nsqd --lookupd-tcp-address=nsqlookupd:4160
+    command: /nsqd --broadcast-address=nsqd --lookupd-tcp-address=nsqlookupd:4160 --data-path=/data
 
   nsqadmin:
     image: nsqio/nsq
