@@ -73,7 +73,12 @@ var (
 )
 
 func InitConfig(e string) {
-	initConfig(e)
+	if e == "local" {
+		initConfig(e)
+	} else {
+		//用etcd
+		//InitConfigByEtcd()
+	}
 }
 
 func initConfig(e string) {
