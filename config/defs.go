@@ -19,12 +19,13 @@ type ConnDetail struct {
 	Port        int    `json:"port,omitempty"`
 	ConnSize    int    `json:"connSize"`
 	PoolSize    int    `json:"poolSize"`
-	MaxIdleSize int    `json:"maxIdleSize"`
-	MaxOpenConn int    `json:"maxOpenConn"`
+	MaxIdleSize int    `json:"maxIdleSize,omitempty"`
+	MaxOpenConn int    `json:"maxOpenConn,omitempty"`
 	Uri         string `json:"uri,omitempty"`
 	Username    string `json:"username,omitempty"`
 	Password    string `json:"password,omitempty"`
 	Db          int    `json:"db,omitempty"`
+	T           string `json:"db,omitempty"` // w 写入 r 只读
 	Prefix      string `json:"prefix,omitempty"`
 }
 type LabelDetail struct {

@@ -69,12 +69,6 @@
 			"revisionTime": "2019-03-02T09:47:10Z"
 		},
 		{
-			"checksumSHA1": "6UmfZnHMo18K/LfHBbFJnB+M1Y0=",
-			"path": "git.zhugefang.com/gocore/zgo/zgomysql",
-			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
-			"revisionTime": "2019-03-02T09:47:10Z"
-		},
-		{
 			"checksumSHA1": "kfvZM1BXG+RyuE7m5SF+i+DQMAo=",
 			"path": "git.zhugefang.com/gocore/zgo/zgomysql1",
 			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",

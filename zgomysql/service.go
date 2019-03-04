@@ -1,10 +1,11 @@
 package zgomysql
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
-	"math/rand"
+	"github.com/jinzhu/gorm"
 	"sync"
 )
 
@@ -15,9 +16,17 @@ var muLabel sync.Once
 
 //Mongo 对外
 type MysqlServiceInterface interface {
-	NewRs(label string) (MysqlResourcerInterface, error)
-	GetLabelByCity(city string, biz string, t string) (string, error)
+	//NewRs(label string) (MysqlResourcerInterface, error)
+	GetPool(t string) (*gorm.DB, error)
+	Get(ctx context.Context, args map[string]interface{}) error
+	List(ctx context.Context, args map[string]interface{}) error
+	Count(ctx context.Context, args map[string]interface{}) error
+	Create(ctx context.Context, args map[string]interface{}) error
+	UpdateOne(ctx context.Context, args map[string]interface{}) (int, error)
+	DeleteOne(ctx context.Context, args map[string]interface{}) (int, error)
+	GetLabelByCityBiz(city string, biz string) (string, error)
 	GetDbByCityBiz(city string, biz string) (string, error)
+	MysqlServiceByCityBiz(city string, biz string) (MysqlServiceInterface, error)
 }
 
 // 初始化
@@ -28,47 +37,47 @@ func InitMysqlService(hsm map[string][]*config.ConnDetail, cdc map[string]map[st
 			currentLabels = hsm
 			cityDbConfig = cdc
 			InitMysqlResource(hsm)
+			for k, _ := range hsm {
+				fmt.Println(k)
+			}
+
 		},
 	)
 }
 
-// 对外接口
-func MysqlService() MysqlServiceInterface {
-	return &zgoMysqlService{}
+// 实现方法
+func NewRs(label string) (MysqlResourcerInterface, error) {
+	return NewMysqlResourcer(label), nil
 }
 
 // 内部就结构体
 type zgoMysqlService struct {
-	res MysqlResourcerInterface //使用resource另外的一个接口
+	label string
+	res   MysqlResourcerInterface //使用resource另外的一个接口
 }
 
-// 实现方法
-func (c *zgoMysqlService) NewRs(label string) (MysqlResourcerInterface, error) {
-	configs := currentLabels[label]
-	if len(configs) == 0 {
-		return nil, errors.New("错误的label：" + label)
-	} else if len(configs) > 1 {
-		index := rand.Intn(len(configs)) //随机取一个相同label下的连接
-		return NewMysqlResourcer(label + ":" + string(index)), nil
-	} else {
-		return NewMysqlResourcer(label + ":0"), nil
+func MysqlService(label string) (MysqlServiceInterface, error) {
+	res, err := NewRs(label)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
 	}
+	return &zgoMysqlService{label, res}, nil
 }
-
-// 根据城市
-func (c *zgoMysqlService) GetLabelByCity(city string, biz string, t string) (string, error) {
-	if value, ok := cityDbConfig[biz]; ok {
-		if value, ok := value[city]; ok {
-			label := "mysql_" + biz + "_" + t + value
-			return label, nil
-		}
+func MysqlServiceByCityBiz(city string, biz string) (MysqlServiceInterface, error) {
+	label, err := GetLabelByCityBiz(city, biz)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
 	}
-	return "", errors.New(fmt.Sprintf("未知mysql label;city:%s;biz:%s;t:%s", city, biz, t))
-
+	res, err := NewRs(label)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return &zgoMysqlService{label, res}, nil
 }
-
-// 根据城市和业务 获取dbname和实例label
-func (c *zgoMysqlService) GetDbByCityBiz(city string, biz string) (string, error) {
+func GetDbByCityBiz(city string, biz string) (string, error) {
 	db := ""
 	if biz == "sell" {
 		if city == "bj" {
@@ -85,4 +94,65 @@ func (c *zgoMysqlService) GetDbByCityBiz(city string, biz string) (string, error
 	}
 
 	return db, errors.New("未知dbname biz:" + biz)
+}
+
+// 根据城市
+func GetLabelByCityBiz(city string, biz string) (string, error) {
+	if value, ok := cityDbConfig[biz]; ok {
+		if value, ok := value[city]; ok {
+			label := "mysql_" + biz + "_" + value
+			return label, nil
+		}
+	}
+	return "", errors.New(fmt.Sprintf("未知mysql label;city:%s;biz:%s;", city, biz))
+
+}
+
+// 对外接口 获取新的Service对象
+func (c *zgoMysqlService) MysqlService(label string) (MysqlServiceInterface, error) {
+	return MysqlService(label)
+}
+
+func (c *zgoMysqlService) MysqlServiceByCityBiz(city string, biz string) (MysqlServiceInterface, error) {
+	return MysqlServiceByCityBiz(city, biz)
+}
+
+func (ms *zgoMysqlService) Get(ctx context.Context, args map[string]interface{}) error {
+	err := ms.res.Get(ctx, args)
+	return err
+}
+
+func (ms *zgoMysqlService) GetPool(t string) (*gorm.DB, error) {
+	pool, err := ms.res.GetPool(t)
+	return pool, err
+}
+
+func (ms *zgoMysqlService) List(ctx context.Context, args map[string]interface{}) error {
+	return ms.res.List(ctx, args)
+}
+
+func (ms *zgoMysqlService) Count(ctx context.Context, args map[string]interface{}) error {
+	return ms.res.Count(ctx, args)
+}
+
+func (ms *zgoMysqlService) Create(ctx context.Context, args map[string]interface{}) error {
+	return ms.res.Get(ctx, args)
+}
+
+func (ms *zgoMysqlService) UpdateOne(ctx context.Context, args map[string]interface{}) (int, error) {
+	return ms.res.UpdateOne(ctx, args)
+}
+
+func (ms *zgoMysqlService) DeleteOne(ctx context.Context, args map[string]interface{}) (int, error) {
+	return ms.res.DeleteOne(ctx, args)
+}
+
+// 根据城市
+func (c *zgoMysqlService) GetLabelByCityBiz(city string, biz string) (string, error) {
+	return GetLabelByCityBiz(city, biz)
+}
+
+// 根据城市和业务 获取dbname和实例label
+func (c *zgoMysqlService) GetDbByCityBiz(city string, biz string) (string, error) {
+	return GetDbByCityBiz(city, biz)
 }
