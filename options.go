@@ -22,7 +22,6 @@ func (opt *Options) init() {
 	if opt.Env == "" {
 		opt.Env = "local"
 	}
-
 	config.InitConfig(opt.Env)
 
 	if opt.Project == "" {
