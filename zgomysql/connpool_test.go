@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	label_bj = "mysql_sell_r1"
-	label_sh = "mysql_sell_r2"
+	label_bj = "mysql_sell_1"
+	label_sh = "mysql_sell_2"
 )
 
 // 实体类
@@ -26,47 +26,64 @@ func TestMysqlGet(t *testing.T) {
 
 	//-------------test for start engine---------
 	hsm := make(map[string][]*config.ConnDetail)
-	cd_bj := config.ConnDetail{
+	cd_bjw := config.ConnDetail{
 		C:           "北京主库-----mysql",
 		Host:        "root:123456@(localhost:3306)/spider?charset=utf8&parseTime=True&loc=Local",
+		T:           "w",
 		MaxOpenConn: 5,
 		MaxIdleSize: 5,
 	}
-	cd_sh := config.ConnDetail{
+	cd_bjr := config.ConnDetail{
+		C:           "北京主库-----mysql",
+		Host:        "root:123456@(localhost:3306)/spider?charset=utf8&parseTime=True&loc=Local",
+		T:           "r",
+		MaxOpenConn: 5,
+		MaxIdleSize: 5,
+	}
+	cd_shw := config.ConnDetail{
 		C:           "上海主库-----mysql",
 		Host:        "root:123456@(localhost:3306)/spider_sh?charset=utf8&parseTime=True&loc=Local",
+		T:           "w",
 		MaxOpenConn: 5,
 		MaxIdleSize: 5,
 	}
-	cityDbConfig := map[string]map[string]string{"sell": {"bj": "1"}}
+	cd_shr := config.ConnDetail{
+		C:           "上海主库-----mysql",
+		Host:        "root:123456@(localhost:3306)/spider_sh?charset=utf8&parseTime=True&loc=Local",
+		T:           "r",
+		MaxOpenConn: 5,
+		MaxIdleSize: 5,
+	}
+	cityDbConfig := map[string]map[string]string{"sell": {"bj": "1", "sh": "2"}}
 
 	var s1 []*config.ConnDetail
 	var s2 []*config.ConnDetail
 
-	s1 = append(s1, &cd_bj)
-	s2 = append(s2, &cd_sh)
+	s1 = append(s1, &cd_bjw)
+	s1 = append(s1, &cd_bjr)
+	s2 = append(s2, &cd_shw)
+	s2 = append(s2, &cd_shr)
 
 	hsm = map[string][]*config.ConnDetail{
-		label_bj: s1,
 		label_sh: s2,
+		label_bj: s1,
 	}
 	//----------------------
 
 	InitMysqlService(hsm, cityDbConfig) //测试时表示使用mysql，在zgo_start中使用一次
-
 	//测试读取nsq数据，wait for sdk init connection
 	time.Sleep(2 * time.Second)
 
-	clientBj := MysqlService()
+	clientBj, _ := MysqlService(label_bj)
 
-	clientSh := MysqlService()
+	clientSh, _ := MysqlService(label_sh)
 	//if err != nil {
 	//	panic(err)
 	//}
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 5000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 2 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
@@ -137,32 +154,18 @@ func getMysql(client MysqlServiceInterface, i int) chan int {
 
 	// 开始查询
 	// 获取对应的label
-	label, err := client.GetLabelByCity("bj", "sell", "r")
-	if err != nil {
-		panic(err)
-	}
-	// 获取re对象
-	re, err := client.NewRs(label)
-	if err != nil {
-		panic(err)
-	}
-
-	// 获取链接池对象
-	pool := re.GetPool()
-	dbName, _ := client.GetDbByCityBiz("sh", "sell")
-	house := &House{}
-	pool.Table(dbName+".house").Where(" id = ? ", 1).First(house)
-	fmt.Println(0, house)
+	//client1, _ := client.MysqlServiceByCityBiz("bj", "sell")
+	//dbName, _ := client.GetDbByCityBiz("sh", "sell")
 
 	//直接用resource查询
 	house1 := &House{}
 	args := make(map[string]interface{})
 	args["tablename"] = "house"
 	args["query"] = " id = ? "
-	args["args"] = []interface{}{1}
+	args["args"] = []interface{}{"2' or 1=1 ) -- "}
+	//args["args"] = []interface{}{1}
 	args["out"] = house1
-	re.Get(ctx, args)
-	fmt.Println(1, house1)
+	client.Get(ctx, args)
 
 	out := make(chan int, 1)
 	select {
@@ -172,7 +175,7 @@ func getMysql(client MysqlServiceInterface, i int) chan int {
 		return out
 	default:
 		//fmt.Println(string(bytes), err, "---from mongo successful---")
-		fmt.Println(house)
+		fmt.Println(house1)
 		out <- 1
 	}
 	return out

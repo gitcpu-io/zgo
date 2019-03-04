@@ -242,49 +242,44 @@
   ],
   "mysql": [
     {
-      "key": "mysql_sell_w1",
+      "key": "mysql_sell_1",
+      "values":
+        [
+          {
+            "c": "北京二手房库 旧实例",
+            "t":"w",
+            "host": "localhost",
+            "port": 3306,
+            "connSize": 50,
+            "mixSize": 10,
+            "poolSize": 20000
+          },
+          {
+            "c": "北京二手房库 旧实例",
+            "t":"r",
+            "host": "localhost",
+            "port": 3306,
+            "connSize": 50,
+            "mixSize": 10,
+            "poolSize": 20000
+          }
+        ]
+    },
+    {
+      "key": "mysql_sell_2",
       "values": [
         {
           "c": "北京二手房库 旧实例",
+          "t":"w",
           "host": "localhost",
           "port": 3306,
           "connSize": 50,
           "mixSize": 10,
           "poolSize": 20000
-        }
-      ]
-    },
-    {
-      "key": "mysql_sell_w2",
-      "values": [
+        },
         {
-          "c": "北京二手房库 新实例",
-          "host": "localhost",
-          "port": 3306,
-          "connSize": 50,
-          "mixSize": 10,
-          "poolSize": 20000
-        }
-      ]
-    },
-    {
-      "key": "mysql_sell_r1",
-      "values": [
-        {
-          "c": "北京二手房从库=====旧实例",
-          "host": "localhost",
-          "port": 3306,
-          "connSize": 50,
-          "mixSize": 10,
-          "poolSize": 20000
-        }
-      ]
-    },
-    {
-      "key": "mysql_sell_r2",
-      "values": [
-        {
-          "c": "北京二手房从库=====新实例",
+          "c": "北京二手房库 旧实例",
+          "t":"r",
           "host": "localhost",
           "port": 3306,
           "connSize": 50,

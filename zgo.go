@@ -16,6 +16,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"git.zhugefang.com/gocore/zgo/zgozoneinfo"
 	"github.com/nsqio/go-nsq"
+	"log"
 )
 
 type engine struct {
@@ -47,6 +48,12 @@ func Engine(opt *Options) *engine {
 		// 配置信息： 城市和数据库的关系
 		cdc := config.CityDbConfig
 		zgomysql.InitMysqlService(hsm, cdc)
+		var err error
+		Mysql, err = zgomysql.MysqlService(opt.Mysql[0])
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
+
 	}
 	if len(opt.Es) > 0 {
 		hsm := engine.getConfigByOption(config.Es, opt.Es)
@@ -128,7 +135,7 @@ var (
 	Redis zgoredis.Rediser
 	Pika  zgopika.Pikaer
 
-	Mysql    = zgomysql.MysqlService()
+	Mysql    zgomysql.MysqlServiceInterface
 	File     = zgofile.NewLocal()
 	Utils    = zgoutils.NewUtils()
 	Log      = zgolog.Newzgolog()
