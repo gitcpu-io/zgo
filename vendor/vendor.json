@@ -15,6 +15,7 @@
 			"revisionTime": "2019-01-02T10:31:57Z"
 		},
 		{
+<<<<<<< HEAD
 			"checksumSHA1": "mYOhHettGivO3iauJGXrVr9h7ng=",
 			"path": "github.com/Shopify/sarama",
 			"revision": "b14e3c695cec874523504cde3c5f62e3c367ea11",
@@ -26,6 +27,12 @@
 			"path": "github.com/beorn7/perks/quantile",
 			"revision": "24fc2a983ae39b4fe09cef3db434c812fdc97cff",
 			"revisionTime": "2019-02-12T00:16:53Z"
+=======
+			"checksumSHA1": "kfvZM1BXG+RyuE7m5SF+i+DQMAo=",
+			"path": "git.zhugefang.com/gocore/zgo/zgomysql1",
+			"revision": "3f150885d3143b33626a17120e3951d691c9a8f0",
+			"revisionTime": "2019-03-02T09:47:10Z"
+>>>>>>> 3e3a6eb9ec2ae13357dc6e00a8bc17fd24e59428
 		},
 		{
 			"checksumSHA1": "MMLIEoxxBubEsHBv8ofKQb0/olU=",

@@ -1,34 +1,40 @@
 package zgomysql
 
 import (
+	"errors"
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"log"
+	"math/rand"
 )
 
 // 连接池 存放的map对象
 var (
-	connPoolMap = make(map[string]*gorm.DB)
+	connPoolMap = make(map[string]map[string][]*gorm.DB)
 )
-
-//对外的接口
-type ConnPooler interface {
-	GetConn(label string) *gorm.DB
-}
 
 // ConnPooler实现类 与 方法
 type connPool struct {
 	label string
 }
 
-func (cp *connPool) GetConn(label string) *gorm.DB {
-	return connPoolMap[label]
-}
+func GetPool(label string, T string) (*gorm.DB, error) {
+	if pss, ok := connPoolMap[T]; ok {
+		if ps, ok1 := pss[label]; ok1 {
+			if len(ps) == 0 {
+				return nil, errors.New("错误的label：" + label)
+			} else if len(ps) > 1 {
+				index := rand.Intn(len(ps)) - 1 //随机取一个相同label下的连接
+				return ps[index], nil
+			} else {
+				return ps[0], nil
+			}
+		}
+	}
+	return nil, errors.New("GetPool param T is wrong")
 
-func GetPool(label string) *gorm.DB {
-	return connPoolMap[label]
 }
 
 // 初始化连接池
@@ -48,7 +54,15 @@ func (cp *connPool) setConnPoolToChan(v []*config.ConnDetail) {
 			fmt.Println("创建mysql链接池失败：", cp.label)
 			log.Fatalf(err.Error())
 		} else {
-			connPoolMap[fmt.Sprintf("%s:%d", cp.label, i)] = pool
+			key := fmt.Sprintf("%s", cp.label)
+
+			if value, ok := connPoolMap[v[i].T]; ok { // 是否能获取到2级Map
+				value[key] = append(value[key], pool)
+			} else { // 创建二级map
+				// 创建slice
+				pools := []*gorm.DB{pool}
+				connPoolMap[v[i].T] = map[string][]*gorm.DB{key: pools}
+			}
 		}
 	}
 }
