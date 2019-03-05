@@ -15,14 +15,13 @@ import (
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"reflect"
-	"strings"
 	"time"
 )
 
-func InitConfigByEtcd() chan map[string][]*ConnDetail {
+func InitConfigByEtcd() (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail) {
 	client, err := CreateClient()
 	if err != nil {
-		return nil
+		return nil, nil
 	}
 
 	prefixKey := "zgo"
@@ -32,61 +31,13 @@ func InitConfigByEtcd() chan map[string][]*ConnDetail {
 		panic(errors.New("Etcd can't connected ..."))
 	}
 
-	ch := make(chan *mvccpb.KeyValue)
-	go func() {
-		for v := range ch {
-			var tmp LabelDetail
-			var lade []LabelDetail
-			mk := string(v.Key)
-			smk := strings.Split(mk, "/")
-			b := v.Value
-			var m []ConnDetail
-			err := zgoutils.Utils.Unmarshal(b, &m)
-			if err != nil {
-				fmt.Println("反序列化当前值失败", mk)
-			}
-			tmp.Key = smk[2]
-			tmp.Values = m
+	ch := make(chan *mvccpb.KeyValue, 1000)
 
-			lade = append(lade, tmp)
-
-			key := smk[1]
-			switch key {
-			case mysqlT:
-				//init mysql again
-				Mysql = lade
-			case mongoT:
-				//init mongo again
-				Mongo = lade
-			case redisT:
-				//init redis again
-				Redis = lade
-			case pikaT:
-				//init pika again
-				Pika = lade
-			case nsqT:
-				//init nsq again
-				Nsq = lade
-			case kafkaT:
-				//init kafka again
-				Kafka = lade
-			case esT:
-				//init es again
-				Es = lade
-			case etcdT:
-				//init etcd again
-			}
-			//fmt.Println(Nsq)
-
-		}
-
-	}()
 	for _, v := range response.Kvs {
 		ch <- v
 	}
-	close(ch)
 	//开始监控
-	return Watcher(client, prefixKey)
+	return ch, Watcher(client, prefixKey)
 }
 
 func Watcher(client *clientv3.Client, prefixKey string) chan map[string][]*ConnDetail {

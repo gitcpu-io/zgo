@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/json"
+	"git.zhugefang.com/gocore/zgo"
+	"git.zhugefang.com/gocore/zgo/config"
 	"time"
 
 	"fmt"
@@ -24,45 +27,72 @@ func main() {
 
 	//------------
 
-	v := `[
-        {
-          "c": "北京主库1-----etcd nsq",
-          "host": "localhost",
-          "port": 4150,
-          "connSize": 5,
-          "poolSize": 25
-        },
-        {
-          "c": "北京主库2-----etcd nsq",
-          "host": "localhost",
-          "port": 4150,
-          "connSize": 5,
-          "poolSize": 390
-        }
-      ]`
+	err = zgo.Engine(&zgo.Options{
+		Env: "local",
+	})
+	if err != nil {
+		panic(err)
+	}
 
-	key := "zgo/nsq/nsq_label_bj"
-	cli.KV.Put(context.TODO(), key, v)
+	for _, v := range config.Nsq {
+		k := v.Key
+		value := v.Values
+		key := "zgo/nsq/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	for _, v := range config.Mongo {
+		k := v.Key
+		value := v.Values
+		key := "zgo/mongo/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
 
-	v_mongo := `[
-        {
-          "c": "北京主库1-----etcd nsq",
-          "host": "localhost",
-          "port": 4150,
-          "connSize": 5,
-          "poolSize": 25
-        },
-        {
-          "c": "北京主库2-----etcd nsq",
-          "host": "localhost",
-          "port": 4150,
-          "connSize": 5,
-          "poolSize": 390
-        }
-      ]`
+	for _, v := range config.Es {
+		k := v.Key
+		value := v.Values
+		key := "zgo/es/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	for _, v := range config.Mysql {
+		k := v.Key
+		value := v.Values
+		key := "zgo/mysql/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	for _, v := range config.Etcd {
+		k := v.Key
+		value := v.Values
+		key := "zgo/etcd/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	for _, v := range config.Kafka {
+		k := v.Key
+		value := v.Values
+		key := "zgo/kafka/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
 
-	key_mongo := "zgo/mongo/mongo_label_bj"
-	cli.KV.Put(context.TODO(), key_mongo, v_mongo)
+	for _, v := range config.Redis {
+		k := v.Key
+		value := v.Values
+		key := "zgo/redis/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	for _, v := range config.Pika {
+		k := v.Key
+		value := v.Values
+		key := "zgo/pika/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	fmt.Println("all config to etcd done")
 
 }
 

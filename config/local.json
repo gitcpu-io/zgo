@@ -14,19 +14,19 @@
       "key": "redis_label_bj",
       "values": [
         {
-          "c": "北京主库1-----redis",
+          "c": "北京主库1-----etcd redis",
           "host": "localhost",
           "port": 6379,
-          "connSize": 50,
+          "connSize": 23,
           "poolSize": 234,
           "username": "",
           "password": ""
         },
         {
-          "c": "北京主库2-----redis",
+          "c": "北京主库2-----etcd redis",
           "host": "localhost",
           "port": 6379,
-          "connSize": 50,
+          "connSize": 22,
           "poolSize": 678,
           "username": "",
           "password": ""
@@ -62,10 +62,10 @@
       "key": "pika_label_rw",
       "values": [
         {
-          "c": "主库1-----pika",
+          "c": "主库1-----pika from etcd",
           "host": "101.201.110.130",
           "port": 49221,
-          "connSize": 50,
+          "connSize": 23,
           "poolSize": 234,
           "username": "",
           "password": "",
@@ -94,17 +94,17 @@
       "key": "kafka_label_bj",
       "values": [
         {
-          "c": "北京主库1-----kafka",
+          "c": "北京主库1-----etcd kafka",
           "host": "localhost",
           "port": 9092,
-          "connSize": 50,
+          "connSize": 12,
           "poolSize": 234
         },
         {
-          "c": "北京主库2-----kafka",
+          "c": "北京主库2-----etcd kafka",
           "host": "localhost",
           "port": 9092,
-          "connSize": 50,
+          "connSize": 10,
           "poolSize": 678
         }
       ]
@@ -134,14 +134,14 @@
       "key": "nsq_label_bj",
       "values": [
         {
-          "c": "北京主库2-----nsq",
+          "c": "北京主库2-----etcd nsq",
           "host": "localhost",
           "port": 4150,
           "connSize": 5,
           "poolSize": 5
         },
         {
-          "c": "北京主库1-----nsq",
+          "c": "北京主库1-----etcd nsq",
           "host": "localhost",
           "port": 4150,
           "connSize": 50,
@@ -158,7 +158,7 @@
           "host": "localhost",
           "port": 4150,
           "connSize": 50,
-          "poolSize": 20000
+          "poolSize": 10555
         }
       ]
     }
@@ -168,14 +168,14 @@
       "key": "mongo_label_bj",
       "values": [
         {
-          "c": "北京主库1-----mongo",
+          "c": "北京主库1-----etcd mongo",
           "host": "localhost",
           "port": 27017,
           "connSize": 10,
           "poolSize": 123
         },
         {
-          "c": "北京主库2-----mongo",
+          "c": "北京主库2-----etcd mongo",
           "host": "localhost",
           "port": 27017,
           "connSize": 5,
@@ -187,17 +187,17 @@
       "key": "mongo_label_sh",
       "values": [
         {
-          "c": "上海从库1=====mongo",
+          "c": "上海从库1=====etcd mongo",
           "host": "localhost",
           "port": 27017,
-          "connSize": 50,
+          "connSize": 5,
           "poolSize": 789
         },
         {
-          "c": "上海从库2=====mongo",
+          "c": "上海从库2=====etcd mongo",
           "host": "localhost",
           "port": 27017,
-          "connSize": 50,
+          "connSize": 5,
           "poolSize": 456
         }
       ]
@@ -225,8 +225,8 @@
           "uri": "http://101.201.28.195:9200",
           "host": "localhost",
           "port": 9200,
-          "connSize": 50,
-          "poolSize": 20000
+          "connSize": 52,
+          "poolSize": 19998
         }
       ]
     },
@@ -238,8 +238,8 @@
           "uri": "http://101.201.28.195:9200",
           "host": "localhost",
           "port": 9200,
-          "connSize": 50,
-          "poolSize": 20000
+          "connSize": 51,
+          "poolSize": 19999
         }
       ]
     }
@@ -250,22 +250,22 @@
       "values":
         [
           {
-            "c": "北京二手房库 旧实例",
+            "c": "北京二手房库 旧实例w",
             "t":"w",
             "host": "localhost",
-            "port": 3306,
-            "connSize": 50,
+            "port": 3307,
+            "connSize": 5,
             "mixSize": 10,
-            "poolSize": 20000
+            "poolSize": 2001
           },
           {
-            "c": "北京二手房库 旧实例",
+            "c": "北京二手房库 旧实例r",
             "t":"r",
             "host": "localhost",
-            "port": 3306,
-            "connSize": 50,
-            "mixSize": 10,
-            "poolSize": 20000
+            "port": 3308,
+            "connSize": 55,
+            "mixSize": 12,
+            "poolSize": 2002
           }
         ]
     },
@@ -273,22 +273,22 @@
       "key": "mysql_sell_2",
       "values": [
         {
-          "c": "北京二手房库 旧实例",
+          "c": "北京二手房库 旧实例w",
           "t":"w",
           "host": "localhost",
-          "port": 3306,
+          "port": 3307,
           "connSize": 50,
-          "mixSize": 10,
-          "poolSize": 20000
+          "mixSize": 11,
+          "poolSize": 1999
         },
         {
-          "c": "北京二手房库 旧实例",
+          "c": "北京二手房库 旧实例r",
           "t":"r",
           "host": "localhost",
-          "port": 3306,
+          "port": 3308,
           "connSize": 50,
-          "mixSize": 10,
-          "poolSize": 20000
+          "mixSize": 12,
+          "poolSize": 1998
         }
       ]
     }
@@ -306,7 +306,7 @@
   },
   "cache":{
     "label":"pika_label_rw",
-    "expire":86400,
+    "expire":86400
   }
 
 }

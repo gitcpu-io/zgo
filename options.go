@@ -1,6 +1,7 @@
 package zgo
 
 import (
+	"errors"
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
 	"git.zhugefang.com/gocore/zgo/zgoes"
@@ -9,6 +10,8 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgonsq"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
+	"go.etcd.io/etcd/mvcc/mvccpb"
+
 	"strings"
 )
 
@@ -36,14 +39,18 @@ type Options struct {
 	Nsq      []string `json:"nsq"`
 }
 
-func (opt *Options) init() {
+func (opt *Options) init() (chan *mvccpb.KeyValue, error) {
 	//init config
 	if opt.Env == "" {
 		opt.Env = "local"
+	} else {
+		if opt.Env != "local" && opt.Env != "dev" && opt.Env != "qa" && opt.Env != "pro" {
+			return nil, errors.New("error env,must be local/dev/qa/pro !")
+		}
 	}
 
 	//如果inch有值表示启用了etcd为配置中心，并watch了key，等待变更ing...
-	inch := config.InitConfig(opt.Env)
+	ladech, inch := config.InitConfig(opt.Env)
 	go func() {
 		if inch != nil {
 			for h := range inch {
@@ -104,4 +111,5 @@ func (opt *Options) init() {
 	}
 	//fmt.Println("-------------------------------", opt.Project, opt.Loglevel)
 
+	return ladech, nil
 }

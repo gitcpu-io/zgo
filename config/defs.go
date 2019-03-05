@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/json-iterator/go"
+	"go.etcd.io/etcd/mvcc/mvccpb"
 	"io/ioutil"
 	"path/filepath"
 	"runtime"
@@ -12,17 +13,6 @@ import (
 var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
 
 var Version = "0.0.1"
-
-const (
-	mysqlT = "mysql"
-	mongoT = "mongo"
-	redisT = "redis"
-	pikaT  = "pika"
-	nsqT   = "nsq"
-	kafkaT = "kafka"
-	esT    = "es"
-	etcdT  = "etcd"
-)
 
 type ConnDetail struct {
 	C           string `json:"c"`
@@ -98,17 +88,17 @@ var (
 	CityDbConfig map[string]map[string]string
 )
 
-func InitConfig(e string) chan map[string][]*ConnDetail {
-	ReadFildByConfig(e)
+func InitConfig(e string) (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail) {
+	ReadFileByConfig(e)
 
 	if e != "local" {
 		//用etcd
 		return InitConfigByEtcd()
 	}
-	return nil
+	return nil, nil
 }
 
-func ReadFildByConfig(e string) {
+func ReadFileByConfig(e string) {
 	_, f, _, ok := runtime.Caller(1)
 	if !ok {
 		panic(errors.New("Can not get current file info"))
