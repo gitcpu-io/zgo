@@ -250,22 +250,22 @@
       "values":
         [
           {
-            "c": "北京二手房库 etcd-==-旧实例w",
+            "c": "北京二手房库 etcd-旧实例w",
             "t":"w",
             "host": "root:root@(localhost:3307)/abc?charset=utf8&parseTime=True&loc=Local",
             "port": 3307,
             "connSize": 5,
             "mixSize": 10,
-            "poolSize": 233
+            "poolSize": 499
           },
           {
-            "c": "北京二手房库 etcd-==-旧实例r",
+            "c": "北京二手房库 etcd-旧实例r",
             "t":"r",
             "host": "root:root@(localhost:3308)/abc?charset=utf8&parseTime=True&loc=Local",
             "port": 3308,
             "connSize": 55,
             "mixSize": 12,
-            "poolSize": 311
+            "poolSize": 399
           }
         ]
     },

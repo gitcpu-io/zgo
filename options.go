@@ -72,12 +72,10 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, error) {
 				case mysqlT:
 					//init mysql again
 					// 配置信息： 城市和数据库的关系
-					fmt.Println("------", keyType)
 					cdc := config.CityDbConfig
 					zgomysql.InitMysqlService(hsm, cdc)
 					var err error
 					Mysql, err = zgomysql.MysqlService(opt.Mysql[0])
-					fmt.Println("----===--", opt.Mysql)
 
 					if err != nil {
 						fmt.Println(err)
