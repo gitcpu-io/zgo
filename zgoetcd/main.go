@@ -30,7 +30,7 @@ func main() {
           "host": "localhost",
           "port": 4150,
           "connSize": 50,
-          "poolSize": 258
+          "poolSize": 250
         },
         {
           "c": "北京主库2-----nsq",

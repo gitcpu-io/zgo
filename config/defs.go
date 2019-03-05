@@ -13,6 +13,17 @@ var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
 
 var Version = "0.0.1"
 
+const (
+	mysqlT = "mysql"
+	mongoT = "mongo"
+	redisT = "redis"
+	pikaT  = "pika"
+	nsqT   = "nsq"
+	kafkaT = "kafka"
+	esT    = "es"
+	etcdT  = "etcd"
+)
+
 type ConnDetail struct {
 	C           string `json:"c"`
 	Host        string `json:"host,omitempty"`
@@ -50,6 +61,7 @@ type allConfig struct {
 	Pika         []LabelDetail                `json:"pika"`
 	Kafka        []LabelDetail                `json:"kafka"`
 	Es           []LabelDetail                `json:"es"`
+	Etcd         []LabelDetail                `json:"etcd"`
 	CityDbConfig map[string]map[string]string `json:"cityDbConfig"`
 }
 
@@ -64,6 +76,7 @@ var (
 	Project      string
 	Loglevel     string
 	Es           []LabelDetail
+	Etcd         []LabelDetail
 	Mongo        []LabelDetail
 	Nsq          []LabelDetail
 	Redis        []LabelDetail
@@ -73,12 +86,13 @@ var (
 	CityDbConfig map[string]map[string]string
 )
 
-func InitConfig(e string) {
+func InitConfig(e string) chan map[string][]*ConnDetail {
 	if e == "local" {
 		initConfig(e)
+		return nil
 	} else {
 		//用etcd
-		InitConfigByEtcd()
+		return InitConfigByEtcd()
 	}
 }
 
@@ -102,6 +116,7 @@ func initConfig(e string) {
 	Loglevel = acfg.Loglevel
 	Nsq = acfg.Nsq
 	Es = acfg.Es
+	Etcd = acfg.Etcd
 	Mongo = acfg.Mongo
 	Redis = acfg.Redis
 	Pika = acfg.Pika
@@ -111,53 +126,4 @@ func initConfig(e string) {
 
 	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Env)
 
-	//fmt.Println(cf)
-
-	//viper.SetConfigFile(cf)
-	//err := viper.ReadInConfig()
-	//if err != nil {
-	//	panic(err)
-	//}
-
-	//for _, v := range acfg.Nsq  {
-	//	if "label_bj" == v.Key {
-	//		Nsq[v.Key] = v.Values
-	//		for _, vv := range v.Values  {
-	//			fmt.Println(vv.Host,vv.PoolSize)
-	//		}
-	//	}
-	//}
-
-	//Env = sjson.Get("env").MustString()
-	//FormateJsonToMap(sjson, "nsq", Nsq)
-	//FormateJsonToMap(sjson, "es", Es)
-	//FormateJsonToMap(sjson, "mongo", Mongo)
 }
-
-//func FormateJsonToMap(sjson *simplejson.Json, name string, m map[string][]comm.Clabels) {
-//	nsqJson, _ := sjson.Get(name).Map()
-//
-//	var cs []string
-//	for k, _ := range nsqJson {
-//		cs = append(cs, k)
-//	}
-//	for _, label := range cs {
-//		//v == label_bj 用户传来的label，它并不知道具体的连接地址
-//		//v == label_sh 用户传来的label，它并不知道具体的连接地址
-//
-//		tmpClabels := []comm.Clabels{}
-//
-//		if km, ok := nsqJson[label]; ok {
-//			b, _ := json.Marshal(km)
-//			json.Unmarshal(b, &tmpClabels)
-//
-//			m[label] = tmpClabels
-//
-//		}
-//
-//		//for k, v := range tmpClabels {
-//		//	fmt.Println(k,v)
-//		//}
-//
-//	}
-//}

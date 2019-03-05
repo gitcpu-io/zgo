@@ -72,7 +72,8 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq
 		hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
-		//fmt.Println(hsm)
+		fmt.Println(config.Nsq)
+		fmt.Println("=====", opt.Nsq)
 		//return nil
 		in := <-zgonsq.InitNsq(hsm)
 		Nsq = in
@@ -82,8 +83,8 @@ func Engine(opt *Options) *engine {
 		hsm := engine.getConfigByOption(config.Kafka, opt.Kafka)
 		//fmt.Println(hsm)
 		//return nil
-		k := <-zgokafka.InitKafka(hsm)
-		Kafka = k
+		in := <-zgokafka.InitKafka(hsm)
+		Kafka = in
 	}
 
 	if opt.Project != "" {
