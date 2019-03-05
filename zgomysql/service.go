@@ -12,7 +12,7 @@ import (
 var currentLabels = make(map[string][]*config.ConnDetail)
 
 var cityDbConfig = make(map[string]map[string]string)
-var muLabel sync.Once
+var muLabel sync.RWMutex
 
 //Mongo 对外
 type MysqlServiceInterface interface {
@@ -30,19 +30,16 @@ type MysqlServiceInterface interface {
 }
 
 // 初始化
-//InitMongo 初始化连接mongo
+//InitMysql 初始化连接mongo
 func InitMysqlService(hsm map[string][]*config.ConnDetail, cdc map[string]map[string]string) {
-	muLabel.Do(
-		func() {
-			currentLabels = hsm
-			cityDbConfig = cdc
-			InitMysqlResource(hsm)
-			for k, _ := range hsm {
-				fmt.Println(k)
-			}
-
-		},
-	)
+	muLabel.Lock()
+	defer muLabel.Unlock()
+	currentLabels = hsm
+	cityDbConfig = cdc
+	InitMysqlResource(hsm)
+	for k, _ := range hsm {
+		fmt.Println(k)
+	}
 }
 
 // 实现方法
