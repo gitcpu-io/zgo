@@ -7,6 +7,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoes"
 	"git.zhugefang.com/gocore/zgo/zgokafka"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
+	"git.zhugefang.com/gocore/zgo/zgomysql"
 	"git.zhugefang.com/gocore/zgo/zgonsq"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
@@ -69,8 +70,18 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, error) {
 
 				switch keyType {
 				case mysqlT:
-				//init mysql again
+					//init mysql again
+					// 配置信息： 城市和数据库的关系
+					fmt.Println("------", keyType)
+					cdc := config.CityDbConfig
+					zgomysql.InitMysqlService(hsm, cdc)
+					var err error
+					Mysql, err = zgomysql.MysqlService(opt.Mysql[0])
+					fmt.Println("----===--", opt.Mysql)
 
+					if err != nil {
+						fmt.Println(err)
+					}
 				case mongoT:
 					//init mongo again
 					in := <-zgomongo.InitMongo(hsm)

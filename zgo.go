@@ -118,6 +118,19 @@ func Engine(opt *Options) error {
 				switch key {
 				case mysqlT:
 					//init mysql again
+					if len(opt.Mysql) > 0 {
+						hsm := engine.getConfigByOption(labelDetArr, opt.Mysql)
+						if len(hsm) > 0 {
+							// 配置信息： 城市和数据库的关系
+							cdc := config.CityDbConfig
+							zgomysql.InitMysqlService(hsm, cdc)
+							var err error
+							Mysql, err = zgomysql.MysqlService(opt.Mysql[0])
+							if err != nil {
+								fmt.Println(err)
+							}
+						}
+					}
 
 				case mongoT:
 					//init mongo again
