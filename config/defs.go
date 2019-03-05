@@ -38,9 +38,15 @@ type ConnDetail struct {
 	Db          int    `json:"db,omitempty"`
 	T           string `json:"t,omitempty"` // w 写入 r 只读
 	Prefix      string `json:"prefix,omitempty"`
-	Expire      int    `json:"expire,omitempty"`     // 缓存失效时间 单位sec
-	CacheLabel  string `json:"cacheLabel,omitempty"` // 缓存所需的 redisLabel
 }
+
+type CacheConfig struct {
+	Expire int    `json:"expire"`     // 缓存失效时间 单位sec
+	Label  string `json:"cacheLabel"` // 缓存所需的 redisLabel
+	Start  int    `json:"start"`      // 是否开启
+	DbType string `json:"dbType"`     //
+}
+
 type LabelDetail struct {
 	Key    string       `json:"key"`
 	Values []ConnDetail `json:"values"`
@@ -65,7 +71,7 @@ type allConfig struct {
 	Kafka        []LabelDetail                `json:"kafka,omitempty"`
 	Es           []LabelDetail                `json:"es,omitempty"`
 	Etcd         []LabelDetail                `json:"etcd,omitempty"`
-	Cache        map[string]interface{}       `json:"cache,omitempty"`
+	Cache        CacheConfig                  `json:"cache"`
 	CityDbConfig map[string]map[string]string `json:"cityDbConfig,omitempty"`
 }
 
@@ -88,7 +94,7 @@ var (
 	Pika         []LabelDetail
 	Mysql        []LabelDetail
 	Kafka        []LabelDetail
-	Cache        map[string]interface{}
+	Cache        CacheConfig
 	CityDbConfig map[string]map[string]string
 )
 

@@ -20,23 +20,22 @@ var (
 
 func InitCache() CacheServiceInterface {
 	hm := config.Cache
-	start := 0
 	expire := 86400
 	label := ""
 	dbtype := "pika"
-	if value, ok := hm["start"]; ok {
-		start = value.(int)
+	if hm.Start != 1 {
+		return GetCache(0, dbtype, label, expire)
 	}
-	if value, ok := hm["expire"]; ok {
-		expire = value.(int)
+	if hm.Expire != 0 {
+		expire = hm.Expire
 	}
-	if value, ok := hm["label"]; ok {
-		label = value.(string)
+	if hm.Label != "" {
+		label = hm.Label
 	}
-	if value, ok := hm["dbtype"]; ok {
-		dbtype = value.(string)
+	if hm.DbType != "" {
+		dbtype = hm.DbType
 	}
-	return GetCache(start, dbtype, label, expire)
+	return GetCache(1, dbtype, label, expire)
 }
 
 // 创建service对象的方法
