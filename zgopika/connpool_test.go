@@ -22,7 +22,7 @@ func TestPikaGet(t *testing.T) {
 	//	C:        "北京主库-----redis1",
 	//	Host:     "localhost",
 	//	Port:     6379,
-	//	ConnSize: 100,
+	//	ConnSize: 100,go
 	//	PoolSize: 20000,
 	//	Username: "",
 	//	Password: "",
@@ -32,8 +32,8 @@ func TestPikaGet(t *testing.T) {
 		C:        "北京主库-----pika1",
 		Host:     "101.201.110.130",
 		Port:     49221,
-		ConnSize: 1000,
-		PoolSize: 1000,
+		ConnSize: 400,
+		PoolSize: 200,
 		Username: "",
 		Password: "",
 		Prefix:   "sell:",
@@ -42,9 +42,9 @@ func TestPikaGet(t *testing.T) {
 	cd_bj_r := config.ConnDetail{
 		C:        "北京从库-----pika2",
 		Host:     "101.201.110.130",
-		Port:     59221,
-		ConnSize: 1000,
-		PoolSize: 1000,
+		Port:     49221,
+		ConnSize: 400,
+		PoolSize: 200,
 		Username: "",
 		Password: "",
 		Prefix:   "sell:",
@@ -83,7 +83,7 @@ func TestPikaGet(t *testing.T) {
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 1000000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 5000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
@@ -94,13 +94,21 @@ func TestPikaGet(t *testing.T) {
 			countChan <- i //统计开出去的goroutine
 			if i%2 == 0 {
 				//ch := getMongo(label_sh,clientBj,i)
-				ch := LpushCheck(bj_rw, clientBjRw, 0)
+				//ch := LpushCheck(bj_rw, clientBjRw, 0)
+				//ch := setSet(bj_rw, clientBjRw, i)
+				ch := hetSet(bj_rw, clientBjRw, i)
+				//ch := hgetSet(bj_rw, clientBjRw, i)
+				//ch := getSet(bj_rw, clientBjRw, i)
 				reply := <-ch
 				replyChan <- reply
 
 			} else {
 				//ch := getMongo(label_bj,clientSh,i)
-				ch := getSet(bj_r, clientBjR, 0)
+				//ch := getSet(bj_r, clientBjR, 0)
+				//ch := setSet(bj_r, clientBjR, i)
+				//ch := hgetSet(bj_r, clientBjR, i)
+				//ch := getSet(bj_r, clientBjR, i)
+				ch := hetSet(bj_r, clientBjR, i)
 				reply := <-ch
 				replyChan <- reply
 			}
@@ -144,12 +152,101 @@ func TestPikaGet(t *testing.T) {
 	}
 }
 
+func hetSet(label string, client *zgopika, i int) chan int {
+	//还需要一个上下文用来控制开出去的goroutine是否超时
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	key := fmt.Sprintf("foo_china_%d", i)
+
+	name := "foo"
+
+	value := "wwwwwwwwwwwwwww"
+	for i := 0; i < 7; i++ {
+		value = value + value
+	}
+
+	_, err := client.Hset(ctx, key, name, value)
+	if err != nil {
+		panic(err)
+	}
+	out := make(chan int, 1)
+	select {
+	case <-ctx.Done():
+		fmt.Println("超时")
+		out <- 10001
+		return out
+	default:
+		fmt.Println("ok........")
+		out <- 1
+	}
+
+	return out
+}
+
+func setSet(label string, client *zgopika, i int) chan int {
+	//还需要一个上下文用来控制开出去的goroutine是否超时
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	key := fmt.Sprintf("foo_%d", i)
+
+	value := "wwwwwwwwwwwwwww"
+	for i := 0; i < 7; i++ {
+		value = value + value
+	}
+
+	_, err := client.Set(ctx, key, value, 5000)
+	if err != nil {
+		panic(err)
+	}
+	out := make(chan int, 1)
+	select {
+	case <-ctx.Done():
+		fmt.Println("超时")
+		out <- 10001
+		return out
+	default:
+		fmt.Println("ok........")
+		out <- 1
+	}
+
+	return out
+}
+
 func getSet(label string, client *zgopika, i int) chan int {
 	//还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
-	result, err := client.Get(ctx, "china_online")
+	key := fmt.Sprintf("foo_%d", i)
+	result, err := client.Get(ctx, key)
+	if err != nil {
+		panic(err)
+	}
+	out := make(chan int, 1)
+	select {
+	case <-ctx.Done():
+		fmt.Println("超时")
+		out <- 10001
+		return out
+	default:
+		fmt.Println(result)
+		out <- 1
+	}
+
+	return out
+}
+
+func hgetSet(label string, client *zgopika, i int) chan int {
+	//还需要一个上下文用来控制开出去的goroutine是否超时
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	key := "foo_china"
+
+	name := fmt.Sprintf("foo_%d", i)
+
+	result, err := client.Hget(ctx, key, name)
 	if err != nil {
 		panic(err)
 	}

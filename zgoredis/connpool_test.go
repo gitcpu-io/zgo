@@ -22,7 +22,7 @@ func TestRedisGet(t *testing.T) {
 		C:        "北京主库-----redis1",
 		Host:     "localhost",
 		Port:     6379,
-		ConnSize: 100,
+		ConnSize: 800,
 		PoolSize: 200,
 		Username: "",
 		Password: "",
@@ -32,7 +32,7 @@ func TestRedisGet(t *testing.T) {
 		C:        "北京从库-----redis2",
 		Host:     "localhost",
 		Port:     6379,
-		ConnSize: 10,
+		ConnSize: 800,
 		PoolSize: 200,
 		Username: "",
 		Password: "",
@@ -42,7 +42,7 @@ func TestRedisGet(t *testing.T) {
 		C:        "上海主库-----redis",
 		Host:     "localhost",
 		Port:     6379,
-		ConnSize: 10,
+		ConnSize: 800,
 		PoolSize: 200,
 		Username: "",
 		Password: "",
@@ -75,7 +75,7 @@ func TestRedisGet(t *testing.T) {
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 100000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 1 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
@@ -85,12 +85,14 @@ func TestRedisGet(t *testing.T) {
 		go func(i int) {
 			countChan <- i //统计开出去的goroutine
 			if i%2 == 0 {
-				ch := getSet(label_bj, clientLocal, i)
+				//ch := getSet(label_bj, clientLocal, i)
+				ch := setSet(label_bj, clientLocal, i)
 				reply := <-ch
 				replyChan <- reply
 
 			} else {
-				ch := getSet(label_sh, clientSpider, i)
+				//ch := getSet(label_sh, clientSpider, i)
+				ch := setSet(label_sh, clientSpider, i)
 				reply := <-ch
 				replyChan <- reply
 			}
@@ -140,8 +142,64 @@ func getSet(label string, client *zgoredis, i int) chan int {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
+	key := fmt.Sprintf("foo_%d", i)
 	var fooVal string
-	_, err := client.Do(ctx, &fooVal, "GET", "foo")
+	_, err := client.Do(ctx, &fooVal, "GET", key)
+	if err != nil {
+		panic(err)
+	}
+	out := make(chan int, 1)
+	select {
+	case <-ctx.Done():
+		fmt.Println("超时")
+		out <- 10001
+		return out
+	default:
+		fmt.Println(fooVal)
+		out <- 1
+	}
+
+	return out
+}
+
+func setSet(label string, client *zgoredis, i int) chan int {
+	//还需要一个上下文用来控制开出去的goroutine是否超时
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	key := fmt.Sprintf("foo_%d", i)
+
+	value := "wwwwwwwwwwwwwww"
+	for i := 0; i < 9; i++ {
+		value = value + value
+	}
+
+	var fooVal string
+	_, err := client.Do(ctx, nil, "SET", key, value)
+	if err != nil {
+		panic(err)
+	}
+	out := make(chan int, 1)
+	select {
+	case <-ctx.Done():
+		fmt.Println("超时")
+		out <- 10001
+		return out
+	default:
+		fmt.Println(fooVal)
+		out <- 1
+	}
+
+	return out
+}
+
+func hsetSet(label string, client *zgoredis, i int) chan int {
+	//还需要一个上下文用来控制开出去的goroutine是否超时
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	key := fmt.Sprintf("foo_%d", i)
+
+	var fooVal string
+	_, err := client.Do(ctx, nil, "HSET", key)
 	if err != nil {
 		panic(err)
 	}
