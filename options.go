@@ -96,6 +96,7 @@ func (opt *Options) init() {
 
 	}()
 
+
 	if opt.Project == "" {
 		opt.Project = config.Project
 	}

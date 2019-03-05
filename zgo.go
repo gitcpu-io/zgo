@@ -30,6 +30,9 @@ func Engine(opt *Options) *engine {
 	}
 	opt.init() //把zgo_start中用户定义的，映射到zgo的内存变量上
 
+	//初始化GRPC
+	Grpc = zgogrpc.GetGrpc()
+
 	if len(opt.Mongo) > 0 {
 		//todo someting
 		hsm := engine.getConfigByOption(config.Mongo, opt.Mongo)
@@ -37,6 +40,7 @@ func Engine(opt *Options) *engine {
 		in := <-zgomongo.InitMongo(hsm)
 		Mongo = in
 	}
+
 	if len(opt.Mysql) > 0 {
 		//todo someting
 		hsm := engine.getConfigByOption(config.Mysql, opt.Mysql)
