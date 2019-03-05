@@ -56,10 +56,10 @@ func GetCache(start int, dbtype string, label string, expire int) CacheServiceIn
 	} else {
 		fmt.Println("未配置缓存")
 		return &zgocache{
+			"",
+			"",
 			nil,
-			nil,
-			nil,
-			nil,
+			0,
 			start,
 		}
 	}
