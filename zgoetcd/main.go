@@ -26,95 +26,43 @@ func main() {
 
 	v := `[
         {
-          "c": "北京主库1-----nsq",
+          "c": "北京主库1-----etcd nsq",
           "host": "localhost",
           "port": 4150,
-          "connSize": 50,
-          "poolSize": 250
+          "connSize": 5,
+          "poolSize": 25
         },
         {
-          "c": "北京主库2-----nsq",
+          "c": "北京主库2-----etcd nsq",
           "host": "localhost",
           "port": 4150,
-          "connSize": 50,
-          "poolSize": 369
+          "connSize": 5,
+          "poolSize": 390
         }
       ]`
 
 	key := "zgo/nsq/nsq_label_bj"
 	cli.KV.Put(context.TODO(), key, v)
 
-	//gr, err := cli.KV.Get(context.TODO(), key, clientv3.WithPrevKV())
-	//
-	//vv := gr.Kvs[0].Value
-	//cnd := []config.ConnDetail{}
-	//json.Unmarshal(vv, &cnd)
-	//
-	//fmt.Println(cnd)
+	v_mongo := `[
+        {
+          "c": "北京主库1-----etcd nsq",
+          "host": "localhost",
+          "port": 4150,
+          "connSize": 5,
+          "poolSize": 25
+        },
+        {
+          "c": "北京主库2-----etcd nsq",
+          "host": "localhost",
+          "port": 4150,
+          "connSize": 5,
+          "poolSize": 390
+        }
+      ]`
 
-	//watcher := clientv3.NewWatcher(cli)
-	//wch := watcher.Watch(context.TODO(), key, clientv3.WithPrevKV())
-	//go func() {
-	//	for {
-	//		select {
-	//		case r := <-wch:
-	//			fmt.Println("----watch---")
-	//			fmt.Printf("%+v %s", r, "\n")
-	//		}
-	//	}
-	//}()
-
-	//sr, err := cli.Status(context.TODO(), "10.20.80.132:2379")
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Printf("%+v\n", sr)
-
-	//------------
-	//cli.KV.Put(context.TODO(), "abc", "abcdef")
-	//gr, err := cli.KV.Get(context.TODO(), "abc", clientv3.WithPrevKV())
-	//fmt.Println("第一次get abc:", gr.Kvs, err, gr.Count)
-	//
-	////------------
-	//
-	//le, err := cli.Lease.Grant(context.TODO(), 3)
-	////fmt.Println(le.TTL)
-	//s := "/abc/def"
-	//_, err = cli.KV.Put(context.TODO(), s, "傻逼12", clientv3.WithLease(le.ID))
-	////fmt.Println(pr, "test etcdDemo ...")
-	////gr, err := cli.KV.Get(context.TODO(), "test")
-	////fmt.Println(gr.Kvs)
-	//
-	////------------
-	//
-	//ctx, cancelFunc := context.WithCancel(context.TODO())
-	//defer cancelFunc()
-	//defer cli.Lease.Revoke(context.TODO(), le.ID)
-	//
-	//lech, err := cli.Lease.KeepAlive(ctx, le.ID)
-	//if err != nil {
-	//	fmt.Println(err, "--keepalive")
-	//}
-	//
-	////------------
-	//
-	//kvc := clientv3.NewKV(cli)
-	//gr, err = kvc.Get(context.TODO(), s, clientv3.WithPrevKV())
-	//fmt.Println("第一次get:", gr.Kvs, err, gr.Count)
-	//
-	//Watcher(cli, s, lech, le)
-	////for x := range wch {
-	////	for _, v := range x.Events {
-	////		fmt.Printf("%+v\n", v)
-	////	}
-	////}
-	//test(kvc, le, err)
-	//
-	//time.Sleep(3500 * time.Millisecond)
-
-	//fmt.Println("/n======")
-	//gr, err = kvc.Get(context.TODO(), "/abc/def", clientv3.WithPrevKV())
-	//fmt.Println(gr.Kvs, err, gr.Count)
+	key_mongo := "zgo/mongo/mongo_label_bj"
+	cli.KV.Put(context.TODO(), key_mongo, v_mongo)
 
 }
 

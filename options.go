@@ -47,20 +47,20 @@ func (opt *Options) init() {
 	go func() {
 		if inch != nil {
 			for h := range inch {
-				var key string
+				var keyType string
 				for mkey, _ := range h {
-					key = strings.Split(mkey, "/")[1]
+					keyType = strings.Split(mkey, "/")[1]
 					//key = mkey
 					break
 				}
 				var hsm = make(map[string][]*config.ConnDetail)
 				for mkey, v := range h {
-					key = strings.Split(mkey, "/")[2]
+					key := strings.Split(mkey, "/")[2]
 					hsm[key] = v
 				}
-				fmt.Println("有变化开始init again", hsm)
+				fmt.Println(keyType, "有变化开始init again", hsm)
 
-				switch key {
+				switch keyType {
 				case mysqlT:
 				//init mysql again
 
@@ -95,7 +95,6 @@ func (opt *Options) init() {
 		}
 
 	}()
-
 
 	if opt.Project == "" {
 		opt.Project = config.Project

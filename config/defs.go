@@ -36,14 +36,14 @@ type ConnDetail struct {
 	Username    string `json:"username,omitempty"`
 	Password    string `json:"password,omitempty"`
 	Db          int    `json:"db,omitempty"`
-	T           string `json:"db,omitempty"` // w 写入 r 只读
+	T           string `json:"t,omitempty"` // w 写入 r 只读
 	Prefix      string `json:"prefix,omitempty"`
-	Expire      int    `json:"prefix,omitempty"`     // 缓存失效时间 单位sec
+	Expire      int    `json:"expire,omitempty"`     // 缓存失效时间 单位sec
 	CacheLabel  string `json:"cacheLabel,omitempty"` // 缓存所需的 redisLabel
 }
 type LabelDetail struct {
-	Key    string `json:"key"`
-	Values []ConnDetail
+	Key    string       `json:"key"`
+	Values []ConnDetail `json:"values"`
 }
 
 type FileStore struct {
@@ -52,20 +52,21 @@ type FileStore struct {
 }
 
 type allConfig struct {
-	Env          string                       `json:"env"`
-	File         FileStore                    `json:"file"`
-	Project      string                       `json:"project"`
-	Loglevel     string                       `json:"loglevel"`
-	Nsq          []LabelDetail                `json:"nsq"`
-	Mongo        []LabelDetail                `json:"mongo"`
-	Mysql        []LabelDetail                `json:"mysql"`
-	Redis        []LabelDetail                `json:"redis"`
-	Pika         []LabelDetail                `json:"pika"`
-	Kafka        []LabelDetail                `json:"kafka"`
-	Es           []LabelDetail                `json:"es"`
-	Etcd         []LabelDetail                `json:"etcd"`
-	Cache        LabelDetail                  `json:"cache"`
-	CityDbConfig map[string]map[string]string `json:"cityDbConfig"`
+	Env          string                       `json:"env,omitempty"`
+	File         FileStore                    `json:"file,omitempty"`
+	Project      string                       `json:"project,omitempty"`
+	Loglevel     string                       `json:"loglevel,omitempty"`
+	EtcdHosts    []string                     `json:"etcdHosts,omitempty"`
+	Nsq          []LabelDetail                `json:"nsq,omitempty"`
+	Mongo        []LabelDetail                `json:"mongo,omitempty"`
+	Mysql        []LabelDetail                `json:"mysql,omitempty"`
+	Redis        []LabelDetail                `json:"redis,omitempty"`
+	Pika         []LabelDetail                `json:"pika,omitempty"`
+	Kafka        []LabelDetail                `json:"kafka,omitempty"`
+	Es           []LabelDetail                `json:"es,omitempty"`
+	Etcd         []LabelDetail                `json:"etcd,omitempty"`
+	Cache        LabelDetail                  `json:"cache,omitempty"`
+	CityDbConfig map[string]map[string]string `json:"cityDbConfig,omitempty"`
 }
 
 type Labelconns struct {
@@ -78,6 +79,7 @@ var (
 	File         FileStore
 	Project      string
 	Loglevel     string
+	EtcdHosts    []string
 	Es           []LabelDetail
 	Etcd         []LabelDetail
 	Mongo        []LabelDetail
@@ -91,16 +93,16 @@ var (
 )
 
 func InitConfig(e string) chan map[string][]*ConnDetail {
-	if e == "local" {
-		initConfig(e)
-		return nil
-	} else {
+	ReadFildByConfig(e)
+
+	if e != "local" {
 		//用etcd
 		return InitConfigByEtcd()
 	}
+	return nil
 }
 
-func initConfig(e string) {
+func ReadFildByConfig(e string) {
 	_, f, _, ok := runtime.Caller(1)
 	if !ok {
 		panic(errors.New("Can not get current file info"))
@@ -118,6 +120,7 @@ func initConfig(e string) {
 	File = acfg.File
 	Project = acfg.Project
 	Loglevel = acfg.Loglevel
+	EtcdHosts = acfg.EtcdHosts
 	Nsq = acfg.Nsq
 	Es = acfg.Es
 	Etcd = acfg.Etcd

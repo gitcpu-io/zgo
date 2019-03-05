@@ -1,5 +1,8 @@
 {
   "env": "local",
+  "etcdHosts": [
+    "0.0.0.0:2381"
+  ],
   "file": {
     "type": "local",
     "home": "/tmp"
@@ -131,19 +134,20 @@
       "key": "nsq_label_bj",
       "values": [
         {
-          "c": "北京主库1-----nsq",
-          "host": "localhost",
-          "port": 4150,
-          "connSize": 50,
-          "poolSize": 258
-        },
-        {
           "c": "北京主库2-----nsq",
           "host": "localhost",
           "port": 4150,
           "connSize": 5,
           "poolSize": 5
+        },
+        {
+          "c": "北京主库1-----nsq",
+          "host": "localhost",
+          "port": 4150,
+          "connSize": 50,
+          "poolSize": 258
         }
+
       ]
     },
     {

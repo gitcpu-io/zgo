@@ -9,14 +9,14 @@ import (
 func TestEngine(t *testing.T) {
 
 	Engine(&Options{
-		Env: "local",
+		Env: "dev",
 		Nsq: []string{
 			"nsq_label_bj",
 			"nsq_label_sh",
 		},
-		Es: []string{
-			//"es_new_write",
-			//"label_sh",
+		Mongo: []string{
+			"mongo_label_bj",
+			"mongo_label_sh",
 		},
 	})
 

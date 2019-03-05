@@ -1,5 +1,12 @@
 package config
 
+/*
+@Time : 2019-03-04 15:09
+@Author : rubinus.chu
+@File : etcd
+@project: zgo
+*/
+
 import (
 	"context"
 	"errors"
@@ -12,27 +19,13 @@ import (
 	"time"
 )
 
-/*
-@Time : 2019-03-04 15:09
-@Author : rubinus.chu
-@File : etcd
-@project: zgo
-*/
-
-var client *clientv3.Client
-
-func init() {
-	cli, err := CreateClient()
-	if err != nil {
-		return
-	}
-	client = cli
-	return
-}
-
 func InitConfigByEtcd() chan map[string][]*ConnDetail {
-	prefixKey := "zgo"
+	client, err := CreateClient()
+	if err != nil {
+		return nil
+	}
 
+	prefixKey := "zgo"
 	//从etcd中取出key并赋值
 	response, err := client.KV.Get(context.TODO(), prefixKey, clientv3.WithPrefix())
 	if err != nil {
@@ -83,7 +76,7 @@ func InitConfigByEtcd() chan map[string][]*ConnDetail {
 			case etcdT:
 				//init etcd again
 			}
-			fmt.Println(Nsq)
+			//fmt.Println(Nsq)
 
 		}
 
@@ -127,10 +120,9 @@ func Watcher(client *clientv3.Client, prefixKey string) chan map[string][]*ConnD
 
 						if reflect.DeepEqual(m, prem) != true { //如果有变化
 							var tmp []*ConnDetail
-							for _, vv := range m {
-								tmp = append(tmp, &vv)
+							for k, _ := range m {
+								tmp = append(tmp, &m[k])
 							}
-							//k := strings.Split(key, "/")[2]
 							hsm[key] = tmp
 							out <- hsm
 						}
@@ -145,10 +137,8 @@ func Watcher(client *clientv3.Client, prefixKey string) chan map[string][]*ConnD
 
 func CreateClient() (*clientv3.Client, error) {
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{
-			"0.0.0.0:2381",
-		},
-		DialTimeout: 10 * time.Second,
+		Endpoints:   EtcdHosts,
+		DialTimeout: 20 * time.Second,
 	})
 	return cli, err
 }

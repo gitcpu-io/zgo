@@ -1,11 +1,11 @@
 {
   "env": "pro",
-  "nsq": {
-    "label_bj": [
-      "localhost:4150"
-    ],
-    "label_sh": [
-      "localhost:4150"
-    ]
+  "etcdHosts": [
+    "0.0.0.0:2381"
+  ],
+  "file": {
+    "type": "local",
+    "home": "/tmp"
   }
+
 }

@@ -76,8 +76,7 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq
 		hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
-		fmt.Println(config.Nsq)
-		fmt.Println("=====", opt.Nsq)
+		//fmt.Println("===zgo.go==", hsm)
 		//return nil
 		in := <-zgonsq.InitNsq(hsm)
 		Nsq = in
@@ -110,8 +109,8 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
 		for _, v := range lds {
 			if label == v.Key {
 				var tmp []*config.ConnDetail
-				for _, vv := range v.Values {
-					tmp = append(tmp, &vv)
+				for k, _ := range v.Values {
+					tmp = append(tmp, &v.Values[k])
 				}
 				m[v.Key] = tmp
 			}
