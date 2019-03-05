@@ -3,9 +3,9 @@ package config
 import (
 	"context"
 	"errors"
-	"etcd/clientv3"
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
+	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"reflect"
 	"strings"
