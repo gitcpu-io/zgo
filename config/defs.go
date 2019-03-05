@@ -13,6 +13,17 @@ var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
 
 var Version = "0.0.1"
 
+const (
+	mysqlT = "mysql"
+	mongoT = "mongo"
+	redisT = "redis"
+	pikaT  = "pika"
+	nsqT   = "nsq"
+	kafkaT = "kafka"
+	esT    = "es"
+	etcdT  = "etcd"
+)
+
 type ConnDetail struct {
 	C           string `json:"c"`
 	Host        string `json:"host,omitempty"`
@@ -27,6 +38,8 @@ type ConnDetail struct {
 	Db          int    `json:"db,omitempty"`
 	T           string `json:"db,omitempty"` // w 写入 r 只读
 	Prefix      string `json:"prefix,omitempty"`
+	Expire      int    `json:"prefix,omitempty"`     // 缓存失效时间 单位sec
+	CacheLabel  string `json:"cacheLabel,omitempty"` // 缓存所需的 redisLabel
 }
 type LabelDetail struct {
 	Key    string `json:"key"`
@@ -50,6 +63,8 @@ type allConfig struct {
 	Pika         []LabelDetail                `json:"pika"`
 	Kafka        []LabelDetail                `json:"kafka"`
 	Es           []LabelDetail                `json:"es"`
+	Etcd         []LabelDetail                `json:"etcd"`
+	Cache        map[string]interface{}       `json:"cache"`
 	CityDbConfig map[string]map[string]string `json:"cityDbConfig"`
 }
 
@@ -64,17 +79,25 @@ var (
 	Project      string
 	Loglevel     string
 	Es           []LabelDetail
+	Etcd         []LabelDetail
 	Mongo        []LabelDetail
 	Nsq          []LabelDetail
 	Redis        []LabelDetail
 	Pika         []LabelDetail
 	Mysql        []LabelDetail
 	Kafka        []LabelDetail
+	Cache        map[string]interface{}
 	CityDbConfig map[string]map[string]string
 )
 
-func InitConfig(e string) {
-	initConfig(e)
+func InitConfig(e string) chan map[string][]*ConnDetail {
+	if e == "local" {
+		initConfig(e)
+		return nil
+	} else {
+		//用etcd
+		return InitConfigByEtcd()
+	}
 }
 
 func initConfig(e string) {
@@ -97,12 +120,14 @@ func initConfig(e string) {
 	Loglevel = acfg.Loglevel
 	Nsq = acfg.Nsq
 	Es = acfg.Es
+	Etcd = acfg.Etcd
 	Mongo = acfg.Mongo
 	Redis = acfg.Redis
 	Pika = acfg.Pika
 	Kafka = acfg.Kafka
 	Mysql = acfg.Mysql
 	CityDbConfig = acfg.CityDbConfig
+	Cache = acfg.Cache
 
 	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Env)
 

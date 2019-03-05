@@ -12,10 +12,10 @@ func TestEngine(t *testing.T) {
 		Env: "local",
 		Nsq: []string{
 			"nsq_label_bj",
-			//"label_sh",
+			"nsq_label_sh",
 		},
 		Es: []string{
-			"es_new_write",
+			//"es_new_write",
 			//"label_sh",
 		},
 	})

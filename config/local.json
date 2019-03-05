@@ -141,8 +141,8 @@
           "c": "北京主库2-----nsq",
           "host": "localhost",
           "port": 4150,
-          "connSize": 50,
-          "poolSize": 369
+          "connSize": 5,
+          "poolSize": 5
         }
       ]
     },
@@ -150,7 +150,7 @@
       "key": "nsq_label_sh",
       "values": [
         {
-          "c": "北京从库=====nsq",
+          "c": "上海主库=====nsq",
           "host": "localhost",
           "port": 4150,
           "connSize": 50,
@@ -299,6 +299,10 @@
         "cq":"1",
         "heb":"1"
       }
+  },
+  "cache":{
+    "redis_label":"pika_label_rw",
+    "expire":86400
   }
 
 }

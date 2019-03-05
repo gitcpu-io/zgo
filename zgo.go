@@ -3,6 +3,7 @@ package zgo
 import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
+	"git.zhugefang.com/gocore/zgo/zgocache"
 	"git.zhugefang.com/gocore/zgo/zgoes"
 	"git.zhugefang.com/gocore/zgo/zgofile"
 	"git.zhugefang.com/gocore/zgo/zgogrpc"
@@ -30,6 +31,9 @@ func Engine(opt *Options) *engine {
 	}
 	opt.init() //把zgo_start中用户定义的，映射到zgo的内存变量上
 
+	//初始化GRPC
+	Grpc = zgogrpc.GetGrpc()
+
 	if len(opt.Mongo) > 0 {
 		//todo someting
 		hsm := engine.getConfigByOption(config.Mongo, opt.Mongo)
@@ -37,6 +41,7 @@ func Engine(opt *Options) *engine {
 		in := <-zgomongo.InitMongo(hsm)
 		Mongo = in
 	}
+
 	if len(opt.Mysql) > 0 {
 		//todo someting
 		hsm := engine.getConfigByOption(config.Mysql, opt.Mysql)
@@ -72,7 +77,8 @@ func Engine(opt *Options) *engine {
 	}
 	if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq
 		hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
-		//fmt.Println(hsm)
+		fmt.Println(config.Nsq)
+		fmt.Println("=====", opt.Nsq)
 		//return nil
 		in := <-zgonsq.InitNsq(hsm)
 		Nsq = in
@@ -82,9 +88,12 @@ func Engine(opt *Options) *engine {
 		hsm := engine.getConfigByOption(config.Kafka, opt.Kafka)
 		//fmt.Println(hsm)
 		//return nil
-		k := <-zgokafka.InitKafka(hsm)
-		Kafka = k
+		in := <-zgokafka.InitKafka(hsm)
+		Kafka = in
 	}
+
+	// 初始化缓存模块
+	Cache = zgocache.InitCache()
 
 	if opt.Project != "" {
 		config.Project = opt.Project
@@ -136,4 +145,6 @@ var (
 	Utils    = zgoutils.NewUtils()
 	Log      = zgolog.Newzgolog()
 	ZoneInfo = zgozoneinfo.NewZoneInfo()
+
+	Cache zgocache.CacheServiceInterface
 )
