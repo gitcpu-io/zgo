@@ -369,12 +369,6 @@
 			"revisionTime": "2019-02-12T00:16:53Z"
 		},
 		{
-			"checksumSHA1": "cZXK195kFlZGC+HgmsTxyfUhCNU=",
-			"path": "github.com/mediocregopher/radix",
-			"revision": "bec0f0186e87085cee473502bbeef419514cb4da",
-			"revisionTime": "2019-02-21T22:01:08Z"
-		},
-		{
 			"checksumSHA1": "ZTcgWKWHsrX0RXYVXn5Xeb8Q0go=",
 			"path": "github.com/modern-go/concurrent",
 			"revision": "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94",
