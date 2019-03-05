@@ -64,7 +64,7 @@ type allConfig struct {
 	Kafka        []LabelDetail                `json:"kafka"`
 	Es           []LabelDetail                `json:"es"`
 	Etcd         []LabelDetail                `json:"etcd"`
-	Cache        LabelDetail                  `json:"cache"`
+	Cache        map[string]interface{}       `json:"cache"`
 	CityDbConfig map[string]map[string]string `json:"cityDbConfig"`
 }
 
@@ -86,7 +86,7 @@ var (
 	Pika         []LabelDetail
 	Mysql        []LabelDetail
 	Kafka        []LabelDetail
-	Cache        LabelDetail
+	Cache        map[string]interface{}
 	CityDbConfig map[string]map[string]string
 )
 
@@ -127,7 +127,57 @@ func initConfig(e string) {
 	Kafka = acfg.Kafka
 	Mysql = acfg.Mysql
 	CityDbConfig = acfg.CityDbConfig
+	Cache = acfg.Cache
 
 	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Env)
 
+	//fmt.Println(cf)
+
+	//viper.SetConfigFile(cf)
+	//err := viper.ReadInConfig()
+	//if err != nil {
+	//	panic(err)
+	//}
+
+	//for _, v := range acfg.Nsq  {
+	//	if "label_bj" == v.Key {
+	//		Nsq[v.Key] = v.Values
+	//		for _, vv := range v.Values  {
+	//			fmt.Println(vv.Host,vv.PoolSize)
+	//		}
+	//	}
+	//}
+
+	//Env = sjson.Get("env").MustString()
+	//FormateJsonToMap(sjson, "nsq", Nsq)
+	//FormateJsonToMap(sjson, "es", Es)
+	//FormateJsonToMap(sjson, "mongo", Mongo)
 }
+
+//func FormateJsonToMap(sjson *simplejson.Json, name string, m map[string][]comm.Clabels) {
+//	nsqJson, _ := sjson.Get(name).Map()
+//
+//	var cs []string
+//	for k, _ := range nsqJson {
+//		cs = append(cs, k)
+//	}
+//	for _, label := range cs {
+//		//v == label_bj 用户传来的label，它并不知道具体的连接地址
+//		//v == label_sh 用户传来的label，它并不知道具体的连接地址
+//
+//		tmpClabels := []comm.Clabels{}
+//
+//		if km, ok := nsqJson[label]; ok {
+//			b, _ := json.Marshal(km)
+//			json.Unmarshal(b, &tmpClabels)
+//
+//			m[label] = tmpClabels
+//
+//		}
+//
+//		//for k, v := range tmpClabels {
+//		//	fmt.Println(k,v)
+//		//}
+//
+//	}
+//}

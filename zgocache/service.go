@@ -18,21 +18,49 @@ var (
 	label  string
 )
 
-func InitCache(cd *config.ConnDetail) CacheServiceInterface {
-	expire = cd.Expire
-	label = cd.CacheLabel
-	return GetCache("pika", label, expire)
+func InitCache() CacheServiceInterface {
+	hm := config.Cache
+	start := 0
+	expire := 86400
+	label := ""
+	dbtype := "pika"
+	if value, ok := hm["start"]; ok {
+		start = value.(int)
+	}
+	if value, ok := hm["expire"]; ok {
+		expire = value.(int)
+	}
+	if value, ok := hm["label"]; ok {
+		label = value.(string)
+	}
+	if value, ok := hm["dbtype"]; ok {
+		dbtype = value.(string)
+	}
+	return GetCache(start, dbtype, label, expire)
 }
 
 // 创建service对象的方法
-func GetCache(dbtype string, label string, expire int) CacheServiceInterface {
-	if dbtype == "pika" {
-		service := zgopika.Pika(label)
+func GetCache(start int, dbtype string, label string, expire int) CacheServiceInterface {
+	if start == 1 {
+		if dbtype == "pika" {
+			// todo 找不到pika后异常处理
+			service := zgopika.Pika(label)
+			return &zgocache{
+				label,
+				dbtype,
+				service,
+				expire,
+				start,
+			}
+		}
+	} else {
+		fmt.Println("未配置缓存")
 		return &zgocache{
-			label,
-			dbtype,
-			service,
-			expire,
+			nil,
+			nil,
+			nil,
+			nil,
+			start,
 		}
 	}
 	log.Fatalf("缓存数据库类型不支持")
@@ -67,6 +95,7 @@ type zgocache struct {
 	dbtype  string
 	service zgopika.Pikaer
 	expire  int
+	start   int
 }
 
 // 缓存装饰器
@@ -74,6 +103,9 @@ func (z *zgocache) Decorate(fn CacheFunc) CacheFunc {
 	return func(ctx context.Context, param map[interface{}]interface{}) (interface{}, error) {
 
 		fmt.Println("进入Decorate")
+		if z.start != 1 {
+			return fn(ctx, param)
+		}
 		key := z.getKey(fn)
 		field, err := jsoniter.MarshalToString(param)
 		if err != nil {
@@ -102,6 +134,9 @@ func (z *zgocache) Decorate(fn CacheFunc) CacheFunc {
 func (z *zgocache) TimeOutDecorate(fn CacheFunc) CacheFunc {
 	return func(ctx context.Context, param map[interface{}]interface{}) (interface{}, error) {
 		fmt.Println("进入TimeOutDecorate")
+		if z.start != 1 {
+			return fn(ctx, param)
+		}
 		ctxTimeout, cancel := context.WithTimeout(ctx, 2*time.Second)
 		ch := make(chan *funResult)
 
@@ -148,7 +183,7 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc) CacheFunc {
 
 // 创建新的缓存
 func (z *zgocache) NewPikaCacheService(label string, expire int) CacheServiceInterface {
-	return GetCache("pika", label, expire)
+	return GetCache(z.start, "pika", label, expire)
 }
 
 func (z *zgocache) getData(ctx context.Context, key string, field string) (interface{}, error) {
