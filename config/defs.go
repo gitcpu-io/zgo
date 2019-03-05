@@ -65,7 +65,7 @@ type allConfig struct {
 	Kafka        []LabelDetail                `json:"kafka,omitempty"`
 	Es           []LabelDetail                `json:"es,omitempty"`
 	Etcd         []LabelDetail                `json:"etcd,omitempty"`
-	Cache        LabelDetail                  `json:"cache,omitempty"`
+	Cache        map[string]interface{}       `json:"cache,omitempty"`
 	CityDbConfig map[string]map[string]string `json:"cityDbConfig,omitempty"`
 }
 
@@ -88,7 +88,7 @@ var (
 	Pika         []LabelDetail
 	Mysql        []LabelDetail
 	Kafka        []LabelDetail
-	Cache        LabelDetail
+	Cache        map[string]interface{}
 	CityDbConfig map[string]map[string]string
 )
 
@@ -130,6 +130,7 @@ func ReadFildByConfig(e string) {
 	Kafka = acfg.Kafka
 	Mysql = acfg.Mysql
 	CityDbConfig = acfg.CityDbConfig
+	Cache = acfg.Cache
 
 	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Env)
 

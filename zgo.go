@@ -3,6 +3,7 @@ package zgo
 import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
+	"git.zhugefang.com/gocore/zgo/zgocache"
 	"git.zhugefang.com/gocore/zgo/zgoes"
 	"git.zhugefang.com/gocore/zgo/zgofile"
 	"git.zhugefang.com/gocore/zgo/zgogrpc"
@@ -90,6 +91,9 @@ func Engine(opt *Options) *engine {
 		Kafka = in
 	}
 
+	// 初始化缓存模块
+	Cache = zgocache.InitCache()
+
 	if opt.Project != "" {
 		config.Project = opt.Project
 	}
@@ -140,4 +144,6 @@ var (
 	Utils    = zgoutils.NewUtils()
 	Log      = zgolog.Newzgolog()
 	ZoneInfo = zgozoneinfo.NewZoneInfo()
+
+	Cache zgocache.CacheServiceInterface
 )

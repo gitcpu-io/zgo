@@ -303,6 +303,10 @@
         "cq":"1",
         "heb":"1"
       }
+  },
+  "cache":{
+    "redis_label":"pika_label_rw",
+    "expire":86400
   }
 
 }
