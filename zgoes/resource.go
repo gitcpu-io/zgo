@@ -3,7 +3,10 @@ package zgoes
 import (
 	"context"
 	"fmt"
-	jsoniter "github.com/json-iterator/go"
+	"git.zhugefang.com/gocore/zgo/zgoutils"
+	"io/ioutil"
+
+	//jsoniter "github.com/json-iterator/go"
 	"net/http"
 	"strings"
 	"sync"
@@ -15,7 +18,7 @@ type EsResourcer interface {
 
 var mu sync.RWMutex
 
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
+//var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 //方法初始化从uris中获取uri
 func NewEsResourcer(label string) EsResourcer {
@@ -43,7 +46,8 @@ func (e *esResource) GetConChan() *http.Client {
 }
 
 func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error) {
-	maps := map[string]interface{}{}                                          //定义es返回结构体
+	maps := map[string]interface{}{}
+	//定义es返回结构体=
 	uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"         //拼接es请求uti[索引+文档+_search]
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl)) //post请求
 	if err != nil {
@@ -58,10 +62,16 @@ func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, ar
 	}
 	defer resp.Body.Close()
 
-	if err := json.NewDecoder(resp.Body).Decode(&maps); err != nil {
+	be, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
 		fmt.Print(err)
 		return nil, err
 	}
-	return maps, nil
+	if err := zgoutils.Utils.Unmarshal(be, &maps); err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+	return maps, err
 }
 
