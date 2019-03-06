@@ -15,7 +15,6 @@ var (
 //Redis 对外
 type Rediser interface {
 	NewRedis(label ...string) (*zgoredis, error)
-	//Do(ctx context.Context, rcv interface{}, cmd string, args ...string) (interface{}, error)
 	//Post
 	Set(ctx context.Context, key string, value string, time int) (interface{}, error)
 	Expire(ctx context.Context, key string, time int) (interface{}, error)
@@ -96,10 +95,6 @@ func GetRedis(label ...string) (*zgoredis, error) {
 	return &zgoredis{
 		res: NewRedisResource(l), //interface
 	}, nil
-}
-
-func (r *zgoredis) Do(ctx context.Context, rcv interface{}, cmd string, args ...string) (interface{}, error) {
-	return r.res.Do(ctx, rcv, cmd, args...)
 }
 
 func (r *zgoredis) Set(ctx context.Context, key string, value string, time int) (interface{}, error) {
