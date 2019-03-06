@@ -11,7 +11,6 @@ import (
 //NsqResourcer 给service使用
 type RedisResourcer interface {
 	GetConnChan(label string) chan *radix.Pool
-	Do(ctx context.Context, rcv interface{}, cmd string, args ...string) (interface{}, error)
 	//Post
 	Set(ctx context.Context, key string, value string, time int) (interface{}, error)
 	Expire(ctx context.Context, key string, time int) (interface{}, error)
@@ -62,11 +61,6 @@ func NewRedisResource(label string) RedisResourcer {
 //GetConnChan 返回存放连接的chan
 func (r *redisResource) GetConnChan(label string) chan *radix.Pool {
 	return r.connpool.GetConnChan(label)
-}
-
-func (r *redisResource) Do(ctx context.Context, rcv interface{}, cmd string, args ...string) (interface{}, error) {
-	s := <-r.connpool.GetConnChan(r.label)
-	return nil, s.Do(radix.Cmd(rcv, cmd, args...))
 }
 
 func (r *redisResource) Set(ctx context.Context, key string, value string, time int) (interface{}, error) {
