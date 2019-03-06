@@ -31,10 +31,10 @@ type ConnDetail struct {
 }
 
 type CacheConfig struct {
-	Expire int    `json:"expire"`     // 缓存失效时间 单位sec
-	Label  string `json:"cacheLabel"` // 缓存所需的 redisLabel
-	Start  int    `json:"start"`      // 是否开启
-	DbType string `json:"dbType"`     //
+	Expire int    `json:"expire"` // 缓存失效时间 单位sec
+	Label  string `json:"label"`  // 缓存所需的 redisLabel
+	Start  int    `json:"start"`  // 是否开启
+	DbType string `json:"dbType"` //
 }
 
 type LabelDetail struct {
@@ -88,14 +88,14 @@ var (
 	CityDbConfig map[string]map[string]string
 )
 
-func InitConfig(e string) (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail) {
+func InitConfig(e string) (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig) {
 	ReadFileByConfig(e)
 
 	if e != "local" {
 		//用etcd
 		return InitConfigByEtcd()
 	}
-	return nil, nil
+	return nil, nil, nil
 }
 
 func ReadFileByConfig(e string) {
