@@ -1,3 +1,4 @@
+// zgokafka是对消息中间件Kafka的封装，提供新建连接，生产数据，消费数据接口
 package zgokafka
 
 import (

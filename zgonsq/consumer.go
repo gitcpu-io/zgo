@@ -11,7 +11,7 @@ type chat struct {
 }
 
 func (c *chat) Consumer() {
-	go c.Nsq.Consumer(c.Topic, c.Channel, 2, c.Deal)
+	go c.Nsq.Consumer(c.Topic, c.Channel, c.Deal)
 }
 
 //处理消息

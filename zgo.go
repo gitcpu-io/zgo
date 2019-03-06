@@ -7,6 +7,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoes"
 	"git.zhugefang.com/gocore/zgo/zgofile"
 	"git.zhugefang.com/gocore/zgo/zgogrpc"
+	"git.zhugefang.com/gocore/zgo/zgohttp"
 	"git.zhugefang.com/gocore/zgo/zgokafka"
 	"git.zhugefang.com/gocore/zgo/zgolog"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
@@ -276,6 +277,8 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
 //定义外部使用的类型
 type (
 	NsqMessage = *nsq.Message
+	RouterParams = zgohttp.Params
+	RouterHandler = zgohttp.Handle
 )
 
 var (
@@ -296,4 +299,6 @@ var (
 	ZoneInfo = zgozoneinfo.NewZoneInfo()
 
 	Cache zgocache.Cacher
+
+	Router = zgohttp.New()
 )

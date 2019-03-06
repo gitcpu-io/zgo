@@ -1,3 +1,4 @@
+// zgonsq是对消息中间件NSQ的封装，提供新建连接，生产数据，消费数据接口
 package zgonsq
 
 import (
@@ -9,31 +10,62 @@ import (
 )
 
 var (
-	currentLabels = make(map[string][]*config.ConnDetail)
-	muLabel       sync.RWMutex
+	currentLabels = make(map[string][]*config.ConnDetail)	//用于存放label与具体Host:port的map
+	muLabel       sync.RWMutex	//用于并发读写上面的map
 )
 
 //Nsq 对外
 type Nsqer interface {
+	/*
+	 label: 可选，如果使用者，用了2个或多个label时，需要调用这个函数，传入label
+	*/
+	// NewNsq 生产一条消息到Nsq
 	NewNsq(label ...string) (*zgonsq, error)
+
+	/*
+	 label: 可选，如果使用者，用了2个或多个label时，需要调用这个函数，传入label
+	*/
+	// GetConnChan 获取原生的生产者client，返回一个chan，使用者需要接收 <- chan
 	GetConnChan(label ...string) (chan *nsq.Producer, error)
+
+	/*
+	 ctx:是上下文参数，由使用者传入，用于控制这个函数是否超时
+	 topic:string
+	 body: 是一个[]byte
+	*/
+	// Producer 生产一条消息到Nsq
 	Producer(ctx context.Context, topic string, body []byte) (chan uint8, error)
+
+	/*
+	 ctx:是上下文参数，由使用者传入，用于控制这个函数是否超时
+	 topic:string
+	 body: 是一个slice of []byte
+	*/
+	// ProducerMulti 生产多条消息到Nsq
 	ProducerMulti(ctx context.Context, topic string, body [][]byte) (chan uint8, error)
-	Consumer(topic, channel string, mode int, fn NsqHandlerFunc)
+
+	/*
+	 topic:string
+	 channel:string
+	 fn:是自定义的回调函数，由使用者传入，经过处理后，使用者可以使用它返回的数据 func(message NsqMessage) error
+	*/
+	// Consumer 消费者使用
+	Consumer(topic, channel string, fn NsqHandlerFunc)
 }
 
+// Nsq用于对zgo.Nsq这个全局变量赋值
 func Nsq(label string) Nsqer {
 	return &zgonsq{
 		res: NewNsqResourcer(label),
 	}
 }
 
-//zgonsq实现了Nsq的接口
+// zgonsq实现了Nsq的接口
 type zgonsq struct {
 	res NsqResourcer //使用resource另外的一个接口
 }
 
-//InitNsq 初始化连接nsq
+// InitNsq 初始化连接nsq，用于使用者zgo.engine时，zgo init
 func InitNsq(hsm map[string][]*config.ConnDetail) chan *zgonsq {
 	muLabel.Lock()
 	defer muLabel.Unlock()
@@ -64,7 +96,7 @@ func InitNsq(hsm map[string][]*config.ConnDetail) chan *zgonsq {
 
 }
 
-//GetNsq zgo内部获取一个连接nsq
+// GetNsq zgo内部获取一个连接nsq
 func GetNsq(label ...string) (*zgonsq, error) {
 	l, err := comm.GetCurrentLabel(label, muLabel, currentLabels)
 	if err != nil {
@@ -75,38 +107,7 @@ func GetNsq(label ...string) (*zgonsq, error) {
 	}, nil
 }
 
-//getCurrentLabel 着重判断输入的label与zgo engine中用户方的label
-//func getCurrentLabel(label ...string) (string, error) {
-//	muLabel.RLock()
-//	defer muLabel.RUnlock()
-//
-//	lcl := len(currentLabels)
-//	if lcl == 0 {
-//		return "", errors.New("invalid label in zgo engine or engine not start.")
-//	}
-//	if len(label) == 0 { //用户没有选择
-//		if lcl >= 1 {
-//			//自动返回默认的第一个
-//			l := ""
-//			for k, _ := range currentLabels {
-//				l = k
-//				break
-//			}
-//			return l, nil
-//		} else {
-//			return "", errors.New("invalid label in zgo engine.")
-//		}
-//	} else if len(label) > 1 {
-//		return "", errors.New("you are choose must be one label or defalut zero.")
-//	} else {
-//		if _, ok := currentLabels[label[0]]; ok {
-//			return label[0], nil
-//		} else {
-//			return "", errors.New("invalid label for u input.")
-//		}
-//	}
-//}
-
+// NewNsq获取一个Nsq生产者的client，用于发送数据
 func (n *zgonsq) NewNsq(label ...string) (*zgonsq, error) {
 	return GetNsq(label...)
 }
@@ -120,14 +121,17 @@ func (n *zgonsq) GetConnChan(label ...string) (chan *nsq.Producer, error) {
 	return n.res.GetConnChan(l), nil
 }
 
+// Producer 生产一条消息
 func (n *zgonsq) Producer(ctx context.Context, topic string, body []byte) (chan uint8, error) {
 	return n.res.Producer(ctx, topic, body)
 }
 
+// ProducerMulti 生产多条消息
 func (n *zgonsq) ProducerMulti(ctx context.Context, topic string, body [][]byte) (chan uint8, error) {
 	return n.res.ProducerMulti(ctx, topic, body)
 }
 
-func (n *zgonsq) Consumer(topic, channel string, mode int, fn NsqHandlerFunc) {
-	go n.res.Consumer(topic, channel, mode, fn)
+// Consumer 消费者
+func (n *zgonsq) Consumer(topic, channel string, fn NsqHandlerFunc) {
+	go n.res.Consumer(topic, channel, fn)
 }

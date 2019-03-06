@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/json-iterator/go"
+	"github.com/mediocregopher/radix"
 	"testing"
 	"time"
 )
@@ -164,7 +165,7 @@ func hetSet(label string, client *zgoredis, i int) chan int {
 		out <- 10001
 		return out
 	default:
-		fmt.Println("ok........")
+		//fmt.Println("ok........")
 		out <- 1
 	}
 
@@ -178,7 +179,7 @@ func setSet(label string, client *zgoredis, i int) chan int {
 	key := fmt.Sprintf("foo_%d", i)
 
 	value := "wwwwwwwwwwwwwww"
-	for i := 0; i < 7; i++ {
+	for i := 0; i < 3; i++ {
 		value = value + value
 	}
 
@@ -193,7 +194,7 @@ func setSet(label string, client *zgoredis, i int) chan int {
 		out <- 10001
 		return out
 	default:
-		fmt.Println("ok........")
+		//fmt.Println("ok........")
 		out <- 1
 	}
 
@@ -275,4 +276,17 @@ func LpushCheck(label string, client *zgoredis, i int) chan int {
 	}
 
 	return out
+}
+
+func TestConnPool_GetConnChan(t *testing.T) {
+	customConnFunc := func(network, addr string) (radix.Conn, error) {
+		return radix.Dial(network, addr,
+			radix.DialTimeout(10*time.Second), radix.DialSelectDB(0), radix.DialAuthPass(""),
+		)
+	}
+	c, err := radix.NewPool("tcp", "127.0.0.1:6379", 10, radix.PoolConnFunc(customConnFunc))
+	if err != nil {
+		fmt.Println("redis ", err)
+	}
+	fmt.Println(c)
 }

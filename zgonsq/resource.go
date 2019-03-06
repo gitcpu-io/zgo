@@ -35,7 +35,7 @@ type NsqResourcer interface {
 	GetConnChan(label string) chan *nsq.Producer
 	Producer(ctx context.Context, topic string, body []byte) (chan uint8, error)
 	ProducerMulti(ctx context.Context, topic string, body [][]byte) (chan uint8, error)
-	Consumer(topic, channel string, mode int, fn NsqHandlerFunc) //自定义的func
+	Consumer(topic, channel string, fn NsqHandlerFunc) //自定义的func
 }
 
 //内部结构体
@@ -116,7 +116,7 @@ func (n *nsqResource) ProducerMulti(ctx context.Context, topic string, body [][]
 }
 
 //初始化消费者
-func (n *nsqResource) Consumer(topic, channel string, mode int, fn NsqHandlerFunc) {
+func (n *nsqResource) Consumer(topic, channel string, fn NsqHandlerFunc) {
 	cfg := nsq.NewConfig()
 	cfg.LookupdPollInterval = time.Second //设置重连时间
 	cfg.MaxInFlight = 20
@@ -140,16 +140,21 @@ func (n *nsqResource) Consumer(topic, channel string, mode int, fn NsqHandlerFun
 			}
 		}
 	}
-	if mode == 1 {
-		//建立NSQLookupd连接
-		if err := c.ConnectToNSQLookupd(address); err != nil {
-			fmt.Println("===ConnectToNSQLookupd===", err)
-		}
-	} else if mode == 2 {
-		if err := c.ConnectToNSQD(address); err != nil {
-			fmt.Println("===ConnectToNSQD===", err)
-		}
+
+	if err := c.ConnectToNSQD(address); err != nil {
+		fmt.Println("===ConnectToNSQD===", err)
 	}
+
+	//if mode == 1 {
+	//	//建立NSQLookupd连接
+	//	if err := c.ConnectToNSQLookupd(address); err != nil {
+	//		fmt.Println("===ConnectToNSQLookupd===", err)
+	//	}
+	//} else if mode == 2 {
+	//	if err := c.ConnectToNSQD(address); err != nil {
+	//		fmt.Println("===ConnectToNSQD===", err)
+	//	}
+	//}
 
 	//建立多个nsqd连接
 	// if err := c.ConnectToNSQDs([]string{"127.0.0.1:4150", "127.0.0.1:4152"}); err != nil {
