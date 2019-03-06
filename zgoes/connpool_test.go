@@ -55,11 +55,8 @@ func TestEsSearch(t *testing.T) {
 	index := "active_bj_house_sell"
 	table := "spider"
 	dsl := `{"query": {"match_all": {}}}`
-
 	sellR, _ := GetEs(label_sell)
-
 	result, err := sellR.SearchDsl(ctx, index, table, dsl, args)
-
 	fmt.Print(result, err)
 
 }

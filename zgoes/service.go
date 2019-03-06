@@ -74,9 +74,6 @@ type Eser interface {
 	// param dsl: 原生elastic语句
 	// 根据elastic dsl 语句查询数据 该接口只能执行查询操作
 	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
-	// 根据elastic dsl 语句模板方式查询数据 该接口只能执行查询操作
-	// 具体使用请参考:https://www.elastic.co/guide/en/elasticsearch/reference/6.6/search-template.html
-	QueryTmp(ctx context.Context, index, table, tmp string, args map[string]interface{}) (interface{}, error)
 }
 
 func (e *zgoes) NewEs(label ...string) (*zgoes, error) {
@@ -85,9 +82,4 @@ func (e *zgoes) NewEs(label ...string) (*zgoes, error) {
 
 func (e *zgoes) SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error) {
 	return e.res.SearchDsl(ctx, index, table, dsl, args)
-}
-
-func (e *zgoes) QueryTmp(ctx context.Context, index, table, tmp string, args map[string]interface{}) (interface{}, error) {
-	return e.res.QueryTmp(ctx, index, table, tmp, args)
-
 }
