@@ -2,6 +2,7 @@ package zgoutils
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"testing"
@@ -61,6 +62,15 @@ func BenchmarkUtils_Marshal(b *testing.B) {
 			panic(err)
 		}
 	}
+}
+
+func TestUtils_NewDecoder(t *testing.T) {
+	f, _ := os.Open("../config/local.json")
+	defer f.Close()
+
+	str := u.NewDecoder(f)
+
+	fmt.Print(str)
 }
 
 func TestUtils_Unmarshal(t *testing.T) {
