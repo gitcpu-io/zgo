@@ -9,16 +9,23 @@ import (
 )
 
 const (
-	rpc_port = ":80"
+	rpc_port = ":50051"
 )
 
 type zgogrpc struct {
 	res GrpcResourcer
 }
 
+/*
+ Grpcer 对外使用接口
+*/
 type Grpcer interface {
-	Run(ctx context.Context, s *grpc.Server) (string, error)
+	// 获取Grpc 服务端
+	// 默认端口50051
 	Server(ctx context.Context) (*grpc.Server, error)
+	// 客户端通过获取到的Grpc server 将客户端接口实现注册到servers 交给Run启动
+	Run(ctx context.Context, s *grpc.Server) (string, error)
+	// 调用GPC服务
 	Client(ctx context.Context, ip string, opts ...grpc.DialOption) (*grpc.ClientConn, error)
 }
 

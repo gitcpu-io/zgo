@@ -72,11 +72,11 @@ func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, ar
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := e.GetConChan().Do(req)
-	defer resp.Body.Close()
 	if err != nil {
 		fmt.Print(err)
 		return nil, err
 	}
+	defer resp.Body.Close()
 	if err := json.NewDecoder(resp.Body).Decode(&maps); err != nil {
 		fmt.Print(err)
 		return nil, err
@@ -89,11 +89,12 @@ func (e *esResource) QueryTmp(ctx context.Context, index, table, tmp string, arg
 	uri := e.uri + "/" + index + "/" + table + "/" + "_search/template?pretty"
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(tmp))
 	resp, err := e.GetConChan().Do(req)
-	defer resp.Body.Close()
 	if err != nil {
 		fmt.Print(err)
 		return nil, err
 	}
+	defer resp.Body.Close()
+
 	if err := json.NewDecoder(resp.Body).Decode(&maps); err != nil {
 		fmt.Print(err)
 		return nil, err

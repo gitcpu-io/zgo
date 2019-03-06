@@ -47,6 +47,7 @@ func TestEsSearch(t *testing.T) {
 		label_sell: s1,
 		label_rent: s2,
 	}
+
 	InitEs(hsm)
 
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
@@ -56,13 +57,9 @@ func TestEsSearch(t *testing.T) {
 	dsl := `{"query": {"match_all": {}}}`
 
 	sellR, _ := GetEs(label_sell)
+
 	result, err := sellR.SearchDsl(ctx, index, table, dsl, args)
 
 	fmt.Print(result, err)
-
-	//InitEs(map[string][]config.ConnDetail{
-	//	label_sell: []string{"localhost:27017"},
-	//	label_rent: []string{"localhost:27017"},
-	//}) //测试时表示使用nsq，在zgo_start中使用一次
 
 }
