@@ -47,35 +47,35 @@ services:
       - ~/docker-data/redis-6379:/data
     networks:
       - link-network
+#
+#  redis-6380:
+#    image: redis
+#    ports:
+#      - 6380:6379
+#    volumes:
+#      - ~/docker-data/redis-6380:/data
+#    networks:
+#      - link-network
 
-  redis-6380:
-    image: redis
-    ports:
-      - 6380:6379
-    volumes:
-      - ~/docker-data/redis-6380:/data
-    networks:
-      - link-network
-
-  mongo-27017:
-    image: mongo
-    ports:
-      - 27017:27017
-    volumes:
-      - ~/docker-data/mongo-27017/configdb:/data/configdb
-      - ~/docker-data/mongo-27017/db:/data/db
-    networks:
-      - link-network
-
-  mongo-27018:
-    image: mongo
-    ports:
-      - 27018:27017
-    volumes:
-      - ~/docker-data/mongo-27018/configdb:/data/configdb
-      - ~/docker-data/mongo-27018/db:/data/db
-    networks:
-      - link-network
+#  mongo-27017:
+#    image: mongo
+#    ports:
+#      - 27017:27017
+#    volumes:
+#      - ~/docker-data/mongo-27017/configdb:/data/configdb
+#      - ~/docker-data/mongo-27017/db:/data/db
+#    networks:
+#      - link-network
+#
+#  mongo-27018:
+#    image: mongo
+#    ports:
+#      - 27018:27017
+#    volumes:
+#      - ~/docker-data/mongo-27018/configdb:/data/configdb
+#      - ~/docker-data/mongo-27018/db:/data/db
+#    networks:
+#      - link-network
 
   mysql-3307:
     image: mysql
@@ -98,67 +98,67 @@ services:
       - ~/docker-data/mysql-3308:/data
     networks:
       - link-network
-
-  nsqlookupd:
-    image: nsqio/nsq
-    networks:
-      - link-network
-    hostname: nsqlookupd
-    ports:
-      - "4161:4161"
-      - "4160:4160"
-    command: /nsqlookupd
-
-  nsqd:
-    image: nsqio/nsq
-    depends_on:
-      - nsqlookupd
-    hostname: nsqd
-    volumes:
-      - ~/docker-data/nsq:/data
-    networks:
-      - link-network
-    ports:
-      - "4151:4151"
-      - "4150:4150"
-    command: /nsqd --broadcast-address=nsqd --lookupd-tcp-address=nsqlookupd:4160 --data-path=/data
-
-  nsqadmin:
-    image: nsqio/nsq
-    depends_on:
-      - nsqlookupd
-    hostname: nsqadmin
-    ports:
-      - "4171:4171"
-    networks:
-      - link-network
-    command: /nsqadmin --lookupd-http-address=nsqlookupd:4161
-
-  zookeeper:
-    image: wurstmeister/zookeeper
-    restart: unless-stopped
-    hostname: zookeeper
-    ports:
-      - "2181:2181"
-    container_name: zookeeper
-    networks:
-      - link-network
-
-  kafka:
-    image: wurstmeister/kafka
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_ADVERTISED_HOST_NAME: localhost
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_BROKER_ID: 1
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CREATE_TOPICS: "stream-in:1:1,stream-out:1:1"
-    depends_on:
-      - zookeeper
-    container_name: kafka
-    networks:
-      - link-network
+#
+#  nsqlookupd:
+#    image: nsqio/nsq
+#    networks:
+#      - link-network
+#    hostname: nsqlookupd
+#    ports:
+#      - "4161:4161"
+#      - "4160:4160"
+#    command: /nsqlookupd
+#
+#  nsqd:
+#    image: nsqio/nsq
+#    depends_on:
+#      - nsqlookupd
+#    hostname: nsqd
+#    volumes:
+#      - ~/docker-data/nsq:/data
+#    networks:
+#      - link-network
+#    ports:
+#      - "4151:4151"
+#      - "4150:4150"
+#    command: /nsqd --broadcast-address=nsqd --lookupd-tcp-address=nsqlookupd:4160 --data-path=/data
+#
+#  nsqadmin:
+#    image: nsqio/nsq
+#    depends_on:
+#      - nsqlookupd
+#    hostname: nsqadmin
+#    ports:
+#      - "4171:4171"
+#    networks:
+#      - link-network
+#    command: /nsqadmin --lookupd-http-address=nsqlookupd:4161
+#
+#  zookeeper:
+#    image: wurstmeister/zookeeper
+#    restart: unless-stopped
+#    hostname: zookeeper
+#    ports:
+#      - "2181:2181"
+#    container_name: zookeeper
+#    networks:
+#      - link-network
+#
+#  kafka:
+#    image: wurstmeister/kafka
+#    ports:
+#      - "9092:9092"
+#    environment:
+#      KAFKA_ADVERTISED_HOST_NAME: localhost
+#      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+#      KAFKA_BROKER_ID: 1
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#      KAFKA_CREATE_TOPICS: "stream-in:1:1,stream-out:1:1"
+#    depends_on:
+#      - zookeeper
+#    container_name: kafka
+#    networks:
+#      - link-network
 
 networks:
   link-network:

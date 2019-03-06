@@ -17,6 +17,7 @@ var muLabel sync.RWMutex
 //Mongo 对外
 type Mysqler interface {
 	//NewRs(label string) (MysqlResourcerInterface, error)
+	MysqlService(label string) (Mysqler, error)
 	GetPool(t string) (*gorm.DB, error)
 	Get(ctx context.Context, args map[string]interface{}) error
 	List(ctx context.Context, args map[string]interface{}) error
@@ -133,7 +134,7 @@ func (ms *zgoMysqlService) Count(ctx context.Context, args map[string]interface{
 }
 
 func (ms *zgoMysqlService) Create(ctx context.Context, args map[string]interface{}) error {
-	return ms.res.Get(ctx, args)
+	return ms.res.Create(ctx, args)
 }
 
 func (ms *zgoMysqlService) UpdateOne(ctx context.Context, args map[string]interface{}) (int, error) {
