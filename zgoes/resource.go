@@ -88,6 +88,7 @@ func (e *esResource) QueryTmp(ctx context.Context, index, table, tmp string, arg
 	maps := map[string]interface{}{} //定义es返回结构提
 	uri := e.uri + "/" + index + "/" + table + "/" + "_search/template?pretty"
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(tmp))
+	req.Header.Set("Content-Type", "application/json")
 	resp, err := e.GetConChan().Do(req)
 	if err != nil {
 		fmt.Print(err)
