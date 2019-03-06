@@ -54,7 +54,7 @@ func (m *mongoResource) Login(ctx context.Context, db, user, pass string) (*mgo.
 
 func (m *mongoResource) Create(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 	s := <-m.connpool.GetConnChan(m.label)
-	return nil, s.DB(args["db"].(string)).C(args["table"].(string)).Insert(args["items"])
+	return s.DB(args["db"].(string)).C(args["table"].(string)).Insert(args["items"]), nil
 }
 
 // type bson.M map[string]interface{}
@@ -98,7 +98,7 @@ func (m *mongoResource) UpdateOne(ctx context.Context, args map[string]interface
 //修改多条数据，期望参数db table update query参数不传则为全部查询
 func (m *mongoResource) UpdateAll(ctx context.Context, args map[string]interface{}) error {
 	s := <-m.connpool.GetConnChan(m.label)
-	if args["query"] == nil{
+	if args["query"] == nil {
 		return errors.New("query cannot be empty")
 	}
 	judgeMongo(args)

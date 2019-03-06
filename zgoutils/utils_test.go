@@ -54,6 +54,14 @@ func TestUtils_Marshal(t *testing.T) {
 	}
 	fmt.Print(string(str), err)
 }
+func BenchmarkUtils_Marshal(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, err := u.Marshal(st)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
 
 func TestUtils_Unmarshal(t *testing.T) {
 	st := &struct {

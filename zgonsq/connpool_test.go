@@ -58,7 +58,7 @@ func TestProducer(t *testing.T) {
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 10 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 10000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
@@ -68,7 +68,7 @@ func TestProducer(t *testing.T) {
 		go func(i int) {
 			countChan <- i //统计开出去的goroutine
 			if i%2 == 0 {
-				ch := producer(label_sh, clientBj, i, false)
+				ch := producer(label_sh, clientBj, i, true)
 				reply := <-ch
 				replyChan <- reply
 

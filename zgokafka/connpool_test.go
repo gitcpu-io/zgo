@@ -69,7 +69,7 @@ func TestProducer(t *testing.T) {
 		go func(i int) {
 			countChan <- i //统计开出去的goroutine
 			if i%2 == 0 {
-				ch := producer(label_sh, clientBj, i, false)
+				ch := producer(label_sh, clientBj, i, true)
 				reply := <-ch
 				replyChan <- reply
 

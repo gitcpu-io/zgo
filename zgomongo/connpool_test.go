@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
-	"github.com/globalsign/mgo/bson"
 	"github.com/json-iterator/go"
 	"testing"
 	"time"
@@ -65,7 +64,7 @@ func TestMongoGet(t *testing.T) {
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 10 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 10000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
@@ -75,8 +74,8 @@ func TestMongoGet(t *testing.T) {
 		go func(i int) {
 			countChan <- i //统计开出去的goroutine
 			if i%2 == 0 {
-				//ch := getMongo(label_sh,clientBj,i)
-				ch := createMongo(label_sh, clientBj, i)
+				ch := getMongo(label_sh, clientBj, i)
+				//ch := createMongo(label_sh, clientBj, i)
 				reply := <-ch
 				replyChan <- reply
 
@@ -135,8 +134,8 @@ func getMongo(label string, client *zgomongo, i int) chan int {
 	//输入参数：上下文ctx，mongoChan里面是client的连接，args具体的查询操作参数
 	args := make(map[string]interface{})
 	args["db"] = "local"
-	args["collection"] = "startup_log"
-	args["query"] = bson.M{}
+	args["table"] = "startup_log"
+	args["query"] = make(map[string]interface{})
 
 	result, err := client.Get(ctx, args)
 	if err != nil {
@@ -175,12 +174,12 @@ func createMongo(label string, client *zgomongo, i int) chan int {
 	//输入参数：上下文ctx，mongoChan里面是client的连接，args具体的查询操作参数
 	args := make(map[string]interface{})
 	args["db"] = "test"
-	args["collection"] = label
+	args["table"] = label
 	args["items"] = &user{
 		Label: label,
 		Age:   i,
 	}
-	result, err := client.Create(ctx, args)
+	_, err := client.Create(ctx, args)
 	if err != nil {
 		panic(err)
 	}
@@ -192,10 +191,10 @@ func createMongo(label string, client *zgomongo, i int) chan int {
 		out <- 10001
 		return out
 	default:
-		_, err := json.Marshal(result)
-		if err != nil {
-			panic(err)
-		}
+		//_, err := json.Marshal(result)
+		//if err != nil {
+		//	panic(err)
+		//}
 		//fmt.Println(string(bytes), err, "---from mongo successful---")
 		out <- 1
 	}
