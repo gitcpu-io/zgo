@@ -12,13 +12,24 @@ import (
 	"sync"
 )
 
+//对外接口
 type EsResourcer interface {
 	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
 }
 
 var mu sync.RWMutex
 
-//var json = jsoniter.ConfigCompatibleWithStandardLibrary
+//接口实现
+type esResource struct {
+	label string       //配置标签
+	mu    sync.RWMutex //读写锁
+	uri   string       //绑定地址
+}
+
+//获取原生http
+func (e *esResource) GetConChan() *http.Client {
+	return &http.Client{}
+}
 
 //方法初始化从uris中获取uri
 func NewEsResourcer(label string) EsResourcer {
@@ -35,19 +46,10 @@ func NewEsResourcer(label string) EsResourcer {
 	}
 }
 
-type esResource struct {
-	label string
-	mu    sync.RWMutex
-	uri   string
-}
-
-func (e *esResource) GetConChan() *http.Client {
-	return &http.Client{}
-}
-
+//根据dsl语句执行查询
 func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error) {
 	maps := map[string]interface{}{}
-	//定义es返回结构体=
+	//定义es结果集返回结构体
 	uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"         //拼接es请求uti[索引+文档+_search]
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl)) //post请求
 	if err != nil {
@@ -74,4 +76,3 @@ func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, ar
 	}
 	return maps, err
 }
-

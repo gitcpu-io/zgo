@@ -18,7 +18,7 @@ func TestEsSearch(t *testing.T) {
 	hsm := make(map[string][]*config.ConnDetail)
 	cd_bj := config.ConnDetail{
 		C:        "北京主库-----es1",
-		Uri:      "http://101.201.28.195:9200",
+		Uri:      "http://101.201.119.240:9200",
 		Host:     "http://101.201.28.195",
 		Port:     9200,
 		ConnSize: 50,
@@ -26,7 +26,7 @@ func TestEsSearch(t *testing.T) {
 	}
 	cd_bj2 := config.ConnDetail{
 		C:        "北京主库-----es2",
-		Uri:      "http://101.201.28.195:9200",
+		Uri:      "http://101.201.119.240:9200",
 		Host:     "http://101.201.28.195",
 		Port:     9200,
 		ConnSize: 50,
@@ -34,7 +34,7 @@ func TestEsSearch(t *testing.T) {
 	}
 	cd_sh := config.ConnDetail{
 		C:        "上海主库-----es",
-		Uri:      "http://101.201.28.195:9200",
+		Uri:      "http://101.201.119.240:9200",
 		Host:     "http://101.201.28.195",
 		Port:     9200,
 		ConnSize: 50,
@@ -55,7 +55,7 @@ func TestEsSearch(t *testing.T) {
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 200 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 100 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
@@ -114,19 +114,6 @@ func TestEsSearch(t *testing.T) {
 			fmt.Println("处理进度每1000毫秒", len(count))
 
 		}
-
-		//}
-		//start := time.Now()
-		//
-		//for i := 0; i < 1000; i++ {
-		//	go func() {
-		//		sellR.SearchDsl(ctx, index, table, dsl, args)
-		//	}()
-		//}
-		//cost := time.Since(start)
-		//fmt.Printf("cost=[%s]", cost)
-
-		//time.Sleep(10 * time.Second)
 	}
 
 }
@@ -171,41 +158,56 @@ func search(label string, client *zgoes, i int) chan int {
 	return out
 
 }
-func TestGetById(t *testing.T) {
-	hsm := make(map[string][]*config.ConnDetail)
-	cd_bj := config.ConnDetail{
-		C:        "北京主库-----es1",
-		Uri:      "http://101.201.28.195:9200",
-		Host:     "http://101.201.28.195",
-		Port:     9200,
-		ConnSize: 50,
-		PoolSize: 20000,
-	}
-	cd_bj2 := config.ConnDetail{
-		C:        "北京主库-----es2",
-		Uri:      "http://101.201.28.195:9200",
-		Host:     "http://101.201.28.195",
-		Port:     9200,
-		ConnSize: 50,
-		PoolSize: 20000,
-	}
-	cd_sh := config.ConnDetail{
-		C:        "上海主库-----es",
-		Uri:      "http://101.201.28.195:9200",
-		Host:     "http://101.201.28.195",
-		Port:     9200,
-		ConnSize: 50,
-		PoolSize: 20000,
-	}
-	var s1 []*config.ConnDetail
-	var s2 []*config.ConnDetail
-	s1 = append(s1, &cd_bj, &cd_bj2)
-	s2 = append(s2, &cd_sh)
-	hsm = map[string][]*config.ConnDetail{
-		label_sell: s1,
-		label_rent: s2,
-	}
-
-	InitEs(hsm)
-
-}
+//func TestGetById(t *testing.T) {
+//	hsm := make(map[string][]*config.ConnDetail)
+//	cd_bj := config.ConnDetail{
+//		C:        "北京主库-----es1",
+//		Uri:      "http://101.201.119.240:9200",
+//		Host:     "http://101.201.28.195",
+//		Port:     9200,
+//		ConnSize: 50,
+//		PoolSize: 20000,
+//	}
+//	cd_bj2 := config.ConnDetail{
+//		C:        "北京主库-----es2",
+//		Uri:      "http://101.201.119.240:9200",
+//		Host:     "http://101.201.28.195",
+//		Port:     9200,
+//		ConnSize: 50,
+//		PoolSize: 20000,
+//	}
+//	cd_sh := config.ConnDetail{
+//		C:        "上海主库-----es",
+//		Uri:      "http://101.201.119.240:9200",
+//		Host:     "http://101.201.28.195",
+//		Port:     9200,
+//		ConnSize: 50,
+//		PoolSize: 20000,
+//	}
+//	var s1 []*config.ConnDetail
+//	var s2 []*config.ConnDetail
+//	s1 = append(s1, &cd_bj, &cd_bj2)
+//	s2 = append(s2, &cd_sh)
+//	hsm = map[string][]*config.ConnDetail{
+//		label_sell: s1,
+//		label_rent: s2,
+//	}
+//
+//	InitEs(hsm)
+//	sellR, _ := GetEs(label_sell)
+//	args := map[string]interface{}{}
+//	index := "active_bj_house_sell"
+//	table := "spider"
+//	dsl := `{
+//	  "query": {
+//   		 "bool" : {
+//    	    "filter": {
+//        	"term" : { "_id" : "5055" }
+//     		 }
+//   		 }
+//  		}
+//	}`
+//	res, _ := sellR.SearchDsl(context.TODO(), index, table, dsl, args)
+//	s, _ := zgoutils.NewUtils().Marshal(res)
+//	fmt.Print(string(s))
+//}
