@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/json-iterator/go"
 	"github.com/satori/go.uuid"
+	"io"
 	"net"
 	"net/url"
 	"reflect"
@@ -48,6 +49,8 @@ type Utilser interface {
 	Marshal(in interface{}) ([]byte, error)
 	//Unmarshal 反序列化为go 内存对象
 	Unmarshal(message []byte, in interface{}) error
+	NewDecoder(reader io.Reader) *jsoniter.Decoder
+	NewEncoder(writer io.Writer) *jsoniter.Encoder
 	//结构体转map[string]interface{}
 	StructToMap(interface{}) map[string]interface{}
 	// GrpcServiceMethod converts a gRPC method to a Go method
@@ -91,6 +94,14 @@ func (u *utils) Marshal(res interface{}) ([]byte, error) {
 //Unmarshal 反序列化为go 内存对象
 func (u *utils) Unmarshal(message []byte, in interface{}) error {
 	return jsonIterator.Unmarshal(message, in)
+}
+
+func (u *utils) NewDecoder(reader io.Reader) *jsoniter.Decoder {
+	return jsoniter.NewDecoder(reader)
+}
+
+func (u *utils) NewEncoder(writer io.Writer) *jsoniter.Encoder {
+	return jsoniter.NewEncoder(writer)
 }
 
 //StructToMap 结构体转map[string]interface{}

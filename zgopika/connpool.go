@@ -1,3 +1,4 @@
+// Pika client
 package zgopika
 
 import (

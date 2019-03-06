@@ -83,7 +83,7 @@ func TestPikaGet(t *testing.T) {
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 5000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 10000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
