@@ -55,56 +55,56 @@ func (mr *mysqlResource) GetWPool() (*gorm.DB, error) {
 }
 
 func (mr *mysqlResource) Get(ctx context.Context, args map[string]interface{}) error {
-	gormpoll, err := mr.GetRPool()
+	gormPool, err := mr.GetRPool()
 	if err != nil {
 		return err
 	}
-	err = gormpoll.Table(args["tablename"].(string)).Where(args["query"], args["args"].([]interface{})...).First(args["obj"]).Error
+	err = gormPool.Table(args["tablename"].(string)).Where(args["query"], args["args"].([]interface{})...).First(args["obj"]).Error
 	return err
 }
 
 func (mr *mysqlResource) List(ctx context.Context, args map[string]interface{}) error {
-	gormpoll, err := mr.GetRPool()
+	gormPool, err := mr.GetRPool()
 	if err != nil {
 		return err
 	}
-	gormpoll = gormpoll.Table(args["tablename"].(string)).Where(args["query"], args["args"].([]interface{})...)
+	gormPool = gormPool.Table(args["tablename"].(string)).Where(args["query"], args["args"].([]interface{})...)
 	currentLimit := 30
 	if limit, ok := args["limit"]; ok {
-		gormpoll = gormpoll.Limit(limit)
+		gormPool = gormPool.Limit(limit)
 		currentLimit = limit.(int)
 	} else {
-		gormpoll = gormpoll.Limit(currentLimit)
+		gormPool = gormPool.Limit(currentLimit)
 	}
 	if page, ok := args["page"]; ok {
-		gormpoll = gormpoll.Offset((page.(int) - 1) * currentLimit)
+		gormPool = gormPool.Offset((page.(int) - 1) * currentLimit)
 	} else if offset, ok := args["offset"]; ok {
-		gormpoll = gormpoll.Offset(offset)
+		gormPool = gormPool.Offset(offset)
 	}
 	if order, ok := args["order"]; ok {
-		gormpoll = gormpoll.Order(order)
+		gormPool = gormPool.Order(order)
 	}
-	err = gormpoll.Find(args["obj"]).Error
+	err = gormPool.Find(args["obj"]).Error
 	return err
 }
 
 func (mr *mysqlResource) Count(ctx context.Context, args map[string]interface{}) error {
-	gormpoll, err := mr.GetRPool()
+	gormPool, err := mr.GetRPool()
 	if err != nil {
 		return err
 	}
-	gormpoll = gormpoll.Table(args["tablename"].(string))
-	err = gormpoll.Count(args["count"]).Error
+	gormPool = gormPool.Table(args["tablename"].(string))
+	err = gormPool.Count(args["count"]).Error
 	return err
 }
 
 func (mr *mysqlResource) Create(ctx context.Context, args map[string]interface{}) error {
-	gormpoll, err := mr.GetWPool()
+	gormPool, err := mr.GetWPool()
 	if err != nil {
 		return err
 	}
-	if gormpoll.Table(args["tablename"].(string)).NewRecord(args["obj"]) {
-		err = gormpoll.Table(args["tablename"].(string)).Create(args["obj"]).Error
+	if gormPool.Table(args["tablename"].(string)).NewRecord(args["obj"]) {
+		err = gormPool.Table(args["tablename"].(string)).Create(args["obj"]).Error
 		return err
 	} else {
 		return errors.New("被创建对象不能有主键")
@@ -113,22 +113,23 @@ func (mr *mysqlResource) Create(ctx context.Context, args map[string]interface{}
 }
 
 func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interface{}) (int, error) {
-	gormpoll, err := mr.GetWPool()
+	gormPool, err := mr.GetWPool()
 	if err != nil {
 		return 0, err
 	}
-	db := gormpoll.Table(args["tablename"].(string)).Where(" id = ? ", args["id"].(int)).Updates(args["data"])
+	db := gormPool.Table(args["tablename"].(string)).Model(args["obj"]).Updates(args["data"])
 	count := db.RowsAffected
 	err = db.Error
 	return int(count), err
 }
 
 func (mr *mysqlResource) DeleteOne(ctx context.Context, args map[string]interface{}) (int, error) {
-	gormpoll, err := mr.GetWPool()
+	gormPool, err := mr.GetWPool()
 	if err != nil {
 		return 0, err
 	}
-	db := gormpoll.Table(args["tablename"].(string)).Where(" id = ? ", args["id"].(int)).Delete(args["data"])
+	//db := gormPool.Table(args["tablename"].(string)).Where(" id = ? ", args["id"].(int)).Delete(args["data"])
+	db := gormPool.Table(args["tablename"].(string)).Delete(args["obj"])
 	count := db.RowsAffected
 	err = db.Error
 	return int(count), err

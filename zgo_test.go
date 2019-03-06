@@ -15,7 +15,7 @@ func TestEngine(t *testing.T) {
 			//"nsq_label_sh",
 		},
 		Mongo: []string{ //测试etcd配置动态改库成功
-			"mongo_label_bj",
+			//"mongo_label_bj",
 			//"mongo_label_sh",
 		},
 		Kafka: []string{ //测试etcd配置动态改库成功
@@ -25,13 +25,12 @@ func TestEngine(t *testing.T) {
 			//"redis_label_bj",
 		},
 		Pika: []string{ //测试etcd配置动态改库成功
-			//"pika_label_rw",
+			"pika_label_rw",
 		},
 
 		Mysql: []string{
-			//"mysql_sell_1",
+			"mysql_sell_1",
 		},
-
 	})
 
 	if err != nil {

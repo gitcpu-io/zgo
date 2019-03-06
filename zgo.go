@@ -121,6 +121,7 @@ func Engine(opt *Options) error {
 					out := zgocache.InitCache(cacheCh)
 					go func() {
 						for v := range out {
+							fmt.Println("InitCache Success")
 							Cache = v
 						}
 					}()
