@@ -252,20 +252,24 @@
           {
             "c": "北京二手房库 etcd-旧实例w",
             "t":"w",
-            "host": "root:root@(localhost:3307)/abc?charset=utf8&parseTime=True&loc=Local",
+            "host": "localhost",
             "port": 3307,
-            "connSize": 5,
-            "mixSize": 10,
-            "poolSize": 499
+            "username": "root",
+            "password": "root",
+            "MaxIdleSize":111,
+            "MaxOpenConn": 222,
+            "dbname": "spider"
           },
           {
             "c": "北京二手房库 etcd-旧实例r",
             "t":"r",
-            "host": "root:root@(localhost:3308)/abc?charset=utf8&parseTime=True&loc=Local",
+            "host": "localhost",
             "port": 3308,
-            "connSize": 55,
-            "mixSize": 12,
-            "poolSize": 399
+            "username": "root",
+            "password": "root",
+            "MaxIdleSize": 222,
+            "MaxOpenConn": 333,
+            "dbname": "spider"
           }
         ]
     },
@@ -276,19 +280,23 @@
           "c": "北京二手房库 旧实例w",
           "t":"w",
           "host": "localhost",
-          "port": 3307,
-          "connSize": 50,
-          "mixSize": 11,
-          "poolSize": 1999
+          "port": 3306,
+          "username": "root",
+          "password": "root",
+          "MaxIdleSize": 5,
+          "MaxOpenConn": 10,
+          "dbname": "spider"
         },
         {
           "c": "北京二手房库 旧实例r",
           "t":"r",
           "host": "localhost",
-          "port": 3308,
-          "connSize": 50,
-          "mixSize": 12,
-          "poolSize": 1998
+          "port": 3306,
+          "username": "root",
+          "password": "root",
+          "MaxIdleSize": 5,
+          "MaxOpenConn": 10,
+          "dbname": "spider"
         }
       ]
     }
@@ -305,8 +313,11 @@
       }
   },
   "cache":{
+    "start": 1,
+    "dbType": "pika",
     "label":"pika_label_rw",
-    "expire":86400
+    "tcType": 2,
+    "rate": 2
   }
 
 }

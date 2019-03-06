@@ -13,66 +13,65 @@ import (
 	"time"
 )
 
-var (
-	expire int
-	label  string
-)
-
-func InitCache(cacheCh chan *config.CacheConfig) CacheServiceInterface {
+func InitCache(cacheCh chan *config.CacheConfig) chan Cacher {
+	out := make(chan Cacher)
 	go func() { //接收到etcd变化后，触发label和expire的值
-
 		for v := range cacheCh {
-
-			label = v.Label
-			expire = v.Expire
-
-			fmt.Println(label, expire, "-----etcd tiger cache value----")
-
+			fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v;", v.Label, v.Rate, v.DbType, v.TcType, v.Start, "-----etcd tiger cache value----")
+			hm := config.Cache
+			rate := hm.Rate
+			dbtype := hm.DbType
+			tcType := hm.TcType
+			label := hm.Label
+			start := hm.Start
+			out <- GetCache(start, dbtype, label, rate, tcType)
 		}
-
 	}()
 
-	hm := config.Cache
-	expire := 86400
-	label := ""
-	dbtype := "pika"
-	if hm.Start != 1 {
-		return GetCache(0, dbtype, label, expire)
-	}
-	if hm.Expire != 0 {
-		expire = hm.Expire
-	}
-	if hm.Label != "" {
-		label = hm.Label
-	}
-	if hm.DbType != "" {
-		dbtype = hm.DbType
-	}
-	return GetCache(1, dbtype, label, expire)
+	go func() { //接收到etcd变化后，触发label和expire的值
+		hm := config.Cache
+		fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v; -----etcd tiger cache value----", hm.Label, hm.Rate, hm.DbType, hm.TcType, hm.Start)
+		rate := hm.Rate
+		dbtype := hm.DbType
+		tcType := hm.TcType
+		label := hm.Label
+		start := hm.Start
+		out <- GetCache(start, dbtype, label, rate, tcType)
+	}()
+	return out
 }
 
-// 创建service对象的方法
-func GetCache(start int, dbtype string, label string, expire int) CacheServiceInterface {
+/*
+ GetCache 创建service对象的方法
+ 1.start 是否开启
+ 2.dbtype 是否开启
+ 3.label 是否开启
+ 4.expire 是否开启
+ 5.tcType 超时对象
+*/
+func GetCache(start int, dbtype string, label string, rate int, tcType int) Cacher {
 	if start == 1 {
 		if dbtype == "pika" {
 			// todo 找不到pika后异常处理
 			service := zgopika.Pika(label)
 			return &zgocache{
+				start,
 				label,
 				dbtype,
 				service,
-				expire,
-				start,
+				tcType,
+				rate,
 			}
 		}
 	} else {
 		fmt.Println("未配置缓存")
 		return &zgocache{
-			"",
-			"",
-			nil,
 			0,
-			start,
+			label,
+			dbtype,
+			nil,
+			tcType,
+			rate,
 		}
 	}
 	log.Fatalf("缓存数据库类型不支持")
@@ -80,10 +79,10 @@ func GetCache(start int, dbtype string, label string, expire int) CacheServiceIn
 }
 
 // 对外接口
-type CacheServiceInterface interface {
-	NewPikaCacheService(label string, expire int) CacheServiceInterface
-	Decorate(fn CacheFunc) CacheFunc
-	TimeOutDecorate(fn CacheFunc) CacheFunc
+type Cacher interface {
+	NewPikaCacheService(label string, expire int, tcType int) Cacher
+	Decorate(fn CacheFunc, expire int) CacheFunc
+	TimeOutDecorate(fn CacheFunc, expire int) CacheFunc
 }
 
 // 缓存装饰器接收的函数类型
@@ -103,17 +102,17 @@ type cacheResult struct {
 
 //zgocache 结构体
 type zgocache struct {
+	start   int
 	label   string
 	dbtype  string
 	service zgopika.Pikaer
-	expire  int
-	start   int
+	tcType  int // 1 降级缓存 2 正常缓存
+	rate    int // 失效时间 倍率
 }
 
 // 缓存装饰器
-func (z *zgocache) Decorate(fn CacheFunc) CacheFunc {
+func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
 	return func(ctx context.Context, param map[interface{}]interface{}) (interface{}, error) {
-
 		fmt.Println("进入Decorate")
 		if z.start != 1 {
 			return fn(ctx, param)
@@ -127,7 +126,7 @@ func (z *zgocache) Decorate(fn CacheFunc) CacheFunc {
 		}
 
 		// 获取缓存
-		data, err := z.getData(ctx, key, field)
+		data, err := z.getData(ctx, key, field, expire)
 		if err != nil { // 有异常 或者 没有缓存
 			// 执行函数获取数据
 			data, err = fn(ctx, param)
@@ -143,13 +142,16 @@ func (z *zgocache) Decorate(fn CacheFunc) CacheFunc {
 }
 
 // 降级缓存装饰器
-func (z *zgocache) TimeOutDecorate(fn CacheFunc) CacheFunc {
+func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 	return func(ctx context.Context, param map[interface{}]interface{}) (interface{}, error) {
+		if z.tcType == 2 {
+			return z.Decorate(fn, 0)(ctx, param)
+		}
 		fmt.Println("进入TimeOutDecorate")
 		if z.start != 1 {
 			return fn(ctx, param)
 		}
-		ctxTimeout, cancel := context.WithTimeout(ctx, 2*time.Second)
+		ctxTimeout, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
 		ch := make(chan *funResult)
 
 		// 执行
@@ -176,7 +178,7 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc) CacheFunc {
 				return nil, fieldErr
 			}
 			// 返回
-			data, err := z.getData(ctx, key, field)
+			data, err := z.getData(ctx, key, field, 0)
 			return data, err
 
 		case value, ok := <-ch:
@@ -194,11 +196,11 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc) CacheFunc {
 }
 
 // 创建新的缓存
-func (z *zgocache) NewPikaCacheService(label string, expire int) CacheServiceInterface {
-	return GetCache(z.start, "pika", label, expire)
+func (z *zgocache) NewPikaCacheService(label string, expire int, tcType int) Cacher {
+	return GetCache(z.start, "pika", label, expire, tcType)
 }
 
-func (z *zgocache) getData(ctx context.Context, key string, field string) (interface{}, error) {
+func (z *zgocache) getData(ctx context.Context, key string, field string, expire int) (interface{}, error) {
 	// 根据项目名，包名，类名，函数名称，拼接，然后数据库
 	//project := config.Project
 	//fn := runtime.FuncForPC(reflect.ValueOf(a).Pointer()).Name()
@@ -212,8 +214,10 @@ func (z *zgocache) getData(ctx context.Context, key string, field string) (inter
 	} else {
 		data := &cacheResult{}
 		jsoniter.UnmarshalFromString(value.(string), data)
-		if data.time < time.Now().Second()-z.expire {
-			return nil, errors.New("缓存已失效")
+		if expire != 0 {
+			if data.time < time.Now().Second()-expire*z.rate {
+				return nil, errors.New("缓存已失效")
+			}
 		}
 		return data.result, nil
 	}
@@ -235,6 +239,6 @@ func (z *zgocache) setData(ctx context.Context, key string, field string, data i
 }
 
 func (z *zgocache) getKey(fn CacheFunc) string {
-	key := "GOCache_" + config.Project + "_" + runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
+	key := "GOCache:" + config.Project + ":" + runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
 	return key
 }
