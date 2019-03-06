@@ -1,8 +1,5 @@
 /*
-@Time : 2019-02-26 12:23
-@Author : zhangjianguo
-@File : service
-@Software: GoLand
+  Elasticsearch 客户端 基于http实现 可以执行原生DSL语句
 */
 package zgoes
 
@@ -23,7 +20,6 @@ func InitEs(hsm map[string][]*config.ConnDetail) chan *zgoes {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 	currentLabels = hsm
-
 	//自动为变量初始化对象
 	initLabel := ""
 	for k, _ := range hsm {
@@ -46,17 +42,17 @@ func InitEs(hsm map[string][]*config.ConnDetail) chan *zgoes {
 }
 
 type zgoes struct {
-	res EsResourcer //使用resource另外的一个接口
+	res EsResourcer
 }
 
-//GetMongo zgo内部获取一个连接mongo
 func GetEs(label ...string) (*zgoes, error) {
+	//根据配置获取具体配置信息
 	l, err := comm.GetCurrentLabel(label, muLabel, currentLabels)
 	if err != nil {
 		return nil, err
 	}
 	return &zgoes{
-		res: NewEsResourcer(l), //interface
+		res: NewEsResourcer(l),
 	}, nil
 }
 
@@ -66,16 +62,27 @@ func Es(l string) Eser {
 	}
 }
 
-//Es 对外
+/*
+ ElasticSearch 对外使用接口
+*/
 type Eser interface {
-	NewEs(label ...string) (*zgoes, error) //初始化方法
+	// 根据配置名称获取Elastic实例 如果所在项目中只使用一个Elastic实例时，则无需初始化（调用NewEs）,可以直接使用接口
+	NewEs(label ...string) (*zgoes, error)
+	// param ctx:上线文
+	// param index:索引文明
+	// param table:文档名称
+	// param dsl: 原生elastic语句
+	// 根据elastic dsl 语句查询数据 该接口只能执行查询操作
 	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
+	// 根据elastic dsl 语句模板方式查询数据 该接口只能执行查询操作
+	// 具体使用请参考:https://www.elastic.co/guide/en/elasticsearch/reference/6.6/search-template.html
 	QueryTmp(ctx context.Context, index, table, tmp string, args map[string]interface{}) (interface{}, error)
 }
 
 func (e *zgoes) NewEs(label ...string) (*zgoes, error) {
 	return GetEs(label...)
 }
+
 func (e *zgoes) SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error) {
 	return e.res.SearchDsl(ctx, index, table, dsl, args)
 }

@@ -1,9 +1,3 @@
-/*
-@Time : 2019-02-26 12:23
-@Author : zhangjianguo
-@File : resource
-@Software: GoLand
-*/
 package zgoes
 
 import (
