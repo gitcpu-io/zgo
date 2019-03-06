@@ -28,13 +28,15 @@ type ConnDetail struct {
 	Db          int    `json:"db,omitempty"`
 	T           string `json:"t,omitempty"` // w 写入 r 只读
 	Prefix      string `json:"prefix,omitempty"`
+	DbName      string `json:"dbName,omitempty"` // w 写入 r 只读
 }
 
 type CacheConfig struct {
-	Expire int    `json:"expire"` // 缓存失效时间 单位sec
-	Label  string `json:"label"`  // 缓存所需的 redisLabel
-	Start  int    `json:"start"`  // 是否开启
-	DbType string `json:"dbType"` //
+	Rate   int    `json:"rate"`   // 缓存失效时间 倍率
+	Label  string `json:"label"`  // 缓存所需的 pikaLabel
+	Start  int    `json:"start"`  // 是否开启 1 开启 0关闭
+	DbType string `json:"dbType"` // 数据库类型 默认pika
+	TcType int    `json:"tcType"` // 降级缓存类型 1正常降级缓存 2转为普通缓存
 }
 
 type LabelDetail struct {

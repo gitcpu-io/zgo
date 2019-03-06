@@ -91,9 +91,9 @@ func Engine(opt *Options) error {
 			in := <-zgokafka.InitKafka(hsm)
 			Kafka = in
 		}
-
 		// 从local初始化缓存模块
-		Cache = zgocache.InitCache(cacheCh)
+		in := <-zgocache.InitCache(cacheCh)
+		Cache = in
 
 	} else {
 
@@ -112,10 +112,18 @@ func Engine(opt *Options) error {
 						fmt.Println("反序列化当前值失败", mk)
 					}
 					config.Cache.Label = cm.Label
-					config.Cache.Expire = cm.Expire
+					config.Cache.Rate = cm.Rate
+					config.Cache.Start = cm.Start
+					config.Cache.TcType = cm.TcType
+					config.Cache.DbType = cm.DbType
 
 					// 从etcd初始化缓存模块
-					Cache = zgocache.InitCache(cacheCh)
+					out := zgocache.InitCache(cacheCh)
+					go func() {
+						for v := range out {
+							Cache = v
+						}
+					}()
 
 				} else if smk[1] == "conn" {
 
@@ -281,11 +289,11 @@ var (
 	Redis zgoredis.Rediser
 	Pika  zgopika.Pikaer
 
-	Mysql    zgomysql.MysqlServiceInterface
+	Mysql    zgomysql.Mysqler
 	File     = zgofile.NewLocal()
 	Utils    = zgoutils.NewUtils()
 	Log      = zgolog.Newzgolog()
 	ZoneInfo = zgozoneinfo.NewZoneInfo()
 
-	Cache zgocache.CacheServiceInterface
+	Cache zgocache.Cacher
 )

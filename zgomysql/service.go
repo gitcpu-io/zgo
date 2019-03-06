@@ -15,7 +15,7 @@ var cityDbConfig = make(map[string]map[string]string)
 var muLabel sync.RWMutex
 
 //Mongo 对外
-type MysqlServiceInterface interface {
+type Mysqler interface {
 	//NewRs(label string) (MysqlResourcerInterface, error)
 	GetPool(t string) (*gorm.DB, error)
 	Get(ctx context.Context, args map[string]interface{}) error
@@ -26,7 +26,7 @@ type MysqlServiceInterface interface {
 	DeleteOne(ctx context.Context, args map[string]interface{}) (int, error)
 	GetLabelByCityBiz(city string, biz string) (string, error)
 	GetDbByCityBiz(city string, biz string) (string, error)
-	MysqlServiceByCityBiz(city string, biz string) (MysqlServiceInterface, error)
+	MysqlServiceByCityBiz(city string, biz string) (Mysqler, error)
 }
 
 // 初始化
@@ -53,7 +53,7 @@ type zgoMysqlService struct {
 	res   MysqlResourcerInterface //使用resource另外的一个接口
 }
 
-func MysqlService(label string) (MysqlServiceInterface, error) {
+func MysqlService(label string) (Mysqler, error) {
 	res, err := NewRs(label)
 	if err != nil {
 		fmt.Println(err)
@@ -61,7 +61,7 @@ func MysqlService(label string) (MysqlServiceInterface, error) {
 	}
 	return &zgoMysqlService{label, res}, nil
 }
-func MysqlServiceByCityBiz(city string, biz string) (MysqlServiceInterface, error) {
+func MysqlServiceByCityBiz(city string, biz string) (Mysqler, error) {
 	label, err := GetLabelByCityBiz(city, biz)
 	if err != nil {
 		fmt.Println(err)
@@ -106,11 +106,11 @@ func GetLabelByCityBiz(city string, biz string) (string, error) {
 }
 
 // 对外接口 获取新的Service对象
-func (c *zgoMysqlService) MysqlService(label string) (MysqlServiceInterface, error) {
+func (c *zgoMysqlService) MysqlService(label string) (Mysqler, error) {
 	return MysqlService(label)
 }
 
-func (c *zgoMysqlService) MysqlServiceByCityBiz(city string, biz string) (MysqlServiceInterface, error) {
+func (c *zgoMysqlService) MysqlServiceByCityBiz(city string, biz string) (Mysqler, error) {
 	return MysqlServiceByCityBiz(city, biz)
 }
 

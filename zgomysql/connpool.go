@@ -69,7 +69,8 @@ func (cp *connPool) setConnPoolToChan(v []*config.ConnDetail) {
 
 func (cp *connPool) createClient(v *config.ConnDetail) (*gorm.DB, error) {
 	fmt.Println("initConnPool", v)
-	db, err := gorm.Open("mysql", v.Host)
+	host := fmt.Sprintf("%v:%v@(%v:%v)/%v?charset=utf8&parseTime=True&loc=Local", v.Username, v.Password, v.Host, v.Port, v.DbName)
+	db, err := gorm.Open("mysql", host)
 	if err != nil {
 		// 	链接mysql异常时 打印并退出系统
 		log.Fatalf(err.Error())
