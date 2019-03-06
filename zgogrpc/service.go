@@ -1,8 +1,5 @@
 /*
-@Time : 2019-02-27 14:38
-@Author : zhangjianguo
-@File : service
-@Software: GoLand
+  Grpc 客户端
 */
 package zgogrpc
 

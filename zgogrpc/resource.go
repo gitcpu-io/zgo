@@ -1,9 +1,3 @@
-/*
-@Time : 2019-02-27 14:38
-@Author : zhangjianguo
-@File : resource
-@Software: GoLand
-*/
 package zgogrpc
 
 import (
