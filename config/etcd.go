@@ -15,13 +15,14 @@ import (
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"reflect"
+	"strings"
 	"time"
 )
 
-func InitConfigByEtcd() (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail) {
+func InitConfigByEtcd() (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig) {
 	client, err := CreateClient()
 	if err != nil {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	prefixKey := "zgo"
@@ -37,13 +38,15 @@ func InitConfigByEtcd() (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail) {
 		ch <- v
 	}
 	//开始监控
-	return ch, Watcher(client, prefixKey)
+	ch1, ch2 := Watcher(client, prefixKey)
+	return ch, ch1, ch2
 }
 
-func Watcher(client *clientv3.Client, prefixKey string) chan map[string][]*ConnDetail {
+func Watcher(client *clientv3.Client, prefixKey string) (chan map[string][]*ConnDetail, chan *CacheConfig) {
 	hsm := make(map[string][]*ConnDetail)
 
 	out := make(chan map[string][]*ConnDetail)
+	outCache := make(chan *CacheConfig)
 	watcher := clientv3.NewWatcher(client)
 	wch := watcher.Watch(context.TODO(), prefixKey, clientv3.WithPrevKV(), clientv3.WithPrefix())
 	go func() {
@@ -54,6 +57,27 @@ func Watcher(client *clientv3.Client, prefixKey string) chan map[string][]*ConnD
 					if v.Type == clientv3.EventTypePut {
 						key := string(v.Kv.Key)
 						b := v.Kv.Value
+						preb := v.PrevKv.Value //上一次的值
+
+						if strings.Split(key, "/")[1] == "cache" { //如果监听到cache有变化
+							cm := CacheConfig{}
+							precm := CacheConfig{}
+							err := zgoutils.Utils.Unmarshal(b, &cm)
+							if err != nil {
+								fmt.Println("反序列化当前值失败", key)
+								return
+							}
+							err = zgoutils.Utils.Unmarshal(preb, &precm)
+							if err != nil {
+								fmt.Println("反序列上一个值失败", key)
+								return
+							}
+							if reflect.DeepEqual(cm, precm) != true { //如果有变化
+								outCache <- &cm
+							}
+							return
+						}
+
 						m := []ConnDetail{}
 						err := zgoutils.Utils.Unmarshal(b, &m)
 						if err != nil {
@@ -61,7 +85,6 @@ func Watcher(client *clientv3.Client, prefixKey string) chan map[string][]*ConnD
 
 							return
 						}
-						preb := v.PrevKv.Value
 						prem := []ConnDetail{}
 						err = zgoutils.Utils.Unmarshal(preb, &prem)
 						if err != nil {
@@ -83,7 +106,7 @@ func Watcher(client *clientv3.Client, prefixKey string) chan map[string][]*ConnD
 			}
 		}
 	}()
-	return out
+	return out, outCache
 }
 
 func CreateClient() (*clientv3.Client, error) {

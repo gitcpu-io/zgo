@@ -29,7 +29,7 @@ func Engine(opt *Options) error {
 	engine := &engine{
 		opt: opt,
 	}
-	ladech, err := opt.init() //把zgo_start中用户定义的，映射到zgo的内存变量上
+	ladech, cacheCh, err := opt.init() //把zgo_start中用户定义的，映射到zgo的内存变量上
 	if err != nil {
 		return err
 	}
@@ -92,6 +92,9 @@ func Engine(opt *Options) error {
 			Kafka = in
 		}
 
+		// 从local初始化缓存模块
+		Cache = zgocache.InitCache(cacheCh)
+
 	} else {
 
 		go func() {
@@ -101,121 +104,137 @@ func Engine(opt *Options) error {
 				mk := string(v.Key)
 				smk := strings.Split(mk, "/")
 				b := v.Value
-				var m []config.ConnDetail
-				err := zgoutils.Utils.Unmarshal(b, &m)
-				if err != nil {
-					fmt.Println("反序列化当前值失败", mk)
-				}
-				tmp.Key = smk[2]
-				tmp.Values = m
 
-				labelDetArr = append(labelDetArr, tmp)
+				if smk[1] == "cache" { //如果不是连接配置
+					cm := config.CacheConfig{}
+					err := zgoutils.Utils.Unmarshal(b, &cm)
+					if err != nil {
+						fmt.Println("反序列化当前值失败", mk)
+					}
+					config.Cache.Label = cm.Label
+					config.Cache.Expire = cm.Expire
 
-				key := smk[1]
+					// 从etcd初始化缓存模块
+					Cache = zgocache.InitCache(cacheCh)
 
-				//fmt.Println(smk[1],"-----",labelDetArr)
+				} else if smk[1] == "conn" {
 
-				switch key {
-				case mysqlT:
-					//init mysql again
-					if len(opt.Mysql) > 0 {
-						hsm := engine.getConfigByOption(labelDetArr, opt.Mysql)
-						if len(hsm) > 0 {
-							// 配置信息： 城市和数据库的关系
-							cdc := config.CityDbConfig
-							zgomysql.InitMysqlService(hsm, cdc)
-							var err error
-							Mysql, err = zgomysql.MysqlService(opt.Mysql[0])
-							if err != nil {
-								fmt.Println(err)
+					var m []config.ConnDetail
+					err := zgoutils.Utils.Unmarshal(b, &m)
+					if err != nil {
+						fmt.Println("反序列化当前值失败", mk)
+					}
+					tmp.Key = smk[3]
+					tmp.Values = m
+
+					labelDetArr = append(labelDetArr, tmp)
+
+					key := smk[2]
+
+					//fmt.Println(smk[2],"-----",labelDetArr)
+
+					switch key {
+					case mysqlT:
+						//init mysql again
+						if len(opt.Mysql) > 0 {
+							hsm := engine.getConfigByOption(labelDetArr, opt.Mysql)
+							if len(hsm) > 0 {
+								// 配置信息： 城市和数据库的关系
+								cdc := config.CityDbConfig
+								zgomysql.InitMysqlService(hsm, cdc)
+								var err error
+								Mysql, err = zgomysql.MysqlService(opt.Mysql[0])
+								if err != nil {
+									fmt.Println(err)
+								}
 							}
 						}
-					}
 
-				case mongoT:
-					//init mongo again
-					if len(opt.Mongo) > 0 {
-						//todo someting
-						hsm := engine.getConfigByOption(labelDetArr, opt.Mongo)
-						//fmt.Println("--zgo.go--",labelDetArr, opt.Mongo, hsm)
-						if len(hsm) > 0 {
-							in := <-zgomongo.InitMongo(hsm)
-							Mongo = in
+					case mongoT:
+						//init mongo again
+						if len(opt.Mongo) > 0 {
+							//todo someting
+							hsm := engine.getConfigByOption(labelDetArr, opt.Mongo)
+							//fmt.Println("--zgo.go--",labelDetArr, opt.Mongo, hsm)
+							if len(hsm) > 0 {
+								in := <-zgomongo.InitMongo(hsm)
+								Mongo = in
+							}
+
 						}
+					case redisT:
+						//init redis again
+						if len(opt.Redis) > 0 {
+							//todo someting
+							hsm := engine.getConfigByOption(labelDetArr, opt.Redis)
+							//fmt.Println(hsm)
+							if len(hsm) > 0 {
+								in := <-zgoredis.InitRedis(hsm)
+								Redis = in
+							}
 
-					}
-				case redisT:
-					//init redis again
-					if len(opt.Redis) > 0 {
-						//todo someting
-						hsm := engine.getConfigByOption(labelDetArr, opt.Redis)
-						//fmt.Println(hsm)
-						if len(hsm) > 0 {
-							in := <-zgoredis.InitRedis(hsm)
-							Redis = in
 						}
+					case pikaT:
+						//init pika again
+						if len(opt.Pika) > 0 {
+							//todo someting
+							hsm := engine.getConfigByOption(labelDetArr, opt.Pika)
+							//fmt.Println(hsm)
+							if len(hsm) > 0 {
+								in := <-zgopika.InitPika(hsm)
+								Pika = in
+							}
 
-					}
-				case pikaT:
-					//init pika again
-					if len(opt.Pika) > 0 {
-						//todo someting
-						hsm := engine.getConfigByOption(labelDetArr, opt.Pika)
-						//fmt.Println(hsm)
-						if len(hsm) > 0 {
-							in := <-zgopika.InitPika(hsm)
-							Pika = in
 						}
+					case nsqT:
+						//init nsq again
+						if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq
+							hsm := engine.getConfigByOption(labelDetArr, opt.Nsq)
+							//fmt.Println("===zgo.go==", hsm)
+							//return nil
+							if len(hsm) > 0 {
+								in := <-zgonsq.InitNsq(hsm)
+								Nsq = in
+							}
 
-					}
-				case nsqT:
-					//init nsq again
-					if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq
-						hsm := engine.getConfigByOption(labelDetArr, opt.Nsq)
-						//fmt.Println("===zgo.go==", hsm)
-						//return nil
-						if len(hsm) > 0 {
-							in := <-zgonsq.InitNsq(hsm)
-							Nsq = in
 						}
+					case kafkaT:
+						//init kafka again
+						if len(opt.Kafka) > 0 {
+							//todo someting
+							hsm := engine.getConfigByOption(labelDetArr, opt.Kafka)
+							//fmt.Println(hsm)
+							//return nil
+							if len(hsm) > 0 {
+								in := <-zgokafka.InitKafka(hsm)
+								Kafka = in
+							}
 
-					}
-				case kafkaT:
-					//init kafka again
-					if len(opt.Kafka) > 0 {
-						//todo someting
-						hsm := engine.getConfigByOption(labelDetArr, opt.Kafka)
-						//fmt.Println(hsm)
-						//return nil
-						if len(hsm) > 0 {
-							in := <-zgokafka.InitKafka(hsm)
-							Kafka = in
 						}
+					case esT:
+						//init es again
+						if len(opt.Es) > 0 {
+							hsm := engine.getConfigByOption(labelDetArr, opt.Es)
+							if len(hsm) > 0 {
+								in := <-zgoes.InitEs(hsm)
+								Es = in
+							}
 
-					}
-				case esT:
-					//init es again
-					if len(opt.Es) > 0 {
-						hsm := engine.getConfigByOption(labelDetArr, opt.Es)
-						if len(hsm) > 0 {
-							in := <-zgoes.InitEs(hsm)
-							Es = in
 						}
+					case etcdT:
+						//init etcd again
 
 					}
-				case etcdT:
-					//init etcd again
+					//fmt.Println(Nsq)
 
 				}
-				//fmt.Println(Nsq)
+
 			}
 		}()
 	}
 
 	//初始化GRPC
 	Grpc = zgogrpc.GetGrpc()
-	// 初始化缓存模块
-	Cache = zgocache.InitCache()
 
 	if opt.Project != "" {
 		config.Project = opt.Project

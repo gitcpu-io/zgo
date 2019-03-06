@@ -40,30 +40,30 @@ type Options struct {
 	Nsq      []string `json:"nsq"`
 }
 
-func (opt *Options) init() (chan *mvccpb.KeyValue, error) {
+func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, error) {
 	//init config
 	if opt.Env == "" {
 		opt.Env = "local"
 	} else {
 		if opt.Env != "local" && opt.Env != "dev" && opt.Env != "qa" && opt.Env != "pro" {
-			return nil, errors.New("error env,must be local/dev/qa/pro !")
+			return nil, nil, errors.New("error env,must be local/dev/qa/pro !")
 		}
 	}
 
 	//如果inch有值表示启用了etcd为配置中心，并watch了key，等待变更ing...
-	ladech, inch := config.InitConfig(opt.Env)
+	ladech, inch, cacheCh := config.InitConfig(opt.Env)
 	go func() {
 		if inch != nil {
 			for h := range inch {
 				var keyType string
 				for mkey, _ := range h {
-					keyType = strings.Split(mkey, "/")[1]
+					keyType = strings.Split(mkey, "/")[2]
 					//key = mkey
 					break
 				}
 				var hsm = make(map[string][]*config.ConnDetail)
 				for mkey, v := range h {
-					key := strings.Split(mkey, "/")[2]
+					key := strings.Split(mkey, "/")[3]
 					hsm[key] = v
 				}
 				fmt.Println(keyType, "有变化开始init again", hsm)
@@ -120,5 +120,5 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, error) {
 	}
 	//fmt.Println("-------------------------------", opt.Project, opt.Loglevel)
 
-	return ladech, nil
+	return ladech, cacheCh, nil
 }

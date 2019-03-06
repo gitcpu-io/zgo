@@ -18,7 +18,20 @@ var (
 	label  string
 )
 
-func InitCache() CacheServiceInterface {
+func InitCache(cacheCh chan *config.CacheConfig) CacheServiceInterface {
+	go func() { //接收到etcd变化后，触发label和expire的值
+
+		for v := range cacheCh {
+
+			label = v.Label
+			expire = v.Expire
+
+			fmt.Println(label, expire, "-----etcd tiger cache value----")
+
+		}
+
+	}()
+
 	hm := config.Cache
 	expire := 86400
 	label := ""

@@ -37,14 +37,14 @@ func main() {
 	for _, v := range config.Nsq {
 		k := v.Key
 		value := v.Values
-		key := "zgo/nsq/" + k
+		key := "zgo/conn/nsq/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
 	for _, v := range config.Mongo {
 		k := v.Key
 		value := v.Values
-		key := "zgo/mongo/" + k
+		key := "zgo/conn/mongo/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
@@ -52,28 +52,28 @@ func main() {
 	for _, v := range config.Es {
 		k := v.Key
 		value := v.Values
-		key := "zgo/es/" + k
+		key := "zgo/conn/es/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
 	for _, v := range config.Mysql {
 		k := v.Key
 		value := v.Values
-		key := "zgo/mysql/" + k
+		key := "zgo/conn/mysql/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
 	for _, v := range config.Etcd {
 		k := v.Key
 		value := v.Values
-		key := "zgo/etcd/" + k
+		key := "zgo/conn/etcd/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
 	for _, v := range config.Kafka {
 		k := v.Key
 		value := v.Values
-		key := "zgo/kafka/" + k
+		key := "zgo/conn/kafka/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
@@ -81,17 +81,21 @@ func main() {
 	for _, v := range config.Redis {
 		k := v.Key
 		value := v.Values
-		key := "zgo/redis/" + k
+		key := "zgo/conn/redis/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
 	for _, v := range config.Pika {
 		k := v.Key
 		value := v.Values
-		key := "zgo/pika/" + k
+		key := "zgo/conn/pika/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
+
+	key := "zgo/cache/one"
+	val, _ := json.Marshal(config.Cache)
+	cli.KV.Put(context.TODO(), key, string(val))
 	fmt.Println("all config to etcd done")
 
 }
