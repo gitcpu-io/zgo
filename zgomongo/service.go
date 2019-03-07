@@ -21,8 +21,13 @@ type Mongoer interface {
 	Update(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	UpdateAll(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	Delete(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	List(ctx context.Context, args map[string]interface{}) ([]interface{}, error)
+	FindOne(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	FindPage(ctx context.Context, args map[string]interface{}) ([]interface{}, error)
+	Pipe(ctx context.Context, pipe interface{}, values interface{}, args map[string]interface{}) (interface{}, error)
+	Count(ctx context.Context, args map[string]interface{}) (int, error)
 	Get(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	Insert(ctx context.Context, args map[string]interface{}) error
+	//InsertMany(ctx context.Context, args map[string]interface{}, docs ...interface{}) error
 }
 
 func Mongo(l string) Mongoer {
@@ -115,7 +120,7 @@ func (m *zgomongo) Delete(ctx context.Context, args map[string]interface{}) (int
 	return nil, m.res.DeleteOne(ctx, args)
 }
 
-func (m *zgomongo) List(ctx context.Context, args map[string]interface{}) ([]interface{}, error) {
+func (m *zgomongo) FindPage(ctx context.Context, args map[string]interface{}) ([]interface{}, error) {
 	//sort := args["sort"]
 	if args["from"] == nil {
 		args["from"] = 0
@@ -129,7 +134,7 @@ func (m *zgomongo) List(ctx context.Context, args map[string]interface{}) ([]int
 	if args["sort"] == nil {
 		args["sort"] = []string{}
 	}
-	return m.res.List(ctx, args)
+	return m.res.FindPage(ctx, args)
 	//return zgo_db_mongo.List(ch, args["db"].(string), args["collection"].(string),
 	//	args["query"].(bson.M))
 }
@@ -137,3 +142,23 @@ func (m *zgomongo) List(ctx context.Context, args map[string]interface{}) ([]int
 func (m *zgomongo) Get(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 	return m.res.Get(ctx, args)
 }
+
+func (m *zgomongo) Insert(ctx context.Context, args map[string]interface{}) error {
+	return m.res.Insert(ctx, args)
+}
+
+func (m *zgomongo) FindOne(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+	return m.res.FindOne(ctx, args)
+}
+
+func (m *zgomongo) Count(ctx context.Context, args map[string]interface{}) (int, error) {
+	return m.res.Count(ctx, args)
+}
+
+func (m *zgomongo) Pipe(ctx context.Context, pipe interface{}, values interface{}, args map[string]interface{}) (interface{}, error) {
+	return m.res.Pipe(ctx, pipe, values, args)
+}
+
+//func (m *zgomongo) InsertMany(ctx context.Context, args map[string]interface{}, docs ...interface{}) error {
+//	return m.res.InsertMany(ctx, args, docs)
+//}
