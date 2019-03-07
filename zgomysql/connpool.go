@@ -26,7 +26,7 @@ func GetPool(label string, T string) (*gorm.DB, error) {
 			if len(ps) == 0 {
 				return nil, errors.New("错误的label：" + label)
 			} else if len(ps) > 1 {
-				index := rand.Intn(len(ps)) - 1 //随机取一个相同label下的连接
+				index := rand.Intn(len(ps)) //随机取一个相同label下的连接
 				return ps[index], nil
 			} else {
 				return ps[0], nil

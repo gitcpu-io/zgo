@@ -12,6 +12,11 @@ func InitMysqlResource(hsm map[string][]*config.ConnDetail) {
 	InitConnPool(hsm)
 }
 
+// 基类 所有
+type Base struct {
+	Id int `json:"id"`
+}
+
 // 对外接口
 type MysqlResourcerInterface interface {
 	GetPool(t string) (*gorm.DB, error)
@@ -93,7 +98,7 @@ func (mr *mysqlResource) Count(ctx context.Context, args map[string]interface{})
 	if err != nil {
 		return err
 	}
-	gormPool = gormPool.Table(args["tablename"].(string))
+	gormPool = gormPool.Table(args["tablename"].(string)).Where(args["query"], args["args"].([]interface{})...)
 	err = gormPool.Count(args["count"]).Error
 	return err
 }
@@ -117,10 +122,16 @@ func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interfac
 	if err != nil {
 		return 0, err
 	}
-	db := gormPool.Table(args["tablename"].(string)).Model(args["obj"]).Updates(args["data"])
-	count := db.RowsAffected
-	err = db.Error
-	return int(count), err
+	if v, ok := args["id"]; ok {
+		if v.(int) > 0 {
+			// args["data"] = map[string]interface{}{"name": "hello", "age": 18}
+			db := gormPool.Table(args["tablename"].(string)).Where(" id = ? ", args["id"]).Updates(args["data"])
+			count := db.RowsAffected
+			err = db.Error
+			return int(count), err
+		}
+	}
+	return 0, errors.New("mysql updateOne method : id not allow null or 0")
 }
 
 func (mr *mysqlResource) DeleteOne(ctx context.Context, args map[string]interface{}) (int, error) {
@@ -128,9 +139,14 @@ func (mr *mysqlResource) DeleteOne(ctx context.Context, args map[string]interfac
 	if err != nil {
 		return 0, err
 	}
-	//db := gormPool.Table(args["tablename"].(string)).Where(" id = ? ", args["id"].(int)).Delete(args["data"])
-	db := gormPool.Table(args["tablename"].(string)).Delete(args["obj"])
-	count := db.RowsAffected
-	err = db.Error
-	return int(count), err
+	// 根据id删除
+	if v, ok := args["id"]; ok {
+		if v.(int) > 0 {
+			db := gormPool.Table(args["tablename"].(string)).Delete(nil, v)
+			count := db.RowsAffected
+			err = db.Error
+			return int(count), err
+		}
+	}
+	return 0, errors.New("mysql deleteOne method : id not allow null or 0")
 }

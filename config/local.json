@@ -258,7 +258,7 @@
             "password": "root",
             "MaxIdleSize":111,
             "MaxOpenConn": 222,
-            "dbname": "spider"
+            "DbName": "spider"
           },
           {
             "c": "北京二手房库 etcd-旧实例r",
@@ -269,7 +269,7 @@
             "password": "root",
             "MaxIdleSize": 222,
             "MaxOpenConn": 333,
-            "dbname": "spider"
+            "DbName": "spider"
           }
         ]
     },
@@ -285,7 +285,7 @@
           "password": "root",
           "MaxIdleSize": 5,
           "MaxOpenConn": 10,
-          "dbname": "spider"
+          "DbName": "spider"
         },
         {
           "c": "北京二手房库 旧实例r",
@@ -296,7 +296,7 @@
           "password": "root",
           "MaxIdleSize": 5,
           "MaxOpenConn": 10,
-          "dbname": "spider"
+          "DbName": "spider"
         }
       ]
     }

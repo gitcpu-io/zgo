@@ -20,15 +20,15 @@ type ConnDetail struct {
 	Port        int    `json:"port,omitempty"`
 	ConnSize    int    `json:"connSize"`
 	PoolSize    int    `json:"poolSize"`
-	MaxIdleSize int    `json:"maxIdleSize,omitempty"`
-	MaxOpenConn int    `json:"maxOpenConn,omitempty"`
+	MaxIdleSize int    `json:"maxIdleSize,omitempty"` // mysql 最大空闲连接数
+	MaxOpenConn int    `json:"maxOpenConn,omitempty"` // mysql 最大可用连接数
 	Uri         string `json:"uri,omitempty"`
 	Username    string `json:"username,omitempty"`
 	Password    string `json:"password,omitempty"`
 	Db          int    `json:"db,omitempty"`
 	T           string `json:"t,omitempty"` // w 写入 r 只读
 	Prefix      string `json:"prefix,omitempty"`
-	DbName      string `json:"dbName,omitempty"` // w 写入 r 只读
+	DbName      string `json:"dbName,omitempty"` // 数据库名称
 }
 
 type CacheConfig struct {
