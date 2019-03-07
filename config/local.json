@@ -256,9 +256,9 @@
             "port": 3307,
             "username": "root",
             "password": "root",
-            "MaxIdleSize":111,
-            "MaxOpenConn": 222,
-            "DbName": "spider"
+            "maxIdleSize":111,
+            "maxOpenConn": 222,
+            "dbName": "spider"
           },
           {
             "c": "北京二手房库 etcd-旧实例r",
@@ -267,9 +267,9 @@
             "port": 3308,
             "username": "root",
             "password": "root",
-            "MaxIdleSize": 222,
-            "MaxOpenConn": 333,
-            "DbName": "spider"
+            "maxIdleSize": 222,
+            "maxOpenConn": 333,
+            "dbName": "spider"
           }
         ]
     },
@@ -283,9 +283,9 @@
           "port": 3306,
           "username": "root",
           "password": "root",
-          "MaxIdleSize": 5,
-          "MaxOpenConn": 10,
-          "DbName": "spider"
+          "maxIdleSize": 5,
+          "maxOpenConn": 10,
+          "dbName": "spider"
         },
         {
           "c": "北京二手房库 旧实例r",
@@ -294,9 +294,9 @@
           "port": 3306,
           "username": "root",
           "password": "root",
-          "MaxIdleSize": 5,
-          "MaxOpenConn": 10,
-          "DbName": "spider"
+          "maxIdleSize": 5,
+          "maxOpenConn": 10,
+          "dbName": "spider"
         }
       ]
     }
