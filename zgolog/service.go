@@ -117,7 +117,7 @@ func (z *zgolog) withCaller() *log.Entry {
 	z.SetDebug(config.Loglevel)
 	if config.Loglevel == "debug" {
 		// 支持goland点击跳转
-		value = fmt.Sprintf(" %+v:", stack.Caller(1))
+		value = fmt.Sprintf(" %+v:", stack.Caller(2))
 	} else {
 		value = fmt.Sprintf("%+v", stack.Caller(2))
 	}

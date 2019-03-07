@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-// Package zgohttp is a trie based high performance HTTP request router.
+// Package zgorouter is a trie based high performance HTTP request router.
 //
 // A trivial example is:
 //
@@ -10,21 +10,21 @@
 //
 //  import (
 //      "fmt"
-//      "github.com/julienschmidt/zgohttp"
+//      "github.com/julienschmidt/zgorouter"
 //      "net/http"
 //      "log"
 //  )
 //
-//  func Index(w http.ResponseWriter, r *http.Request, _ zgohttp.Params) {
+//  func Index(w http.ResponseWriter, r *http.Request, _ zgorouter.Params) {
 //      fmt.Fprint(w, "Welcome!\n")
 //  }
 //
-//  func Hello(w http.ResponseWriter, r *http.Request, ps zgohttp.Params) {
+//  func Hello(w http.ResponseWriter, r *http.Request, ps zgorouter.Params) {
 //      fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
 //  }
 //
 //  func main() {
-//      router := zgohttp.New()
+//      router := zgorouter.New()
 //      router.GET("/", Index)
 //      router.GET("/hello/:name", Hello)
 //
@@ -74,77 +74,12 @@
 //  // by the index of the parameter. This way you can also get the name (key)
 //  thirdKey   := ps[2].Key   // the name of the 3rd parameter
 //  thirdValue := ps[2].Value // the value of the 3rd parameter
-package zgohttp
+package zgorouter
 
 import (
 	"context"
-	"fmt"
-	"git.zhugefang.com/gocore/zgo/zgoresponse"
-	"github.com/json-iterator/go"
 	"net/http"
-	"net/url"
-	"strings"
 )
-
-func ParseReq2Map(r *http.Request) (map[string]interface{}, error) {
-	//info := fmt.Sprintln(r.Header.Get("Content-Type"))
-	//len := r.ContentLength
-	paramMap := make(map[string]interface{})
-	if strings.Contains(strings.ToLower(r.Header.Get("Content-Type")), "json") {
-		err := jsoniter.NewDecoder(r.Body).Decode(&paramMap)
-		if err != nil {
-			fmt.Println(err)
-		}
-		//body := make([]byte, len)
-		//r.Body.Read(body)
-		queryMap, err := url.ParseQuery(r.URL.RawQuery)
-		if err != nil {
-			fmt.Println(err)
-		}
-		for key, value := range queryMap {
-			paramMap[key] = value[0]
-		}
-		return paramMap, nil
-	} else if strings.Contains(strings.ToLower(r.Header.Get("Content-Type")), "form") {
-		r.ParseForm()
-
-		for key, value := range r.Form {
-			paramMap[key] = value[0]
-		}
-		return paramMap, nil
-	}else {
-		queryMap, err := url.ParseQuery(r.URL.RawQuery)
-		if err != nil {
-			fmt.Println(err)
-		}
-		for key, value := range queryMap {
-			paramMap[key] = value[0]
-		}
-		return paramMap, nil
-	}
-
-}
-
-func Json(w http.ResponseWriter, response zgoresponse.Response) {
-	w.Header().Set("content-type", "application/json; charset=utf-8")
-	ret, err := jsoniter.Marshal(response)
-	if err != nil{
-		fmt.Println(err)
-	}
-	fmt.Fprintln(w, string(ret))
-}
-
-func JsonP(w http.ResponseWriter, response zgoresponse.Response) {
-	if response.GetCallBack() == ""{
-		Json(w, response)
-	}
-	w.Header().Set("content-type", "application/json; charset=utf-8")
-	ret, err := jsoniter.Marshal(response)
-	if err != nil{
-		fmt.Println(err)
-	}
-	fmt.Fprintln(w, string(ret))
-}
 
 // Handle is a function that can be registered to a route to handle HTTP
 // requests. Like http.HandlerFunc, but has a third parameter for the values of

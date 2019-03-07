@@ -15,8 +15,8 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgonsq"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
+	"git.zhugefang.com/gocore/zgo/zgorouter"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
-	"git.zhugefang.com/gocore/zgo/zgozoneinfo"
 	"github.com/nsqio/go-nsq"
 	"strings"
 )
@@ -253,6 +253,8 @@ func Engine(opt *Options) error {
 		config.Loglevel = opt.Loglevel
 	}
 
+	Log = zgolog.Newzgolog()
+
 	return nil
 }
 
@@ -277,9 +279,9 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
 
 //定义外部使用的类型
 type (
-	NsqMessage = *nsq.Message
-	RouterParams = zgohttp.Params
-	RouterHandler = zgohttp.Handle
+	NsqMessage    = *nsq.Message
+	RouterParams  = zgorouter.Params
+	RouterHandler = zgorouter.Handle
 )
 
 var (
@@ -287,19 +289,15 @@ var (
 	Nsq   zgonsq.Nsqer
 	Mongo zgomongo.Mongoer
 	Es    zgoes.Eser
-
-	Grpc zgogrpc.Grpcer
-
+	Grpc  zgogrpc.Grpcer
 	Redis zgoredis.Rediser
 	Pika  zgopika.Pikaer
-
-	Mysql    zgomysql.Mysqler
-	File     = zgofile.NewLocal()
-	Utils    = zgoutils.NewUtils()
-	Log      = zgolog.Newzgolog()
-	ZoneInfo = zgozoneinfo.NewZoneInfo()
-
+	Mysql zgomysql.Mysqler
+	Log   zgolog.Logger
 	Cache zgocache.Cacher
+	Http  = zgohttp.NewHttp()
 
-	Router = zgohttp.New()
+	Utils  = zgoutils.NewUtils()
+	File   = zgofile.NewLocal()
+	Router = zgorouter.New()
 )

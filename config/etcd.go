@@ -58,7 +58,7 @@ func Watcher(client *clientv3.Client, prefixKey string) (chan map[string][]*Conn
 						key := string(v.Kv.Key)
 						b := v.Kv.Value
 						preb := v.PrevKv.Value //上一次的值
-
+						fmt.Println(key, "-=--")
 						if strings.Split(key, "/")[1] == "cache" { //如果监听到cache有变化
 							cm := CacheConfig{}
 							precm := CacheConfig{}

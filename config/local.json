@@ -154,11 +154,18 @@
       "key": "nsq_label_sh",
       "values": [
         {
-          "c": "上海主库=====etcd nsq",
+          "c": "上海主库==333===etcd nsq",
           "host": "localhost",
           "port": 4150,
           "connSize": 33,
           "poolSize": 999
+        },
+        {
+          "c": "上海从库==33===etcd nsq",
+          "host": "localhost",
+          "port": 4150,
+          "connSize": 22,
+          "poolSize": 111
         }
       ]
     }
@@ -247,56 +254,55 @@
   "mysql": [
     {
       "key": "mysql_sell_1",
-      "values":
-        [
-          {
-            "c": "北京二手房库 etcd-旧实例w",
-            "t":"w",
-            "host": "localhost",
-            "port": 3307,
-            "username": "root",
-            "password": "root",
-            "maxIdleSize":111,
-            "maxOpenConn": 222,
-            "dbName": "spider"
-          },
-          {
-            "c": "北京二手房库 etcd-旧实例r",
-            "t":"r",
-            "host": "localhost",
-            "port": 3308,
-            "username": "root",
-            "password": "root",
-            "maxIdleSize": 222,
-            "maxOpenConn": 333,
-            "dbName": "spider"
-          }
-        ]
+      "values": [
+        {
+          "c": "北京二手房库 etcd-旧实例w",
+          "t": "w",
+          "host": "localhost",
+          "port": 3307,
+          "username": "root",
+          "password": "root",
+          "maxIdleSize": 5,
+          "maxOpenConn": 5,
+          "dbName": "spider"
+        },
+        {
+          "c": "北京二手房库 etcd-旧实例r",
+          "t": "r",
+          "host": "localhost",
+          "port": 3307,
+          "username": "root",
+          "password": "root",
+          "maxIdleSize": 5,
+          "maxOpenConn": 5,
+          "dbName": "spider"
+        }
+      ]
     },
     {
       "key": "mysql_sell_2",
       "values": [
         {
           "c": "北京二手房库 旧实例w",
-          "t":"w",
+          "t": "w",
           "host": "localhost",
-          "port": 3306,
+          "port": 3308,
           "username": "root",
           "password": "root",
           "maxIdleSize": 5,
           "maxOpenConn": 10,
-          "dbName": "spider"
+          "dbName": "spider_sh"
         },
         {
           "c": "北京二手房库 旧实例r",
-          "t":"r",
+          "t": "r",
           "host": "localhost",
-          "port": 3306,
+          "port": 3308,
           "username": "root",
           "password": "root",
           "maxIdleSize": 5,
           "maxOpenConn": 10,
-          "dbName": "spider"
+          "dbName": "spider_sh"
         }
       ]
     }
