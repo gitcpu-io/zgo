@@ -154,11 +154,18 @@
       "key": "nsq_label_sh",
       "values": [
         {
-          "c": "上海主库=====etcd nsq",
+          "c": "上海主库==333===etcd nsq",
           "host": "localhost",
           "port": 4150,
           "connSize": 33,
           "poolSize": 999
+        },
+        {
+          "c": "上海从库==33===etcd nsq",
+          "host": "localhost",
+          "port": 4150,
+          "connSize": 22,
+          "poolSize": 111
         }
       ]
     }

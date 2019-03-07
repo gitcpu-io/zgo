@@ -61,49 +61,77 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, err
 					//key = mkey
 					break
 				}
-				var hsm = make(map[string][]*config.ConnDetail)
+				var hsmEtcd = make(map[string][]*config.ConnDetail)
 				for mkey, v := range h {
 					key := strings.Split(mkey, "/")[3]
-					hsm[key] = v
+					hsmEtcd[key] = v
 				}
-				fmt.Println(keyType, "有变化开始init again", hsm)
+				fmt.Println(keyType, "有变化开始init again", hsmEtcd)
 
 				switch keyType {
 				case mysqlT:
 					//init mysql again
 					// 配置信息： 城市和数据库的关系
 					cdc := config.CityDbConfig
-					zgomysql.InitMysqlService(hsm, cdc)
-					var err error
-					Mysql, err = zgomysql.MysqlService(opt.Mysql[0])
+					hsm := getMatchConfig(hsmEtcd, opt.Mysql)
+					if len(hsm) > 0 {
+						zgomysql.InitMysqlService(hsm, cdc)
+						var err error
+						Mysql, err = zgomysql.MysqlService(opt.Mysql[0])
 
-					if err != nil {
-						fmt.Println(err)
+						if err != nil {
+							fmt.Println(err)
+						}
 					}
+
 				case mongoT:
 					//init mongo again
-					in := <-zgomongo.InitMongo(hsm)
-					Mongo = in
+					hsm := getMatchConfig(hsmEtcd, opt.Mongo)
+					if len(hsm) > 0 {
+						in := <-zgomongo.InitMongo(hsm)
+						Mongo = in
+					}
+
 				case redisT:
 					//init redis again
-					in := <-zgoredis.InitRedis(hsm)
-					Redis = in
+					hsm := getMatchConfig(hsmEtcd, opt.Redis)
+					if len(hsm) > 0 {
+						in := <-zgoredis.InitRedis(hsm)
+						Redis = in
+					}
+
 				case pikaT:
 					//init pika again
-					in := <-zgopika.InitPika(hsm)
-					Pika = in
+					hsm := getMatchConfig(hsmEtcd, opt.Pika)
+					if len(hsm) > 0 {
+						in := <-zgopika.InitPika(hsm)
+						Pika = in
+					}
+
 				case nsqT:
 					//init nsq again
-					in := <-zgonsq.InitNsq(hsm)
-					Nsq = in
+					hsm := getMatchConfig(hsmEtcd, opt.Nsq)
+					if len(hsm) > 0 {
+						in := <-zgonsq.InitNsq(hsm)
+						Nsq = in
+					}
+
 				case kafkaT:
 					//init kafka again
-					in := <-zgokafka.InitKafka(hsm)
-					Kafka = in
+					hsm := getMatchConfig(hsmEtcd, opt.Kafka)
+					if len(hsm) > 0 {
+						in := <-zgokafka.InitKafka(hsm)
+						Kafka = in
+					}
+
 				case esT:
 					//init es again
-					in := <-zgoes.InitEs(hsm)
-					Es = in
+					hsm := getMatchConfig(hsmEtcd, opt.Es)
+					if len(hsm) > 0 {
+						in := <-zgoes.InitEs(hsm)
+						Es = in
+					}
+
 				case etcdT:
 					//init etcd again
 				}
@@ -121,4 +149,18 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, err
 	//fmt.Println("-------------------------------", opt.Project, opt.Loglevel)
 
 	return ladech, cacheCh, nil
+}
+
+func getMatchConfig(lds map[string][]*config.ConnDetail, us []string) map[string][]*config.ConnDetail {
+	m := make(map[string][]*config.ConnDetail)
+	for _, label := range us {
+		//v == label_bj 用户传来的label，它并不知道具体的连接地址
+		//v == label_sh 用户传来的label，它并不知道具体的连接地址
+		for k, v := range lds {
+			if label == k {
+				m[label] = v
+			}
+		}
+	}
+	return m
 }

@@ -12,7 +12,7 @@ import (
 */
 
 func TestWatcher(t *testing.T) {
-	c := Init()
+	c, _ := CreateClient()
 	key := "zgo/nsq/label_bj"
 	Watcher(c, key)
 }
