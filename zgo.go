@@ -7,6 +7,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoes"
 	"git.zhugefang.com/gocore/zgo/zgofile"
 	"git.zhugefang.com/gocore/zgo/zgogrpc"
+	"git.zhugefang.com/gocore/zgo/zgohttp"
 	"git.zhugefang.com/gocore/zgo/zgokafka"
 	"git.zhugefang.com/gocore/zgo/zgolog"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
@@ -16,7 +17,6 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoredis"
 	"git.zhugefang.com/gocore/zgo/zgorouter"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
-	"git.zhugefang.com/gocore/zgo/zgozoneinfo"
 	"github.com/nsqio/go-nsq"
 	"strings"
 )
@@ -254,7 +254,6 @@ func Engine(opt *Options) error {
 	}
 
 	Log = zgolog.Newzgolog()
-	ZoneInfo = zgozoneinfo.NewZoneInfo()
 
 	return nil
 }
@@ -286,17 +285,17 @@ type (
 )
 
 var (
-	Kafka    zgokafka.Kafkaer
-	Nsq      zgonsq.Nsqer
-	Mongo    zgomongo.Mongoer
-	Es       zgoes.Eser
-	Grpc     zgogrpc.Grpcer
-	Redis    zgoredis.Rediser
-	Pika     zgopika.Pikaer
-	Mysql    zgomysql.Mysqler
-	Log      zgolog.Logger
-	ZoneInfo zgozoneinfo.ZoneInfoer
-	Cache    zgocache.Cacher
+	Kafka zgokafka.Kafkaer
+	Nsq   zgonsq.Nsqer
+	Mongo zgomongo.Mongoer
+	Es    zgoes.Eser
+	Grpc  zgogrpc.Grpcer
+	Redis zgoredis.Rediser
+	Pika  zgopika.Pikaer
+	Mysql zgomysql.Mysqler
+	Log   zgolog.Logger
+	Cache zgocache.Cacher
+	Http  = zgohttp.NewHttp()
 
 	Utils  = zgoutils.NewUtils()
 	File   = zgofile.NewLocal()
