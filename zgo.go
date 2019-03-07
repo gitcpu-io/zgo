@@ -243,7 +243,6 @@ func Engine(opt *Options) error {
 		}()
 	}
 
-	Utils = zgoutils.NewUtils()
 	//初始化GRPC
 	Grpc = zgogrpc.GetGrpc()
 
@@ -295,11 +294,11 @@ var (
 	Redis    zgoredis.Rediser
 	Pika     zgopika.Pikaer
 	Mysql    zgomysql.Mysqler
-	Utils    zgoutils.Utilser
 	Log      zgolog.Logger
 	ZoneInfo zgozoneinfo.ZoneInfoer
 	Cache    zgocache.Cacher
 
+	Utils  = zgoutils.NewUtils()
 	File   = zgofile.NewLocal()
 	Router = zgorouter.New()
 )

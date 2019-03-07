@@ -17,7 +17,7 @@ func InitCache(cacheCh chan *config.CacheConfig) chan Cacher {
 	out := make(chan Cacher)
 	go func() { //接收到etcd变化后，触发label和expire的值
 		for v := range cacheCh {
-			fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v;", v.Label, v.Rate, v.DbType, v.TcType, v.Start, "-----etcd tiger cache value----")
+			fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v;\n", v.Label, v.Rate, v.DbType, v.TcType, v.Start, "-----etcd tiger cache value----")
 			hm := config.Cache
 			rate := hm.Rate
 			dbtype := hm.DbType
@@ -30,7 +30,7 @@ func InitCache(cacheCh chan *config.CacheConfig) chan Cacher {
 
 	go func() { //接收到etcd变化后，触发label和expire的值
 		hm := config.Cache
-		fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v; -----etcd tiger cache value----", hm.Label, hm.Rate, hm.DbType, hm.TcType, hm.Start)
+		fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v; -----etcd tiger cache value----\n", hm.Label, hm.Rate, hm.DbType, hm.TcType, hm.Start)
 		rate := hm.Rate
 		dbtype := hm.DbType
 		tcType := hm.TcType
