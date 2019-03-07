@@ -7,7 +7,6 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoes"
 	"git.zhugefang.com/gocore/zgo/zgofile"
 	"git.zhugefang.com/gocore/zgo/zgogrpc"
-	"git.zhugefang.com/gocore/zgo/zgohttp"
 	"git.zhugefang.com/gocore/zgo/zgokafka"
 	"git.zhugefang.com/gocore/zgo/zgolog"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
@@ -15,6 +14,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgonsq"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
+	"git.zhugefang.com/gocore/zgo/zgorouter"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"git.zhugefang.com/gocore/zgo/zgozoneinfo"
 	"github.com/nsqio/go-nsq"
@@ -243,6 +243,7 @@ func Engine(opt *Options) error {
 		}()
 	}
 
+	Utils = zgoutils.NewUtils()
 	//初始化GRPC
 	Grpc = zgogrpc.GetGrpc()
 
@@ -252,6 +253,9 @@ func Engine(opt *Options) error {
 	if opt.Loglevel != "" {
 		config.Loglevel = opt.Loglevel
 	}
+
+	Log = zgolog.Newzgolog()
+	ZoneInfo = zgozoneinfo.NewZoneInfo()
 
 	return nil
 }
@@ -277,29 +281,25 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
 
 //定义外部使用的类型
 type (
-	NsqMessage = *nsq.Message
-	RouterParams = zgohttp.Params
-	RouterHandler = zgohttp.Handle
+	NsqMessage    = *nsq.Message
+	RouterParams  = zgorouter.Params
+	RouterHandler = zgorouter.Handle
 )
 
 var (
-	Kafka zgokafka.Kafkaer
-	Nsq   zgonsq.Nsqer
-	Mongo zgomongo.Mongoer
-	Es    zgoes.Eser
-
-	Grpc zgogrpc.Grpcer
-
-	Redis zgoredis.Rediser
-	Pika  zgopika.Pikaer
-
+	Kafka    zgokafka.Kafkaer
+	Nsq      zgonsq.Nsqer
+	Mongo    zgomongo.Mongoer
+	Es       zgoes.Eser
+	Grpc     zgogrpc.Grpcer
+	Redis    zgoredis.Rediser
+	Pika     zgopika.Pikaer
 	Mysql    zgomysql.Mysqler
-	File     = zgofile.NewLocal()
-	Utils    = zgoutils.NewUtils()
-	Log      = zgolog.Newzgolog()
-	ZoneInfo = zgozoneinfo.NewZoneInfo()
+	Utils    zgoutils.Utilser
+	Log      zgolog.Logger
+	ZoneInfo zgozoneinfo.ZoneInfoer
+	Cache    zgocache.Cacher
 
-	Cache zgocache.Cacher
-
-	Router = zgohttp.New()
+	File   = zgofile.NewLocal()
+	Router = zgorouter.New()
 )
