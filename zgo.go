@@ -15,6 +15,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgonsq"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
+	"git.zhugefang.com/gocore/zgo/zgoresponse"
 	"git.zhugefang.com/gocore/zgo/zgorouter"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"github.com/nsqio/go-nsq"
@@ -285,17 +286,18 @@ type (
 )
 
 var (
-	Kafka zgokafka.Kafkaer
-	Nsq   zgonsq.Nsqer
-	Mongo zgomongo.Mongoer
-	Es    zgoes.Eser
-	Grpc  zgogrpc.Grpcer
-	Redis zgoredis.Rediser
-	Pika  zgopika.Pikaer
-	Mysql zgomysql.Mysqler
-	Log   zgolog.Logger
-	Cache zgocache.Cacher
-	Http  = zgohttp.NewHttp()
+	Kafka        zgokafka.Kafkaer
+	Nsq          zgonsq.Nsqer
+	Mongo        zgomongo.Mongoer
+	Es           zgoes.Eser
+	Grpc         zgogrpc.Grpcer
+	Redis        zgoredis.Rediser
+	Pika         zgopika.Pikaer
+	Mysql        zgomysql.Mysqler
+	Log          zgolog.Logger
+	Cache        zgocache.Cacher
+	Http         = zgohttp.NewHttp()
+	HttpResponse zgoresponse.Response
 
 	Utils  = zgoutils.NewUtils()
 	File   = zgofile.NewLocal()

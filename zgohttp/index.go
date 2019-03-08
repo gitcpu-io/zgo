@@ -71,9 +71,10 @@ func (zh *zgohttp) Json(w http.ResponseWriter, response zgoresponse.Response) {
 }
 
 func (zh *zgohttp) JsonP(w http.ResponseWriter, response zgoresponse.Response) {
-	if response.GetCallBack() == "" {
-		zh.Json(w, response)
-	}
+	//if response.GetCallBack() == "" {
+	//	zh.Json(w, response)
+	//	return
+	//}
 	w.Header().Set("content-type", "application/json; charset=utf-8")
 	ret, err := jsoniter.Marshal(response)
 	if err != nil {
