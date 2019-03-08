@@ -31,6 +31,8 @@ func TestUtils_IPs(t *testing.T) {
 	}
 	fmt.Println(e)
 	fmt.Println(u.GetIntranetIP())
+
+	fmt.Println(u.NowUnix(), u.GetTimestamp(13))
 }
 
 func TestUtils_ServiceMethod(t *testing.T) {
