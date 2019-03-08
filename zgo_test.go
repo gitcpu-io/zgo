@@ -12,7 +12,7 @@ func TestEngine(t *testing.T) {
 		Env: "dev",
 		Nsq: []string{ //测试etcd配置动态改库成功
 			//"nsq_label_bj",
-			"nsq_label_sh",
+			//"nsq_label_sh",
 		},
 		Mongo: []string{ //测试etcd配置动态改库成功
 			//"mongo_label_bj",
