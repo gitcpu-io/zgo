@@ -14,7 +14,6 @@ import (
 	"github.com/satori/go.uuid"
 	"io"
 	"math/rand"
-	"mygo/lottery/conf"
 	"net"
 	"net/url"
 	"reflect"
@@ -414,32 +413,38 @@ func (u *utils) InitStructWithDefaultTag(bean interface{}) {
 	}
 }
 
+const SysTimeform = "2006-01-02 15:04:05"
+const SysTimeformShort = "2006-01-02"
+
+// 中国时区
+var SysTimeLocation, _ = time.LoadLocation("Asia/Chongqing")
+
 // 当前时间的时间戳
 func (u *utils) NowUnix() int {
-	return int(time.Now().In(conf.SysTimeLocation).Unix())
+	return int(time.Now().In(SysTimeLocation).Unix())
 }
 
 // 将unix时间戳格式化为yyyymmdd H:i:s格式字符串
 func (u *utils) FormatFromUnixTime(t int64) string {
 	if t > 0 {
-		return time.Unix(t, 0).Format(conf.SysTimeform)
+		return time.Unix(t, 0).Format(SysTimeform)
 	} else {
-		return time.Now().Format(conf.SysTimeform)
+		return time.Now().Format(SysTimeform)
 	}
 }
 
 // 将unix时间戳格式化为yyyymmdd格式字符串
 func (u *utils) FormatFromUnixTimeShort(t int64) string {
 	if t > 0 {
-		return time.Unix(t, 0).Format(conf.SysTimeformShort)
+		return time.Unix(t, 0).Format(SysTimeformShort)
 	} else {
-		return time.Now().Format(conf.SysTimeformShort)
+		return time.Now().Format(SysTimeformShort)
 	}
 }
 
 // 将字符串转成时间
 func (u *utils) ParseTime(str string) (time.Time, error) {
-	return time.ParseInLocation(conf.SysTimeform, str, conf.SysTimeLocation)
+	return time.ParseInLocation(SysTimeform, str, SysTimeLocation)
 }
 
 // 得到一个随机数
@@ -553,7 +558,7 @@ func (u *utils) Ip4toInt(ip string) int64 {
 // 得到当前时间到下一天零点的延时
 func (u *utils) NextDayDuration() time.Duration {
 	year, month, day := time.Now().Add(time.Hour * 24).Date()
-	next := time.Date(year, month, day, 0, 0, 0, 0, conf.SysTimeLocation)
+	next := time.Date(year, month, day, 0, 0, 0, 0, SysTimeLocation)
 	return next.Sub(time.Now())
 }
 
