@@ -2,6 +2,7 @@ package zgomysql
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
 	"testing"
@@ -11,13 +12,21 @@ import (
 const (
 	label_bj = "mysql_sell_1"
 	label_sh = "mysql_sell_2"
-	l        = 3000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l        = 30 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 )
 
 // 实体类
 type House struct {
-	Name string
-	Id   int
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+func (u *House) BeforeUpdate() (err error) {
+	if u.Id == 0 {
+		err = errors.New("user id is 0")
+	}
+	fmt.Println(u.Id)
+	return
 }
 
 // 创建链接
@@ -52,7 +61,7 @@ func newService() (Mysqler, error) {
 		Port:        3308,
 		Username:    "root",
 		Password:    "root",
-		DbName:      "spider",
+		DbName:      "spider_sh",
 		T:           "w",
 		MaxOpenConn: 5,
 		MaxIdleSize: 5,
@@ -63,7 +72,7 @@ func newService() (Mysqler, error) {
 		Port:        3308,
 		Username:    "root",
 		Password:    "root",
-		DbName:      "spider",
+		DbName:      "spider_sh",
 		T:           "r",
 		MaxOpenConn: 5,
 		MaxIdleSize: 5,
@@ -175,18 +184,26 @@ func TestMysqlList(t *testing.T) {
 	testMysql(listMysql)
 }
 
+// count
+func TestMysqlCount(t *testing.T) {
+	testMysql(countMysql)
+}
+
 // 删除
 func TestMysqlDelete(t *testing.T) {
 	testMysql(deleteMysql)
 }
+
 func getMysql(client Mysqler, i int, city string) chan int {
 	//还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
+	client.MysqlServiceByCityBiz(city, "sell")
+	dbName, _ := client.GetDbByCityBiz(city, "sell")
 	// 开始查询
 	house1 := &House{}
 	args := make(map[string]interface{})
-	args["tablename"] = "house"
+	args["table"] = dbName + ".house"
 	args["query"] = " id = ? "
 	args["args"] = []interface{}{i}
 	//args["args"] = []interface{}{1}
@@ -214,7 +231,7 @@ func createMysql(client Mysqler, i int, city string) chan int {
 	// 开始查询
 	house1 := &House{Name: city + ":house:" + string(i)}
 	args := make(map[string]interface{})
-	args["tablename"] = "house"
+	args["table"] = "house"
 	args["obj"] = house1
 	label, _ := client.GetLabelByCityBiz(city, "sell")
 	client, err := client.MysqlService(label)
@@ -243,7 +260,7 @@ func listMysql(client Mysqler, i int, city string) chan int {
 	// 开始查询
 	//house1 := &House{Name:city+":house:"+string(i)}
 	args := make(map[string]interface{})
-	args["tablename"] = "house"
+	args["table"] = "house"
 	args["query"] = " id < ? "
 	args["args"] = []interface{}{int(i)}
 	args["limit"] = 30
@@ -278,7 +295,7 @@ func updateMysql(client Mysqler, i int, city string) chan int {
 	// 开始查询
 	house1 := &House{Id: i}
 	args := make(map[string]interface{})
-	args["tablename"] = "house"
+	args["table"] = "house"
 	args["obj"] = house1
 	label, _ := client.GetLabelByCityBiz(city, "sell")
 	client, err := client.MysqlService(label)
@@ -303,6 +320,38 @@ func updateMysql(client Mysqler, i int, city string) chan int {
 	return out
 }
 
+func countMysql(client Mysqler, i int, city string) chan int {
+	//还需要一个上下文用来控制开出去的goroutine是否超时
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	// 开始查询
+	count := 0
+	args := make(map[string]interface{})
+	args["table"] = "house"
+	args["count"] = &count
+	args["query"] = " id < ? "
+	args["args"] = []interface{}{int(i)}
+	label, _ := client.GetLabelByCityBiz(city, "sell")
+	client, err := client.MysqlService(label)
+	client.Count(ctx, args)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	out := make(chan int, 1)
+	select {
+	case <-ctx.Done():
+		fmt.Println("超时")
+		out <- 10001
+		return out
+	default:
+		//fmt.Println(string(bytes), err, "---from mongo successful---")
+		fmt.Println(count)
+		fmt.Println("查询到了" + string(count) + "条数据")
+		out <- 1
+	}
+	return out
+}
+
 func deleteMysql(client Mysqler, i int, city string) chan int {
 	//还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -310,7 +359,7 @@ func deleteMysql(client Mysqler, i int, city string) chan int {
 	// 开始查询
 	house1 := &House{Id: i}
 	args := make(map[string]interface{})
-	args["tablename"] = "house"
+	args["table"] = "house"
 	args["obj"] = house1
 	label, _ := client.GetLabelByCityBiz(city, "sell")
 	client, err := client.MysqlService(label)

@@ -25,11 +25,11 @@ func TestEngine(t *testing.T) {
 			//"redis_label_bj",
 		},
 		Pika: []string{ //测试etcd配置动态改库成功
-			"pika_label_rw",
+			//"pika_label_rw",
 		},
 
 		Mysql: []string{
-			"mysql_sell_1",
+			//"mysql_sell_1",
 		},
 	})
 

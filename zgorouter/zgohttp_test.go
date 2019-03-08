@@ -1,4 +1,4 @@
-package zgohttp
+package zgorouter
 
 import (
 	"git.zhugefang.com/gocore/zgo/zgoresponse"
