@@ -74,6 +74,8 @@ type Eser interface {
 	// param dsl: 原生elastic语句
 	// 根据elastic dsl 语句查询数据 该接口只能执行查询操作
 	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
+
+
 }
 
 func (e *zgoes) NewEs(label ...string) (*zgoes, error) {

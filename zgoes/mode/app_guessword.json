@@ -1,0 +1,59 @@
+{
+  "mapping": {
+    "app_guessword": {
+      "properties": {
+        "city": {
+          "type": "keyword"
+        },
+        "complex_price": {
+          "type": "keyword"
+        },
+        "count_house": {
+          "type": "long"
+        },
+        "first_saletime": {
+          "type": "long"
+        },
+        "full_text": {
+          "type": "keyword"
+        },
+        "housetype": {
+          "type": "keyword"
+        },
+        "id": {
+          "type": "keyword"
+        },
+        "keyword": {
+          "type": "text"
+        },
+        "location": {
+          "type": "geo_point"
+        },
+        "other_id": {
+          "type": "long"
+        },
+        "pid": {
+          "type": "long"
+        },
+        "pinyin": {
+          "type": "keyword"
+        },
+        "sale_status": {
+          "type": "long"
+        },
+        "score": {
+          "type": "float"
+        },
+        "sell_price": {
+          "type": "long"
+        },
+        "type_id": {
+          "type": "long"
+        },
+        "type_name": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}
