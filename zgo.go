@@ -100,8 +100,7 @@ func Engine(opt *Options) error {
 
 		go func() {
 			for v := range ladech {
-				var tmp config.LabelDetail
-				var labelDetArr []config.LabelDetail
+				//var tmp config.LabelDetail
 				mk := string(v.Key)
 				smk := strings.Split(mk, "/")
 				b := v.Value
@@ -127,115 +126,22 @@ func Engine(opt *Options) error {
 						}
 					}()
 
-				} else if smk[1] == "conn" {
+				} else if smk[1] == "project" && smk[2] == opt.Project {
 
 					var m []config.ConnDetail
 					err := zgoutils.Utils.Unmarshal(b, &m)
 					if err != nil {
 						fmt.Println("反序列化当前值失败", mk)
 					}
-					tmp.Key = smk[3]
-					tmp.Values = m
+					//tmp.Key = smk[4]
+					//tmp.Values = m
 
-					labelDetArr = append(labelDetArr, tmp)
-
-					key := smk[2]
-
-					//fmt.Println(smk[2],"-----",labelDetArr)
-
-					switch key {
-					case mysqlT:
-						//init mysql again
-						if len(opt.Mysql) > 0 {
-							hsm := engine.getConfigByOption(labelDetArr, opt.Mysql)
-							if len(hsm) > 0 {
-								// 配置信息： 城市和数据库的关系
-								cdc := config.CityDbConfig
-								zgomysql.InitMysqlService(hsm, cdc)
-								var err error
-								Mysql, err = zgomysql.MysqlService(opt.Mysql[0])
-								if err != nil {
-									fmt.Println(err)
-								}
-							}
-						}
-
-					case mongoT:
-						//init mongo again
-						if len(opt.Mongo) > 0 {
-							//todo someting
-							hsm := engine.getConfigByOption(labelDetArr, opt.Mongo)
-							//fmt.Println("--zgo.go--",labelDetArr, opt.Mongo, hsm)
-							if len(hsm) > 0 {
-								in := <-zgomongo.InitMongo(hsm)
-								Mongo = in
-							}
-
-						}
-					case redisT:
-						//init redis again
-						if len(opt.Redis) > 0 {
-							//todo someting
-							hsm := engine.getConfigByOption(labelDetArr, opt.Redis)
-							//fmt.Println(hsm)
-							if len(hsm) > 0 {
-								in := <-zgoredis.InitRedis(hsm)
-								Redis = in
-							}
-
-						}
-					case pikaT:
-						//init pika again
-						if len(opt.Pika) > 0 {
-							//todo someting
-							hsm := engine.getConfigByOption(labelDetArr, opt.Pika)
-							//fmt.Println(hsm)
-							if len(hsm) > 0 {
-								in := <-zgopika.InitPika(hsm)
-								Pika = in
-							}
-
-						}
-					case nsqT:
-						//init nsq again
-						if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq
-							hsm := engine.getConfigByOption(labelDetArr, opt.Nsq)
-							//fmt.Println("===zgo.go==", hsm)
-							//return nil
-							if len(hsm) > 0 {
-								in := <-zgonsq.InitNsq(hsm)
-								Nsq = in
-							}
-
-						}
-					case kafkaT:
-						//init kafka again
-						if len(opt.Kafka) > 0 {
-							//todo someting
-							hsm := engine.getConfigByOption(labelDetArr, opt.Kafka)
-							//fmt.Println(hsm)
-							//return nil
-							if len(hsm) > 0 {
-								in := <-zgokafka.InitKafka(hsm)
-								Kafka = in
-							}
-
-						}
-					case esT:
-						//init es again
-						if len(opt.Es) > 0 {
-							hsm := engine.getConfigByOption(labelDetArr, opt.Es)
-							if len(hsm) > 0 {
-								in := <-zgoes.InitEs(hsm)
-								Es = in
-							}
-
-						}
-					case etcdT:
-						//init etcd again
-
+					var hsm = make(map[string][]*config.ConnDetail)
+					for _, vv := range m {
+						pvv := vv
+						hsm[smk[4]] = append(hsm[smk[4]], &pvv)
 					}
-					//fmt.Println(Nsq)
+					initComponent(hsm, smk[3],smk[4])
 
 				}
 

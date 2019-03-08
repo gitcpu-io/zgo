@@ -68,7 +68,7 @@ func (cp *connPool) setConnPoolToChan(v []*config.ConnDetail) {
 }
 
 func (cp *connPool) createClient(v *config.ConnDetail) (*gorm.DB, error) {
-	fmt.Println("initConnPool", v)
+	//fmt.Println("initConnPool", v)
 	host := fmt.Sprintf("%v:%v@(%v:%v)/%v?charset=utf8&parseTime=True&loc=Local", v.Username, v.Password, v.Host, v.Port, v.DbName)
 	db, err := gorm.Open("mysql", host)
 	if err != nil {
@@ -81,10 +81,10 @@ func (cp *connPool) createClient(v *config.ConnDetail) (*gorm.DB, error) {
 	db.LogMode(true)
 	//}
 	// 最大空闲连接 5
-	fmt.Println(v.MaxIdleSize)
+	//fmt.Println(v.MaxIdleSize)
 	db.DB().SetMaxIdleConns(v.MaxIdleSize)
 	// 最大打开链接 50
-	fmt.Println(v.MaxOpenConn)
+	//fmt.Println(v.MaxOpenConn)
 	db.DB().SetMaxOpenConns(v.MaxOpenConn)
 	// 禁用复数表名
 	db.SingularTable(true)

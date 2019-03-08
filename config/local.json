@@ -78,8 +78,8 @@
       "values": [
         {
           "c": "从库1=====pika",
-          "host": "localhost",
-          "port": 59221,
+          "host": "101.201.110.130",
+          "port": 49221,
           "connSize": 50,
           "poolSize": 111,
           "username": "",
@@ -138,7 +138,7 @@
           "host": "localhost",
           "port": 4150,
           "connSize": 5,
-          "poolSize": 5
+          "poolSize": 500
         },
         {
           "c": "北京主库1-----etcd nsq",
@@ -158,14 +158,14 @@
           "host": "localhost",
           "port": 4150,
           "connSize": 33,
-          "poolSize": 999
+          "poolSize": 90
         },
         {
           "c": "上海从库==33===etcd nsq",
           "host": "localhost",
           "port": 4150,
           "connSize": 22,
-          "poolSize": 111
+          "poolSize": 1100
         }
       ]
     }
@@ -291,7 +291,7 @@
           "password": "root",
           "maxIdleSize": 5,
           "maxOpenConn": 10,
-          "dbName": "spider_sh"
+          "dbName": "spider"
         },
         {
           "c": "北京二手房库 旧实例r",
@@ -302,7 +302,7 @@
           "password": "root",
           "maxIdleSize": 5,
           "maxOpenConn": 10,
-          "dbName": "spider_sh"
+          "dbName": "spider"
         }
       ]
     }

@@ -18,6 +18,7 @@ const (
 
 var (
 	connChanMap map[string]chan *radix.Pool
+	mu        sync.RWMutex
 	hsmu        sync.RWMutex
 	prefixMap   map[string]string
 )
@@ -55,7 +56,7 @@ func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 	ch := make(chan *config.Labelconns)
 	go func() {
 		for lahosts := range ch {
-			fmt.Println("-----------------", lahosts)
+			//fmt.Println("-----------------", lahosts)
 			label := lahosts.Label
 			hosts := lahosts.Hosts
 			for k, v := range hosts {
@@ -65,14 +66,16 @@ func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 					connChan:     make(chan *radix.Pool, v.PoolSize),
 					connChanChan: make(chan chan *radix.Pool, v.ConnSize),
 				}
+				mu.Lock()
 				connChanMap[index] = c.connChan
 				prefixMap[label] = v.Prefix
+				mu.Unlock()
 				//connChanMap[index] = c.createClient(fmt.Sprintf("redis://%s:%s@%s:%d", v.Username, v.Password, v.Host, v.Port), v.Db, v.PoolSize)
 				go c.setConnPoolToChan(index, v) //call 创建连接到chan中
 				//go c.createClient(fmt.Sprintf("%s:%d", v.Host, v.Port))
 			}
 
-			fmt.Println(label, hosts, "hsm=====", len(hsm), connChanMap)
+			//fmt.Println(label, hosts, "hsm=====", len(hsm), connChanMap)
 		}
 	}()
 
@@ -147,7 +150,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 
 	go func() {
 		time.Sleep(2000 * time.Millisecond) //仅仅为了查看创建的连接数，创建数据库连接时间：90ms
-		fmt.Printf("init Redis to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
+		fmt.Printf("init Pika to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
 			len(cp.connChan), label, hosts.Host, hosts.Port, hosts.ConnSize, hosts.PoolSize, hosts.C)
 	}()
 }

@@ -90,12 +90,12 @@ var (
 	CityDbConfig map[string]map[string]string
 )
 
-func InitConfig(e string) (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig) {
+func InitConfig(e, project string) (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig) {
 	ReadFileByConfig(e)
 
 	if e != "local" {
 		//用etcd
-		return InitConfigByEtcd()
+		return InitConfigByEtcd(project)
 	}
 	return nil, nil, nil
 }

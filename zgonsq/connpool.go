@@ -64,7 +64,9 @@ func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 					connChan:     make(chan *nsq.Producer, v.PoolSize),
 					connChanChan: make(chan chan *nsq.Producer, v.ConnSize),
 				}
+				mu.Lock()
 				connChanMap[index] = c.connChan
+				mu.Unlock()
 				go c.setConnPoolToChan(index, v) //call 创建连接到chan中
 			}
 
