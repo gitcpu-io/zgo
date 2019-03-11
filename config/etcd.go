@@ -38,7 +38,7 @@ func InitConfigByEtcd(project string) (chan *mvccpb.KeyValue, chan map[string][]
 		panic(errors.New("Etcd have not u config pls checkout it ..."))
 	}
 
-	ch := make(chan *mvccpb.KeyValue, 1000)
+	ch := make(chan *mvccpb.KeyValue, 100)
 
 	for _, v := range response.Kvs {
 		ch <- v //返回到其它channel中
@@ -68,7 +68,6 @@ func Watcher(prefixKey string, watchStartRev int64) (chan map[string][]*ConnDeta
 					b := v.Kv.Value
 					preb := v.PrevKv.Value //上一次的值
 					keyType := strings.Split(key, "/")[3]
-					fmt.Println(keyType, "-----------------")
 					if keyType == "cache" || keyType == "log" { //如果监听到cache有变化
 						cm := CacheConfig{}
 						precm := CacheConfig{}
@@ -88,7 +87,6 @@ func Watcher(prefixKey string, watchStartRev int64) (chan map[string][]*ConnDeta
 								outCacheCh <- &cm
 
 							case "log":
-								fmt.Println("---etcd watching log change ..")
 								outLogCh <- &cm
 							}
 						}

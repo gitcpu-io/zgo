@@ -16,6 +16,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
+	kafkaCluter "github.com/bsm/sarama-cluster"
 	"github.com/nsqio/go-nsq"
 	"strings"
 )
@@ -29,9 +30,17 @@ func Engine(opt *Options) error {
 	engine := &engine{
 		opt: opt,
 	}
+
 	ladech, cacheCh, err := opt.init() //把zgo_start中用户定义的，映射到zgo的内存变量上
 	if err != nil {
 		return err
+	}
+
+	if opt.Project != "" {
+		config.Project = opt.Project
+	}
+	if opt.Loglevel != "" {
+		config.Loglevel = opt.Loglevel
 	}
 
 	if opt.Env == "local" {
@@ -95,6 +104,8 @@ func Engine(opt *Options) error {
 		in := <-zgocache.InitCache(cacheCh)
 		Cache = in
 
+		Log = zgolog.InitLog(config.Project, "file", "/tmp", 1)
+
 	} else {
 
 		go func() { //初始化时从etcd配置中读取
@@ -125,11 +136,18 @@ func Engine(opt *Options) error {
 						}
 					}()
 
-				} else if smk[3] == "log" { //log存储配置
+				} else if smk[3] == "log" { //init log存储配置 by etcd
+					cm := config.CacheConfig{}
+					err := zgoutils.Utils.Unmarshal(b, &cm)
+					if err != nil {
+						fmt.Println("反序列化当前值失败", mk)
+					}
+
+					Log = zgolog.InitLog(config.Project, cm.Label, cm.DbType, cm.Start)
 
 					fmt.Println("====log init by etcd config====", smk)
 
-				} else if smk[1] == "project" && smk[2] == opt.Project {
+				} else if smk[1] == "project" && smk[2] == opt.Project { //init conn config by etcd
 
 					var m []config.ConnDetail
 					err := zgoutils.Utils.Unmarshal(b, &m)
@@ -160,15 +178,6 @@ func Engine(opt *Options) error {
 	//初始化GRPC
 	Grpc = zgogrpc.GetGrpc()
 
-	if opt.Project != "" {
-		config.Project = opt.Project
-	}
-	if opt.Loglevel != "" {
-		config.Loglevel = opt.Loglevel
-	}
-
-	Log = zgolog.Newzgolog()
-
 	return nil
 }
 
@@ -193,7 +202,8 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
 
 //定义外部使用的类型
 type (
-	NsqMessage = *nsq.Message
+	NsqMessage        = *nsq.Message
+	PartitionConsumer = kafkaCluter.PartitionConsumer
 )
 
 var (
