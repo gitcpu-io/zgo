@@ -9,7 +9,7 @@ type Httper interface {
 	JsonpErr(ctx iris.Context, msg string) (int, error)
 	JsonServiceErr(ctx iris.Context) (int, error)
 	JsonParamErr(ctx iris.Context) (int, error)
-	JsonOtherErr(ctx iris.Context, code int, msg string) (int, error)
+	JsonErr(ctx iris.Context, status int, code string, msg string) (int, error)
 	JsonExpectErr(ctx iris.Context, msg string) (int, error)
 }
 
@@ -21,9 +21,10 @@ func NewHttp() Httper {
 }
 
 type ErrResponse struct {
-	Status    int    `json:"status"`
-	Msg       string `json:"msg"`
-	ErrorCode string `json:"errorCode"`
+	Status    int                    `json:"status"`
+	Msg       string                 `json:"msg"`
+	ErrorCode string                 `json:"errorCode"`
+	Data      map[string]interface{} `json:data`
 }
 
 var (
@@ -42,27 +43,27 @@ func (zh *zgohttp) JsonpErr(ctx iris.Context, msg string) (int, error) {
 
 // JsonOK 正常的返回方法
 func (zh *zgohttp) JsonOK(ctx iris.Context, r interface{}) (int, error) {
-	return ctx.JSON(iris.Map{"status": 200, "data": r})
+	return ctx.JSON(iris.Map{"status": 200, "data": r, "msg": ""})
 }
 
 // JsonExpectErr 预期内的错误，适用于调用func后 return出来的errors!=nil时的返回值
 func (zh *zgohttp) JsonExpectErr(ctx iris.Context, msg string) (int, error) {
-	return ctx.JSON(ErrResponse{Status: 500, Msg: msg, ErrorCode: "500"})
+	return ctx.JSON(ErrResponse{Status: 500, Msg: msg, ErrorCode: "500", Data: make(map[string]interface{})})
 }
 
-// JsonOtherErr 其他自定义返回方法 （不要轻易使用）
-func (zh *zgohttp) JsonOtherErr(ctx iris.Context, code int, msg string) (int, error) {
-	return ctx.JSON(ErrResponse{Status: code, Msg: msg, ErrorCode: string(code)})
+// JsonOtherErr 其他自定义返回方法 （业务本身的异常）
+func (zh *zgohttp) JsonErr(ctx iris.Context, status int, code string, msg string) (int, error) {
+	return ctx.JSON(ErrResponse{Status: status, Msg: msg, ErrorCode: code})
 }
 
 // JsonServiceErr defer recover到panic的时候用的异常方法
 func (zh *zgohttp) JsonServiceErr(ctx iris.Context) (int, error) {
-	msg := "服务器异常"
-	return ctx.JSON(ErrResponse{Status: 500, Msg: msg, ErrorCode: "500"})
+	msg := "服务器开小差了，稍后再试吧"
+	return ctx.JSON(ErrResponse{Status: 500, Msg: msg, ErrorCode: "500", Data: make(map[string]interface{})})
 }
 
 // JsonParamErr 参数验证不通过时调用
 func (zh *zgohttp) JsonParamErr(ctx iris.Context) (int, error) {
 	msg := "参数错误"
-	return ctx.JSON(ErrResponse{Status: 400, Msg: msg, ErrorCode: "400"})
+	return ctx.JSON(ErrResponse{Status: 400, Msg: msg, ErrorCode: "400", Data: make(map[string]interface{})})
 }
