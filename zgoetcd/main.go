@@ -28,29 +28,25 @@ func main() {
 	//------------
 
 	err = zgo.Engine(&zgo.Options{
-		Env: "local",
+		Env:     "local",
 		Project: "zgo_start",
 	})
 	if err != nil {
 		panic(err)
 	}
 
-
 	for _, v := range config.Nsq {
-		go func(v config.LabelDetail) {
-			k := v.Key
-			value := v.Values
-			key := "zgo/project/zgo_start/nsq/" + k
-			val, _ := json.Marshal(value)
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/nsq/" + k
+		val, _ := json.Marshal(value)
 
-			res, err := cli.KV.Put(context.TODO(), key, string(val),clientv3.WithPrevKV())
-			if err != nil {
-				fmt.Println(err)
-			}
-			fmt.Println(res.PrevKv)
-		}(v)
+		res, err := cli.KV.Put(context.TODO(), key, string(val), clientv3.WithPrevKV())
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(res.PrevKv)
 	}
-	time.Sleep(5 * time.Second)
 
 	//for _, v := range config.Mongo {
 	//	k := v.Key
