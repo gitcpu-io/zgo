@@ -12,7 +12,7 @@ import (
 
 var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
 
-var Version = "0.0.1"
+var Version = "0.1.0"
 
 type ConnDetail struct {
 	C           string `json:"c"`
@@ -32,11 +32,13 @@ type ConnDetail struct {
 }
 
 type CacheConfig struct {
-	Rate   int    `json:"rate"`   // 缓存失效时间 倍率
-	Label  string `json:"label"`  // 缓存所需的 pikaLabel
-	Start  int    `json:"start"`  // 是否开启 1 开启 0关闭
-	DbType string `json:"dbType"` // 数据库类型 默认pika
-	TcType int    `json:"tcType"` // 降级缓存类型 1正常降级缓存 2转为普通缓存
+	//same as LogConfig so 共用一个struct
+	C      string `json:"c"`
+	Rate   int    `json:"rate,omitempty"`   // 缓存失效时间 倍率
+	Label  string `json:"label"`            // 缓存所需的 pikaLabel
+	Start  int    `json:"start"`            // 是否开启 1 开启 0关闭
+	DbType string `json:"dbType"`           // 数据库类型 默认pika
+	TcType int    `json:"tcType,omitempty"` // 降级缓存类型 1正常降级缓存 2转为普通缓存
 }
 
 type LabelDetail struct {
@@ -64,6 +66,7 @@ type allConfig struct {
 	Es           []LabelDetail                `json:"es,omitempty"`
 	Etcd         []LabelDetail                `json:"etcd,omitempty"`
 	Cache        CacheConfig                  `json:"cache"`
+	Log          CacheConfig                  `json:"log"`
 	CityDbConfig map[string]map[string]string `json:"cityDbConfig,omitempty"`
 }
 
@@ -87,17 +90,18 @@ var (
 	Mysql        []LabelDetail
 	Kafka        []LabelDetail
 	Cache        CacheConfig
+	Log          CacheConfig
 	CityDbConfig map[string]map[string]string
 )
 
-func InitConfig(e, project string) (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig) {
+func InitConfig(e, project string) (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
 	ReadFileByConfig(e)
 
 	if e != "local" {
 		//用etcd
 		return InitConfigByEtcd(project)
 	}
-	return nil, nil, nil
+	return nil, nil, nil, nil
 }
 
 func ReadFileByConfig(e string) {
@@ -129,6 +133,7 @@ func ReadFileByConfig(e string) {
 	Mysql = acfg.Mysql
 	CityDbConfig = acfg.CityDbConfig
 	Cache = acfg.Cache
+	Log = acfg.Log
 
 	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Env)
 

@@ -15,7 +15,6 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgonsq"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
-	"git.zhugefang.com/gocore/zgo/zgorouter"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"github.com/nsqio/go-nsq"
 	"strings"
@@ -98,14 +97,14 @@ func Engine(opt *Options) error {
 
 	} else {
 
-		go func() {
+		go func() { //初始化时从etcd配置中读取
 			for v := range ladech {
 				//var tmp config.LabelDetail
 				mk := string(v.Key)
 				smk := strings.Split(mk, "/")
 				b := v.Value
 
-				if smk[1] == "cache" { //如果不是连接配置
+				if smk[3] == "cache" { //如果cache配置
 					cm := config.CacheConfig{}
 					err := zgoutils.Utils.Unmarshal(b, &cm)
 					if err != nil {
@@ -126,6 +125,10 @@ func Engine(opt *Options) error {
 						}
 					}()
 
+				} else if smk[3] == "log" { //log存储配置
+
+					fmt.Println("====log init by etcd config====", smk)
+
 				} else if smk[1] == "project" && smk[2] == opt.Project {
 
 					var m []config.ConnDetail
@@ -140,8 +143,13 @@ func Engine(opt *Options) error {
 					for _, vv := range m {
 						pvv := vv
 						hsm[smk[4]] = append(hsm[smk[4]], &pvv)
+						fmt.Printf("\n**********************资源ID: %s **************************\n", smk[4])
+						fmt.Printf("描述: %s\n", pvv.C)
+						fmt.Printf("Host: %s\n", pvv.Host)
+						fmt.Printf("Port: %d\n", pvv.Port)
+						fmt.Printf("DbName: %s\n", pvv.DbName)
 					}
-					initComponent(hsm, smk[3],smk[4])
+					initComponent(hsm, smk[3], smk[4])
 
 				}
 
@@ -185,9 +193,7 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
 
 //定义外部使用的类型
 type (
-	NsqMessage    = *nsq.Message
-	RouterParams  = zgorouter.Params
-	RouterHandler = zgorouter.Handle
+	NsqMessage = *nsq.Message
 )
 
 var (
@@ -203,7 +209,6 @@ var (
 	Cache zgocache.Cacher
 	Http  = zgohttp.NewHttp()
 
-	Utils  = zgoutils.NewUtils()
-	File   = zgofile.NewLocal()
-	Router = zgorouter.New()
+	Utils = zgoutils.NewUtils()
+	File  = zgofile.NewLocal()
 )

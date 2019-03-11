@@ -36,9 +36,18 @@ func TestMongoGet(t *testing.T) {
 	//	ConnSize: 5,
 	//	PoolSize: 456,
 	//}
+	//cd_sh := config.ConnDetail{
+	//	C:        "上海主库-----mongo",
+	//	Host:     "127.0.0.1",
+	//	Port:     27017,
+	//	ConnSize: 20,
+	//	PoolSize: 100,
+	//}
 	cd_sh := config.ConnDetail{
 		C:        "上海主库-----mongo",
-		Host:     "127.0.0.1",
+		Host:     "123.56.173.28",
+		Username: "root",
+		Password: "Au3jIwERA34y",
 		Port:     27017,
 		ConnSize: 20,
 		PoolSize: 100,
