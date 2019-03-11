@@ -9,10 +9,11 @@ import (
 func TestEngine(t *testing.T) {
 
 	err := Engine(&Options{
-		Env: "dev",
+		Env:     "dev",
+		Project: "zgo_start",
 		Nsq: []string{ //测试etcd配置动态改库成功
-			//"nsq_label_bj",
-			"nsq_label_sh",
+			"nsq_label_bj",
+			//"nsq_label_sh",
 		},
 		Mongo: []string{ //测试etcd配置动态改库成功
 			//"mongo_label_bj",

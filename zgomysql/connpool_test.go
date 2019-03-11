@@ -203,7 +203,7 @@ func getMysql(client Mysqler, i int, city string) chan int {
 	// 开始查询
 	house1 := &House{}
 	args := make(map[string]interface{})
-	args["tablename"] = dbName + ".house"
+	args["table"] = dbName + ".house"
 	args["query"] = " id = ? "
 	args["args"] = []interface{}{i}
 	//args["args"] = []interface{}{1}
@@ -231,7 +231,7 @@ func createMysql(client Mysqler, i int, city string) chan int {
 	// 开始查询
 	house1 := &House{Name: city + ":house:" + string(i)}
 	args := make(map[string]interface{})
-	args["tablename"] = "house"
+	args["table"] = "house"
 	args["obj"] = house1
 	label, _ := client.GetLabelByCityBiz(city, "sell")
 	client, err := client.MysqlService(label)
@@ -260,7 +260,7 @@ func listMysql(client Mysqler, i int, city string) chan int {
 	// 开始查询
 	//house1 := &House{Name:city+":house:"+string(i)}
 	args := make(map[string]interface{})
-	args["tablename"] = "house"
+	args["table"] = "house"
 	args["query"] = " id < ? "
 	args["args"] = []interface{}{int(i)}
 	args["limit"] = 30
@@ -295,7 +295,7 @@ func updateMysql(client Mysqler, i int, city string) chan int {
 	// 开始查询
 	house1 := &House{Id: i}
 	args := make(map[string]interface{})
-	args["tablename"] = "house"
+	args["table"] = "house"
 	args["obj"] = house1
 	label, _ := client.GetLabelByCityBiz(city, "sell")
 	client, err := client.MysqlService(label)
@@ -327,7 +327,7 @@ func countMysql(client Mysqler, i int, city string) chan int {
 	// 开始查询
 	count := 0
 	args := make(map[string]interface{})
-	args["tablename"] = "house"
+	args["table"] = "house"
 	args["count"] = &count
 	args["query"] = " id < ? "
 	args["args"] = []interface{}{int(i)}
@@ -359,7 +359,7 @@ func deleteMysql(client Mysqler, i int, city string) chan int {
 	// 开始查询
 	house1 := &House{Id: i}
 	args := make(map[string]interface{})
-	args["tablename"] = "house"
+	args["table"] = "house"
 	args["obj"] = house1
 	label, _ := client.GetLabelByCityBiz(city, "sell")
 	client, err := client.MysqlService(label)

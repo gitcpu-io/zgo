@@ -48,93 +48,34 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, err
 		if opt.Env != "local" && opt.Env != "dev" && opt.Env != "qa" && opt.Env != "pro" {
 			return nil, nil, errors.New("error env,must be local/dev/qa/pro !")
 		}
+		if opt.Project == "" {
+			return nil,nil,errors.New("u msut input your Project name to zgo.Engine func .")
+		}
 	}
 
 	//如果inch有值表示启用了etcd为配置中心，并watch了key，等待变更ing...
-	ladech, inch, cacheCh := config.InitConfig(opt.Env)
+	ladech, inch, cacheCh := config.InitConfig(opt.Env,opt.Project)
 	go func() {
 		if inch != nil {
 			for h := range inch {
+				//KEY: zgo/project/项目名/mysql/label名字
 				var keyType string
+				var mysqlLabel string
 				for mkey, _ := range h {
-					keyType = strings.Split(mkey, "/")[2]
+					keyType = strings.Split(mkey, "/")[3]
+					mysqlLabel = strings.Split(mkey, "/")[4]
 					//key = mkey
 					break
 				}
-				var hsmEtcd = make(map[string][]*config.ConnDetail)
+
+				var hsm = make(map[string][]*config.ConnDetail)
 				for mkey, v := range h {
-					key := strings.Split(mkey, "/")[3]
-					hsmEtcd[key] = v
+					key := strings.Split(mkey, "/")[4]	//改变label，去掉前缀
+					hsm[key] = v
 				}
-				fmt.Println(keyType, "有变化开始init again", hsmEtcd)
+				fmt.Println(keyType, "有变化开始init again", hsm)
 
-				switch keyType {
-				case mysqlT:
-					//init mysql again
-					// 配置信息： 城市和数据库的关系
-					cdc := config.CityDbConfig
-					hsm := getMatchConfig(hsmEtcd, opt.Mysql)
-					if len(hsm) > 0 {
-						zgomysql.InitMysqlService(hsm, cdc)
-						var err error
-						Mysql, err = zgomysql.MysqlService(opt.Mysql[0])
-
-						if err != nil {
-							fmt.Println(err)
-						}
-					}
-
-				case mongoT:
-					//init mongo again
-					hsm := getMatchConfig(hsmEtcd, opt.Mongo)
-					if len(hsm) > 0 {
-						in := <-zgomongo.InitMongo(hsm)
-						Mongo = in
-					}
-
-				case redisT:
-					//init redis again
-					hsm := getMatchConfig(hsmEtcd, opt.Redis)
-					if len(hsm) > 0 {
-						in := <-zgoredis.InitRedis(hsm)
-						Redis = in
-					}
-
-				case pikaT:
-					//init pika again
-					hsm := getMatchConfig(hsmEtcd, opt.Pika)
-					if len(hsm) > 0 {
-						in := <-zgopika.InitPika(hsm)
-						Pika = in
-					}
-
-				case nsqT:
-					//init nsq again
-					hsm := getMatchConfig(hsmEtcd, opt.Nsq)
-					if len(hsm) > 0 {
-						in := <-zgonsq.InitNsq(hsm)
-						Nsq = in
-					}
-
-				case kafkaT:
-					//init kafka again
-					hsm := getMatchConfig(hsmEtcd, opt.Kafka)
-					if len(hsm) > 0 {
-						in := <-zgokafka.InitKafka(hsm)
-						Kafka = in
-					}
-
-				case esT:
-					//init es again
-					hsm := getMatchConfig(hsmEtcd, opt.Es)
-					if len(hsm) > 0 {
-						in := <-zgoes.InitEs(hsm)
-						Es = in
-					}
-
-				case etcdT:
-					//init etcd again
-				}
+				initComponent(hsm, keyType,mysqlLabel)
 			}
 		}
 
@@ -149,6 +90,77 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, err
 	//fmt.Println("-------------------------------", opt.Project, opt.Loglevel)
 
 	return ladech, cacheCh, nil
+}
+
+func initComponent(hsm map[string][]*config.ConnDetail, keyType,mysqlLabel string) {
+
+	switch keyType {
+	case mysqlT:
+		//init mysql again
+		// 配置信息： 城市和数据库的关系
+		cdc := config.CityDbConfig
+		//hsm := getMatchConfig(hsmEtcd, opt.Mysql)
+		if len(hsm) > 0 {
+			zgomysql.InitMysqlService(hsm, cdc)
+			var err error
+			Mysql, err = zgomysql.MysqlService(mysqlLabel)
+
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+
+	case mongoT:
+		//init mongo again
+		//hsm := getMatchConfig(hsmEtcd, opt.Mongo)
+		if len(hsm) > 0 {
+			in := <-zgomongo.InitMongo(hsm)
+			Mongo = in
+		}
+
+	case redisT:
+		//init redis again
+		//hsm := getMatchConfig(hsmEtcd, opt.Redis)
+		if len(hsm) > 0 {
+			in := <-zgoredis.InitRedis(hsm)
+			Redis = in
+		}
+
+	case pikaT:
+		//init pika again
+		//hsm := getMatchConfig(hsmEtcd, opt.Pika)
+		if len(hsm) > 0 {
+			in := <-zgopika.InitPika(hsm)
+			Pika = in
+		}
+
+	case nsqT:
+		//init nsq again
+		//hsm := getMatchConfig(hsmEtcd, opt.Nsq)
+		if len(hsm) > 0 {
+			in := <-zgonsq.InitNsq(hsm)
+			Nsq = in
+		}
+
+	case kafkaT:
+		//init kafka again
+		//hsm := getMatchConfig(hsmEtcd, opt.Kafka)
+		if len(hsm) > 0 {
+			in := <-zgokafka.InitKafka(hsm)
+			Kafka = in
+		}
+
+	case esT:
+		//init es again
+		//hsm := getMatchConfig(hsmEtcd, opt.Es)
+		if len(hsm) > 0 {
+			in := <-zgoes.InitEs(hsm)
+			Es = in
+		}
+
+	case etcdT:
+		//init etcd again
+	}
 }
 
 func getMatchConfig(lds map[string][]*config.ConnDetail, us []string) map[string][]*config.ConnDetail {

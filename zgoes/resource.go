@@ -18,7 +18,6 @@ type EsResourcer interface {
 }
 
 var mu sync.RWMutex
-
 //接口实现
 type esResource struct {
 	label string       //配置标签
@@ -50,7 +49,8 @@ func NewEsResourcer(label string) EsResourcer {
 func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error) {
 	maps := map[string]interface{}{}
 	//定义es结果集返回结构体
-	uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"         //拼接es请求uti[索引+文档+_search]
+	uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"
+	//拼接es请求uti[索引+文档+_search]
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl)) //post请求
 	if err != nil {
 		fmt.Print(err)
@@ -74,5 +74,6 @@ func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, ar
 		fmt.Print(err)
 		return nil, err
 	}
+
 	return maps, err
 }
