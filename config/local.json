@@ -138,7 +138,7 @@
           "host": "localhost",
           "port": 4150,
           "connSize": 5,
-          "poolSize": 50
+          "poolSize": 55
         },
         {
           "c": "北京主库1-----etcd nsq",
@@ -319,11 +319,18 @@
       }
   },
   "cache":{
+    "c": "cache",
     "start": 1,
     "dbType": "pika",
     "label":"pika_label_rw",
     "tcType": 2,
     "rate": 2
+  },
+  "log":{
+    "c": "日志存储100088822244444444",
+    "start": 1,
+    "dbType": "nsq",
+    "label":"nsq_label_bj"
   }
 
 }
