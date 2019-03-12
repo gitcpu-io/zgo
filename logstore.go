@@ -62,10 +62,10 @@ func (ls *logStore) Deal(topic string, body []byte) (int, error) {
 
 	switch ls.DbType {
 	case "nsq":
-		n, err := zgonsq.GetNsq(ls.Label)
-		if err != nil {
-			fmt.Println(ls.Label, "==nsq==", err)
-		}
+		n := zgonsq.Nsq(ls.Label)
+		//if err != nil {
+		//	fmt.Println(ls.Label, "==nsq==", err)
+		//}
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
