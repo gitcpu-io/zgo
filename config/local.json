@@ -137,7 +137,7 @@
           "c": "北京主库2-----etcd nsq",
           "host": "localhost",
           "port": 4150,
-          "connSize": 5,
+          "connSize": 55,
           "poolSize": 55
         },
         {
@@ -145,7 +145,7 @@
           "host": "localhost",
           "port": 4150,
           "connSize": 50,
-          "poolSize": 25
+          "poolSize": 50
         }
 
       ]

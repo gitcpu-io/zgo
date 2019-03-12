@@ -45,7 +45,12 @@ type logStore struct {
 }
 
 func NewLogStore(dbType string, label string, start int) LogStorer {
-	return &logStore{DbType: dbType, Label: label, Start: start}
+	nls := &logStore{
+		DbType: dbType,
+		Label:  label,
+		Start:  start,
+	}
+	return nls
 }
 
 func (ls *logStore) Deal(topic string, body []byte) (int, error) {
@@ -59,14 +64,14 @@ func (ls *logStore) Deal(topic string, body []byte) (int, error) {
 	case "nsq":
 		n, err := zgonsq.GetNsq(ls.Label)
 		if err != nil {
-			fmt.Println(ls.Label, "==nsq==", n, err)
+			fmt.Println(ls.Label, "==nsq==", err)
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		ui8, err := n.Producer(ctx, topic, body)
 		if err != nil {
-			fmt.Println(ls.Label, "==nsq==", n, err)
+			fmt.Println(ls.Label, "==nsq==", err)
 		}
 		pint := int(<-ui8)
 		return pint, err
@@ -74,12 +79,14 @@ func (ls *logStore) Deal(topic string, body []byte) (int, error) {
 	case "kafka":
 		k, err := zgokafka.GetKafka(ls.Label)
 		if err != nil {
-			fmt.Println(ls.Label, "====", k, err)
+			fmt.Println(ls.Label, "==kafka==", err)
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		ui8, err := k.Producer(ctx, topic, body)
-
+		if err != nil {
+			fmt.Println(ls.Label, "==kafka==", err)
+		}
 		pint := int(<-ui8)
 		return pint, err
 

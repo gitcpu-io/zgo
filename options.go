@@ -64,6 +64,7 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, err
 
 				fmt.Println(keyType, "log,有变化开始init again", h)
 				Log = zgolog.InitLog(config.Project)
+
 				LogStore = NewLogStore(h.DbType, h.Label, h.Start)
 			}
 		}
@@ -154,6 +155,7 @@ func initComponent(hsm map[string][]*config.ConnDetail, keyType, mysqlLabel stri
 		if len(hsm) > 0 {
 			in := <-zgonsq.InitNsq(hsm)
 			Nsq = in
+
 		}
 
 	case kafkaT:

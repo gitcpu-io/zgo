@@ -1,6 +1,9 @@
 package main
 
 import (
+	"git.zhugefang.com/gocore/zgo"
+	"git.zhugefang.com/gocore/zgo/config"
+	"gopkg.in/gin-gonic/gin.v1/json"
 	"time"
 
 	"fmt"
@@ -26,84 +29,82 @@ func main() {
 
 	//------------
 
-	//err = zgo.Engine(&zgo.Options{
-	//	Env:     "local",
-	//	Project: "zgo_start",
-	//})
-	//if err != nil {
-	//	panic(err)
-	//}
+	err = zgo.Engine(&zgo.Options{
+		Env:     "local",
+		Project: "zgo_start",
+	})
+	if err != nil {
+		panic(err)
+	}
 
-	//for _, v := range config.Nsq {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/nsq/" + k
-	//	val, _ := json.Marshal(value)
-	//
-	//	res, err := client.KV.Put(context.TODO(), key, string(val), clientv3.WithPrevKV())
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	fmt.Println(res)
-	//}
-	//time.Sleep(5 * time.Second)
+	for _, v := range config.Nsq {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/nsq/" + k
+		val, _ := json.Marshal(value)
+		res, err := cli.KV.Put(context.TODO(), key, string(val), clientv3.WithPrevKV())
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(res)
+	}
+	time.Sleep(5 * time.Second)
 
-	//
-	//for _, v := range config.Mongo {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/mongo/" + k
-	//	val, _ := json.Marshal(value)
-	//	cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//
-	//for _, v := range config.Es {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/es/" + k
-	//	val, _ := json.Marshal(value)
-	//	cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//for _, v := range config.Mysql {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/mysql/" + k
-	//	val, _ := json.Marshal(value)
-	//	cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//for _, v := range config.Etcd {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/etcd/" + k
-	//	val, _ := json.Marshal(value)
-	//	cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//for _, v := range config.Kafka {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/kafka/" + k
-	//	val, _ := json.Marshal(value)
-	//	cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//
-	//for _, v := range config.Redis {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/redis/" + k
-	//	val, _ := json.Marshal(value)
-	//	cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//for _, v := range config.Pika {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/pika/" + k
-	//	val, _ := json.Marshal(value)
-	//	cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//
-	//key := "zgo/project/zgo_start/cache"
-	//val, _ := json.Marshal(config.Cache)
-	//cli.KV.Put(context.TODO(), key, string(val))
+	for _, v := range config.Mongo {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/mongo/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+
+	for _, v := range config.Es {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/es/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	for _, v := range config.Mysql {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/mysql/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	for _, v := range config.Etcd {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/etcd/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	for _, v := range config.Kafka {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/kafka/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+
+	for _, v := range config.Redis {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/redis/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	for _, v := range config.Pika {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/pika/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+
+	key := "zgo/project/zgo_start/cache"
+	val, _ := json.Marshal(config.Cache)
+	cli.KV.Put(context.TODO(), key, string(val))
 
 	key_log := "zgo/project/zgo_start/log"
 	//val_log, _ := json.Marshal(config.Log)

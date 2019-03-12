@@ -77,6 +77,16 @@ func (n *nsqResource) Producer(ctx context.Context, topic string, body []byte) (
 		return out, errors.New("conn is nil")
 	}
 
+	//for {
+	//	if err := producer.Ping(); err != nil {
+	//		producer = <-n.connpool.GetConnChan(n.label)
+	//		fmt.Println("------producer is nil")
+	//	}else{
+	//		break
+	//	}
+	//	time.Sleep(10 * time.Millisecond)
+	//}
+
 	doneChan := make(chan *nsq.ProducerTransaction)
 	err := producer.PublishAsync(topic, body, doneChan) // 发布消息
 

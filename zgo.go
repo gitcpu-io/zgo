@@ -149,7 +149,9 @@ func Engine(opt *Options) error {
 					}
 
 					Log = zgolog.InitLog(config.Project)
-					LogStore = NewLogStore(cm.DbType, cm.Label, cm.Start)
+					config.Log.DbType = cm.DbType
+					config.Log.Label = cm.Label
+					config.Log.Start = cm.Start
 
 					//fmt.Println("====log init by etcd config====", smk)
 
@@ -177,6 +179,8 @@ func Engine(opt *Options) error {
 
 				}
 
+				LogStore = NewLogStore(config.Log.DbType, config.Log.Label, config.Log.Start)
+
 			}
 
 		}()
@@ -190,7 +194,6 @@ func Engine(opt *Options) error {
 		for {
 			if len(zgolog.LbodyCh) > 1 {
 				StartQueue()
-
 			} else {
 				time.Sleep(3 * time.Second)
 			}
