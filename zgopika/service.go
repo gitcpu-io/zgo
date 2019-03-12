@@ -59,7 +59,10 @@ func InitPika(hsm map[string][]*config.ConnDetail) chan *zgopika {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 
-	currentLabels = hsm
+	//currentLabels = hsm
+	for k, v := range hsm { //so big bug can't set hsm to currentLabels，must be for, may be have old label
+		currentLabels[k] = v
+	}
 	InitPikaResource(hsm)
 
 	//自动为变量初始化对象

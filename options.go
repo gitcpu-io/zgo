@@ -63,11 +63,8 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, err
 				var keyType string
 
 				fmt.Println(keyType, "log,有变化开始init again", h)
-				config.Log.DbType = h.DbType
-				config.Log.Label = h.Label
-				config.Log.Start = h.Start
-				Log = zgolog.InitLog(config.Project, h.Label, h.DbType, h.Start)
-				//initComponent(hsm, keyType,mysqlLabel)
+				Log = zgolog.InitLog(config.Project)
+				LogStore = NewLogStore(h.DbType, h.Label, h.Start)
 			}
 		}
 

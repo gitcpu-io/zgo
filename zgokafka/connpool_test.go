@@ -59,7 +59,7 @@ func TestProducer(t *testing.T) {
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 10000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 10 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
@@ -138,7 +138,7 @@ func producer(label string, client *zgokafka, i int, b bool) chan int {
 		//rch, err = client.Producer(ctx, label, bodyMutil)
 
 	} else {
-		rch, err = client.Producer(ctx, label, body)
+		rch, err = client.Producer(ctx, "zgo_start", body)
 
 	}
 	if err != nil {

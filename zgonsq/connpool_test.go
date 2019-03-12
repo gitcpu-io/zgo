@@ -73,7 +73,7 @@ func TestProducer(t *testing.T) {
 				replyChan <- reply
 
 			} else {
-				ch := producer(label_bj, clientSh, i, false)
+				ch := producer("zgo_start", clientSh, i, false)
 				reply := <-ch
 				replyChan <- reply
 			}

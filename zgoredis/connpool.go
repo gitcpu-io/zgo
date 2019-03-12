@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	connChanMap map[string]chan *radix.Pool
+	connChanMap = make(map[string]chan *radix.Pool)
 	mu          sync.RWMutex //用于锁定connChanMap
 	hsmu        sync.RWMutex
 )
@@ -48,7 +48,7 @@ func InitConnPool(hsm map[string][]*config.ConnDetail) {
 func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 	hsmu.RLock()
 	defer hsmu.RUnlock()
-	connChanMap = make(map[string]chan *radix.Pool)
+	//connChanMap = make(map[string]chan *radix.Pool)
 	ch := make(chan *config.Labelconns)
 	go func() {
 		for lahosts := range ch {

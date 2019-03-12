@@ -1,7 +1,6 @@
 package zgo
 
 import (
-	"git.zhugefang.com/gocore/zgo/zgolog"
 	"testing"
 	"time"
 )
@@ -9,7 +8,7 @@ import (
 func TestEngine(t *testing.T) {
 
 	err := Engine(&Options{
-		Env:     "dev",
+		Env:     "local",
 		Project: "zgo_start",
 		Nsq:     []string{ //测试etcd配置动态改库成功
 			//"nsq_label_bj",
@@ -41,7 +40,7 @@ func TestEngine(t *testing.T) {
 	for {
 		select {
 		case <-time.Tick(time.Duration(5) * time.Second):
-			zgolog.Newzgolog().Error("start engine for test")
+			Log.Error("start engine for test")
 		}
 	}
 }

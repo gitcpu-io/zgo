@@ -19,11 +19,14 @@ import (
 	kafkaCluter "github.com/bsm/sarama-cluster"
 	"github.com/nsqio/go-nsq"
 	"strings"
+	"time"
 )
 
 type engine struct {
 	opt *Options
 }
+
+var LogStore LogStorer
 
 //New init zgo engine
 func Engine(opt *Options) error {
@@ -104,11 +107,13 @@ func Engine(opt *Options) error {
 		in := <-zgocache.InitCache(cacheCh)
 		Cache = in
 
-		Log = zgolog.InitLog(config.Project, "file", "/tmp", 1)
+		Log = zgolog.InitLog(config.Project)
+		LogStore = NewLogStore("file", "/tmp", 1)
 
 	} else {
 
 		go func() { //初始化时从etcd配置中读取
+
 			for v := range ladech {
 				//var tmp config.LabelDetail
 				mk := string(v.Key)
@@ -143,9 +148,10 @@ func Engine(opt *Options) error {
 						fmt.Println("反序列化当前值失败", mk)
 					}
 
-					Log = zgolog.InitLog(config.Project, cm.Label, cm.DbType, cm.Start)
+					Log = zgolog.InitLog(config.Project)
+					LogStore = NewLogStore(cm.DbType, cm.Label, cm.Start)
 
-					fmt.Println("====log init by etcd config====", smk)
+					//fmt.Println("====log init by etcd config====", smk)
 
 				} else if smk[1] == "project" && smk[2] == opt.Project { //init conn config by etcd
 
@@ -161,22 +167,35 @@ func Engine(opt *Options) error {
 					for _, vv := range m {
 						pvv := vv
 						hsm[smk[4]] = append(hsm[smk[4]], &pvv)
-						fmt.Printf("\n**********************资源ID: %s **************************\n", smk[4])
-						fmt.Printf("描述: %s\n", pvv.C)
-						fmt.Printf("Host: %s\n", pvv.Host)
-						fmt.Printf("Port: %d\n", pvv.Port)
-						fmt.Printf("DbName: %s\n", pvv.DbName)
+						//fmt.Printf("\n**********************资源ID: %s **************************\n", smk[4])
+						//fmt.Printf("描述: %s\n", pvv.C)
+						//fmt.Printf("Host: %s\n", pvv.Host)
+						//fmt.Printf("Port: %d\n", pvv.Port)
+						//fmt.Printf("DbName: %s\n", pvv.DbName)
 					}
 					initComponent(hsm, smk[3], smk[4])
 
 				}
 
 			}
+
 		}()
 	}
 
 	//初始化GRPC
 	Grpc = zgogrpc.GetGrpc()
+
+	//waiting for nsq and kafka init done
+	go func() {
+		for {
+			if len(zgolog.LbodyCh) > 1 {
+				StartQueue()
+
+			} else {
+				time.Sleep(3 * time.Second)
+			}
+		}
+	}()
 
 	return nil
 }

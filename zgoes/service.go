@@ -19,7 +19,12 @@ var (
 func InitEs(hsm map[string][]*config.ConnDetail) chan *zgoes {
 	muLabel.Lock()
 	defer muLabel.Unlock()
-	currentLabels = hsm
+	//currentLabels = hsm
+
+	for k, v := range hsm { //so big bug can't set hsm to currentLabels，must be for, may be have old label
+		currentLabels[k] = v
+	}
+
 	//自动为变量初始化对象
 	initLabel := ""
 	for k, _ := range hsm {
@@ -74,8 +79,6 @@ type Eser interface {
 	// param dsl: 原生elastic语句
 	// 根据elastic dsl 语句查询数据 该接口只能执行查询操作
 	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
-
-
 }
 
 func (e *zgoes) NewEs(label ...string) (*zgoes, error) {

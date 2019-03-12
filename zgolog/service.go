@@ -6,13 +6,14 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"github.com/go-stack/stack"
 	log "github.com/sirupsen/logrus"
-	"strings"
 )
 
 const (
 	project = "project"
 	file    = "file"
 )
+
+var LbodyCh = make(chan *logBody, 2000)
 
 type Logger interface {
 	NewLog() *zgolog
@@ -32,28 +33,22 @@ type zgolog struct {
 	Project  string
 	LogLevel string
 	Entry    *log.Logger
-	res      LogStorer
 }
 
-//var Log = Newzgolog()
-
-func Newzgolog() Logger {
-	z := &zgolog{
-		Project:  config.Project,
-		LogLevel: config.Loglevel,
-		Entry:    log.New(),
-		res:      NewLogStore("file", "/tmp", 1),
-	}
-	return z
+type logBody struct {
+	File    string `json:"file"`
+	Project string `json:"project"`
+	Time    string `json:"time"`
+	Msg     string `json:"msg"`
+	Level   string `json:"level"`
 }
 
-func InitLog(project, label, dbType string, start int) *zgolog {
-	res := NewLogStore(dbType, label, start)
+func InitLog(project string) *zgolog {
+
 	return &zgolog{
 		Project:  project,
 		LogLevel: config.Loglevel,
 		Entry:    log.New(),
-		res:      res,
 	}
 }
 
@@ -68,12 +63,9 @@ func (z *zgolog) NewLog() *zgolog {
 		Project:  config.Project,
 		LogLevel: l,
 		Entry:    log.New(),
-		res:      NewLogStore("file", "/tmp", 1),
 	}
 }
 
-// debug: 使用text格式, Level是Debug, 打印所有级别
-// not debug: 使用json格式, level是Info, 不打印Debug级别
 func (z *zgolog) SetDebug(level string) *log.Logger {
 	l, _ := log.ParseLevel(level)
 	logger := z.Entry
@@ -119,14 +111,6 @@ func (z *zgolog) SetDebug(level string) *log.Logger {
 	return nil
 }
 
-//func (z *zgolog) WithField(key string, value interface{}) *log.Entry {
-//	return z.withCaller().WithField(key, value)
-//}
-//
-//func (z *zgolog) WithFields(fs log.Fields) *log.Entry {
-//	return z.withCaller().WithFields(fs)
-//}
-
 func (z *zgolog) withCaller() (*log.Entry, interface{}) {
 	var value interface{}
 	z.SetDebug(config.Loglevel)
@@ -149,87 +133,142 @@ func (z *zgolog) withCaller() (*log.Entry, interface{}) {
 
 func (z *zgolog) Error(args ...interface{}) {
 
-	//
-	//k, _ := zgokafka.GetKafka("kafka_label_bj")
-	//_,err = k.Producer(context.TODO(), "kafka_label_bj", []byte(fmt.Sprint(args...)))
-	//if err != nil {
-	//	z.withCaller().Error(args...)
-	//	return
-	//}
-
 	en, value := z.withCaller()
 
-	//f := zgofile.NewLocal(".")
-	bstr := strings.Builder{}
-	bstr.WriteString("(" + config.Project + ")")
-	bstr.WriteString("(" + value.(string) + ")")
-	bstr.WriteString("(error)")
-	bstr.WriteString(fmt.Sprint(args...))
-	bstr.WriteString(zgoutils.Utils.FormatFromUnixTime(-1))
-	bstr.WriteString("\r\n")
-	//input := strings.NewReader(bstr.String())
-	//_, err := f.Append("/"+zgoutils.Utils.FormatFromUnixTimeShort(-1)+"/kafka_label_bj.txt", input)
-
-	_, err := z.res.Save(z.Project, []byte(bstr.String()))
-	if err != nil {
-		en.Error(args...)
-		return
+	lb := logBody{
+		Project: config.Project,
+		File:    value.(string),
+		Msg:     fmt.Sprint(args...),
+		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+		Level:   "error",
 	}
-
+	LbodyCh <- &lb
 	en.Error(args...)
 }
 
 func (z *zgolog) Info(args ...interface{}) {
-	//z.withCaller().Info(args...)
-	en, _ := z.withCaller()
+	en, value := z.withCaller()
+
+	lb := logBody{
+		Project: config.Project,
+		File:    value.(string),
+		Msg:     fmt.Sprint(args...),
+		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+		Level:   "info",
+	}
+	LbodyCh <- &lb
 	en.Info(args...)
 }
 
 func (z *zgolog) Print(args ...interface{}) {
-	//z.withCaller().Print(args...)
-	en, _ := z.withCaller()
+	en, value := z.withCaller()
+
+	lb := logBody{
+		Project: config.Project,
+		File:    value.(string),
+		Msg:     fmt.Sprint(args...),
+		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+		Level:   "print",
+	}
+	LbodyCh <- &lb
 	en.Print(args...)
 }
 
 func (z *zgolog) Warn(args ...interface{}) {
-	//z.withCaller().Warn(args...)
-	en, _ := z.withCaller()
+	en, value := z.withCaller()
+
+	lb := logBody{
+		Project: config.Project,
+		File:    value.(string),
+		Msg:     fmt.Sprint(args...),
+		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+		Level:   "warn",
+	}
+	LbodyCh <- &lb
 	en.Warn(args...)
 }
 
 func (z *zgolog) Debug(args ...interface{}) {
-	//z.withCaller().Debug(args...)
-	en, _ := z.withCaller()
+	en, value := z.withCaller()
+
+	lb := logBody{
+		Project: config.Project,
+		File:    value.(string),
+		Msg:     fmt.Sprint(args...),
+		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+		Level:   "debug",
+	}
+	LbodyCh <- &lb
 	en.Debug(args...)
 }
 
 func (z *zgolog) Errorf(format string, args ...interface{}) {
-	//z.withCaller().Errorf(format, args...)
-	en, _ := z.withCaller()
+	en, value := z.withCaller()
+
+	lb := logBody{
+		Project: config.Project,
+		File:    value.(string),
+		Msg:     fmt.Sprint(args...),
+		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+		Level:   "error",
+	}
+	LbodyCh <- &lb
 	en.Errorf(format, args...)
 }
 
 func (z *zgolog) Infof(format string, args ...interface{}) {
-	//z.withCaller().Infof(format, args...)
-	en, _ := z.withCaller()
+	en, value := z.withCaller()
+
+	lb := logBody{
+		Project: config.Project,
+		File:    value.(string),
+		Msg:     fmt.Sprint(args...),
+		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+		Level:   "info",
+	}
+	LbodyCh <- &lb
 	en.Infof(format, args...)
 }
 
 func (z *zgolog) Printf(format string, args ...interface{}) {
-	//z.withCaller().Printf(format, args...)
-	en, _ := z.withCaller()
+	en, value := z.withCaller()
+
+	lb := logBody{
+		Project: config.Project,
+		File:    value.(string),
+		Msg:     fmt.Sprint(args...),
+		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+		Level:   "print",
+	}
+	LbodyCh <- &lb
 	en.Printf(format, args...)
 
 }
 
 func (z *zgolog) Warnf(format string, args ...interface{}) {
-	//z.withCaller().Warnf(format, args...)
-	en, _ := z.withCaller()
+	en, value := z.withCaller()
+
+	lb := logBody{
+		Project: config.Project,
+		File:    value.(string),
+		Msg:     fmt.Sprint(args...),
+		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+		Level:   "warn",
+	}
+	LbodyCh <- &lb
 	en.Warnf(format, args...)
 }
 
 func (z *zgolog) Debugf(format string, args ...interface{}) {
-	//z.withCaller().Debugf(format, args...)
-	en, _ := z.withCaller()
+	en, value := z.withCaller()
+
+	lb := logBody{
+		Project: config.Project,
+		File:    value.(string),
+		Msg:     fmt.Sprint(args...),
+		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+		Level:   "debug",
+	}
+	LbodyCh <- &lb
 	en.Debugf(format, args...)
 }

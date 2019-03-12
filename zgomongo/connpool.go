@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	connChanMap map[string]chan *mgo.Session
+	connChanMap = make(map[string]chan *mgo.Session)
 	mu          sync.RWMutex
 	hsmu        sync.RWMutex
 )
@@ -48,8 +48,6 @@ func InitConnPool(hsm map[string][]*config.ConnDetail) {
 func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 	hsmu.RLock()
 	defer hsmu.RUnlock()
-
-	connChanMap = make(map[string]chan *mgo.Session)
 
 	ch := make(chan *config.Labelconns)
 	go func() {

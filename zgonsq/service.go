@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	currentLabels = make(map[string][]*config.ConnDetail)	//用于存放label与具体Host:port的map
-	muLabel       sync.RWMutex	//用于并发读写上面的map
+	currentLabels = make(map[string][]*config.ConnDetail) //用于存放label与具体Host:port的map
+	muLabel       sync.RWMutex                            //用于并发读写上面的map
 )
 
 //Nsq 对外
@@ -70,7 +70,10 @@ func InitNsq(hsm map[string][]*config.ConnDetail) chan *zgonsq {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 
-	currentLabels = hsm
+	//currentLabels = hsm
+	for k, v := range hsm { //so big bug can't set hsm to currentLabels，must be for, may be have old label
+		currentLabels[k] = v
+	}
 	InitNsqResource(hsm)
 
 	//自动为变量初始化对象
