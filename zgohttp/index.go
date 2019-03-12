@@ -7,6 +7,7 @@ import (
 type Httper interface {
 	JsonpOK(ctx iris.Context, r interface{}) (int, error)
 	JsonpErr(ctx iris.Context, msg string) (int, error)
+	JsonOK(ctx iris.Context, r interface{}) (int, error)
 	JsonServiceErr(ctx iris.Context) (int, error)
 	JsonParamErr(ctx iris.Context) (int, error)
 	JsonErr(ctx iris.Context, status int, code string, msg string) (int, error)
