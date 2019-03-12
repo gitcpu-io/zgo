@@ -6,6 +6,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/config"
 	"git.zhugefang.com/gocore/zgo/zgoes"
 	"git.zhugefang.com/gocore/zgo/zgokafka"
+	"git.zhugefang.com/gocore/zgo/zgolog"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
 	"git.zhugefang.com/gocore/zgo/zgomysql"
 	"git.zhugefang.com/gocore/zgo/zgonsq"
@@ -62,7 +63,10 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, err
 				var keyType string
 
 				fmt.Println(keyType, "log,有变化开始init again", h)
-
+				config.Log.DbType = h.DbType
+				config.Log.Label = h.Label
+				config.Log.Start = h.Start
+				Log = zgolog.InitLog(config.Project, h.Label, h.DbType, h.Start)
 				//initComponent(hsm, keyType,mysqlLabel)
 			}
 		}

@@ -1,7 +1,7 @@
 package zgo
 
 import (
-	"fmt"
+	"git.zhugefang.com/gocore/zgo/zgolog"
 	"testing"
 	"time"
 )
@@ -41,7 +41,7 @@ func TestEngine(t *testing.T) {
 	for {
 		select {
 		case <-time.Tick(time.Duration(5) * time.Second):
-			fmt.Println("start engine for test")
+			zgolog.Newzgolog().Error("start engine for test")
 		}
 	}
 }

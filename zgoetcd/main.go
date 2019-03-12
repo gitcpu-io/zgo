@@ -1,9 +1,6 @@
 package main
 
 import (
-	"git.zhugefang.com/gocore/zgo"
-	"git.zhugefang.com/gocore/zgo/config"
-	"gopkg.in/gin-gonic/gin.v1/json"
 	"time"
 
 	"fmt"
@@ -29,13 +26,13 @@ func main() {
 
 	//------------
 
-	err = zgo.Engine(&zgo.Options{
-		Env:     "local",
-		Project: "zgo_start",
-	})
-	if err != nil {
-		panic(err)
-	}
+	//err = zgo.Engine(&zgo.Options{
+	//	Env:     "local",
+	//	Project: "zgo_start",
+	//})
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	//for _, v := range config.Nsq {
 	//	k := v.Key
@@ -109,7 +106,8 @@ func main() {
 	//cli.KV.Put(context.TODO(), key, string(val))
 
 	key_log := "zgo/project/zgo_start/log"
-	val_log, _ := json.Marshal(config.Log)
+	//val_log, _ := json.Marshal(config.Log)
+	val_log := "{\"c\": \"日志存储12222\",\"start\": 1,\"dbType\": \"nsq\",\"label\":\"nsq_label_bj\"}"
 	res, err := cli.KV.Put(context.TODO(), key_log, string(val_log))
 	fmt.Println(res, err)
 
