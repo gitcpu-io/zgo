@@ -1,8 +1,6 @@
 package zgo
 
 import (
-	"context"
-	"git.zhugefang.com/gocore/zgo/zgonsq"
 	"testing"
 	"time"
 )
@@ -42,8 +40,6 @@ func TestEngine(t *testing.T) {
 	for {
 		select {
 		case <-time.Tick(time.Duration(5) * time.Second):
-			n := zgonsq.Nsq("nsq_label_bj")
-			n.Producer(context.TODO(), "zgo_start", []byte("999999999999"))
 			Log.Error("start engine for test")
 		}
 	}

@@ -155,7 +155,6 @@ func initComponent(hsm map[string][]*config.ConnDetail, keyType, mysqlLabel stri
 		if len(hsm) > 0 {
 			in := <-zgonsq.InitNsq(hsm)
 			Nsq = in
-
 		}
 
 	case kafkaT:

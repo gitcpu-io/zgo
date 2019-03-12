@@ -152,12 +152,14 @@ func (cp *connPool) createClient(address []string) chan *sarama.AsyncProducer {
 	go func() {
 		c := sarama.NewConfig()
 		c.Producer.Return.Successes = true
+		c.Net.KeepAlive = 1
 		p, err := sarama.NewAsyncProducer(address, c)
 		if err != nil {
 			fmt.Printf("sarama.NewSyncProducer err:%s \n", err)
 			out <- nil
 			return
 		}
+
 		out <- &p
 	}()
 	return out
