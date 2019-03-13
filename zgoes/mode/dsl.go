@@ -67,9 +67,6 @@ func parseArgs(args map[string]interface{}, key string) (interface{}, bool) {
 func QueryDsl(args map[string]interface{}) interface{} {
 	boolMap := make(map[string]interface{})
 
-	should, _ := parseArgs(args, "should")
-	boolMap["should"] = should
-
 	must, ok := parseArgs(args, "must")
 	if ok {
 		boolMap["must"] = must
@@ -82,6 +79,12 @@ func QueryDsl(args map[string]interface{}) interface{} {
 	filter, ok := parseArgs(args, "filter")
 	if ok {
 		boolMap["filter"] = filter
+	}
+
+	should, ok := parseArgs(args, "should")
+	if ok {
+		boolMap["should"] = should
+		boolMap["minimum_should_match"] = 1
 	}
 
 	queryMap := make(map[string]interface{})
@@ -105,9 +108,10 @@ func QueryDsl(args map[string]interface{}) interface{} {
 	if ok {
 		queryMap["size"] = size
 	}
-
-	queryMap["query"] = map[string]interface{}{
-		"bool": boolMap,
+	if len(boolMap) > 0 {
+		queryMap["query"] = map[string]interface{}{
+			"bool": boolMap,
+		}
 	}
 
 	return unmarshal(queryMap)
@@ -262,6 +266,7 @@ var GeoBoxMap = func(location map[string]interface{}) interface{} {
 	return term
 }
 
+//
 var GeoBoxField = func(field string, left_lat, left_lon,
 	right_lat, right_lon float64) interface{} {
 
@@ -321,6 +326,35 @@ func SimpleSort(field string, isAsc bool) interface{} {
 			"order": order,
 		},
 	}
+}
+
+func BoolQuery(op string, mapWhere interface{}) interface{} {
+	opMap := make(map[string]interface{})
+	opMap[op] = mapWhere
+
+	if op == "should" {
+		opMap["minimum_should_match"] = 1
+	}
+
+	return map[string]interface{}{
+		"bool": opMap,
+	}
+}
+
+func MustQuery(mapWhere []interface{}) interface{} {
+	return BoolQuery("must", mapWhere)
+}
+
+func ShouldQuery(mapWhere []interface{}) interface{} {
+	return BoolQuery("should", mapWhere)
+}
+
+func MustNotQuery(mapWhere []interface{}) interface{} {
+	return BoolQuery("must_not", mapWhere)
+}
+
+func FilterQuery(mapWhere []interface{}) interface{} {
+	return BoolQuery("filter", mapWhere)
 }
 
 func unmarshal(T interface{}) interface{} {

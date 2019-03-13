@@ -75,3 +75,36 @@ func TestQueryDsl(t *testing.T) {
 	dsl := QueryDsl(resMap)
 	show(dsl)
 }
+
+func showQuery(T interface{}, flag string) {
+	fmt.Println(flag)
+	show(unmarshal(T))
+}
+
+func TestQueryBoolEmpty(t *testing.T) {
+	println("############################################")
+	args := make(map[string]interface{})
+	aggs := SimpleAggs("cityarea_id", 5)
+	args["aggs"] = aggs
+
+	res := QueryDsl(args)
+	show(res)
+
+	res = MatchPhraseField("cityarea_name", "朝阳")
+	must := make([]interface{}, 0)
+	must = append(must, res)
+
+	should := make([]interface{}, 0)
+	should = append(should, res)
+
+	filter := make([]interface{}, 0)
+	filter = append(filter, res)
+
+	must_not := make([]interface{}, 0)
+	must_not = append(must_not, res)
+
+	showQuery(MustQuery(must), "must")
+	showQuery(ShouldQuery(should), "should")
+	showQuery(MustNotQuery(must_not), "must_not")
+	showQuery(FilterQuery(filter), "filter")
+}
