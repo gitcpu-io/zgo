@@ -155,6 +155,22 @@ var TermField = func(field string, value interface{}) interface{} {
 	return term
 }
 
+// m = { field: values} // values = [val0, val1, val2, ...]
+func TermsMap(m map[string]interface{}) interface{} {
+	term := map[string]interface{}{}
+	term["terms"] = m
+	return term
+}
+
+// values = [val0, val1, val2, ...]
+func TermsField(field string, values interface{}) interface{} {
+	term := map[string]interface{}{}
+	term["terms"] = map[string]interface{}{
+		field: values,
+	}
+	return term
+}
+
 // m = {op1: val1, op2: val2}  op = lt gt lte gte
 var RangeMap = func(field string, m map[string]interface{}) interface{} {
 	term := map[string]interface{}{}
@@ -341,19 +357,23 @@ func BoolQuery(op string, mapWhere interface{}) interface{} {
 	}
 }
 
-func MustQuery(mapWhere []interface{}) interface{} {
+// mapWhere = []interface{} or map[string] interface{}
+func MustQuery(mapWhere interface{}) interface{} {
 	return BoolQuery("must", mapWhere)
 }
 
-func ShouldQuery(mapWhere []interface{}) interface{} {
+// mapWhere = []interface{}
+func ShouldQuery(mapWhere interface{}) interface{} {
 	return BoolQuery("should", mapWhere)
 }
 
-func MustNotQuery(mapWhere []interface{}) interface{} {
+// mapWhere = []interface{} or map[string] interface{}
+func MustNotQuery(mapWhere interface{}) interface{} {
 	return BoolQuery("must_not", mapWhere)
 }
 
-func FilterQuery(mapWhere []interface{}) interface{} {
+// mapWhere = []interface{} or map[string] interface{}
+func FilterQuery(mapWhere interface{}) interface{} {
 	return BoolQuery("filter", mapWhere)
 }
 

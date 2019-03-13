@@ -86,11 +86,12 @@ func TestQueryBoolEmpty(t *testing.T) {
 	args := make(map[string]interface{})
 	aggs := SimpleAggs("cityarea_id", 5)
 	args["aggs"] = aggs
+	var res interface{}
 
-	res := QueryDsl(args)
-	show(res)
+	// res = MatchPhraseField("cityarea_name", "朝阳")
 
-	res = MatchPhraseField("cityarea_name", "朝阳")
+	xx := []int{1, 2, 3, 4, 5}
+	res = TermsField("cityarea_id", xx)
 	must := make([]interface{}, 0)
 	must = append(must, res)
 
@@ -107,4 +108,9 @@ func TestQueryBoolEmpty(t *testing.T) {
 	showQuery(ShouldQuery(should), "should")
 	showQuery(MustNotQuery(must_not), "must_not")
 	showQuery(FilterQuery(filter), "filter")
+
+	args["must"] = must
+	res = QueryDsl(args)
+	show(res)
+
 }
