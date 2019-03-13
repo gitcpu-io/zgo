@@ -130,11 +130,12 @@ func (n *kafkaResource) PublishAsync(topics string, value []byte, ptr *sarama.As
 	go func(p sarama.AsyncProducer, in chan uint8) {
 		errors := p.Errors()
 		success := p.Successes()
+		p.AsyncClose()
 		for {
 			select {
 			case err := <-errors:
 				if err != nil {
-					fmt.Println("asyn send=", err, topics, value)
+					fmt.Println(err, topics)
 				}
 				in <- 0
 			case <-success:
@@ -159,11 +160,12 @@ func (n *kafkaResource) PublishMultiAsync(topics string, value [][]byte, ptr *sa
 	go func(p sarama.AsyncProducer, in chan uint8) {
 		errors := p.Errors()
 		success := p.Successes()
+		p.AsyncClose()
 		for {
 			select {
 			case err := <-errors:
 				if err != nil {
-					fmt.Println("asyn send=", err, topics, value)
+					fmt.Println(err, topics)
 				}
 				in <- 0
 			case <-success:

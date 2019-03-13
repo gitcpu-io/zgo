@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	connChanMap map[string]chan *nsq.Producer
+	connChanMap = make(map[string]chan *nsq.Producer)
 	mu          sync.RWMutex //用于锁定connChanMap
 	hsmu        sync.RWMutex
 )
@@ -48,8 +48,6 @@ func InitConnPool(hsm map[string][]*config.ConnDetail) {
 func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 	hsmu.RLock()
 	defer hsmu.RUnlock()
-
-	connChanMap = make(map[string]chan *nsq.Producer)
 
 	ch := make(chan *config.Labelconns)
 	go func() {
@@ -96,6 +94,7 @@ func (cp *connPool) GetConnChan(label string) chan *nsq.Producer {
 		labLen = len(v)
 	}
 	index := rand.Intn(labLen) //随机取一个相同label下的连接
+
 	return connChanMap[fmt.Sprintf("%s:%d", label, index)]
 }
 
@@ -156,6 +155,16 @@ func (cp *connPool) createClient(address string) chan *nsq.Producer {
 		}
 		pro.SetLogger(nil, 2)
 
+		go func() {
+			for {
+				select {
+				case <-time.Tick(1 * time.Second):
+					if err := pro.Ping(); err != nil {
+						//fmt.Println(err,"-----ping is error---",address)
+					}
+				}
+			}
+		}()
 		out <- pro
 	}()
 	return out

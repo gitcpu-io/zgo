@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	connChanMap map[string]chan *sarama.AsyncProducer
+	connChanMap = make(map[string]chan *sarama.AsyncProducer)
 	mu          sync.RWMutex //用于锁定connChanMap
 	hsmu        sync.RWMutex
 )
@@ -48,8 +48,6 @@ func InitConnPool(hsm map[string][]*config.ConnDetail) {
 func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 	hsmu.RLock()
 	defer hsmu.RUnlock()
-
-	connChanMap = make(map[string]chan *sarama.AsyncProducer)
 
 	ch := make(chan *config.Labelconns)
 	go func() {
@@ -96,6 +94,7 @@ func (cp *connPool) GetConnChan(label string) chan *sarama.AsyncProducer {
 		labLen = len(v)
 	}
 	index := rand.Intn(labLen) //随机取一个相同label下的连接
+
 	return connChanMap[fmt.Sprintf("%s:%d", label, index)]
 }
 
@@ -153,12 +152,14 @@ func (cp *connPool) createClient(address []string) chan *sarama.AsyncProducer {
 	go func() {
 		c := sarama.NewConfig()
 		c.Producer.Return.Successes = true
+		c.Net.KeepAlive = 1
 		p, err := sarama.NewAsyncProducer(address, c)
 		if err != nil {
 			fmt.Printf("sarama.NewSyncProducer err:%s \n", err)
 			out <- nil
 			return
 		}
+
 		out <- &p
 	}()
 	return out

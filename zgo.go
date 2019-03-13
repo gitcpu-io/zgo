@@ -15,24 +15,35 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgonsq"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
-	"git.zhugefang.com/gocore/zgo/zgorouter"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
+	kafkaCluter "github.com/bsm/sarama-cluster"
 	"github.com/nsqio/go-nsq"
 	"strings"
+	"time"
 )
 
 type engine struct {
 	opt *Options
 }
 
+var LogStore LogStorer
+
 //New init zgo engine
 func Engine(opt *Options) error {
 	engine := &engine{
 		opt: opt,
 	}
+
 	ladech, cacheCh, err := opt.init() //把zgo_start中用户定义的，映射到zgo的内存变量上
 	if err != nil {
 		return err
+	}
+
+	if opt.Project != "" {
+		config.Project = opt.Project
+	}
+	if opt.Loglevel != "" {
+		config.Loglevel = opt.Loglevel
 	}
 
 	if opt.Env == "local" {
@@ -96,16 +107,20 @@ func Engine(opt *Options) error {
 		in := <-zgocache.InitCache(cacheCh)
 		Cache = in
 
+		Log = zgolog.InitLog(config.Project)
+		LogStore = NewLogStore("file", "/tmp", 1)
+
 	} else {
 
-		go func() {
+		go func() { //初始化时从etcd配置中读取
+
 			for v := range ladech {
 				//var tmp config.LabelDetail
 				mk := string(v.Key)
 				smk := strings.Split(mk, "/")
 				b := v.Value
 
-				if smk[1] == "cache" { //如果不是连接配置
+				if smk[3] == "cache" { //如果cache配置
 					cm := config.CacheConfig{}
 					err := zgoutils.Utils.Unmarshal(b, &cm)
 					if err != nil {
@@ -126,7 +141,21 @@ func Engine(opt *Options) error {
 						}
 					}()
 
-				} else if smk[1] == "project" && smk[2] == opt.Project {
+				} else if smk[3] == "log" { //init log存储配置 by etcd
+					cm := config.CacheConfig{}
+					err := zgoutils.Utils.Unmarshal(b, &cm)
+					if err != nil {
+						fmt.Println("反序列化当前值失败", mk)
+					}
+
+					Log = zgolog.InitLog(config.Project)
+					config.Log.DbType = cm.DbType
+					config.Log.Label = cm.Label
+					config.Log.Start = cm.Start
+
+					//fmt.Println("====log init by etcd config====", smk)
+
+				} else if smk[1] == "project" && smk[2] == opt.Project { //init conn config by etcd
 
 					var m []config.ConnDetail
 					err := zgoutils.Utils.Unmarshal(b, &m)
@@ -140,26 +169,36 @@ func Engine(opt *Options) error {
 					for _, vv := range m {
 						pvv := vv
 						hsm[smk[4]] = append(hsm[smk[4]], &pvv)
+						//fmt.Printf("\n**********************资源ID: %s **************************\n", smk[4])
+						//fmt.Printf("描述: %s\n", pvv.C)
+						//fmt.Printf("Host: %s\n", pvv.Host)
+						//fmt.Printf("Port: %d\n", pvv.Port)
+						//fmt.Printf("DbName: %s\n", pvv.DbName)
 					}
-					initComponent(hsm, smk[3],smk[4])
+					initComponent(hsm, smk[3], smk[4])
 
 				}
 
+				LogStore = NewLogStore(config.Log.DbType, config.Log.Label, config.Log.Start)
+
 			}
+
 		}()
 	}
 
 	//初始化GRPC
 	Grpc = zgogrpc.GetGrpc()
 
-	if opt.Project != "" {
-		config.Project = opt.Project
-	}
-	if opt.Loglevel != "" {
-		config.Loglevel = opt.Loglevel
-	}
-
-	Log = zgolog.Newzgolog()
+	//waiting for nsq and kafka init done
+	go func() {
+		for {
+			if len(zgolog.LbodyCh) > 1 {
+				StartQueue()
+			} else {
+				time.Sleep(3 * time.Second)
+			}
+		}
+	}()
 
 	return nil
 }
@@ -185,9 +224,8 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
 
 //定义外部使用的类型
 type (
-	NsqMessage    = *nsq.Message
-	RouterParams  = zgorouter.Params
-	RouterHandler = zgorouter.Handle
+	NsqMessage        = *nsq.Message
+	PartitionConsumer = kafkaCluter.PartitionConsumer
 )
 
 var (
@@ -203,7 +241,6 @@ var (
 	Cache zgocache.Cacher
 	Http  = zgohttp.NewHttp()
 
-	Utils  = zgoutils.NewUtils()
-	File   = zgofile.NewLocal()
-	Router = zgorouter.New()
+	Utils = zgoutils.NewUtils()
+	File  = zgofile.NewLocal()
 )

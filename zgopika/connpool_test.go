@@ -177,7 +177,7 @@ func hetSet(label string, client *zgopika, i int) chan int {
 		out <- 10001
 		return out
 	default:
-		fmt.Println("ok........")
+		//fmt.Println("ok........")
 		out <- 1
 	}
 
@@ -206,7 +206,7 @@ func setSet(label string, client *zgopika, i int) chan int {
 		out <- 10001
 		return out
 	default:
-		fmt.Println("ok........")
+		//fmt.Println("ok........")
 		out <- 1
 	}
 

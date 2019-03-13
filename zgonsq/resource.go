@@ -63,14 +63,35 @@ func (n *nsqResource) GetConnChan(label string) chan *nsq.Producer {
 
 //Producer 生产者函数
 func (n *nsqResource) Producer(ctx context.Context, topic string, body []byte) (chan uint8, error) {
+
 	out := make(chan uint8, 1)
 	if len(body) == 0 { //不能发布空串，否则会导致error
 		out <- 0
 		return out, errors.New("message is empty")
 	}
+
 	producer := <-n.connpool.GetConnChan(n.label)
+
+	if producer == nil {
+		out <- 0
+		return out, errors.New("conn is nil")
+	}
+
+	//for {
+	//	if err := producer.Ping(); err != nil {
+	//		producer = <-n.connpool.GetConnChan(n.label)
+	//		fmt.Println("------producer is nil")
+	//	}else{
+	//		break
+	//	}
+	//	time.Sleep(10 * time.Millisecond)
+	//}
+
 	doneChan := make(chan *nsq.ProducerTransaction)
 	err := producer.PublishAsync(topic, body, doneChan) // 发布消息
+
+	fmt.Println(string(body), err, "---PublishAsync----", producer)
+
 	if err != nil {
 		out <- 0
 		return out, nil
@@ -78,10 +99,10 @@ func (n *nsqResource) Producer(ctx context.Context, topic string, body []byte) (
 	go func() {
 		r := <-doneChan //一定要消费掉这个，要不然会丢消息
 		if r == nil {
-			//fmt.Println(topic,"--发送到NSQ失败--",err)
+			//fmt.Println(topic, "--发送到NSQ失败--", err)
 			out <- 0
 		} else {
-			//fmt.Println(topic,"==发送到NSQ成功==", string(body),err)
+			//fmt.Println(topic, "==发送到NSQ成功==", string(body), err)
 			out <- 1
 		}
 	}()

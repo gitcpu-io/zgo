@@ -35,7 +35,12 @@ type Mysqler interface {
 func InitMysqlService(hsm map[string][]*config.ConnDetail, cdc map[string]map[string]string) {
 	muLabel.Lock()
 	defer muLabel.Unlock()
-	currentLabels = hsm
+
+	//currentLabels = hsm
+	for k, v := range hsm { //so big bug can't set hsm to currentLabels，must be for, may be have old label
+		currentLabels[k] = v
+	}
+
 	cityDbConfig = cdc
 	InitMysqlResource(hsm)
 	for k, _ := range hsm {

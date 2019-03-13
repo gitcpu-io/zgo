@@ -6,6 +6,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/config"
 	"git.zhugefang.com/gocore/zgo/zgoes"
 	"git.zhugefang.com/gocore/zgo/zgokafka"
+	"git.zhugefang.com/gocore/zgo/zgolog"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
 	"git.zhugefang.com/gocore/zgo/zgomysql"
 	"git.zhugefang.com/gocore/zgo/zgonsq"
@@ -49,12 +50,26 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, err
 			return nil, nil, errors.New("error env,must be local/dev/qa/pro !")
 		}
 		if opt.Project == "" {
-			return nil,nil,errors.New("u msut input your Project name to zgo.Engine func .")
+			return nil, nil, errors.New("u msut input your Project name to zgo.Engine func .")
 		}
 	}
 
 	//如果inch有值表示启用了etcd为配置中心，并watch了key，等待变更ing...
-	ladech, inch, cacheCh := config.InitConfig(opt.Env,opt.Project)
+	ladech, inch, cacheCh, logCh := config.InitConfig(opt.Env, opt.Project)
+	go func() {
+		if logCh != nil {
+			for h := range logCh {
+				//KEY: zgo/project/项目名/mysql/label名字
+				var keyType string
+
+				fmt.Println(keyType, "log,有变化开始init again", h)
+				Log = zgolog.InitLog(config.Project)
+
+				LogStore = NewLogStore(h.DbType, h.Label, h.Start)
+			}
+		}
+
+	}()
 	go func() {
 		if inch != nil {
 			for h := range inch {
@@ -70,12 +85,12 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, err
 
 				var hsm = make(map[string][]*config.ConnDetail)
 				for mkey, v := range h {
-					key := strings.Split(mkey, "/")[4]	//改变label，去掉前缀
+					key := strings.Split(mkey, "/")[4] //改变label，去掉前缀
 					hsm[key] = v
 				}
 				fmt.Println(keyType, "有变化开始init again", hsm)
 
-				initComponent(hsm, keyType,mysqlLabel)
+				initComponent(hsm, keyType, mysqlLabel)
 			}
 		}
 
@@ -92,7 +107,7 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, err
 	return ladech, cacheCh, nil
 }
 
-func initComponent(hsm map[string][]*config.ConnDetail, keyType,mysqlLabel string) {
+func initComponent(hsm map[string][]*config.ConnDetail, keyType, mysqlLabel string) {
 
 	switch keyType {
 	case mysqlT:

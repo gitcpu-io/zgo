@@ -1,9 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"git.zhugefang.com/gocore/zgo"
 	"git.zhugefang.com/gocore/zgo/config"
+	"gopkg.in/gin-gonic/gin.v1/json"
 	"time"
 
 	"fmt"
@@ -18,12 +18,14 @@ type A struct {
 	DEF string `json:"def"`
 }
 
+var cli *clientv3.Client
+
 func main() {
-	cli, err := CreateClient()
+	c, err := CreateClient()
 	if err != nil {
 		return
 	}
-	defer cli.Close()
+	cli = c
 
 	//------------
 
@@ -40,69 +42,75 @@ func main() {
 		value := v.Values
 		key := "zgo/project/zgo_start/nsq/" + k
 		val, _ := json.Marshal(value)
-
 		res, err := cli.KV.Put(context.TODO(), key, string(val), clientv3.WithPrevKV())
 		if err != nil {
-			fmt.Println(err)
+			panic(err)
 		}
-		fmt.Println(res.PrevKv)
+		fmt.Println(res)
+	}
+	time.Sleep(5 * time.Second)
+
+	for _, v := range config.Mongo {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/mongo/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
 	}
 
-	//for _, v := range config.Mongo {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/mongo/" + k
-	//	val, _ := json.Marshal(value)
-	//	go cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//
-	//for _, v := range config.Es {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/es/" + k
-	//	val, _ := json.Marshal(value)
-	//	go cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//for _, v := range config.Mysql {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/mysql/" + k
-	//	val, _ := json.Marshal(value)
-	//	go cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//for _, v := range config.Etcd {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/etcd/" + k
-	//	val, _ := json.Marshal(value)
-	//	go cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//for _, v := range config.Kafka {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/kafka/" + k
-	//	val, _ := json.Marshal(value)
-	//	go cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//
-	//for _, v := range config.Redis {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/redis/" + k
-	//	val, _ := json.Marshal(value)
-	//	go cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//for _, v := range config.Pika {
-	//	k := v.Key
-	//	value := v.Values
-	//	key := "zgo/project/zgo_start/pika/" + k
-	//	val, _ := json.Marshal(value)
-	//	go cli.KV.Put(context.TODO(), key, string(val))
-	//}
-	//
-	//key := "zgo/cache/one"
-	//val, _ := json.Marshal(config.Cache)
-	//cli.KV.Put(context.TODO(), key, string(val))
+	for _, v := range config.Es {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/es/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	for _, v := range config.Mysql {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/mysql/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	for _, v := range config.Etcd {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/etcd/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	for _, v := range config.Kafka {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/kafka/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+
+	for _, v := range config.Redis {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/redis/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+	for _, v := range config.Pika {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/pika/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+
+	key := "zgo/project/zgo_start/cache"
+	val, _ := json.Marshal(config.Cache)
+	cli.KV.Put(context.TODO(), key, string(val))
+
+	key_log := "zgo/project/zgo_start/log"
+	//val_log, _ := json.Marshal(config.Log)
+	val_log := "{\"c\": \"日志存储12222\",\"start\": 1,\"dbType\": \"nsq\",\"label\":\"nsq_label_bj\"}"
+	res, err := cli.KV.Put(context.TODO(), key_log, string(val_log))
+	fmt.Println(res, err)
 
 	fmt.Println("all config to etcd done")
 
@@ -111,7 +119,8 @@ func main() {
 func CreateClient() (*clientv3.Client, error) {
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints: []string{
-			"0.0.0.0:2381",
+			"127.0.0.1:2381",
+			//"123.56.173.28:2380",
 		},
 		DialTimeout: 10 * time.Second,
 	})

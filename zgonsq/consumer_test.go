@@ -1,6 +1,7 @@
 package zgonsq
 
 import (
+	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
 	"testing"
 	"time"
@@ -61,12 +62,12 @@ func TestConsumer(t *testing.T) {
 	}
 	c2.Consumer()
 
-	//for {
-	//	select {
-	//	case <-time.Tick(time.Duration(3 * time.Second)):
-	//		fmt.Println("一直在消费着")
-	//	}
-	//}
-	time.Sleep(3 * time.Second)
+	for {
+		select {
+		case <-time.Tick(time.Duration(3 * time.Second)):
+			fmt.Println("一直在消费着")
+		}
+	}
+	//time.Sleep(3 * time.Second)
 
 }

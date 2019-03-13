@@ -1,6 +1,7 @@
 package zgokafka
 
 import (
+	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
 	"testing"
 	"time"
@@ -46,7 +47,7 @@ func TestConsumer(t *testing.T) {
 		panic(err)
 	}
 	c := chat{
-		Topic:   label_bj,
+		Topic:   "zgo_start",
 		GroupId: label_bj,
 		Kafka:   labelBj,
 	}
@@ -59,13 +60,13 @@ func TestConsumer(t *testing.T) {
 	}
 	go c2.Consumer()
 
-	//for {
-	//	select {
-	//	case <-time.Tick(time.Duration(3 * time.Second)):
-	//		fmt.Println("一直在消费着")
-	//	}
-	//}
+	for {
+		select {
+		case <-time.Tick(time.Duration(3 * time.Second)):
+			fmt.Println("一直在消费着")
+		}
+	}
 
-	time.Sleep(3 * time.Second)
+	//time.Sleep(3 * time.Second)
 
 }

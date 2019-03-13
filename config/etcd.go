@@ -19,11 +19,14 @@ import (
 	"time"
 )
 
-func InitConfigByEtcd(project string) (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig) {
-	client, err := CreateClient() //创建etcd client
+var client *clientv3.Client
+
+func InitConfigByEtcd(project string) (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
+	c, err := CreateClient() //创建etcd client
 	if err != nil {
-		return nil, nil, nil
+		return nil, nil, nil, nil
 	}
+	client = c
 
 	prefixKey := fmt.Sprintf("zgo/project/%s", project)
 	//从etcd中取出key并赋值
@@ -35,22 +38,23 @@ func InitConfigByEtcd(project string) (chan *mvccpb.KeyValue, chan map[string][]
 		panic(errors.New("Etcd have not u config pls checkout it ..."))
 	}
 
-	ch := make(chan *mvccpb.KeyValue, 1000)
+	ch := make(chan *mvccpb.KeyValue, 100)
 
 	for _, v := range response.Kvs {
 		ch <- v //返回到其它channel中
 	}
 	//从这个version开始监控
 	watchStartRev := response.Header.Revision + 1
-	ch1, ch2 := Watcher(client, prefixKey, watchStartRev)
+	ch1, ch2, ch3 := Watcher(prefixKey, watchStartRev)
 
-	return ch, ch1, ch2
+	return ch, ch1, ch2, ch3
 }
 
-func Watcher(client *clientv3.Client, prefixKey string, watchStartRev int64) (chan map[string][]*ConnDetail, chan *CacheConfig) {
+func Watcher(prefixKey string, watchStartRev int64) (chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
 
-	out := make(chan map[string][]*ConnDetail)
-	outCache := make(chan *CacheConfig)
+	outConnCh := make(chan map[string][]*ConnDetail)
+	outCacheCh := make(chan *CacheConfig)
+	outLogCh := make(chan *CacheConfig)
 
 	go func() {
 		watcher := clientv3.NewWatcher(client)
@@ -62,8 +66,9 @@ func Watcher(client *clientv3.Client, prefixKey string, watchStartRev int64) (ch
 				case clientv3.EventTypePut:
 					key := string(v.Kv.Key)
 					b := v.Kv.Value
-					preb := v.PrevKv.Value                     //上一次的值
-					if strings.Split(key, "/")[1] == "cache" { //如果监听到cache有变化
+					preb := v.PrevKv.Value //上一次的值
+					keyType := strings.Split(key, "/")[3]
+					if keyType == "cache" || keyType == "log" { //如果监听到cache有变化
 						cm := CacheConfig{}
 						precm := CacheConfig{}
 						err := zgoutils.Utils.Unmarshal(b, &cm)
@@ -77,7 +82,13 @@ func Watcher(client *clientv3.Client, prefixKey string, watchStartRev int64) (ch
 							continue
 						}
 						if reflect.DeepEqual(cm, precm) != true { //如果有变化
-							outCache <- &cm
+							switch keyType {
+							case "cache":
+								outCacheCh <- &cm
+
+							case "log":
+								outLogCh <- &cm
+							}
 						}
 
 					} else {
@@ -104,7 +115,7 @@ func Watcher(client *clientv3.Client, prefixKey string, watchStartRev int64) (ch
 							hsm := make(map[string][]*ConnDetail)
 							hsm[key] = tmp
 
-							out <- hsm
+							outConnCh <- hsm
 						}
 
 					}
@@ -113,7 +124,7 @@ func Watcher(client *clientv3.Client, prefixKey string, watchStartRev int64) (ch
 			}
 		}
 	}()
-	return out, outCache
+	return outConnCh, outCacheCh, outLogCh
 }
 
 func CreateClient() (*clientv3.Client, error) {
