@@ -39,7 +39,8 @@ func NewEsResourcer(label string) EsResourcer {
 	if al, ok := currentLabels[label]; ok {
 		lf := al[0]
 		// uri = lf.Uri
-		uri = "http://" + lf.Username + ":" + lf.Password + "@" + lf.Host + ":" + lf.Port
+		//uri = "http://" + lf.Username + ":" + lf.Password + "@" + lf.Host + ":" + lf.Port
+		uri = fmt.Sprintf("%s://%s:%s@%s:%d", lf.Username, lf.Password, lf.Host, lf.Port)
 	}
 	return &esResource{
 		label: label,
@@ -49,33 +50,33 @@ func NewEsResourcer(label string) EsResourcer {
 
 //根据dsl语句执行查询
 func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error) {
-	maps := map[string]interface{}{}
+	//maps := map[string]interface{}{}
 	//定义es结果集返回结构体
-	uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"
+	//uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"
 	//拼接es请求uti[索引+文档+_search]
-	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl)) //post请求
-	if err != nil {
-		fmt.Print(err)
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json") //设置json协议解析头
-	resp, err := e.GetConChan().Do(req)                //获取绑定的地址执行请求
-	if err != nil {
-		fmt.Print(err)
-		return nil, err
-	}
-	defer resp.Body.Close()
+	//req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl)) //post请求
+	//if err != nil {
+	//	fmt.Print(err)
+	//	return nil, err
+	//}
+	//req.Header.Set("Content-Type", "application/json") //设置json协议解析头
+	//resp, err := e.GetConChan().Do(req)                //获取绑定的地址执行请求
+	//if err != nil {
+	//	fmt.Print(err)
+	//	return nil, err
+	//}
+	//defer resp.Body.Close()
+	//
+	//be, err := ioutil.ReadAll(resp.Body)
+	//
+	//if err != nil {
+	//	fmt.Print(err)
+	//	return nil, err
+	//}
+	//if err := zgoutils.Utils.Unmarshal(be, &maps); err != nil {
+	//	fmt.Print(err)
+	//	return nil, err
+	//}
 
-	be, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		fmt.Print(err)
-		return nil, err
-	}
-	if err := zgoutils.Utils.Unmarshal(be, &maps); err != nil {
-		fmt.Print(err)
-		return nil, err
-	}
-
-	return maps, err
+	//return maps, err
 }
