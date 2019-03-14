@@ -10,22 +10,6 @@ func show(T interface{}) {
 	fmt.Println(T, reflect.TypeOf(T))
 }
 
-func TestRang(t *testing.T) {
-	//ps := map[string]interface{}{"type_name": "小区"}
-	rg := map[string]interface{}{"gte": 10, "lte": 20}
-
-	a := fmt.Sprintf(DSL["bool"], unmarshal(RangeMap("city", rg)), "[]", "[]")
-
-	fmt.Println(a)
-}
-
-func TestMatch(t *testing.T) {
-	mch := map[string]interface{}{"cityarea2": "朝阳"}
-	a := fmt.Sprintf(DSL["bool"], unmarshal(MatchMap(mch)), "[]", "[]")
-
-	fmt.Println(a, MatchMap(mch))
-}
-
 func TestSimpleAggs(t *testing.T) {
 	res := SimpleAggs("cityarea_id", 20)
 	show(res)
@@ -112,5 +96,76 @@ func TestQueryBoolEmpty(t *testing.T) {
 	args["must"] = must
 	res = QueryDsl(args)
 	show(res)
+}
 
+func TestDslStruct_1(t *testing.T) {
+	fmt.Println("#########################QueryDsl")
+
+	dsl := NewDSL()
+	var res interface{}
+	res = TermField("cityarea_id", 5)
+	show(res)
+	dsl.Must(res)
+
+	res = MatchPhraseField("cityarea_name", "朝阳")
+	dsl.Should(res)
+
+	res = TermField("borough_id", 10)
+	dsl.MustNot(res)
+
+	res = RangeField("cityarea_id", "lt", 200, "gte", 10)
+	show(res)
+	dsl.Filter(res)
+
+	aggs := SimpleAggs("cityarea_id", 5)
+	sort := SimpleSort("borough_id", true)
+
+	dsl.SetAggs(aggs)
+	dsl.SetSort(sort)
+	dsl.SetFrom(10)
+	dsl.SetSize(100)
+
+	dsl.Set_Source([]string{"_id", "cityarea_id"})
+
+	dslstr := dsl.QueryDsl()
+	show(dsl)
+	show(dslstr)
+}
+
+func TestDslStruct_2(t *testing.T) {
+	fmt.Println("#########################QueryDsl")
+
+	dsl := NewDSL()
+
+	m1 := dsl.TermField("cityarea_id", 5)
+	show(m1)
+	//dsl.Must(m1)
+
+	s1 := dsl.MatchPhraseField("cityarea_name", "朝阳")
+	//dsl.Should(s1)
+
+	mn1 := dsl.TermField("borough_id", 10)
+	//dsl.MustNot(mn1)
+
+	f1 := dsl.RangeField("cityarea_id", "lt", 200, "gte", 10)
+	//dsl.Filter(f1)
+
+	aggs := dsl.SimpleAggs("cityarea_id", 5)
+	sort := dsl.SimpleSort("borough_id", true)
+
+	//dsl.SetAggs(aggs)
+	//dsl.SetSort(sort)
+	//dsl.SetFrom(10)
+	//dsl.SetSize(100)
+
+	//dsl.Set_Source([]string{"_id", "cityarea_id"})
+	//dsl.Set_SourceField("_id", "cityarea_id")
+
+	//dsl.Must(m1).Should(s1).MustNot(mn1).Filter(f1).SetAggs(aggs).SetSort(sort).SetFrom(10).SetSize(100).Set_SourceField("_id", "cityarea_id")
+	dsl.Must(m1).Should(s1).MustNot(mn1).Filter(f1)
+	dsl.SetAggs(aggs).SetSort(sort).SetFrom(10).SetSize(100).Set_SourceField("_id", "cityarea_id")
+
+	dslstr := dsl.QueryDsl()
+	show(dsl)
+	show(dslstr)
 }

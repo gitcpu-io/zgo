@@ -6,7 +6,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 )
 
-var DSL = map[string]string{
+var DSLtyp = map[string]string{
 	"bool": `{"source":"{\"query\":{\"bool\":{\"must\":{{#toJson}}must{{/toJson}},\"should\":{{#toJson}}should{{/toJson}},\"must_not\":{{#toJson}}must_not{{/toJson}} }}}}","params":{"must":%s,"should":%s,"must_not":%s}}`,
 }
 
