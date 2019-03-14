@@ -17,8 +17,8 @@
           "c": "北京主库1-----etcd redis",
           "host": "localhost",
           "port": 6379,
-          "connSize": 5,
-          "poolSize": 1000,
+          "connSize": 10,
+          "poolSize": 5000,
           "username": "",
           "password": ""
         },
@@ -26,8 +26,8 @@
           "c": "北京主库2-----etcd redis",
           "host": "localhost",
           "port": 6379,
-          "connSize": 5,
-          "poolSize": 1000,
+          "connSize": 10,
+          "poolSize": 5000,
           "username": "",
           "password": ""
         }
@@ -40,8 +40,8 @@
           "c": "北京从库1=====redis",
           "host": "localhost",
           "port": 6379,
-          "connSize": 50,
-          "poolSize": 111,
+          "connSize": 1,
+          "poolSize": 100,
           "username": "",
           "password": ""
         },
@@ -65,7 +65,7 @@
           "c": "主库1-----pika from etcd",
           "host": "101.201.110.130",
           "port": 49221,
-          "connSize": 23,
+          "connSize": 100,
           "poolSize": 234,
           "username": "",
           "password": "",

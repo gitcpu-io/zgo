@@ -13,7 +13,7 @@ import (
 const (
 	//limitConn = 50   //如果是连接集群就是每台数据库长连接50个，单机连也是50个
 	//mchSize   = 1000 //mchSize越大，越用不完，会休眠越久，不用长时间塞连接进channel
-	sleepTime = 100 //goroutine休眠时间为1000毫秒
+	sleepTime = 1000 //goroutine休眠时间为1000毫秒
 )
 
 var (
@@ -122,9 +122,9 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 		}
 	}()
 
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 10; i++ {
 		//把并发创建的数据库的连接channel，放进channel中
-		cp.connChanChan <- cp.createClient(fmt.Sprintf("redis://%s:%s@%s:%d", hosts.Username, hosts.Password, hosts.Host, hosts.Port), hosts.PoolSize)
+		cp.connChanChan <- cp.createClient(fmt.Sprintf("redis://%s:%s@%s:%d", hosts.Username, hosts.Password, hosts.Host, hosts.Port))
 	}
 
 	go func() {
@@ -156,7 +156,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 }
 
 //createClient 创建客户端连接
-func (cp *connPool) createClient(address string, poolsize int) chan *radix.Pool {
+func (cp *connPool) createClient(address string) chan *radix.Pool {
 	out := make(chan *radix.Pool)
 	go func() {
 		customConnFunc := func(network, addr string) (radix.Conn, error) {
@@ -166,9 +166,11 @@ func (cp *connPool) createClient(address string, poolsize int) chan *radix.Pool 
 		}
 		//c, err := radix.NewCluster(config.RedisClusterIP,
 		//	radix.ClusterPoolFunc(poolFunc), radix.ClusterSyncEvery(5*time.Second))
-		c, err := radix.NewPool("tcp", address, poolsize, radix.PoolConnFunc(customConnFunc))
+		c, err := radix.NewPool("tcp", address, 10, radix.PoolConnFunc(customConnFunc))
 		if err != nil {
-			fmt.Println("redis ", err)
+			fmt.Println("pika ", err)
+			out <- nil
+			return
 		}
 		out <- c
 		//fmt.Println(time.Now().Sub(stime))	//创建数据库连接时间：90ms

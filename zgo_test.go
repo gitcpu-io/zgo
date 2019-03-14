@@ -10,7 +10,7 @@ import (
 func TestEngine(t *testing.T) {
 
 	err := Engine(&Options{
-		Env:     "dev",
+		Env:     "local",
 		Project: "zgo_start",
 
 		//如果是在本地开发可以对下面的组件开启使用(local.json)，如果是线上，不需要填写，走的配置是etcd
@@ -22,14 +22,14 @@ func TestEngine(t *testing.T) {
 			"nsq_label_bj",
 			"nsq_label_sh",
 		},
-		//Pika: []string{
-		//	"pika_label_rw",
-		//	"pika_label_r",
-		//},
-		Redis: []string{
-			"redis_label_bj",
-			//"redis_label_sh",
+		Pika: []string{
+			"pika_label_rw",
+			"pika_label_r",
 		},
+		//Redis: []string{
+		//	"redis_label_bj",
+		//"redis_label_sh",
+		//},
 		//Es: []string{
 		//	"label_new",
 		//	"label_rent",

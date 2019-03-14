@@ -93,7 +93,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 		}
 	}()
 
-	for i := 0; i < hosts.ConnSize; i++ {
+	for i := 0; i < 10; i++ {
 		//把并发创建的数据库的连接channel，放进channel中
 		cp.connChanChan <- cp.createClient(fmt.Sprintf("%s:%d", hosts.Host, hosts.Port), hosts.Db, hosts.PoolSize, hosts.Password)
 	}
@@ -150,7 +150,7 @@ func (cp *connPool) createClient(address string, db int, poolsize int, password 
 				radix.DialTimeout(30*time.Second), radix.DialSelectDB(db), radix.DialAuthPass(password),
 			)
 		}
-		c, err := radix.NewPool("tcp", address, 100, radix.PoolConnFunc(customConnFunc))
+		c, err := radix.NewPool("tcp", address, 10, radix.PoolConnFunc(customConnFunc))
 		if err != nil {
 			fmt.Println("redis ", err)
 			out <- nil
