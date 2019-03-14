@@ -88,10 +88,10 @@ func TestQueryBoolEmpty(t *testing.T) {
 	must_not := make([]interface{}, 0)
 	must_not = append(must_not, res)
 
-	showQuery(MustQuery(must), "must")
-	showQuery(ShouldQuery(should), "should")
-	showQuery(MustNotQuery(must_not), "must_not")
-	showQuery(FilterQuery(filter), "filter")
+	showQuery(BoolMust(must), "must")
+	showQuery(BoolShould(should), "should")
+	showQuery(BoolMustNot(must_not), "must_not")
+	showQuery(BoolFilter(filter), "filter")
 
 	args["must"] = must
 	res = QueryDsl(args)

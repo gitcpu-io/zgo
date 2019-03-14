@@ -358,22 +358,22 @@ func BoolQuery(op string, mapWhere interface{}) interface{} {
 }
 
 // mapWhere = []interface{} or map[string] interface{}
-func MustQuery(mapWhere interface{}) interface{} {
+func BoolMust(mapWhere interface{}) interface{} {
 	return BoolQuery("must", mapWhere)
 }
 
 // mapWhere = []interface{}
-func ShouldQuery(mapWhere interface{}) interface{} {
+func BoolShould(mapWhere interface{}) interface{} {
 	return BoolQuery("should", mapWhere)
 }
 
 // mapWhere = []interface{} or map[string] interface{}
-func MustNotQuery(mapWhere interface{}) interface{} {
+func BoolMustNot(mapWhere interface{}) interface{} {
 	return BoolQuery("must_not", mapWhere)
 }
 
 // mapWhere = []interface{} or map[string] interface{}
-func FilterQuery(mapWhere interface{}) interface{} {
+func BoolFilter(mapWhere interface{}) interface{} {
 	return BoolQuery("filter", mapWhere)
 }
 
