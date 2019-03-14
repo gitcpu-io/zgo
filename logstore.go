@@ -87,7 +87,7 @@ func (ls *logStore) StartQueue() {
 
 			case "file":
 
-				f := zgofile.NewLocal(ls.Label)
+				f := zgofile.New(ls.Label)
 				input := strings.NewReader(string(body) + "\r\n")
 				_, err = f.Append("/"+zgoutils.Utils.FormatFromUnixTimeShort(-1)+"/"+topic+".log", input)
 				if err != nil {

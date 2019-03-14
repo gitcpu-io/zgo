@@ -11,7 +11,7 @@ type Local struct {
 	home string
 }
 
-func NewLocal(home ...string) *Local {
+func New(home ...string) *Local {
 	sf := ""
 	if len(home) != 0 {
 		sf = home[0]

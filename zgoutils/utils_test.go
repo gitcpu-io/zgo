@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var u = NewUtils()
+var u = New()
 
 var st = &struct {
 	A string

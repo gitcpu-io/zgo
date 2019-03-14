@@ -240,8 +240,8 @@ var (
 	Mysql zgomysql.Mysqler
 	Log   zgolog.Logger
 	Cache zgocache.Cacher
-	Http  = zgohttp.NewHttp()
+	Http  = zgohttp.New()
 
-	Utils = zgoutils.NewUtils()
-	File  = zgofile.NewLocal()
+	Utils = zgoutils.New()
+	File  = zgofile.New()
 )

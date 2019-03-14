@@ -41,7 +41,7 @@ func init() {
 var Utils Utilser
 
 func init() {
-	Utils = NewUtils()
+	Utils = New()
 }
 
 type Utilser interface {
@@ -106,7 +106,7 @@ var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type utils struct{}
 
-func NewUtils() Utilser {
+func New() Utilser {
 	return &utils{}
 }
 

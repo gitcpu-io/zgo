@@ -17,7 +17,7 @@ type Httper interface {
 type zgohttp struct {
 }
 
-func NewHttp() Httper {
+func New() Httper {
 	return &zgohttp{}
 }
 
