@@ -82,11 +82,11 @@ func GetCache(start int, dbtype string, label string, rate int, tcType int) Cach
 type Cacher interface {
 	NewPikaCacheService(label string, expire int, tcType int) Cacher
 	Decorate(fn CacheFunc, expire int) CacheFunc
-	TimeOutDecorate(fn CacheFunc, expire int) CacheFunc
+	TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc
 }
 
 // 缓存装饰器接收的函数类型
-type CacheFunc func(ctx context.Context, param map[interface{}]interface{}) (interface{}, error)
+type CacheFunc func(ctx context.Context, param map[string]interface{}) (interface{}, error)
 
 // 函数返回值 channel接收时候用到
 type funResult struct {
@@ -96,8 +96,8 @@ type funResult struct {
 
 // 缓存入redis结构体
 type cacheResult struct {
-	result interface{}
-	time   int
+	Result interface{}
+	Time   int
 }
 
 //zgocache 结构体
@@ -112,7 +112,7 @@ type zgocache struct {
 
 // 缓存装饰器
 func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
-	return func(ctx context.Context, param map[interface{}]interface{}) (interface{}, error) {
+	return func(ctx context.Context, param map[string]interface{}) (interface{}, error) {
 		fmt.Println("进入Decorate")
 		if z.start != 1 {
 			return fn(ctx, param)
@@ -143,7 +143,7 @@ func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
 
 // 降级缓存装饰器
 func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
-	return func(ctx context.Context, param map[interface{}]interface{}) (interface{}, error) {
+	return func(ctx context.Context, param map[string]interface{}) (interface{}, error) {
 		if z.tcType == 2 {
 			return z.Decorate(fn, 0)(ctx, param)
 		}
@@ -209,17 +209,17 @@ func (z *zgocache) getData(ctx context.Context, key string, field string, expire
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, err
-	} else if value == nil {
+	} else if value == nil || value == "" {
 		return nil, errors.New("缓存数据为空")
 	} else {
 		data := &cacheResult{}
 		jsoniter.UnmarshalFromString(value.(string), data)
 		if expire != 0 {
-			if data.time < time.Now().Second()-expire*z.rate {
+			if data.Time < time.Now().Second()-expire*z.rate {
 				return nil, errors.New("缓存已失效")
 			}
 		}
-		return data.result, nil
+		return data.Result, nil
 	}
 }
 

@@ -216,11 +216,11 @@
       "values": [
         {
           "c": "新房s集群",
-          "uri": "http://101.201.28.195:9200",
-          "host": "localhost",
-          "port": 9200,
-          "connSize": 50,
-          "poolSize": 20000
+          "uri": "http://101.201.119.240:9900",
+          "host": "101.201.119.240",
+          "port": 9900,
+          "connSize": 10,
+          "poolSize": 100
         }
       ]
     },
