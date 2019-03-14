@@ -15,7 +15,7 @@ var (
 
 //Mongo 对外
 type Mongoer interface {
-	NewMongo(label ...string) (*zgomongo, error)
+	New(label ...string) (*zgomongo, error)
 	GetConnChan(label ...string) (chan *mgo.Session, error)
 	Create(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	Update(ctx context.Context, args map[string]interface{}) (interface{}, error)
@@ -85,7 +85,7 @@ func GetMongo(label ...string) (*zgomongo, error) {
 	}, nil
 }
 
-func (n *zgomongo) NewMongo(label ...string) (*zgomongo, error) {
+func (n *zgomongo) New(label ...string) (*zgomongo, error) {
 	return GetMongo(label...)
 }
 

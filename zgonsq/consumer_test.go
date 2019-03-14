@@ -49,7 +49,7 @@ func TestConsumer(t *testing.T) {
 		panic(err)
 	}
 	c := chat{
-		Topic:   label_bj,
+		Topic:   "zgo_start",
 		Channel: label_bj,
 		Nsq:     labelBj,
 	}

@@ -8,6 +8,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/bsm/sarama-cluster"
 	"sync"
+	"time"
 )
 
 //KafkaResourcer 给service使用
@@ -72,6 +73,8 @@ func (n *kafkaResource) Consumer(topic, groupId string) (*cluster.Consumer, erro
 	config := cluster.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Group.Return.Notifications = true
+	config.Net.KeepAlive = 30 * time.Minute
+	config.Net.MaxOpenRequests = 20000
 
 	//config.Group.Mode = cluster.ConsumerModePartitions
 
@@ -127,31 +130,30 @@ func (n *kafkaResource) Consumer(topic, groupId string) (*cluster.Consumer, erro
 func (n *kafkaResource) PublishAsync(topics string, value []byte, ptr *sarama.AsyncProducer, in chan uint8) {
 	p := *ptr
 	//必须有这个匿名函数内容
-	go func(p sarama.AsyncProducer, in chan uint8) {
-		errors := p.Errors()
-		success := p.Successes()
-		p.AsyncClose()
-		for {
-			select {
-			case err := <-errors:
-				if err != nil {
-					fmt.Println(err, topics)
-				}
-				in <- 0
-			case <-success:
-				//fmt.Printf("Partition:%d\nOffset:%d\n%s\n%s",s.Partition,s.Offset,s.Value,s.Timestamp)
-				//fmt.Fprintln(os.Stdout, "\n", string(value), "==done success==", topics)
-				in <- 1
-			}
-		}
-	}(p, in)
+	//go func(p sarama.AsyncProducer, in chan uint8) {
+	//	errors := p.Errors()
+	//	success := p.Successes()
+	//	for {
+	//		select {
+	//		case err := <-errors:
+	//			if err != nil {
+	//				fmt.Println(err)
+	//			}
+	//			in <- 0
+	//		case <-success:
+	//			//fmt.Printf("Partition:%d\nOffset:%d\n%s\n%s",s.Partition,s.Offset,s.Value,s.Timestamp)
+	//			//fmt.Fprintln(os.Stdout, "\n", string(value), "==done success==", topics)
+	//			in <- 1
+	//		}
+	//	}
+	//}(p, in)
 
 	msg := &sarama.ProducerMessage{
 		Topic: topics,
 		Value: sarama.ByteEncoder(value),
 	}
 	p.Input() <- msg
-
+	in <- 1
 }
 
 func (n *kafkaResource) PublishMultiAsync(topics string, value [][]byte, ptr *sarama.AsyncProducer, in chan uint8) {
@@ -160,7 +162,6 @@ func (n *kafkaResource) PublishMultiAsync(topics string, value [][]byte, ptr *sa
 	go func(p sarama.AsyncProducer, in chan uint8) {
 		errors := p.Errors()
 		success := p.Successes()
-		p.AsyncClose()
 		for {
 			select {
 			case err := <-errors:

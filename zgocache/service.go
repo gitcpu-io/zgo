@@ -18,7 +18,7 @@ func InitCache(cacheCh chan *config.CacheConfig) chan Cacher {
 	go func() { //接收到etcd变化后，触发label和expire的值
 		for v := range cacheCh {
 			fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v; -----etcd tiger cache value----\n", v.Label, v.Rate, v.DbType, v.TcType, v.Start)
-			hm := config.Cache
+			hm := config.Conf.Cache
 			rate := hm.Rate
 			dbtype := hm.DbType
 			tcType := hm.TcType
@@ -29,7 +29,7 @@ func InitCache(cacheCh chan *config.CacheConfig) chan Cacher {
 	}()
 
 	go func() { //接收到etcd变化后，触发label和expire的值
-		hm := config.Cache
+		hm := config.Conf.Cache
 		fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v; -----etcd tiger cache value----\n", hm.Label, hm.Rate, hm.DbType, hm.TcType, hm.Start)
 		rate := hm.Rate
 		dbtype := hm.DbType
@@ -239,6 +239,6 @@ func (z *zgocache) setData(ctx context.Context, key string, field string, data i
 }
 
 func (z *zgocache) getKey(fn CacheFunc) string {
-	key := "GOCache:" + config.Project + ":" + runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
+	key := "GOCache:" + config.Conf.Project + ":" + runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
 	return key
 }

@@ -19,8 +19,8 @@ type Nsqer interface {
 	/*
 	 label: 可选，如果使用者，用了2个或多个label时，需要调用这个函数，传入label
 	*/
-	// NewNsq 生产一条消息到Nsq
-	NewNsq(label ...string) (*zgonsq, error)
+	// New 生产一条消息到Nsq
+	New(label ...string) (*zgonsq, error)
 
 	/*
 	 label: 可选，如果使用者，用了2个或多个label时，需要调用这个函数，传入label
@@ -111,7 +111,7 @@ func GetNsq(label ...string) (*zgonsq, error) {
 }
 
 // NewNsq获取一个Nsq生产者的client，用于发送数据
-func (n *zgonsq) NewNsq(label ...string) (*zgonsq, error) {
+func (n *zgonsq) New(label ...string) (*zgonsq, error) {
 	return GetNsq(label...)
 }
 

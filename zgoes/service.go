@@ -72,7 +72,7 @@ func Es(l string) Eser {
 */
 type Eser interface {
 	// 根据配置名称获取Elastic实例 如果所在项目中只使用一个Elastic实例时，则无需初始化（调用NewEs）,可以直接使用接口
-	NewEs(label ...string) (*zgoes, error)
+	New(label ...string) (*zgoes, error)
 	// param ctx:上线文
 	// param index:索引文明
 	// param table:文档名称
@@ -81,7 +81,7 @@ type Eser interface {
 	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
 }
 
-func (e *zgoes) NewEs(label ...string) (*zgoes, error) {
+func (e *zgoes) New(label ...string) (*zgoes, error) {
 	return GetEs(label...)
 }
 

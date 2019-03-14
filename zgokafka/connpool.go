@@ -151,8 +151,13 @@ func (cp *connPool) createClient(address []string) chan *sarama.AsyncProducer {
 	out := make(chan *sarama.AsyncProducer)
 	go func() {
 		c := sarama.NewConfig()
+
 		c.Producer.Return.Successes = true
-		c.Net.KeepAlive = 1
+		//c.Producer.Partitioner = sarama.NewRandomPartitioner
+		c.Producer.Flush.Frequency = 500 * time.Millisecond
+		//c.Net.KeepAlive = 30 * time.Minute
+		c.Net.MaxOpenRequests = 20000
+
 		p, err := sarama.NewAsyncProducer(address, c)
 		if err != nil {
 			fmt.Printf("sarama.NewSyncProducer err:%s \n", err)
@@ -160,23 +165,20 @@ func (cp *connPool) createClient(address []string) chan *sarama.AsyncProducer {
 			return
 		}
 
+		go func(p sarama.AsyncProducer) {
+			for err := range p.Errors() {
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
+		}(p)
+		go func(p sarama.AsyncProducer) {
+			for v := range p.Successes() {
+				fmt.Println(v.Offset,v.Partition)
+			}
+
+		}(p)
 		out <- &p
 	}()
 	return out
 }
-
-//func CreateClient(address []string) chan *sarama.AsyncProducer {
-//	out := make(chan *sarama.AsyncProducer)
-//	go func() {
-//		c := sarama.NewConfig()
-//		c.Producer.Return.Successes = true
-//		p, err := sarama.NewAsyncProducer(address, c)
-//		if err != nil {
-//			fmt.Printf("sarama.NewSyncProducer err:%s \n", err)
-//			out <- nil
-//			return
-//		}
-//		out <- &p
-//	}()
-//	return out
-//}

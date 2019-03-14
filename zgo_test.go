@@ -1,6 +1,8 @@
 package zgo
 
 import (
+	"context"
+	"git.zhugefang.com/gocore/zgo/zgokafka"
 	"testing"
 	"time"
 )
@@ -8,28 +10,18 @@ import (
 func TestEngine(t *testing.T) {
 
 	err := Engine(&Options{
-		Env:     "dev",
+		Env:     "local",
 		Project: "zgo_start",
-		Nsq:     []string{ //测试etcd配置动态改库成功
-			//"nsq_label_bj",
-			//"nsq_label_sh",
-		},
-		Mongo: []string{ //测试etcd配置动态改库成功
-			//"mongo_label_bj",
-			//"mongo_label_sh",
-		},
-		Kafka: []string{ //测试etcd配置动态改库成功
-			//"kafka_label_bj",
-		},
-		Redis: []string{ //测试etcd配置动态改库成功
-			//"redis_label_bj",
-		},
-		Pika: []string{ //测试etcd配置动态改库成功
-			//"pika_label_rw",
-		},
 
-		Mysql: []string{
-			//"mysql_sell_1",
+
+
+		//如果是在本地开发可以对下面的组件开启使用(local.json)，如果是线上，不需要填写，走的配置是etcd
+		Kafka: []string{
+			"kafka_label_bj",
+		},
+		Nsq: []string{
+			"nsq_label_bj",
+			"nsq_label_sh",
 		},
 	})
 
@@ -41,6 +33,8 @@ func TestEngine(t *testing.T) {
 		select {
 		case <-time.Tick(time.Duration(5) * time.Second):
 			Log.Error("start engine for test")
+			n := zgokafka.Kafka("kafka_label_bj")
+			n.Producer(context.TODO(),"zgo_start", []byte("dsfsdfsdfsfsfsdfsdfss"))
 		}
 	}
 }

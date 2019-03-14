@@ -18,15 +18,13 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	kafkaCluter "github.com/bsm/sarama-cluster"
 	"github.com/nsqio/go-nsq"
+	"go.etcd.io/etcd/mvcc/mvccpb"
 	"strings"
-	"time"
 )
 
 type engine struct {
 	opt *Options
 }
-
-var LogStore LogStorer
 
 //New init zgo engine
 func Engine(opt *Options) error {
@@ -34,22 +32,36 @@ func Engine(opt *Options) error {
 		opt: opt,
 	}
 
-	ladech, cacheCh, err := opt.init() //把zgo_start中用户定义的，映射到zgo的内存变量上
+	resKvs, cacheCh, err := opt.init() //把zgo_start中用户定义的，映射到zgo的内存变量上
 	if err != nil {
 		return err
 	}
 
 	if opt.Project != "" {
-		config.Project = opt.Project
+		config.Conf.Project = opt.Project
 	}
 	if opt.Loglevel != "" {
-		config.Loglevel = opt.Loglevel
+		config.Conf.Loglevel = opt.Loglevel
 	}
+
+
+	//初始化GRPC
+	Grpc = zgogrpc.GetGrpc()
+
+	//init 日志存储
+	LogStore = InitLogStore()
+
+	//start 日志watch
+	StartLogStoreWatcher()
+
+	//异步start 日志消费存储协程
+	go LogStore.StartQueue()
+
 
 	if opt.Env == "local" {
 		if len(opt.Mongo) > 0 {
 			//todo someting
-			hsm := engine.getConfigByOption(config.Mongo, opt.Mongo)
+			hsm := engine.getConfigByOption(config.Conf.Mongo, opt.Mongo)
 			//fmt.Println("--zgo.go--",config.Mongo, opt.Mongo, hsm)
 			in := <-zgomongo.InitMongo(hsm)
 			Mongo = in
@@ -57,10 +69,10 @@ func Engine(opt *Options) error {
 
 		if len(opt.Mysql) > 0 {
 			//todo someting
-			hsm := engine.getConfigByOption(config.Mysql, opt.Mysql)
+			hsm := engine.getConfigByOption(config.Conf.Mysql, opt.Mysql)
 			fmt.Println(hsm)
 			// 配置信息： 城市和数据库的关系
-			cdc := config.CityDbConfig
+			cdc := config.Conf.CityDbConfig
 			zgomysql.InitMysqlService(hsm, cdc)
 			var err error
 			Mysql, err = zgomysql.MysqlService(opt.Mysql[0])
@@ -70,26 +82,26 @@ func Engine(opt *Options) error {
 
 		}
 		if len(opt.Es) > 0 {
-			hsm := engine.getConfigByOption(config.Es, opt.Es)
+			hsm := engine.getConfigByOption(config.Conf.Es, opt.Es)
 			in := <-zgoes.InitEs(hsm)
 			Es = in
 		}
 		if len(opt.Redis) > 0 {
 			//todo someting
-			hsm := engine.getConfigByOption(config.Redis, opt.Redis)
+			hsm := engine.getConfigByOption(config.Conf.Redis, opt.Redis)
 			//fmt.Println(hsm)
 			in := <-zgoredis.InitRedis(hsm)
 			Redis = in
 		}
 		if len(opt.Pika) > 0 {
 			//todo someting
-			hsm := engine.getConfigByOption(config.Pika, opt.Pika)
+			hsm := engine.getConfigByOption(config.Conf.Pika, opt.Pika)
 			//fmt.Println(hsm)
 			in := <-zgopika.InitPika(hsm)
 			Pika = in
 		}
 		if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq
-			hsm := engine.getConfigByOption(config.Nsq, opt.Nsq)
+			hsm := engine.getConfigByOption(config.Conf.Nsq, opt.Nsq)
 			//fmt.Println("===zgo.go==", hsm)
 			//return nil
 			in := <-zgonsq.InitNsq(hsm)
@@ -97,7 +109,7 @@ func Engine(opt *Options) error {
 		}
 		if len(opt.Kafka) > 0 {
 			//todo someting
-			hsm := engine.getConfigByOption(config.Kafka, opt.Kafka)
+			hsm := engine.getConfigByOption(config.Conf.Kafka, opt.Kafka)
 			//fmt.Println(hsm)
 			//return nil
 			in := <-zgokafka.InitKafka(hsm)
@@ -107,30 +119,32 @@ func Engine(opt *Options) error {
 		in := <-zgocache.InitCache(cacheCh)
 		Cache = in
 
-		Log = zgolog.InitLog(config.Project)
-		LogStore = NewLogStore("file", "/tmp", 1)
+		Log = zgolog.InitLog(config.Conf.Project)
+		LogWatch <- &config.CacheConfig{
+			DbType: config.Conf.Log.DbType,
+			Label:  config.Conf.Log.Label,
+			Start:  config.Conf.Log.Start,
+		}
 
 	} else {
 
-		go func() { //初始化时从etcd配置中读取
-
-			for v := range ladech {
-				//var tmp config.LabelDetail
+		var cc *config.CacheConfig
+		for _, v := range resKvs {
+			go func(v *mvccpb.KeyValue) {
 				mk := string(v.Key)
 				smk := strings.Split(mk, "/")
 				b := v.Value
-
 				if smk[3] == "cache" { //如果cache配置
 					cm := config.CacheConfig{}
 					err := zgoutils.Utils.Unmarshal(b, &cm)
 					if err != nil {
 						fmt.Println("反序列化当前值失败", mk)
 					}
-					config.Cache.Label = cm.Label
-					config.Cache.Rate = cm.Rate
-					config.Cache.Start = cm.Start
-					config.Cache.TcType = cm.TcType
-					config.Cache.DbType = cm.DbType
+					config.Conf.Cache.Label = cm.Label
+					config.Conf.Cache.Rate = cm.Rate
+					config.Conf.Cache.Start = cm.Start
+					config.Conf.Cache.TcType = cm.TcType
+					config.Conf.Cache.DbType = cm.DbType
 
 					// 从etcd初始化缓存模块
 					out := zgocache.InitCache(cacheCh)
@@ -140,7 +154,6 @@ func Engine(opt *Options) error {
 							Cache = v
 						}
 					}()
-
 				} else if smk[3] == "log" { //init log存储配置 by etcd
 					cm := config.CacheConfig{}
 					err := zgoutils.Utils.Unmarshal(b, &cm)
@@ -148,11 +161,17 @@ func Engine(opt *Options) error {
 						fmt.Println("反序列化当前值失败", mk)
 					}
 
-					Log = zgolog.InitLog(config.Project)
-					config.Log.DbType = cm.DbType
-					config.Log.Label = cm.Label
-					config.Log.Start = cm.Start
+					Log = zgolog.InitLog(config.Conf.Project)
+					config.Conf.Log.DbType = cm.DbType
+					config.Conf.Log.Label = cm.Label
+					config.Conf.Log.Start = cm.Start
 
+					cc = &config.CacheConfig{
+						DbType: config.Conf.Log.DbType,
+						Label:  config.Conf.Log.Label,
+						Start:  config.Conf.Log.Start,
+					}
+					LogWatch <- cc
 					//fmt.Println("====log init by etcd config====", smk)
 
 				} else if smk[1] == "project" && smk[2] == opt.Project { //init conn config by etcd
@@ -178,27 +197,10 @@ func Engine(opt *Options) error {
 					initComponent(hsm, smk[3], smk[4])
 
 				}
-
-				LogStore = NewLogStore(config.Log.DbType, config.Log.Label, config.Log.Start)
-
-			}
-
-		}()
-	}
-
-	//初始化GRPC
-	Grpc = zgogrpc.GetGrpc()
-
-	//waiting for nsq and kafka init done
-	go func() {
-		for {
-			if len(zgolog.LbodyCh) > 1 {
-				StartQueue()
-			} else {
-				time.Sleep(3 * time.Second)
-			}
+			}(v)
 		}
-	}()
+
+	}
 
 	return nil
 }
@@ -224,7 +226,7 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
 
 //定义外部使用的类型
 type (
-	NsqMessage        = *nsq.Message
+	NsqMessage = *nsq.Message
 	PartitionConsumer = kafkaCluter.PartitionConsumer
 )
 

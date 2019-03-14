@@ -20,82 +20,83 @@ import (
 @project: zgo
 */
 
-func StartQueue() {
+var LogWatch = make(chan *config.CacheConfig, 1)
+
+var LogStore *logStore
+
+type logStore struct {
+	DbType string
+	Label  string
+	Start  int
+}
+
+func InitLogStore() *logStore {
+	return &logStore{}
+}
+
+func StartLogStoreWatcher() {
 	go func() {
-		for v := range zgolog.LbodyCh {
-			//fmt.Println("from chan ============:", v)
-			lbb, err := zgoutils.Utils.Marshal(v)
-			_, err = LogStore.Deal(config.Project, lbb)
+
+		for {
+			select {
+			case v := <-LogWatch:
+				if v.DbType == "nsq" {
+					LogStore.DbType = v.DbType
+					LogStore.Label = v.Label
+					LogStore.Start = v.Start
+				}
+				if v.DbType == "kafka" {
+					LogStore.DbType = v.DbType
+					LogStore.Label = v.Label
+					LogStore.Start = v.Start
+				}
+			}
+
+		}
+
+	}()
+}
+
+func (ls *logStore) StartQueue() {
+	for v := range zgolog.LbodyCh {
+		if ls.Start == 1 {
+			topic := config.Conf.Project
+
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			body, err := zgoutils.Utils.Marshal(v)
 			if err != nil {
 				fmt.Println("error logstore")
 			}
+
+			switch ls.DbType {
+			case "nsq":
+				nq, _ := zgonsq.GetNsq(ls.Label)
+				_, err = nq.Producer(context.TODO(), topic, body)
+				if err != nil {
+					fmt.Println(ls.Label, "==nsq==", err)
+				}
+
+			case "kafka":
+				kq, _ := zgokafka.GetKafka(ls.Label)
+
+				_, err = kq.Producer(ctx, topic, body)
+				if err != nil {
+					fmt.Println(ls.Label, "==kafka==", err)
+				}
+
+			case "file":
+
+				f := zgofile.NewLocal(ls.Label)
+				input := strings.NewReader(string(body) + "\r\n")
+				_, err = f.Append("/"+zgoutils.Utils.FormatFromUnixTimeShort(-1)+"/"+topic+".log", input)
+				if err != nil {
+					fmt.Println(ls.Label, "==file==", err)
+				}
+
+			}
+
 		}
-	}()
-
-}
-
-type LogStorer interface {
-	Deal(topic string, body []byte) (int, error)
-}
-
-type logStore struct {
-	DbType string `json:"dbType"`
-	Label  string `json:"label"`
-	Start  int    `json:"start"`
-}
-
-func NewLogStore(dbType string, label string, start int) LogStorer {
-	nls := &logStore{
-		DbType: dbType,
-		Label:  label,
-		Start:  start,
 	}
-	return nls
-}
 
-func (ls *logStore) Deal(topic string, body []byte) (int, error) {
-	//fmt.Println(topic, ls.DbType, ls.Label, ls.Start, "=====当前日志存储方式======")
-
-	if ls.Start != 1 {
-		return 0, nil
-	}
-
-	switch ls.DbType {
-	case "nsq":
-		n := zgonsq.Nsq(ls.Label)
-		//if err != nil {
-		//	fmt.Println(ls.Label, "==nsq==", err)
-		//}
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		ui8, err := n.Producer(ctx, topic, body)
-		if err != nil {
-			fmt.Println(ls.Label, "==nsq==", err)
-		}
-		pint := int(<-ui8)
-		return pint, err
-
-	case "kafka":
-		k, err := zgokafka.GetKafka(ls.Label)
-		if err != nil {
-			fmt.Println(ls.Label, "==kafka==", err)
-		}
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		ui8, err := k.Producer(ctx, topic, body)
-		if err != nil {
-			fmt.Println(ls.Label, "==kafka==", err)
-		}
-		pint := int(<-ui8)
-		return pint, err
-
-	case "file":
-		input := strings.NewReader(string(body) + "\r\n")
-		f := zgofile.NewLocal(ls.Label)
-		pn, err := f.Append("/"+zgoutils.Utils.FormatFromUnixTimeShort(-1)+"/"+topic+".log", input)
-		pint := int(pn)
-		return pint, err
-	}
-	return 0, nil
 }

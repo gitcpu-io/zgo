@@ -14,7 +14,7 @@ var (
 
 //Redis 对外
 type Rediser interface {
-	NewRedis(label ...string) (*zgoredis, error)
+	New(label ...string) (*zgoredis, error)
 	//Post
 	Set(ctx context.Context, key string, value string, time int) (interface{}, error)
 	Expire(ctx context.Context, key string, time int) (interface{}, error)
@@ -85,7 +85,7 @@ func InitRedis(hsm map[string][]*config.ConnDetail) chan *zgoredis {
 	return out
 }
 
-func (n *zgoredis) NewRedis(label ...string) (*zgoredis, error) {
+func (n *zgoredis) New(label ...string) (*zgoredis, error) {
 	return GetRedis(label...)
 }
 

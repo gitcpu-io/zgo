@@ -49,7 +49,7 @@ func TestProducer(t *testing.T) {
 	InitKafka(hsm) //测试时表示使用kafka，在zgo_start中使用一次
 
 	//测试读取kafka数据，wait for sdk init connection
-	time.Sleep(2 * time.Second)
+	time.Sleep(20 * time.Second)
 
 	clientBj, err := GetKafka(label_bj)
 	clientSh, err := GetKafka(label_sh)

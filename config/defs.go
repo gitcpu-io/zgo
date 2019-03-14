@@ -75,26 +75,10 @@ type Labelconns struct {
 	Hosts []*ConnDetail `json:"hosts"`
 }
 
-var (
-	Env          string
-	File         FileStore
-	Project      string
-	Loglevel     string
-	EtcdHosts    []string
-	Es           []LabelDetail
-	Etcd         []LabelDetail
-	Mongo        []LabelDetail
-	Nsq          []LabelDetail
-	Redis        []LabelDetail
-	Pika         []LabelDetail
-	Mysql        []LabelDetail
-	Kafka        []LabelDetail
-	Cache        CacheConfig
-	Log          CacheConfig
-	CityDbConfig map[string]map[string]string
-)
+var Conf allConfig
 
-func InitConfig(e, project string) (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
+
+func InitConfig(e, project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
 	ReadFileByConfig(e)
 
 	if e != "local" {
@@ -112,29 +96,12 @@ func ReadFileByConfig(e string) {
 	cf := fmt.Sprintf("%s/%s.json", filepath.Dir(f), e)
 
 	bf, _ := ioutil.ReadFile(cf)
-	acfg := allConfig{}
-	err := jsonIterator.Unmarshal(bf, &acfg)
+	Conf = allConfig{}
+	err := jsonIterator.Unmarshal(bf, &Conf)
 	if err != nil {
 		panic(err)
 	}
 
-	Env = acfg.Env
-	File = acfg.File
-	Project = acfg.Project
-	Loglevel = acfg.Loglevel
-	EtcdHosts = acfg.EtcdHosts
-	Nsq = acfg.Nsq
-	Es = acfg.Es
-	Etcd = acfg.Etcd
-	Mongo = acfg.Mongo
-	Redis = acfg.Redis
-	Pika = acfg.Pika
-	Kafka = acfg.Kafka
-	Mysql = acfg.Mysql
-	CityDbConfig = acfg.CityDbConfig
-	Cache = acfg.Cache
-	Log = acfg.Log
-
-	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Env)
+	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Conf.Env)
 
 }

@@ -16,7 +16,7 @@ const (
 var LbodyCh = make(chan *logBody, 2000)
 
 type Logger interface {
-	NewLog() *zgolog
+	New() *zgolog
 	Error(args ...interface{})
 	Info(args ...interface{})
 	Print(args ...interface{})
@@ -44,23 +44,22 @@ type logBody struct {
 }
 
 func InitLog(project string) *zgolog {
-
 	return &zgolog{
 		Project:  project,
-		LogLevel: config.Loglevel,
+		LogLevel: config.Conf.Loglevel,
 		Entry:    log.New(),
 	}
 }
 
-func (z *zgolog) NewLog() *zgolog {
+func (z *zgolog) New() *zgolog {
 	l := ""
 	if z.LogLevel == "" {
-		l = config.Loglevel
+		l = config.Conf.Loglevel
 	} else {
 		l = z.LogLevel
 	}
 	return &zgolog{
-		Project:  config.Project,
+		Project:  config.Conf.Project,
 		LogLevel: l,
 		Entry:    log.New(),
 	}
@@ -113,14 +112,14 @@ func (z *zgolog) SetDebug(level string) *log.Logger {
 
 func (z *zgolog) withCaller() (*log.Entry, interface{}) {
 	var value interface{}
-	z.SetDebug(config.Loglevel)
-	if config.Loglevel == "debug" {
+	z.SetDebug(config.Conf.Loglevel)
+	if config.Conf.Loglevel == "debug" {
 		// 支持goland点击跳转
 		value = fmt.Sprintf(" %+v:", stack.Caller(2))
 	} else {
 		value = fmt.Sprintf("%+v", stack.Caller(2))
 	}
-	p := config.Project
+	p := z.Project
 	if p == "" {
 		p = "zgo"
 	}
@@ -136,7 +135,7 @@ func (z *zgolog) Error(args ...interface{}) {
 	en, value := z.withCaller()
 
 	lb := logBody{
-		Project: config.Project,
+		Project: z.Project,
 		File:    value.(string),
 		Msg:     fmt.Sprint(args...),
 		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
@@ -150,7 +149,7 @@ func (z *zgolog) Info(args ...interface{}) {
 	en, value := z.withCaller()
 
 	lb := logBody{
-		Project: config.Project,
+		Project: z.Project,
 		File:    value.(string),
 		Msg:     fmt.Sprint(args...),
 		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
@@ -164,7 +163,7 @@ func (z *zgolog) Print(args ...interface{}) {
 	en, value := z.withCaller()
 
 	lb := logBody{
-		Project: config.Project,
+		Project: z.Project,
 		File:    value.(string),
 		Msg:     fmt.Sprint(args...),
 		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
@@ -178,7 +177,7 @@ func (z *zgolog) Warn(args ...interface{}) {
 	en, value := z.withCaller()
 
 	lb := logBody{
-		Project: config.Project,
+		Project: z.Project,
 		File:    value.(string),
 		Msg:     fmt.Sprint(args...),
 		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
@@ -192,7 +191,7 @@ func (z *zgolog) Debug(args ...interface{}) {
 	en, value := z.withCaller()
 
 	lb := logBody{
-		Project: config.Project,
+		Project: z.Project,
 		File:    value.(string),
 		Msg:     fmt.Sprint(args...),
 		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
@@ -206,7 +205,7 @@ func (z *zgolog) Errorf(format string, args ...interface{}) {
 	en, value := z.withCaller()
 
 	lb := logBody{
-		Project: config.Project,
+		Project: z.Project,
 		File:    value.(string),
 		Msg:     fmt.Sprint(args...),
 		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
@@ -220,7 +219,7 @@ func (z *zgolog) Infof(format string, args ...interface{}) {
 	en, value := z.withCaller()
 
 	lb := logBody{
-		Project: config.Project,
+		Project: z.Project,
 		File:    value.(string),
 		Msg:     fmt.Sprint(args...),
 		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
@@ -234,7 +233,7 @@ func (z *zgolog) Printf(format string, args ...interface{}) {
 	en, value := z.withCaller()
 
 	lb := logBody{
-		Project: config.Project,
+		Project: z.Project,
 		File:    value.(string),
 		Msg:     fmt.Sprint(args...),
 		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
@@ -249,7 +248,7 @@ func (z *zgolog) Warnf(format string, args ...interface{}) {
 	en, value := z.withCaller()
 
 	lb := logBody{
-		Project: config.Project,
+		Project: z.Project,
 		File:    value.(string),
 		Msg:     fmt.Sprint(args...),
 		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
@@ -263,7 +262,7 @@ func (z *zgolog) Debugf(format string, args ...interface{}) {
 	en, value := z.withCaller()
 
 	lb := logBody{
-		Project: config.Project,
+		Project: z.Project,
 		File:    value.(string),
 		Msg:     fmt.Sprint(args...),
 		Time:    zgoutils.Utils.FormatFromUnixTime(-1),

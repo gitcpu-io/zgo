@@ -90,10 +90,10 @@ func (n *nsqResource) Producer(ctx context.Context, topic string, body []byte) (
 	doneChan := make(chan *nsq.ProducerTransaction)
 	err := producer.PublishAsync(topic, body, doneChan) // 发布消息
 
-	fmt.Println(string(body), err, "---PublishAsync----", producer)
 
 	if err != nil {
 		out <- 0
+		fmt.Println( err, "---PublishAsync error----")
 		return out, nil
 	}
 	go func() {
@@ -102,7 +102,7 @@ func (n *nsqResource) Producer(ctx context.Context, topic string, body []byte) (
 			//fmt.Println(topic, "--发送到NSQ失败--", err)
 			out <- 0
 		} else {
-			//fmt.Println(topic, "==发送到NSQ成功==", string(body), err)
+			fmt.Println(topic, "==发送到NSQ成功==", string(body), err)
 			out <- 1
 		}
 	}()

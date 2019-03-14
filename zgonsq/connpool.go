@@ -165,6 +165,7 @@ func (cp *connPool) createClient(address string) chan *nsq.Producer {
 				}
 			}
 		}()
+
 		out <- pro
 	}()
 	return out

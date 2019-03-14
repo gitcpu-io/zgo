@@ -14,7 +14,7 @@ var (
 
 //Pika 对外
 type Pikaer interface {
-	NewPika(label ...string) (*zgopika, error)
+	New(label ...string) (*zgopika, error)
 	//Post
 	Set(ctx context.Context, key string, value string, time int) (interface{}, error)
 	Expire(ctx context.Context, key string, time int) (interface{}, error)
@@ -85,7 +85,7 @@ func InitPika(hsm map[string][]*config.ConnDetail) chan *zgopika {
 	return out
 }
 
-func (n *zgopika) NewPika(label ...string) (*zgopika, error) {
+func (n *zgopika) New(label ...string) (*zgopika, error) {
 	return GetPika(label...)
 }
 

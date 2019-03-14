@@ -13,7 +13,6 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
 	"go.etcd.io/etcd/mvcc/mvccpb"
-
 	"strings"
 )
 
@@ -41,7 +40,7 @@ type Options struct {
 	Nsq      []string `json:"nsq"`
 }
 
-func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, error) {
+func (opt *Options) init() ([]*mvccpb.KeyValue, chan *config.CacheConfig, error) {
 	//init config
 	if opt.Env == "" {
 		opt.Env = "local"
@@ -55,17 +54,23 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, err
 	}
 
 	//如果inch有值表示启用了etcd为配置中心，并watch了key，等待变更ing...
-	ladech, inch, cacheCh, logCh := config.InitConfig(opt.Env, opt.Project)
+	resKvs, inch, cacheCh, logCh := config.InitConfig(opt.Env, opt.Project)
 	go func() {
 		if logCh != nil {
-			for h := range logCh {
+			for cm := range logCh {
 				//KEY: zgo/project/项目名/mysql/label名字
 				var keyType string
 
-				fmt.Println(keyType, "log,有变化开始init again", h)
-				Log = zgolog.InitLog(config.Project)
-
-				LogStore = NewLogStore(h.DbType, h.Label, h.Start)
+				fmt.Println(keyType, "log,有变化开始init again", cm)
+				Log = zgolog.InitLog(config.Conf.Project)
+				config.Conf.Log.DbType = cm.DbType
+				config.Conf.Log.Label = cm.Label
+				config.Conf.Log.Start = cm.Start
+				LogWatch <- &config.CacheConfig{
+					DbType: config.Conf.Log.DbType,
+					Label:  config.Conf.Log.Label,
+					Start:  config.Conf.Log.Start,
+				}
 			}
 		}
 
@@ -97,23 +102,22 @@ func (opt *Options) init() (chan *mvccpb.KeyValue, chan *config.CacheConfig, err
 	}()
 
 	if opt.Project == "" {
-		opt.Project = config.Project
+		opt.Project = config.Conf.Project
 	}
 	if opt.Loglevel == "" {
-		opt.Loglevel = config.Loglevel
+		opt.Loglevel = config.Conf.Loglevel
 	}
 	//fmt.Println("-------------------------------", opt.Project, opt.Loglevel)
 
-	return ladech, cacheCh, nil
+	return resKvs, cacheCh, nil
 }
 
 func initComponent(hsm map[string][]*config.ConnDetail, keyType, mysqlLabel string) {
-
 	switch keyType {
 	case mysqlT:
 		//init mysql again
 		// 配置信息： 城市和数据库的关系
-		cdc := config.CityDbConfig
+		cdc := config.Conf.CityDbConfig
 		//hsm := getMatchConfig(hsmEtcd, opt.Mysql)
 		if len(hsm) > 0 {
 			zgomysql.InitMysqlService(hsm, cdc)
@@ -155,6 +159,7 @@ func initComponent(hsm map[string][]*config.ConnDetail, keyType, mysqlLabel stri
 		if len(hsm) > 0 {
 			in := <-zgonsq.InitNsq(hsm)
 			Nsq = in
+
 		}
 
 	case kafkaT:

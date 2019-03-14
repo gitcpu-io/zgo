@@ -37,7 +37,7 @@ func main() {
 		panic(err)
 	}
 
-	for _, v := range config.Nsq {
+	for _, v := range config.Conf.Nsq {
 		k := v.Key
 		value := v.Values
 		key := "zgo/project/zgo_start/nsq/" + k
@@ -50,7 +50,7 @@ func main() {
 	}
 	time.Sleep(5 * time.Second)
 
-	for _, v := range config.Mongo {
+	for _, v := range config.Conf.Mongo {
 		k := v.Key
 		value := v.Values
 		key := "zgo/project/zgo_start/mongo/" + k
@@ -58,28 +58,28 @@ func main() {
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
 
-	for _, v := range config.Es {
+	for _, v := range config.Conf.Es {
 		k := v.Key
 		value := v.Values
 		key := "zgo/project/zgo_start/es/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
-	for _, v := range config.Mysql {
+	for _, v := range config.Conf.Mysql {
 		k := v.Key
 		value := v.Values
 		key := "zgo/project/zgo_start/mysql/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
-	for _, v := range config.Etcd {
+	for _, v := range config.Conf.Etcd {
 		k := v.Key
 		value := v.Values
 		key := "zgo/project/zgo_start/etcd/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
-	for _, v := range config.Kafka {
+	for _, v := range config.Conf.Kafka {
 		k := v.Key
 		value := v.Values
 		key := "zgo/project/zgo_start/kafka/" + k
@@ -87,14 +87,14 @@ func main() {
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
 
-	for _, v := range config.Redis {
+	for _, v := range config.Conf.Redis {
 		k := v.Key
 		value := v.Values
 		key := "zgo/project/zgo_start/redis/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
-	for _, v := range config.Pika {
+	for _, v := range config.Conf.Pika {
 		k := v.Key
 		value := v.Values
 		key := "zgo/project/zgo_start/pika/" + k
@@ -103,7 +103,7 @@ func main() {
 	}
 
 	key := "zgo/project/zgo_start/cache"
-	val, _ := json.Marshal(config.Cache)
+	val, _ := json.Marshal(config.Conf.Cache)
 	cli.KV.Put(context.TODO(), key, string(val))
 
 	key_log := "zgo/project/zgo_start/log"

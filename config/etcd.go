@@ -21,7 +21,7 @@ import (
 
 var client *clientv3.Client
 
-func InitConfigByEtcd(project string) (chan *mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
+func InitConfigByEtcd(project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
 	c, err := CreateClient() //创建etcd client
 	if err != nil {
 		return nil, nil, nil, nil
@@ -38,16 +38,16 @@ func InitConfigByEtcd(project string) (chan *mvccpb.KeyValue, chan map[string][]
 		panic(errors.New("Etcd have not u config pls checkout it ..."))
 	}
 
-	ch := make(chan *mvccpb.KeyValue, 100)
+	//ch := make(chan *mvccpb.KeyValue, 100)
 
-	for _, v := range response.Kvs {
-		ch <- v //返回到其它channel中
-	}
+	//for _, v := range response.Kvs {
+	//	ch <- v //返回到其它channel中
+	//}
 	//从这个version开始监控
 	watchStartRev := response.Header.Revision + 1
 	ch1, ch2, ch3 := Watcher(prefixKey, watchStartRev)
 
-	return ch, ch1, ch2, ch3
+	return response.Kvs, ch1, ch2, ch3
 }
 
 func Watcher(prefixKey string, watchStartRev int64) (chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
@@ -129,7 +129,7 @@ func Watcher(prefixKey string, watchStartRev int64) (chan map[string][]*ConnDeta
 
 func CreateClient() (*clientv3.Client, error) {
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   EtcdHosts,
+		Endpoints:   Conf.EtcdHosts,
 		DialTimeout: 20 * time.Second,
 	})
 	return cli, err

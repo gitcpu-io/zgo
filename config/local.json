@@ -98,14 +98,14 @@
           "host": "localhost",
           "port": 9092,
           "connSize": 12,
-          "poolSize": 234
+          "poolSize": 12
         },
         {
           "c": "北京主库2-----etcd kafka",
           "host": "localhost",
           "port": 9092,
           "connSize": 10,
-          "poolSize": 678
+          "poolSize": 10
         }
       ]
     },
@@ -137,15 +137,15 @@
           "c": "北京主库2-----etcd nsq",
           "host": "localhost",
           "port": 4150,
-          "connSize": 55,
-          "poolSize": 55
+          "connSize": 5,
+          "poolSize": 550
         },
         {
           "c": "北京主库1-----etcd nsq",
           "host": "localhost",
           "port": 4150,
-          "connSize": 50,
-          "poolSize": 50
+          "connSize": 5,
+          "poolSize": 500
         }
 
       ]
@@ -327,10 +327,10 @@
     "rate": 2
   },
   "log":{
-    "c": "日志存储1200088822244444444",
+    "c": "日志存储",
     "start": 1,
-    "dbType": "nsq",
-    "label":"nsq_label_bj"
+    "dbType": "file",
+    "label":"/tmp"
   }
 
 }

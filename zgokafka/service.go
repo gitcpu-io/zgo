@@ -17,7 +17,7 @@ var (
 
 //Kafka 对外
 type Kafkaer interface {
-	NewKafka(label ...string) (*zgokafka, error)
+	New(label ...string) (*zgokafka, error)
 	GetConnChan(label ...string) (chan *sarama.AsyncProducer, error)
 	Producer(ctx context.Context, topic string, body []byte) (chan uint8, error)
 	ProducerMulti(ctx context.Context, topic string, body [][]byte) (chan uint8, error)
@@ -78,7 +78,7 @@ func GetKafka(label ...string) (*zgokafka, error) {
 	}, nil
 }
 
-func (n *zgokafka) NewKafka(label ...string) (*zgokafka, error) {
+func (n *zgokafka) New(label ...string) (*zgokafka, error) {
 	return GetKafka(label...)
 }
 
