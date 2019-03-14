@@ -329,8 +329,8 @@
   "log":{
     "c": "日志存储",
     "start": 1,
-    "dbType": "nsq",
-    "label":"nsq_label_bj"
+    "dbType": "file",
+    "label":"/tmp"
   }
 
 }
