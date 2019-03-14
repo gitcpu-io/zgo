@@ -174,7 +174,8 @@ func (cp *connPool) createClient(address []string) chan *sarama.AsyncProducer {
 		}(p)
 		go func(p sarama.AsyncProducer) {
 			for v := range p.Successes() {
-				fmt.Println(v.Offset,v.Partition)
+				val, _ := v.Value.Encode()
+				fmt.Println(v.Offset, v.Partition, string(val))
 			}
 
 		}(p)

@@ -155,16 +155,16 @@ func (cp *connPool) createClient(address string) chan *nsq.Producer {
 		}
 		pro.SetLogger(nil, 2)
 
-		go func() {
-			for {
-				select {
-				case <-time.Tick(1 * time.Second):
-					if err := pro.Ping(); err != nil {
-						//fmt.Println(err,"-----ping is error---",address)
-					}
-				}
-			}
-		}()
+		//go func() {
+		//	for {
+		//		select {
+		//		case <-time.Tick(1 * time.Second):
+		//			if err := pro.Ping(); err != nil {
+		//				//fmt.Println(err,"-----ping is error---",address)
+		//			}
+		//		}
+		//	}
+		//}()
 
 		out <- pro
 	}()

@@ -47,14 +47,12 @@ func Engine(opt *Options) error {
 	//初始化GRPC
 	Grpc = zgogrpc.GetGrpc()
 
-	//init 日志存储
-	LogStore = InitLogStore()
-
 	//start 日志watch
-	StartLogStoreWatcher()
+	zgolog.StartLogStoreWatcher()
 
 	//异步start 日志消费存储协程
-	go LogStore.StartQueue()
+	zgolog.LogStore = zgolog.NewLogStore()
+	go zgolog.LogStore.StartQueue()
 
 	if opt.Env == "local" {
 		if len(opt.Mongo) > 0 {
@@ -118,15 +116,15 @@ func Engine(opt *Options) error {
 		Cache = in
 
 		Log = zgolog.InitLog(config.Conf.Project)
-		LogWatch <- &config.CacheConfig{
+		cc := &config.CacheConfig{
 			DbType: config.Conf.Log.DbType,
 			Label:  config.Conf.Log.Label,
 			Start:  config.Conf.Log.Start,
 		}
+		zgolog.LogWatch <- cc
 
 	} else {
 
-		var cc *config.CacheConfig
 		for _, v := range resKvs {
 			go func(v *mvccpb.KeyValue) {
 				mk := string(v.Key)
@@ -164,13 +162,12 @@ func Engine(opt *Options) error {
 					config.Conf.Log.Label = cm.Label
 					config.Conf.Log.Start = cm.Start
 
-					cc = &config.CacheConfig{
+					cc := &config.CacheConfig{
 						DbType: config.Conf.Log.DbType,
 						Label:  config.Conf.Log.Label,
 						Start:  config.Conf.Log.Start,
 					}
-					LogWatch <- cc
-					//fmt.Println("====log init by etcd config====", smk)
+					zgolog.LogWatch <- cc
 
 				} else if smk[1] == "project" && smk[2] == opt.Project { //init conn config by etcd
 
@@ -179,8 +176,6 @@ func Engine(opt *Options) error {
 					if err != nil {
 						fmt.Println("反序列化当前值失败", mk)
 					}
-					//tmp.Key = smk[4]
-					//tmp.Values = m
 
 					var hsm = make(map[string][]*config.ConnDetail)
 					for _, vv := range m {

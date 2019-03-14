@@ -66,11 +66,12 @@ func (opt *Options) init() ([]*mvccpb.KeyValue, chan *config.CacheConfig, error)
 				config.Conf.Log.DbType = cm.DbType
 				config.Conf.Log.Label = cm.Label
 				config.Conf.Log.Start = cm.Start
-				LogWatch <- &config.CacheConfig{
+				cc := &config.CacheConfig{
 					DbType: config.Conf.Log.DbType,
 					Label:  config.Conf.Log.Label,
 					Start:  config.Conf.Log.Start,
 				}
+				zgolog.LogWatch <- cc
 			}
 		}
 

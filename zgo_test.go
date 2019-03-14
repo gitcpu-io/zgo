@@ -1,8 +1,6 @@
 package zgo
 
 import (
-	"context"
-	"git.zhugefang.com/gocore/zgo/zgokafka"
 	"testing"
 	"time"
 )
@@ -31,8 +29,9 @@ func TestEngine(t *testing.T) {
 		select {
 		case <-time.Tick(time.Duration(5) * time.Second):
 			Log.Error("start engine for test")
-			n := zgokafka.Kafka("kafka_label_bj")
-			n.Producer(context.TODO(), "zgo_start", []byte("dsfsdfsdfsfsfsdfsdfss"))
+
+			//n := zgokafka.Kafka("kafka_label_bj")
+			//n.Producer(context.TODO(), "zgo_start", []byte("dsfsdfsdfsfsfsdfsdfss"))
 		}
 	}
 }
