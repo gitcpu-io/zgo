@@ -205,11 +205,14 @@ func (z *zgocache) getData(ctx context.Context, key string, field string, expire
 	//project := config.Project
 	//fn := runtime.FuncForPC(reflect.ValueOf(a).Pointer()).Name()
 	//path := reflect.TypeOf(a).PkgPath()
+
+	fmt.Println("取", key, ":", field)
 	value, err := z.service.Hget(ctx, key, field)
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, err
 	} else if value == nil || value == "" {
+		fmt.Println("没有缓存")
 		return nil, errors.New("缓存数据为空")
 	} else {
 		data := &cacheResult{}
@@ -219,6 +222,7 @@ func (z *zgocache) getData(ctx context.Context, key string, field string, expire
 				return nil, errors.New("缓存已失效")
 			}
 		}
+		fmt.Println("有缓存")
 		return data.Result, nil
 	}
 }
@@ -232,7 +236,10 @@ func (z *zgocache) setData(ctx context.Context, key string, field string, data i
 			fmt.Println(err.Error())
 			fmt.Println("缓存放入失败")
 		} else {
-			z.service.Hset(ctx, key, field, value)
+
+			fmt.Println("存：", key, ":", field)
+			_, err := z.service.Hset(ctx, key, field, value)
+			fmt.Println(err.Error())
 		}
 	}(ctx)
 
