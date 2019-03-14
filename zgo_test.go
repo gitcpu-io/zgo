@@ -10,10 +10,8 @@ import (
 func TestEngine(t *testing.T) {
 
 	err := Engine(&Options{
-		Env:     "local",
+		Env:     "dev",
 		Project: "zgo_start",
-
-
 
 		//如果是在本地开发可以对下面的组件开启使用(local.json)，如果是线上，不需要填写，走的配置是etcd
 		Kafka: []string{
@@ -34,7 +32,7 @@ func TestEngine(t *testing.T) {
 		case <-time.Tick(time.Duration(5) * time.Second):
 			Log.Error("start engine for test")
 			n := zgokafka.Kafka("kafka_label_bj")
-			n.Producer(context.TODO(),"zgo_start", []byte("dsfsdfsdfsfsfsdfsdfss"))
+			n.Producer(context.TODO(), "zgo_start", []byte("dsfsdfsdfsfsfsdfsdfss"))
 		}
 	}
 }

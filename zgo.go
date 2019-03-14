@@ -44,7 +44,6 @@ func Engine(opt *Options) error {
 		config.Conf.Loglevel = opt.Loglevel
 	}
 
-
 	//初始化GRPC
 	Grpc = zgogrpc.GetGrpc()
 
@@ -56,7 +55,6 @@ func Engine(opt *Options) error {
 
 	//异步start 日志消费存储协程
 	go LogStore.StartQueue()
-
 
 	if opt.Env == "local" {
 		if len(opt.Mongo) > 0 {
@@ -188,11 +186,12 @@ func Engine(opt *Options) error {
 					for _, vv := range m {
 						pvv := vv
 						hsm[smk[4]] = append(hsm[smk[4]], &pvv)
-						//fmt.Printf("\n**********************资源ID: %s **************************\n", smk[4])
-						//fmt.Printf("描述: %s\n", pvv.C)
-						//fmt.Printf("Host: %s\n", pvv.Host)
-						//fmt.Printf("Port: %d\n", pvv.Port)
-						//fmt.Printf("DbName: %s\n", pvv.DbName)
+						fmt.Printf("\n**********************资源项: %s **************************\n", smk[3])
+						fmt.Printf("描述: %s\n", pvv.C)
+						fmt.Printf("Label: %s\n", smk[4])
+						fmt.Printf("Host: %s\n", pvv.Host)
+						fmt.Printf("Port: %d\n", pvv.Port)
+						fmt.Printf("DbName: %s\n", pvv.DbName)
 					}
 					initComponent(hsm, smk[3], smk[4])
 
@@ -226,7 +225,7 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
 
 //定义外部使用的类型
 type (
-	NsqMessage = *nsq.Message
+	NsqMessage        = *nsq.Message
 	PartitionConsumer = kafkaCluter.PartitionConsumer
 )
 
