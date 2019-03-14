@@ -39,8 +39,7 @@ func NewEsResourcer(label string) EsResourcer {
 	if al, ok := currentLabels[label]; ok {
 		lf := al[0]
 		// uri = lf.Uri
-		//uri = "http://" + lf.Username + ":" + lf.Password + "@" + lf.Host + ":" + lf.Port
-		uri = fmt.Sprintf("http://%s:%s@%s:%d", lf.Username, lf.Password, lf.Host, lf.Port)
+		uri = fmt.Sprintf("http://%s:%s@%s:%v", lf.Username, lf.Password, lf.Host, lf.Port)
 	}
 	return &esResource{
 		label: label,

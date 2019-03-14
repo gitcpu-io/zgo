@@ -168,4 +168,9 @@ func TestDslStruct_2(t *testing.T) {
 	dslstr := dsl.QueryDsl()
 	show(dsl)
 	show(dslstr)
+
+	binterface := dsl.BoolDslTerm()
+	show(binterface)
+	bstring := dsl.BoolDslString()
+	show(bstring)
 }

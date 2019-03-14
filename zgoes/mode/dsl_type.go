@@ -331,6 +331,19 @@ func marshal(T interface{}) string {
 	return string(t)
 }
 
+func (dsl *DSL) BoolDslTerm() interface{} {
+	if len(dsl.querys) > 0 {
+		return map[string]interface{}{
+			"bool": dsl.querys,
+		}
+	}
+	return dsl.querys
+}
+
+func (dsl *DSL) BoolDslString() string {
+	return marshal(dsl.BoolDslTerm())
+}
+
 func (dsl *DSL) QueryDsl() string {
 
 	_, ok := dsl.querys["should"]
