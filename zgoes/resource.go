@@ -18,6 +18,7 @@ type EsResourcer interface {
 }
 
 var mu sync.RWMutex
+
 //接口实现
 type esResource struct {
 	label string       //配置标签
@@ -37,7 +38,8 @@ func NewEsResourcer(label string) EsResourcer {
 	var uri = ""
 	if al, ok := currentLabels[label]; ok {
 		lf := al[0]
-		uri = lf.Uri
+		// uri = lf.Uri
+		uri = "http://" + lf.Username + ":" + lf.Password + "@" + lf.Host + ":" + lf.Port
 	}
 	return &esResource{
 		label: label,
