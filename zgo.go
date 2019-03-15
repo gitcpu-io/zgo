@@ -53,11 +53,13 @@ func Engine(opt *Options) error {
 	//初始化GRPC
 	Grpc = zgogrpc.GetGrpc()
 
+	Log = zgolog.InitLog(config.Conf.Project)
 	//start 日志watch
 	zgolog.StartLogStoreWatcher()
 
 	//异步start 日志消费存储协程
 	zgolog.LogStore = zgolog.NewLogStore()
+
 	go zgolog.LogStore.StartQueue()
 
 	if opt.Env == "local" {
@@ -121,7 +123,6 @@ func Engine(opt *Options) error {
 		in := <-zgocache.InitCache(cacheCh)
 		Cache = in
 
-		Log = zgolog.InitLog(config.Conf.Project)
 		cc := &config.CacheConfig{
 			DbType: config.Conf.Log.DbType,
 			Label:  config.Conf.Log.Label,
@@ -163,7 +164,6 @@ func Engine(opt *Options) error {
 						fmt.Println("反序列化当前值失败", mk)
 					}
 
-					Log = zgolog.InitLog(config.Conf.Project)
 					config.Conf.Log.DbType = cm.DbType
 					config.Conf.Log.Label = cm.Label
 					config.Conf.Log.Start = cm.Start

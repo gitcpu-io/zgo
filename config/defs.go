@@ -3,16 +3,12 @@ package config
 import (
 	"errors"
 	"fmt"
-	"github.com/json-iterator/go"
+	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"io/ioutil"
 	"path/filepath"
 	"runtime"
 )
-
-var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
-
-var Version = "0.1.0"
 
 type ConnDetail struct {
 	C           string `json:"c"`
@@ -52,9 +48,10 @@ type FileStore struct {
 }
 
 type allConfig struct {
-	Env          string                       `json:"env,omitempty"`
+	Version      string                       `json:"version"`
+	Env          string                       `json:"env"`
 	File         FileStore                    `json:"file,omitempty"`
-	Project      string                       `json:"project,omitempty"`
+	Project      string                       `json:"project"`
 	Loglevel     string                       `json:"loglevel,omitempty"`
 	EtcdHosts    []string                     `json:"etcdHosts,omitempty"`
 	Nsq          []LabelDetail                `json:"nsq,omitempty"`
@@ -77,7 +74,6 @@ type Labelconns struct {
 
 var Conf allConfig
 
-
 func InitConfig(e, project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
 	ReadFileByConfig(e)
 
@@ -97,11 +93,11 @@ func ReadFileByConfig(e string) {
 
 	bf, _ := ioutil.ReadFile(cf)
 	Conf = allConfig{}
-	err := jsonIterator.Unmarshal(bf, &Conf)
+	err := zgoutils.Utils.Unmarshal(bf, &Conf)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Conf.Env)
+	fmt.Printf("zgo engine %s is started on the ... %s\n", Conf.Version, Conf.Env)
 
 }
