@@ -361,6 +361,7 @@ func deleteMysql(client Mysqler, i int, city string) chan int {
 	args := make(map[string]interface{})
 	args["table"] = "house"
 	args["obj"] = house1
+	args["id"] = i
 	label, _ := client.GetLabelByCityBiz(city, "sell")
 	client, err := client.MysqlService(label)
 	cn, _ := client.DeleteOne(ctx, args)

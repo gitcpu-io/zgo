@@ -315,7 +315,7 @@
   },
   "cache":{
     "c": "cache",
-    "start": 1,
+    "start": 0,
     "dbType": "pika",
     "label":"pika_label_rw",
     "tcType": 2,
