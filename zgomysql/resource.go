@@ -54,7 +54,12 @@ func (mr *mysqlResource) GetPool(t string) (*gorm.DB, error) {
 
 // mysqlResourcer 实现方法
 func (mr *mysqlResource) GetRPool() (*gorm.DB, error) {
-	return GetPool(mr.label, "r")
+	c, err := GetPool(mr.label, "r")
+	if err != nil {
+		//zgo.Log.Error(err.Error())
+		return GetPool(mr.label, "w")
+	}
+	return c, err
 }
 
 func (mr *mysqlResource) GetWPool() (*gorm.DB, error) {
@@ -62,7 +67,16 @@ func (mr *mysqlResource) GetWPool() (*gorm.DB, error) {
 }
 
 func (mr *mysqlResource) Get(ctx context.Context, args map[string]interface{}) error {
-	gormPool, err := mr.GetRPool()
+	var (
+		gormPool *gorm.DB
+		err      error
+	)
+	if T, ok := args["T"]; ok {
+		gormPool, err = mr.GetPool(T.(string))
+	} else {
+		gormPool, err = mr.GetRPool()
+	}
+
 	if err != nil {
 		return err
 	}
@@ -71,7 +85,16 @@ func (mr *mysqlResource) Get(ctx context.Context, args map[string]interface{}) e
 }
 
 func (mr *mysqlResource) List(ctx context.Context, args map[string]interface{}) error {
-	gormPool, err := mr.GetRPool()
+	var (
+		gormPool *gorm.DB
+		err      error
+	)
+	if T, ok := args["T"]; ok {
+		gormPool, err = mr.GetPool(T.(string))
+	} else {
+		gormPool, err = mr.GetRPool()
+	}
+
 	if err != nil {
 		return err
 	}
@@ -96,7 +119,16 @@ func (mr *mysqlResource) List(ctx context.Context, args map[string]interface{}) 
 }
 
 func (mr *mysqlResource) Count(ctx context.Context, args map[string]interface{}) error {
-	gormPool, err := mr.GetRPool()
+	var (
+		gormPool *gorm.DB
+		err      error
+	)
+	if T, ok := args["T"]; ok {
+		gormPool, err = mr.GetPool(T.(string))
+	} else {
+		gormPool, err = mr.GetRPool()
+	}
+
 	if err != nil {
 		return err
 	}
