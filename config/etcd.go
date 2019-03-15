@@ -24,6 +24,7 @@ var client *clientv3.Client
 func InitConfigByEtcd(project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
 	c, err := CreateClient() //创建etcd client
 	if err != nil {
+		panic(err)
 		return nil, nil, nil, nil
 	}
 	client = c
@@ -34,8 +35,9 @@ func InitConfigByEtcd(project string) ([]*mvccpb.KeyValue, chan map[string][]*Co
 	if err != nil {
 		panic(errors.New("Etcd can't connected ..."))
 	}
+
 	if len(response.Kvs) == 0 {
-		panic(errors.New("Etcd have not u config pls checkout it ..."))
+		fmt.Println("Etcd配置中心暂未有该项目信息,组件不可用...")
 	}
 
 	//ch := make(chan *mvccpb.KeyValue, 100)
@@ -66,22 +68,15 @@ func Watcher(prefixKey string, watchStartRev int64) (chan map[string][]*ConnDeta
 				case clientv3.EventTypePut:
 					key := string(v.Kv.Key)
 					b := v.Kv.Value
-					preb := v.PrevKv.Value //上一次的值
-					keyType := strings.Split(key, "/")[3]
-					if keyType == "cache" || keyType == "log" { //如果监听到cache有变化
-						cm := CacheConfig{}
-						precm := CacheConfig{}
-						err := zgoutils.Utils.Unmarshal(b, &cm)
-						if err != nil {
-							fmt.Println("反序列化当前值失败", key)
-							continue
-						}
-						err = zgoutils.Utils.Unmarshal(preb, &precm)
-						if err != nil {
-							fmt.Println("反序列上一个值失败", key)
-							continue
-						}
-						if reflect.DeepEqual(cm, precm) != true { //如果有变化
+					if v.IsCreate() {
+						keyType := strings.Split(key, "/")[3]
+						if keyType == "cache" || keyType == "log" { //如果监听到cache有变化
+							cm := CacheConfig{}
+							err := zgoutils.Utils.Unmarshal(b, &cm)
+							if err != nil {
+								fmt.Println("反序列化当前值失败", key)
+								continue
+							}
 							switch keyType {
 							case "cache":
 								outCacheCh <- &cm
@@ -89,24 +84,17 @@ func Watcher(prefixKey string, watchStartRev int64) (chan map[string][]*ConnDeta
 							case "log":
 								outLogCh <- &cm
 							}
-						}
 
-					} else {
+						} else {
 
-						m := []ConnDetail{}
-						err := zgoutils.Utils.Unmarshal(b, &m)
-						if err != nil {
-							fmt.Println("反序列化当前值失败", key)
+							m := []ConnDetail{}
+							err := zgoutils.Utils.Unmarshal(b, &m)
+							if err != nil {
+								fmt.Println("反序列化当前值失败", key)
 
-							continue
-						}
-						prem := []ConnDetail{}
-						err = zgoutils.Utils.Unmarshal(preb, &prem)
-						if err != nil {
-							fmt.Println("反序列上一个值失败", key)
-							continue
-						}
-						if reflect.DeepEqual(m, prem) != true { //如果有变化
+								continue
+							}
+
 							var tmp []*ConnDetail
 							for _, vv := range m {
 								pvv := vv
@@ -116,9 +104,64 @@ func Watcher(prefixKey string, watchStartRev int64) (chan map[string][]*ConnDeta
 							hsm[key] = tmp
 
 							outConnCh <- hsm
-						}
 
+						}
+					} else {
+						preb := v.PrevKv.Value //上一次的值
+						keyType := strings.Split(key, "/")[3]
+						if keyType == "cache" || keyType == "log" { //如果监听到cache有变化
+							cm := CacheConfig{}
+							precm := CacheConfig{}
+							err := zgoutils.Utils.Unmarshal(b, &cm)
+							if err != nil {
+								fmt.Println("反序列化当前值失败", key)
+								continue
+							}
+							err = zgoutils.Utils.Unmarshal(preb, &precm)
+							if err != nil {
+								fmt.Println("反序列上一个值失败", key)
+								continue
+							}
+							if reflect.DeepEqual(cm, precm) != true { //如果有变化
+								switch keyType {
+								case "cache":
+									outCacheCh <- &cm
+
+								case "log":
+									outLogCh <- &cm
+								}
+							}
+
+						} else {
+
+							m := []ConnDetail{}
+							err := zgoutils.Utils.Unmarshal(b, &m)
+							if err != nil {
+								fmt.Println("反序列化当前值失败", key)
+
+								continue
+							}
+							prem := []ConnDetail{}
+							err = zgoutils.Utils.Unmarshal(preb, &prem)
+							if err != nil {
+								fmt.Println("反序列上一个值失败", key)
+								continue
+							}
+							if reflect.DeepEqual(m, prem) != true { //如果有变化
+								var tmp []*ConnDetail
+								for _, vv := range m {
+									pvv := vv
+									tmp = append(tmp, &pvv)
+								}
+								hsm := make(map[string][]*ConnDetail)
+								hsm[key] = tmp
+
+								outConnCh <- hsm
+							}
+
+						}
 					}
+
 				}
 
 			}

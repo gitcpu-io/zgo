@@ -1,10 +1,10 @@
 {
+  "version": "0.5.0",
   "env": "qa",
   "etcdHosts": [
-    "0.0.0.0:2381"
+    "123.56.173.28:2380"
   ],
-  "file": {
-    "type": "local",
-    "home": "/tmp"
-  }
+  "project": "zgo",
+  "projectPrefix": "zgo/project/",
+  "loglevel": "info"
 }
