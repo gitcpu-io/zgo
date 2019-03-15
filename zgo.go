@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
 	"git.zhugefang.com/gocore/zgo/zgocache"
+	"git.zhugefang.com/gocore/zgo/zgocrypto"
 	"git.zhugefang.com/gocore/zgo/zgoes"
 	"git.zhugefang.com/gocore/zgo/zgofile"
 	"git.zhugefang.com/gocore/zgo/zgogrpc"
 	"git.zhugefang.com/gocore/zgo/zgohttp"
 	"git.zhugefang.com/gocore/zgo/zgokafka"
 	"git.zhugefang.com/gocore/zgo/zgolog"
+	"git.zhugefang.com/gocore/zgo/zgomap"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
 	"git.zhugefang.com/gocore/zgo/zgomysql"
 	"git.zhugefang.com/gocore/zgo/zgonsq"
@@ -43,6 +45,11 @@ func Engine(opt *Options) error {
 	if opt.Loglevel != "" {
 		config.Conf.Loglevel = opt.Loglevel
 	}
+
+	Utils = zgoutils.New()
+	Crypto = zgocrypto.New()
+	File = zgofile.New()
+	Map = zgomap.GetMap()
 
 	//初始化GRPC
 	Grpc = zgogrpc.GetGrpc()
@@ -233,10 +240,13 @@ var (
 	Redis zgoredis.Rediser
 	Pika  zgopika.Pikaer
 	Mysql zgomysql.Mysqler
-	Log   zgolog.Logger
 	Cache zgocache.Cacher
-	Http  = zgohttp.New()
 
-	Utils = zgoutils.New()
-	File  = zgofile.New()
+	Http = zgohttp.New()
+
+	Log    zgolog.Logger
+	Utils  zgoutils.Utilser
+	Crypto zgocrypto.Cryptoer
+	Map    zgomap.Maper
+	File   zgofile.Filer
 )

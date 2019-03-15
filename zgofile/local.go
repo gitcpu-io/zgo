@@ -7,11 +7,18 @@ import (
 	"path"
 )
 
+type Filer interface {
+	Get(name string, output io.Writer) (n int64, err error)
+	Put(name string, input io.Reader) (n int64, err error)
+	Append(name string, input io.Reader) (n int64, err error)
+	Size(name string) (n int64, err error)
+}
+
 type Local struct {
 	home string
 }
 
-func New(home ...string) *Local {
+func New(home ...string) Filer {
 	sf := ""
 	if len(home) != 0 {
 		sf = home[0]
