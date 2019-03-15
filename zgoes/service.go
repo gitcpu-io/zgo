@@ -7,7 +7,6 @@ import (
 	"context"
 	"git.zhugefang.com/gocore/zgo/comm"
 	"git.zhugefang.com/gocore/zgo/config"
-	"git.zhugefang.com/gocore/zgo/zgoes/mode"
 	"sync"
 )
 
@@ -80,7 +79,7 @@ type Eser interface {
 	// param dsl: 原生elastic语句
 	// 根据elastic dsl 语句查询数据 该接口只能执行查询操作
 	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
-	NewDsl() *mode.DSL
+	NewDsl() *DSL
 }
 
 func (e *zgoes) New(label ...string) (*zgoes, error) {
@@ -98,6 +97,6 @@ func (e *zgoes) SearchDsl(ctx context.Context, index, table, dsl string, args ma
 //	}
 //}
 
-func (e *zgoes) NewDsl() *mode.DSL {
-	return mode.NewDSL()
+func (e *zgoes) NewDsl() *DSL {
+	return NewDSL()
 }

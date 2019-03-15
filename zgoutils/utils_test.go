@@ -195,3 +195,8 @@ func TestGetTimeInFormatRFC2616WithTZData(t *testing.T) {
 	re := regexp.MustCompile(`^[A-Z][a-z]{2}, [0-9]{2} [A-Z][a-z]{2} [0-9]{4} [0-9]{2}:[0-9]{2}:[0-9]{2} GMT$`)
 	assert.True(t, re.MatchString(s))
 }
+func TestJosn(t *testing.T) {
+	son := "{}";
+	sss, _ := u.Marshal(son)
+	fmt.Println(string(sss))
+}
