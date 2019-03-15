@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
 	"git.zhugefang.com/gocore/zgo/zgopika"
+	"git.zhugefang.com/gocore/zgo/zgoredis"
 	"github.com/json-iterator/go"
 	"log"
 	"reflect"
@@ -41,6 +42,11 @@ func InitCache(cacheCh chan *config.CacheConfig) chan Cacher {
 	return out
 }
 
+type dbServicer interface {
+	Hget(ctx context.Context, key string, field string) (interface{}, error)
+	Hset(ctx context.Context, key string, field string, value string) (interface{}, error)
+}
+
 /*
  GetCache 创建service对象的方法
  1.start 是否开启
@@ -53,7 +59,17 @@ func GetCache(start int, dbtype string, label string, rate int, tcType int) Cach
 	if start == 1 {
 		if dbtype == "pika" {
 			// todo 找不到pika后异常处理
-			service := zgopika.Pika(label)
+			var service dbServicer = zgopika.Pika(label)
+			return &zgocache{
+				start,
+				label,
+				dbtype,
+				service,
+				tcType,
+				rate,
+			}
+		} else if dbtype == "redis" {
+			var service dbServicer = zgoredis.Redis(label)
 			return &zgocache{
 				start,
 				label,
@@ -80,7 +96,7 @@ func GetCache(start int, dbtype string, label string, rate int, tcType int) Cach
 
 // 对外接口
 type Cacher interface {
-	NewPikaCacheService(label string, expire int, tcType int) Cacher
+	//NewPikaCacheService(label string, expire int, tcType int) Cacher
 	Decorate(fn CacheFunc, expire int) CacheFunc
 	TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc
 }
@@ -105,7 +121,7 @@ type zgocache struct {
 	start   int
 	label   string
 	dbtype  string
-	service zgopika.Pikaer
+	service dbServicer
 	tcType  int // 1 降级缓存 2 正常缓存
 	rate    int // 失效时间 倍率
 }
@@ -133,8 +149,10 @@ func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
 			if data != nil && err == nil {
 				// 正常返回结果 存入缓存
 				z.setData(ctx, key, field, data)
+				fmt.Println("存入完成")
 			}
 			// 返回结果
+			fmt.Println("返回结果到service")
 			return data, err
 		}
 		return data, err
@@ -196,9 +214,9 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 }
 
 // 创建新的缓存
-func (z *zgocache) NewPikaCacheService(label string, expire int, tcType int) Cacher {
-	return GetCache(z.start, "pika", label, expire, tcType)
-}
+//func (z *zgocache) NewPikaCacheService(label string, expire int, tcType int) Cacher {
+//	return GetCache(z.start, "pika", label, expire, tcType)
+//}
 
 func (z *zgocache) getData(ctx context.Context, key string, field string, expire int) (interface{}, error) {
 	// 根据项目名，包名，类名，函数名称，拼接，然后数据库
@@ -215,6 +233,7 @@ func (z *zgocache) getData(ctx context.Context, key string, field string, expire
 		fmt.Println("没有缓存")
 		return nil, errors.New("缓存数据为空")
 	} else {
+		fmt.Println("有缓存-------------")
 		data := &cacheResult{}
 		jsoniter.UnmarshalFromString(value.(string), data)
 		if expire != 0 {
@@ -236,13 +255,12 @@ func (z *zgocache) setData(ctx context.Context, key string, field string, data i
 			fmt.Println(err.Error())
 			fmt.Println("缓存放入失败")
 		} else {
-
 			fmt.Println("存：", key, ":", field)
-			_, err := z.service.Hset(ctx, key, field, value)
+			z.service.Hset(ctx, key, field, value)
 			fmt.Println(err.Error())
 		}
 	}(ctx)
-
+	//return
 }
 
 func (z *zgocache) getKey(fn CacheFunc) string {

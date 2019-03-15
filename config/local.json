@@ -172,21 +172,16 @@
   ],
   "mongo": [
     {
-      "key": "mongo_label_bj",
+      "key": "mongo_label_borough",
       "values": [
         {
           "c": "北京主库1-----etcd mongo",
-          "host": "localhost",
+          "host": "123.56.173.28",
           "port": 27017,
+          "username": "root",
+          "password": "Au3jIwERA34y",
           "connSize": 10,
-          "poolSize": 321
-        },
-        {
-          "c": "北京主库2-----etcd mongo",
-          "host": "localhost",
-          "port": 27017,
-          "connSize": 5,
-          "poolSize": 654
+          "poolSize": 20
         }
       ]
     },
