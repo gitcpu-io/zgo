@@ -1,18 +1,20 @@
 package zgoutils
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
+	"bytes"
 	"crypto/md5"
-	"crypto/sha1"
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/fatih/structs"
 	"github.com/json-iterator/go"
 	"github.com/satori/go.uuid"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 	"io"
+	"io/ioutil"
 	"math/rand"
 	"net"
 	"net/url"
@@ -45,17 +47,22 @@ func init() {
 }
 
 type Utilser interface {
-	//md5 对字符串md5
-	Md5(s string) string
-	Sha1(s string) string
+	GBK2UTF8(s []byte) ([]byte, error)
+	UTF82GBK(s []byte) ([]byte, error)
+	ToString(data interface{}) (string, error)
+
 	//获取当前时间时间戳，n= 10/13/19 位时间戳
 	GetTimestamp(n int) int64
+
 	//Marshal 序列化为json
 	Marshal(in interface{}) ([]byte, error)
 	//Unmarshal 反序列化为go 内存对象
 	Unmarshal(message []byte, in interface{}) error
 	NewDecoder(reader io.Reader) *jsoniter.Decoder
 	NewEncoder(writer io.Writer) *jsoniter.Encoder
+
+	//string转map[string]interface{}
+	StringToMap(str string) map[string]interface{}
 	//结构体转map[string]interface{}
 	StructToMap(interface{}) map[string]interface{}
 	// GrpcServiceMethod converts a gRPC method to a Go method
@@ -83,9 +90,8 @@ type Utilser interface {
 	FormatFromUnixTimeShort(t int64) string
 	ParseTime(str string) (time.Time, error)
 	Random(max int) int
+
 	CreateSign(str string) string
-	Encrypt(key, text []byte) ([]byte, error)
-	Decrypt(key, text []byte) ([]byte, error)
 	Addslashes(str string) string
 	Stripslashes(str string) string
 	Ip4toInt(ip string) int64
@@ -110,6 +116,53 @@ func New() Utilser {
 	return &utils{}
 }
 
+// GBK2UTF8 transform s from GBK to UTF8 format
+func (u *utils) GBK2UTF8(s []byte) ([]byte, error) {
+	reader := transform.NewReader(bytes.NewReader(s), simplifiedchinese.GBK.NewDecoder())
+	d, e := ioutil.ReadAll(reader)
+	if e != nil {
+		return nil, e
+	}
+	return d, nil
+}
+
+// ToString convert data to string, data must be one of map[string]string, map[string]interface{}, string, []string, struct
+func (u *utils) ToString(data interface{}) (string, error) {
+	if structs.IsStruct(data) {
+		data = structs.Map(data)
+	}
+	var s string
+	switch data.(type) {
+	case string:
+		s = data.(string)
+	case []string:
+		for _, v := range data.([]string) {
+			s += fmt.Sprintf("%v\n", v)
+		}
+	case map[string]string:
+		for k, v := range data.(map[string]string) {
+			s += fmt.Sprintf("%v: %v\n", k, v)
+		}
+	case map[string]interface{}:
+		for k, v := range data.(map[string]interface{}) {
+			s += fmt.Sprintf("%v: %v\n", k, v)
+		}
+	default:
+		return "", errors.New("Unsupport data")
+	}
+	return s, nil
+}
+
+// UTF82GBK transform s from UTF8 to GBK format
+func (u *utils) UTF82GBK(s []byte) ([]byte, error) {
+	reader := transform.NewReader(bytes.NewReader(s), simplifiedchinese.GBK.NewEncoder())
+	d, e := ioutil.ReadAll(reader)
+	if e != nil {
+		return nil, e
+	}
+	return d, nil
+}
+
 //Marshal 序列化为json
 func (u *utils) Marshal(res interface{}) ([]byte, error) {
 	return jsonIterator.Marshal(res)
@@ -126,6 +179,16 @@ func (u *utils) NewDecoder(reader io.Reader) *jsoniter.Decoder {
 
 func (u *utils) NewEncoder(writer io.Writer) *jsoniter.Encoder {
 	return jsoniter.NewEncoder(writer)
+}
+
+// StringToMap 字符串类型的json转成map
+func (u *utils) StringToMap(str string) map[string]interface{} {
+	var val interface{}
+	err := jsonIterator.Unmarshal([]byte(str), &val)
+	if err != nil {
+		return nil
+	}
+	return val.(map[string]interface{})
 }
 
 //StructToMap 结构体转map[string]interface{}
@@ -168,19 +231,6 @@ func (u *utils) GrpcServiceMethodConverts(m string) (string, string, error) {
 	}
 
 	return parts[0], parts[1], nil
-}
-
-//Md5
-func (u *utils) Md5(body string) string {
-	md5 := md5.New()
-	md5.Write([]byte(body))
-	return hex.EncodeToString(md5.Sum(nil))
-}
-
-//Sha1
-func (u *utils) Sha1(s string) string {
-	r := sha1.Sum([]byte(s))
-	return hex.EncodeToString(r[:])
 }
 
 //GetTimestamp
@@ -463,43 +513,6 @@ func (u *utils) CreateSign(str string) string {
 	str = string(signSecret) + str
 	sign := fmt.Sprintf("%x", md5.Sum([]byte(str)))
 	return sign
-}
-
-// 对一个字符串进行加密
-func (u *utils) Encrypt(key, text []byte) ([]byte, error) {
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, err
-	}
-	b := base64.StdEncoding.EncodeToString(text)
-	ciphertext := make([]byte, aes.BlockSize+len(b))
-	iv := ciphertext[:aes.BlockSize]
-	//if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-	//	return nil, err
-	//}
-	cfb := cipher.NewCFBEncrypter(block, iv)
-	cfb.XORKeyStream(ciphertext[aes.BlockSize:], []byte(b))
-	return ciphertext, nil
-}
-
-// 对一个字符串进行解密
-func (u *utils) Decrypt(key, text []byte) ([]byte, error) {
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, err
-	}
-	if len(text) < aes.BlockSize {
-		return nil, errors.New("ciphertext too short")
-	}
-	iv := text[:aes.BlockSize]
-	text = text[aes.BlockSize:]
-	cfb := cipher.NewCFBDecrypter(block, iv)
-	cfb.XORKeyStream(text, text)
-	data, err := base64.StdEncoding.DecodeString(string(text))
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
 }
 
 // addslashes() 函数返回在预定义字符之前添加反斜杠的字符串。

@@ -114,6 +114,12 @@
 			"revisionTime": "2018-02-27T14:14:24Z"
 		},
 		{
+			"checksumSHA1": "Ps2Bsd1OjhSmAv4uVA2ZIZx7w7k=",
+			"path": "github.com/fatih/structs",
+			"revision": "878a968ab22548362a09bdb3322f98b00f470d46",
+			"revisionTime": "2018-10-10T23:17:57Z"
+		},
+		{
 			"checksumSHA1": "7QWn2gbBDds4wUOR+A7KnfVozLY=",
 			"origin": "go.etcd.io/etcd/vendor/github.com/ghodss/yaml",
 			"path": "github.com/ghodss/yaml",

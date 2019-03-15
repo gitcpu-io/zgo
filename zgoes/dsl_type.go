@@ -309,26 +309,49 @@ func (dsl *DSL) BoolMust(mapWhere interface{}) interface{} {
 }
 
 // mapWhere = []interface{}
-// return {bool: {must: mapWhere}, "minimum_should_match":1}
+// return {bool: {should: mapWhere}, "minimum_should_match":1}
 func (dsl *DSL) BoolShould(mapWhere interface{}) interface{} {
 	return dsl.BoolQuery("should", mapWhere)
 }
 
 // mapWhere = []interface{} or map[string] interface{}
-// return {bool: {must: mapWhere}}
+// return {bool: {must_not: mapWhere}}
 func (dsl *DSL) BoolMustNot(mapWhere interface{}) interface{} {
 	return dsl.BoolQuery("must_not", mapWhere)
 }
 
 // mapWhere = []interface{} or map[string] interface{}
-// return {bool: {must: mapWhere}}
+// return {bool: {filter: mapWhere}}
 func (dsl *DSL) BoolFilter(mapWhere interface{}) interface{} {
 	return dsl.BoolQuery("filter", mapWhere)
+}
+
+// mapMixWhere = {"must": mapWhere, "must_not": mapWhere, "filter": mapWhere, "should": mapWhere}
+// return {bool: {"filter": mapWhere, "must":...}}
+func (dsl *DSL) BoolMix(mapMixWhere map[string]interface{}) interface{} {
+	if len(mapMixWhere) > 0 {
+		return map[string]interface{}{
+			"bool": mapMixWhere,
+		}
+	}
+	return mapMixWhere
 }
 
 func marshal(T interface{}) string {
 	t, _ := zgoutils.Utils.Marshal(T)
 	return string(t)
+}
+
+// path = path to nested
+// boolTerm = {"bool": {"must" : {"term": {path.field: value}}}}
+// return { nested: {"path": path, "query": boolTerm}}
+func (dsl *DSL) NestedDslTerm(path string, boolTerm interface{}) interface{} {
+	return map[string]interface{}{
+		"nested": map[string]interface{}{
+			"path":  path,
+			"query": boolTerm,
+		},
+	}
 }
 
 func (dsl *DSL) BoolDslTerm() interface{} {
