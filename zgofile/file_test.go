@@ -7,7 +7,7 @@ import (
 )
 
 func TestFileLocal(t *testing.T) {
-	f := NewLocal("/tmp")
+	f := New("/tmp")
 	for i := 0; i < 10000; i++ {
 		go func() {
 			input := strings.NewReader("hello world")

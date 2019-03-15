@@ -23,6 +23,6 @@ func InitFile() {
 	case "s3":
 		break
 	default:
-		FileStore = New(config.Conf.File.Home)
+		FileStore = New("/tmp")
 	}
 }
