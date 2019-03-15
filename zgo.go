@@ -46,7 +46,6 @@ func Engine(opt *Options) error {
 		config.Conf.Loglevel = opt.Loglevel
 	}
 
-	Utils = zgoutils.New()
 	Crypto = zgocrypto.New()
 	File = zgofile.New()
 	Map = zgomap.GetMap()
@@ -245,7 +244,7 @@ var (
 	Http = zgohttp.New()
 
 	Log    zgolog.Logger
-	Utils  zgoutils.Utilser
+	Utils  = zgoutils.New()
 	Crypto zgocrypto.Cryptoer
 	Map    zgomap.Maper
 	File   zgofile.Filer
