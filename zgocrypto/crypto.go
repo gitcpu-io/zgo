@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/hmac"
 	"crypto/md5"
 	"crypto/rand"
 	"crypto/rsa"
@@ -14,6 +15,7 @@ import (
 	"encoding/hex"
 	"encoding/pem"
 	"errors"
+	"golang.org/x/crypto/hkdf"
 	"hash"
 	"io"
 )
@@ -41,36 +43,63 @@ type Cryptoer interface {
 	//md5 对字符串md5
 	Md5(s string) string
 
+	//对字符串进行sha1算法
 	SHA1(s string) string
 
+	//对字符串进行sha256算法
 	SHA256String(s string) string
 
+	//对[]byte进行sha256算法
 	SHA256(s []byte) ([]byte, error)
 
+	//aes 256
 	AESMake256Key(k []byte) []byte
 
+	//aes-cfb
 	AESCFBEncrypt(s, k []byte) ([]byte, error)
 	AESCFBDecrypt(c, k []byte) ([]byte, error)
 
+	//aes-cbc
 	AESCBCEncrypt(s, k []byte) ([]byte, error)
 	AESCBCDecrypt(c, k []byte) ([]byte, error)
 
+	//aes-gcm
 	AESGCMEncrypt(s, k, n []byte) ([]byte, error)
 	AESGCMDecrypt(c, k, n []byte) ([]byte, error)
 
+	//aes
 	AesEncrypt(orig string, key string) string
 	AesDecrypt(cryted string, key string) string
 
+	//rsa
 	RsaEncrypt(origData []byte, publicKey []byte) ([]byte, error)
 	RsaDecrypt(ciphertext []byte, privateKey []byte) ([]byte, error)
 
 	DecryptDataForWeixinUniond(encryptedData, key, iv string) (string, error)
 
+	//pkcs5
 	PKCS5Padding(c []byte, blockSize int) []byte
 	PKCS5UnPadding(s []byte) ([]byte, error)
 
+	//pkcs7
 	PKCS7Padding(ciphertext []byte, blocksize int) []byte
 	PKCS7UnPadding(origData []byte) []byte
+
+	//HmacSha1
+	HmacSha1(message, key []byte) ([]byte, error)
+	HmacSha1Check(message, messageMAC, key []byte) (bool, error)
+
+	//HmacSha256
+	HmacSha256(message, key []byte) ([]byte, error)
+	HmacSha256Check(message, messageMAC, key []byte) (bool, error)
+
+	//hkdf-sha256
+	HkdfSha256RandomSalt(secret, info []byte, sl int) (key []byte, salt []byte, err error)
+	HkdfSha256WithSalt(secret, salt, info []byte) (key []byte, err error)
+
+	//hkdf-sha1
+	HkdfSha1RandomSalt(secret, info []byte, sl int) (key []byte, salt []byte, err error)
+	HkdfSha1WithSalt(secret, salt, info []byte) (key []byte, err error)
 }
 
 // Md5
@@ -390,4 +419,104 @@ func (cp *crypto) DecryptDataForWeixinUniond(encryptedData, key, iv string) (str
 		return "", err
 	}
 	return dnData, nil
+}
+
+// HmacSha256
+func (cp *crypto) HmacSha256(message, key []byte) ([]byte, error) {
+	mac := hmac.New(sha256.New, key)
+	if _, err := mac.Write(message); err != nil {
+		return nil, err
+	}
+	return mac.Sum(nil), nil
+}
+
+// HmacSha256Check
+func (cp *crypto) HmacSha256Check(message, messageMAC, key []byte) (bool, error) {
+	mac := hmac.New(sha256.New, key)
+	if _, err := mac.Write(message); err != nil {
+		return false, err
+	}
+	expectedMAC := mac.Sum(nil)
+	return hmac.Equal(messageMAC, expectedMAC), nil
+}
+
+// HmacSha1
+func (cp *crypto) HmacSha1(message, key []byte) ([]byte, error) {
+	mac := hmac.New(sha1.New, key)
+	if _, err := mac.Write(message); err != nil {
+		return nil, err
+	}
+	return mac.Sum(nil), nil
+}
+
+// HmacSha1Check
+func (cp *crypto) HmacSha1Check(message, messageMAC, key []byte) (bool, error) {
+	mac := hmac.New(sha1.New, key)
+	if _, err := mac.Write(message); err != nil {
+		return false, err
+	}
+	expectedMAC := mac.Sum(nil)
+	return hmac.Equal(messageMAC, expectedMAC), nil
+}
+
+// HkdfSha256RandomSalt
+func (cp *crypto) HkdfSha256RandomSalt(secret, info []byte, sl int) (key []byte, salt []byte, err error) {
+	hash := sha256.New
+
+	salt = make([]byte, sl)
+	if _, err = io.ReadFull(rand.Reader, salt); err != nil {
+		return
+	}
+
+	hkdf := hkdf.New(hash, secret, salt, info)
+
+	key = make([]byte, hash().Size())
+	if _, err = io.ReadFull(hkdf, key); err != nil {
+		return
+	}
+	return
+}
+
+// HkdfSha256WithSalt
+func (cp *crypto) HkdfSha256WithSalt(secret, salt, info []byte) (key []byte, err error) {
+	hash := sha256.New
+
+	hkdf := hkdf.New(hash, secret, salt, info)
+
+	key = make([]byte, hash().Size())
+	if _, err = io.ReadFull(hkdf, key); err != nil {
+		return
+	}
+	return
+}
+
+// HkdfSha1RandomSalt
+func (cp *crypto) HkdfSha1RandomSalt(secret, info []byte, sl int) (key []byte, salt []byte, err error) {
+	hash := sha1.New
+
+	salt = make([]byte, sl)
+	if _, err = io.ReadFull(rand.Reader, salt); err != nil {
+		return
+	}
+
+	hkdf := hkdf.New(hash, secret, salt, info)
+
+	key = make([]byte, hash().Size())
+	if _, err = io.ReadFull(hkdf, key); err != nil {
+		return
+	}
+	return
+}
+
+// HkdfSha1WithSalt
+func (cp *crypto) HkdfSha1WithSalt(secret, salt, info []byte) (key []byte, err error) {
+	hash := sha1.New
+
+	hkdf := hkdf.New(hash, secret, salt, info)
+
+	key = make([]byte, hash().Size())
+	if _, err = io.ReadFull(hkdf, key); err != nil {
+		return
+	}
+	return
 }

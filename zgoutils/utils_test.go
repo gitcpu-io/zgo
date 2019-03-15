@@ -1,6 +1,7 @@
 package zgoutils
 
 import (
+	"encoding/hex"
 	"fmt"
 	"os"
 	"regexp"
@@ -17,6 +18,20 @@ var st = &struct {
 	A string
 }{
 	A: "niubi",
+}
+
+func TestUTF8GBK(t *testing.T) {
+	g, err := u.UTF82GBK([]byte("朱大仙儿"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(hex.EncodeToString(g))
+
+	ut, err := u.GBK2UTF8(g)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(ut)
 }
 
 func TestStringToMap(t *testing.T) {
