@@ -2,6 +2,7 @@ package mode
 
 import (
 	"fmt"
+	"git.zhugefang.com/gocore/zgo/zgoes"
 	"reflect"
 	"testing"
 )
@@ -101,7 +102,7 @@ func TestQueryBoolEmpty(t *testing.T) {
 func TestDslStruct_1(t *testing.T) {
 	fmt.Println("#########################QueryDsl")
 
-	dsl := NewDSL()
+	dsl := zgoes.NewDSL()
 	var res interface{}
 	res = TermField("cityarea_id", 5)
 	show(res)
@@ -135,7 +136,7 @@ func TestDslStruct_1(t *testing.T) {
 func TestDslStruct_2(t *testing.T) {
 	fmt.Println("#########################QueryDsl")
 
-	dsl := NewDSL()
+	dsl := zgoes.NewDSL()
 
 	m1 := dsl.TermField("cityarea_id", 5)
 	show(m1)

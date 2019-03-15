@@ -1,4 +1,4 @@
-package mode
+package zgoes
 
 import (
 	"git.zhugefang.com/gocore/zgo/zgoutils"
