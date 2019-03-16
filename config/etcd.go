@@ -23,13 +23,13 @@ var client *clientv3.Client
 
 func InitConfigByEtcd(project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
 	c, err := CreateClient() //创建etcd client
-	if err != nil {
-		panic(err)
+	if err != nil || c == nil {
+		panic(errors.New("连接ETCD失败:" + err.Error()))
 		return nil, nil, nil, nil
 	}
 	client = c
 
-	prefixKey := fmt.Sprintf("zgo/project/%s", project)
+	prefixKey := fmt.Sprintf("%s%s", ProjectPrefix, project)
 	//从etcd中取出key并赋值
 	response, err := client.KV.Get(context.TODO(), prefixKey, clientv3.WithPrefix())
 	if err != nil {
@@ -37,7 +37,7 @@ func InitConfigByEtcd(project string) ([]*mvccpb.KeyValue, chan map[string][]*Co
 	}
 
 	if len(response.Kvs) == 0 {
-		fmt.Println("Etcd配置中心暂未有该项目信息,组件不可用...")
+		fmt.Println("Etcd配置中心没有该项目信息,资源组件不可用,请联系zgo engine Admin管理平台添加...")
 	}
 
 	//ch := make(chan *mvccpb.KeyValue, 100)

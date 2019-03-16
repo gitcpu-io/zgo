@@ -6,10 +6,35 @@ import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"go.etcd.io/etcd/mvcc/mvccpb"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"runtime"
+)
+
+const (
+	Version       = "0.5.0"        //zgo版本号
+	ProjectPrefix = "zgo/project/" //读取ETCD配置时prefix
+	FileStoreType = "local"        //文件存储类型
+	FileStoreHome = "/tmp"         //文件存储目录
+	Local         = "local"        //本地开发环境标识
+	Dev           = "dev"          //开发联调环境标识
+	Qa            = "qa"           //QA测试环境标识
+	Pro           = "pro"          //生产环境标识
+)
+
+var (
+	DevEtcdHosts = []string{ //开发联调ETCD地址
+		//"123.56.173.28:2380",
+		"localhost:2381",
+	}
+	QaEtcdHosts = []string{ //QA环境ETCD地址
+		"123.56.173.28:2380",
+	}
+	ProEtcdHosts = []string{ //生产环境ETCD地址
+		"123.56.173.28:2380",
+	}
 )
 
 type ConnDetail struct {
@@ -50,24 +75,22 @@ type FileStore struct {
 }
 
 type allConfig struct {
-	Version       string                       `json:"version"`
-	Env           string                       `json:"env"`
-	File          FileStore                    `json:"file,omitempty"`
-	Project       string                       `json:"project"`
-	ProjectPrefix string                       `json:"projectPrefix"`
-	Loglevel      string                       `json:"loglevel,omitempty"`
-	EtcdHosts     []string                     `json:"etcdHosts,omitempty"`
-	Nsq           []LabelDetail                `json:"nsq,omitempty"`
-	Mongo         []LabelDetail                `json:"mongo,omitempty"`
-	Mysql         []LabelDetail                `json:"mysql,omitempty"`
-	Redis         []LabelDetail                `json:"redis,omitempty"`
-	Pika          []LabelDetail                `json:"pika,omitempty"`
-	Kafka         []LabelDetail                `json:"kafka,omitempty"`
-	Es            []LabelDetail                `json:"es,omitempty"`
-	Etcd          []LabelDetail                `json:"etcd,omitempty"`
-	Cache         CacheConfig                  `json:"cache"`
-	Log           CacheConfig                  `json:"log"`
-	CityDbConfig  map[string]map[string]string `json:"cityDbConfig,omitempty"`
+	Env          string                       `json:"env"`
+	File         FileStore                    `json:"file,omitempty"`
+	Project      string                       `json:"project"`
+	Loglevel     string                       `json:"loglevel,omitempty"`
+	EtcdHosts    []string                     `json:"etcdHosts,omitempty"`
+	Nsq          []LabelDetail                `json:"nsq,omitempty"`
+	Mongo        []LabelDetail                `json:"mongo,omitempty"`
+	Mysql        []LabelDetail                `json:"mysql,omitempty"`
+	Redis        []LabelDetail                `json:"redis,omitempty"`
+	Pika         []LabelDetail                `json:"pika,omitempty"`
+	Kafka        []LabelDetail                `json:"kafka,omitempty"`
+	Es           []LabelDetail                `json:"es,omitempty"`
+	Etcd         []LabelDetail                `json:"etcd,omitempty"`
+	Cache        CacheConfig                  `json:"cache"`
+	Log          CacheConfig                  `json:"log"`
+	CityDbConfig map[string]map[string]string `json:"cityDbConfig,omitempty"`
 }
 
 type Labelconns struct {
@@ -78,9 +101,10 @@ type Labelconns struct {
 var Conf *allConfig
 
 func InitConfig(e, project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
+
 	ReadFileByConfig(e, project)
 
-	if e != "local" {
+	if e != Local {
 		//用etcd
 		return InitConfigByEtcd(project)
 	}
@@ -88,57 +112,65 @@ func InitConfig(e, project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnD
 }
 
 func ReadFileByConfig(e, project string) {
-	//_, f, _, ok := runtime.Caller(1)
-	//if !ok {
-	//	panic(errors.New("Can not get current file info"))
-	//}
-	//cf := fmt.Sprintf("%s/%s.json", filepath.Dir(f), e)
-	//
-	//bf, _ := ioutil.ReadFile(cf)
-	//Conf = allConfig{}
-	//err := zgoutils.Utils.Unmarshal(bf, &Conf)
-	//if err != nil {
-	//	panic(err)
-	//}
-
 	var cf string
-	if e == "local" {
+	switch e {
+	case Local:
 		_, f, _, ok := runtime.Caller(1)
 		if !ok {
 			panic(errors.New("Can not get current file info"))
 		}
 		cf = fmt.Sprintf("%s/%s.json", filepath.Dir(f), e)
 
-		Conf = LoadConfig(cf)
+		bf, err := ioutil.ReadFile(cf)
+		if err != nil {
+			panic(err)
+		}
 
-	} else if e == "dev" {
-		//prefix, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-		//cf = fmt.Sprintf(prefix + "/config/%s.json", e)
+		Conf = &allConfig{}
+		err = zgoutils.Utils.Unmarshal(bf, Conf)
+		if err != nil {
+			panic(err)
+		}
 
+		//Conf = LoadConfig(cf)
+
+	case Dev:
 		Conf = &allConfig{
-			Version:       "0.5.0",
-			Env:           e,
-			Project:       project,
-			ProjectPrefix: "zgo/project/",
-			EtcdHosts: []string{
-				"123.56.173.28:2380",
+			Env:       e,
+			Project:   project,
+			EtcdHosts: DevEtcdHosts,
+			File: FileStore{
+				Type: FileStoreType,
+				Home: FileStoreHome,
+			},
+		}
+	case Qa:
+		Conf = &allConfig{
+			Env:       e,
+			Project:   project,
+			EtcdHosts: QaEtcdHosts,
+			File: FileStore{
+				Type: FileStoreType,
+				Home: FileStoreHome,
+			},
+		}
+	case Pro:
+		Conf = &allConfig{
+			Env:       e,
+			Project:   project,
+			EtcdHosts: ProEtcdHosts,
+			File: FileStore{
+				Type: FileStoreType, //以后生产环境可以存到aws s3，在这里直接更改
+				Home: FileStoreHome,
 			},
 		}
 	}
 
-	//bf, _ := ioutil.ReadFile(cf)
-
-	//Conf = allConfig{}
-	//fmt.Println(cf, "----===前===-----", Conf)
-
-	//Conf = LoadConfig(cf)
-
-	fmt.Println(cf, "----===后===-----", Conf)
-
-	fmt.Printf("zgo engine %s is started on the ... %s\n", Conf.Version, Conf.Env)
+	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Conf.Env)
 
 }
 
+// LoadConfig 暂时不用
 func LoadConfig(path string) *allConfig {
 	var config allConfig
 	config_file, err := os.Open(path)
