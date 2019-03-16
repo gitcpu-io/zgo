@@ -71,7 +71,7 @@ func (opt *Options) parseConfig(resKvs []*mvccpb.KeyValue, connCh chan map[strin
 			smk := strings.Split(key, "/")
 			labelType := smk[3]
 			b := v.Value
-			if labelType == config.EtcTKCache { //如果cache配置
+			if labelType == config.EtcTKCache || labelType == config.EtcTKLog { //如果cache or log配置
 				var cm config.CacheConfig
 
 				err := zgoutils.Utils.Unmarshal(b, &cm)
