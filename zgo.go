@@ -20,8 +20,6 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	kafkaCluter "github.com/bsm/sarama-cluster"
 	"github.com/nsqio/go-nsq"
-	"go.etcd.io/etcd/mvcc/mvccpb"
-	"strings"
 )
 
 type engine struct {
@@ -34,7 +32,8 @@ func Engine(opt *Options) error {
 		opt: opt,
 	}
 
-	resKvs, cacheCh, err := opt.init() //把zgo_start中用户定义的，映射到zgo的内存变量上
+	err := opt.init() //把zgo_start中用户定义的，映射到zgo的内存变量上
+
 	if err != nil {
 		return err
 	}
@@ -120,7 +119,7 @@ func Engine(opt *Options) error {
 			Kafka = in
 		}
 		// 从local初始化缓存模块
-		in := <-zgocache.InitCache(cacheCh)
+		in := <-zgocache.InitCache()
 		Cache = in
 
 		cc := &config.CacheConfig{
@@ -131,76 +130,6 @@ func Engine(opt *Options) error {
 		zgolog.LogWatch <- cc
 
 	} else {
-
-		for _, v := range resKvs {
-			go func(v *mvccpb.KeyValue) {
-				mk := string(v.Key)
-				smk := strings.Split(mk, "/")
-				labelType := smk[3]
-				b := v.Value
-				if labelType == config.EtcTKCache { //如果cache配置
-					cm := config.CacheConfig{}
-					err := zgoutils.Utils.Unmarshal(b, &cm)
-					if err != nil {
-						fmt.Println("反序列化当前值失败", mk)
-					}
-					config.Conf.Cache.Label = cm.Label
-					config.Conf.Cache.Rate = cm.Rate
-					config.Conf.Cache.Start = cm.Start
-					config.Conf.Cache.TcType = cm.TcType
-					config.Conf.Cache.DbType = cm.DbType
-
-					// 从etcd初始化缓存模块
-					out := zgocache.InitCache(cacheCh)
-					go func() {
-						for v := range out {
-							fmt.Println("InitCache Success")
-							Cache = v
-						}
-					}()
-				} else if labelType == "log" { //init log存储配置 by etcd
-					cm := config.CacheConfig{}
-					err := zgoutils.Utils.Unmarshal(b, &cm)
-					if err != nil {
-						fmt.Println("反序列化当前值失败", mk)
-					}
-
-					config.Conf.Log.DbType = cm.DbType
-					config.Conf.Log.Label = cm.Label
-					config.Conf.Log.Start = cm.Start
-
-					cc := &config.CacheConfig{
-						DbType: config.Conf.Log.DbType,
-						Label:  config.Conf.Log.Label,
-						Start:  config.Conf.Log.Start,
-					}
-					zgolog.LogWatch <- cc
-
-				} else if smk[1] == "project" && smk[2] == opt.Project { //init conn config by etcd
-					label := smk[4]
-
-					var m []config.ConnDetail
-					err := zgoutils.Utils.Unmarshal(b, &m)
-					if err != nil {
-						fmt.Println("反序列化当前值失败", mk)
-					}
-
-					var hsm = make(map[string][]*config.ConnDetail)
-					for _, vv := range m {
-						pvv := vv
-						hsm[label] = append(hsm[label], &pvv)
-						fmt.Printf("\n**********************资源项: %s **************************\n", labelType)
-						fmt.Printf("描述: %s\n", pvv.C)
-						fmt.Printf("Label: %s\n", label)
-						fmt.Printf("Host: %s\n", pvv.Host)
-						fmt.Printf("Port: %d\n", pvv.Port)
-						fmt.Printf("DbName: %s\n", pvv.DbName)
-					}
-					initConn(labelType, hsm, label)
-
-				}
-			}(v)
-		}
 
 	}
 

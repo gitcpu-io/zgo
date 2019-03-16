@@ -14,22 +14,23 @@ import (
 	"time"
 )
 
-func InitCache(cacheCh chan *config.CacheConfig) chan Cacher {
+func InitCacheByEtcd(v *config.CacheConfig) chan Cacher {
 	out := make(chan Cacher)
 	go func() { //接收到etcd变化后，触发label和expire的值
-		for v := range cacheCh {
-			fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v; -----etcd tiger cache value----\n", v.Label, v.Rate, v.DbType, v.TcType, v.Start)
-			hm := config.Conf.Cache
-			rate := hm.Rate
-			dbtype := hm.DbType
-			tcType := hm.TcType
-			label := hm.Label
-			start := hm.Start
-			out <- GetCache(start, dbtype, label, rate, tcType)
-		}
+		fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v; -----etcd tiger cache value----\n", v.Label, v.Rate, v.DbType, v.TcType, v.Start)
+		rate := v.Rate
+		dbtype := v.DbType
+		tcType := v.TcType
+		label := v.Label
+		start := v.Start
+		out <- GetCache(start, dbtype, label, rate, tcType)
 	}()
+	return out
+}
 
-	go func() { //接收到etcd变化后，触发label和expire的值
+func InitCache() chan Cacher {
+	out := make(chan Cacher)
+	go func() {
 		hm := config.Conf.Cache
 		fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v; -----etcd tiger cache value----\n", hm.Label, hm.Rate, hm.DbType, hm.TcType, hm.Start)
 		rate := hm.Rate
