@@ -113,6 +113,67 @@ func (opt *Options) parseConfig(resKvs []*mvccpb.KeyValue, connCh chan map[strin
 	}
 }
 
+// watchPutConn 监听保存到etcd中的资源key，连接类型
+func (opt *Options) watchPutConn(inch chan map[string][]*config.ConnDetail) {
+	go func() {
+		if inch != nil {
+			for h := range inch {
+				//KEY: zgo/project/项目名/mysql/label名字
+				for k, _ := range h {
+					smk := strings.Split(k, "/")
+					labelType := smk[3]
+					mysqlLabel := smk[4]
+					hsm := make(map[string][]*config.ConnDetail)
+					for k, v := range h {
+						label := strings.Split(k, "/")[4] //改变label，去掉前缀
+						hsm[label] = v
+					}
+					fmt.Println("[init again]watchPutConn:", labelType, hsm)
+					//[init again]watchPutConn: nsq map[nsq_label_bj:[0xc0004e62c0 0xc0004e6420]]
+
+					opt.initConn(labelType, hsm, mysqlLabel)
+				}
+			}
+		}
+
+	}()
+}
+
+// watchDeleteConn 监听从etcd中删除的资源key，连接类型
+func (opt *Options) watchDeleteConn(ch chan map[string][]*config.ConnDetail) {
+	go func() {
+		if ch != nil {
+			//KEY: zgo/project/项目名/mysql/label名字
+			for h := range ch {
+				for k, v := range h {
+					smk := strings.Split(k, "/")
+					labelType := smk[3]
+					label := smk[4]
+					fmt.Println("[destroy conn]watchDeleteConn", labelType, label, v)
+					//[destroy conn]watchDeleteConn nsq nsq_label_bj [0xc0004e6840 0xc0004e68f0]
+
+					opt.destroyConn(labelType, label, v)
+				}
+			}
+		}
+	}()
+}
+
+// destroyConn 具体删除操作
+func (opt *Options) destroyConn(labelType, label string, details []*config.ConnDetail) {
+	switch labelType {
+	case config.EtcTKMysql:
+	case config.EtcTKMongo:
+	case config.EtcTKRedis:
+	case config.EtcTKPia:
+	case config.EtcTKNsq:
+	case config.EtcTKKafka:
+	case config.EtcTKEs:
+	case config.EtcTKEtc:
+	}
+}
+
+// watchPutCacheOrLog 监听put cache和log的操作
 func (opt *Options) watchPutCacheOrLog(cacheLogCh chan map[string]*config.CacheConfig) {
 	go func() {
 		if cacheLogCh != nil {
@@ -158,40 +219,6 @@ func (opt *Options) watchPutCacheOrLog(cacheLogCh chan map[string]*config.CacheC
 		}
 
 	}()
-}
-
-// watchDeleteConn 监听从etcd中删除的资源key，连接类型
-func (opt *Options) watchDeleteConn(ch chan map[string][]*config.ConnDetail) {
-	go func() {
-		if ch != nil {
-			//KEY: zgo/project/项目名/mysql/label名字
-			for h := range ch {
-				for k, v := range h {
-					smk := strings.Split(k, "/")
-					labelType := smk[3]
-					label := smk[4]
-					fmt.Println("[destroy conn]watchDeleteConn", labelType, label, v)
-					//[destroy conn]watchDeleteConn nsq nsq_label_bj [0xc0004e6840 0xc0004e68f0]
-
-					opt.destroyConn(labelType, label, v)
-				}
-			}
-		}
-	}()
-}
-
-// destroyConn 具体删除操作
-func (opt *Options) destroyConn(labelType, label string, details []*config.ConnDetail) {
-	switch labelType {
-	case config.EtcTKMysql:
-	case config.EtcTKMongo:
-	case config.EtcTKRedis:
-	case config.EtcTKPia:
-	case config.EtcTKNsq:
-	case config.EtcTKKafka:
-	case config.EtcTKEs:
-	case config.EtcTKEtc:
-	}
 }
 
 // watchDeleteCacheAndLog 监听删除etcd中的 cache和log类型的key
@@ -240,32 +267,6 @@ func (opt *Options) destroyCacheAndLog(labelType string, cf *config.CacheConfig)
 		}
 		zgolog.LogWatch <- cc
 	}
-}
-
-// watchPutConn 监听保存到etcd中的资源key，连接类型
-func (opt *Options) watchPutConn(inch chan map[string][]*config.ConnDetail) {
-	go func() {
-		if inch != nil {
-			for h := range inch {
-				//KEY: zgo/project/项目名/mysql/label名字
-				for k, _ := range h {
-					smk := strings.Split(k, "/")
-					labelType := smk[3]
-					mysqlLabel := smk[4]
-					hsm := make(map[string][]*config.ConnDetail)
-					for k, v := range h {
-						label := strings.Split(k, "/")[4] //改变label，去掉前缀
-						hsm[label] = v
-					}
-					fmt.Println("[init again]watchPutConn:", labelType, hsm)
-					//[init again]watchPutConn: nsq map[nsq_label_bj:[0xc0004e62c0 0xc0004e6420]]
-
-					opt.initConn(labelType, hsm, mysqlLabel)
-				}
-			}
-		}
-
-	}()
 }
 
 // initConn具体的连接操作
