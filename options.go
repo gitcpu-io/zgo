@@ -45,34 +45,16 @@ func (opt *Options) init() ([]*mvccpb.KeyValue, chan *config.CacheConfig, error)
 	//如果inch有值表示启用了etcd为配置中心，并watch了key，等待变更ing...
 	resKvs, inch, cacheCh, logCh, delConnCh, delCacheAndLogCh := config.InitConfig(opt.Env, opt.Project)
 
+	//监听put资源组件
 	opt.watchPutConn(inch)
+	//监听delete资源组件
 	opt.watchDeleteConn(delConnCh)
 
+	//监听put的log操作
+	opt.watchPutLog(logCh)
+
+	//监听cache和log的删除操作
 	opt.watchDeleteCacheAndLog(delCacheAndLogCh)
-
-	go func() {
-		if logCh != nil {
-			for cm := range logCh {
-				//KEY: zgo/project/项目名/mysql/label名字
-				var keyType string
-
-				fmt.Println(keyType, "log,有变化开始init again", cm)
-
-				Log = zgolog.InitLog(opt.Project)
-				config.Conf.Log.DbType = cm.DbType
-				config.Conf.Log.Label = cm.Label
-				config.Conf.Log.Start = cm.Start
-
-				cc := &config.CacheConfig{
-					DbType: config.Conf.Log.DbType,
-					Label:  config.Conf.Log.Label,
-					Start:  config.Conf.Log.Start,
-				}
-				zgolog.LogWatch <- cc
-			}
-		}
-
-	}()
 
 	if opt.Project == "" {
 		opt.Project = config.Conf.Project
@@ -84,6 +66,33 @@ func (opt *Options) init() ([]*mvccpb.KeyValue, chan *config.CacheConfig, error)
 	return resKvs, cacheCh, nil
 }
 
+func (opt *Options) watchPutLog(logCh chan *config.CacheConfig) {
+	go func() {
+		if logCh != nil {
+			for cm := range logCh {
+				//KEY: zgo/project/项目名/log
+
+				Log = zgolog.InitLog(opt.Project)
+
+				config.Conf.Log.DbType = cm.DbType
+				config.Conf.Log.Label = cm.Label
+				config.Conf.Log.Start = cm.Start
+
+				cc := &config.CacheConfig{
+					DbType: config.Conf.Log.DbType,
+					Label:  config.Conf.Log.Label,
+					Start:  config.Conf.Log.Start,
+				}
+
+				fmt.Println("[Log]watchPutLog", cm)
+
+				zgolog.LogWatch <- cc
+			}
+		}
+
+	}()
+}
+
 // watchDeleteConn 监听从etcd中删除的资源key，连接类型
 func (opt *Options) watchDeleteConn(ch chan map[string][]*config.ConnDetail) {
 	go func() {
@@ -92,12 +101,12 @@ func (opt *Options) watchDeleteConn(ch chan map[string][]*config.ConnDetail) {
 			for h := range ch {
 				for k, v := range h {
 					smk := strings.Split(k, "/")
-					keyType := smk[3]
-					sKey := smk[4]
-					fmt.Println("[destroy conn]watchDeleteConn", keyType, sKey, v)
+					labelType := smk[3]
+					label := smk[4]
+					fmt.Println("[destroy conn]watchDeleteConn", labelType, label, v)
 					//[destroy conn]watchDeleteConn nsq nsq_label_bj [0xc0004e6840 0xc0004e68f0]
 
-					opt.destroyConn(keyType, sKey, v)
+					opt.destroyConn(labelType, label, v)
 				}
 			}
 		}
@@ -105,8 +114,8 @@ func (opt *Options) watchDeleteConn(ch chan map[string][]*config.ConnDetail) {
 }
 
 // destroyConn 具体删除操作
-func (opt *Options) destroyConn(keyType, sKey string, details []*config.ConnDetail) {
-	switch keyType {
+func (opt *Options) destroyConn(labelType, label string, details []*config.ConnDetail) {
+	switch labelType {
 	case config.EtcTKMysql:
 	case config.EtcTKMongo:
 	case config.EtcTKRedis:
@@ -125,11 +134,11 @@ func (opt *Options) watchDeleteCacheAndLog(ch chan map[string]*config.CacheConfi
 			//KEY: zgo/project/项目名/mysql/label名字
 			for h := range ch {
 				for k, v := range h {
-					keyType := strings.Split(k, "/")[3]
-					fmt.Println("[destroy]watchDeleteCacheAndLog:", keyType, v)
+					labelType := strings.Split(k, "/")[3]
+					fmt.Println("[destroy]watchDeleteCacheAndLog:", labelType, v)
 					//[destroy]watchDeleteCacheAndLog: log &{日志存储 0 /tmp 1 file 0}
 
-					opt.destroyCacheAndLog(keyType, v)
+					opt.destroyCacheAndLog(labelType, v)
 				}
 			}
 		}
@@ -137,9 +146,9 @@ func (opt *Options) watchDeleteCacheAndLog(ch chan map[string]*config.CacheConfi
 }
 
 // destroyCacheAndLog 具体删除操作
-func (opt *Options) destroyCacheAndLog(keyType string, cf *config.CacheConfig) {
+func (opt *Options) destroyCacheAndLog(labelType string, cf *config.CacheConfig) {
 
-	switch keyType {
+	switch labelType {
 	case config.EtcTKCache:
 		//如果delete是cache todo something
 	case config.EtcTKLog:
@@ -164,17 +173,18 @@ func (opt *Options) watchPutConn(inch chan map[string][]*config.ConnDetail) {
 			for h := range inch {
 				//KEY: zgo/project/项目名/mysql/label名字
 				for k, _ := range h {
-					keyType := strings.Split(k, "/")[3]
-					mysqlLabel := strings.Split(k, "/")[4]
+					smk := strings.Split(k, "/")
+					labelType := smk[3]
+					mysqlLabel := smk[4]
 					hsm := make(map[string][]*config.ConnDetail)
-					for mkey, v := range h {
-						key := strings.Split(mkey, "/")[4] //改变label，去掉前缀
-						hsm[key] = v
+					for k, v := range h {
+						label := strings.Split(k, "/")[4] //改变label，去掉前缀
+						hsm[label] = v
 					}
-					fmt.Println("[init again]watchPutConn:", keyType, hsm)
+					fmt.Println("[init again]watchPutConn:", labelType, hsm)
 					//[init again]watchPutConn: nsq map[nsq_label_bj:[0xc0004e62c0 0xc0004e6420]]
 
-					initConn(keyType, hsm, mysqlLabel)
+					initConn(labelType, hsm, mysqlLabel)
 				}
 			}
 		}
@@ -183,8 +193,8 @@ func (opt *Options) watchPutConn(inch chan map[string][]*config.ConnDetail) {
 }
 
 // initConn具体的连接操作
-func initConn(keyType string, hsm map[string][]*config.ConnDetail, mysqlLabel string) {
-	switch keyType {
+func initConn(labelType string, hsm map[string][]*config.ConnDetail, mysqlLabel string) {
+	switch labelType {
 	case config.EtcTKMysql:
 		//init mysql again
 		// 配置信息： 城市和数据库的关系

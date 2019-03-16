@@ -68,12 +68,12 @@ func (ec *EtcConfig) Watcher(prefixKey string, watchStartRev int64) (chan map[st
 		for r := range wch {
 			for _, v := range r.Events {
 				key := string(v.Kv.Key)
-				keyType := strings.Split(key, "/")[3]
+				labelType := strings.Split(key, "/")[3]
 
 				switch v.Type {
 				case clientv3.EventTypeDelete: //监听到删除操作
 					val := v.PrevKv.Value
-					err := ec.watchDelete(keyType, key, val, outDelCacheCh, outDelConnCh)
+					err := ec.watchDelete(labelType, key, val, outDelCacheCh, outDelConnCh)
 					if err != nil {
 						fmt.Println("反序列化当前值失败", key)
 						break
@@ -84,7 +84,7 @@ func (ec *EtcConfig) Watcher(prefixKey string, watchStartRev int64) (chan map[st
 
 					if v.IsCreate() { //如果监听到是第一次创建资源组件
 
-						err := ec.watchFirstPut(keyType, key, val, outCacheCh, outLogCh, outConnCh)
+						err := ec.watchFirstPut(labelType, key, val, outCacheCh, outLogCh, outConnCh)
 						if err != nil {
 							fmt.Println("反序列化当前值失败", key)
 							break
@@ -94,7 +94,7 @@ func (ec *EtcConfig) Watcher(prefixKey string, watchStartRev int64) (chan map[st
 
 						preVal := v.PrevKv.Value //上一次的值
 
-						err := ec.watchSecondPut(keyType, key, val, preVal, outCacheCh, outLogCh, outConnCh)
+						err := ec.watchSecondPut(labelType, key, val, preVal, outCacheCh, outLogCh, outConnCh)
 						if err != nil {
 							fmt.Println("反序列化当前值失败", key)
 							break
@@ -110,11 +110,11 @@ func (ec *EtcConfig) Watcher(prefixKey string, watchStartRev int64) (chan map[st
 }
 
 // watchDelete 监听到删除操作时
-func (ec *EtcConfig) watchDelete(keyType string, key string, b []byte, outDelCacheCh chan map[string]*CacheConfig, outDelConnCh chan map[string][]*ConnDetail) error {
+func (ec *EtcConfig) watchDelete(labelType string, key string, b []byte, outDelCacheCh chan map[string]*CacheConfig, outDelConnCh chan map[string][]*ConnDetail) error {
 	var cm CacheConfig
 	var m []ConnDetail
 
-	if keyType == EtcTKCache || keyType == EtcTKLog {
+	if labelType == EtcTKCache || labelType == EtcTKLog {
 		//删除cache或log
 		err := zgoutils.Utils.Unmarshal(b, &cm)
 		if err != nil {
@@ -142,21 +142,22 @@ func (ec *EtcConfig) watchDelete(keyType string, key string, b []byte, outDelCac
 }
 
 // watchFirstPut 第一次监听到put操作，应用于资源组件第一次创建时
-func (ec *EtcConfig) watchFirstPut(keyType string, key string, b []byte, outCacheCh chan *CacheConfig, outLogCh chan *CacheConfig, outConnCh chan map[string][]*ConnDetail) error {
+func (ec *EtcConfig) watchFirstPut(labelType string, key string, b []byte, outCacheCh chan *CacheConfig, outLogCh chan *CacheConfig, outConnCh chan map[string][]*ConnDetail) error {
 	var cm CacheConfig
 	var m []ConnDetail
 
-	if keyType == EtcTKCache || keyType == EtcTKLog {
+	if labelType == EtcTKCache || labelType == EtcTKLog {
 		err := zgoutils.Utils.Unmarshal(b, &cm)
 		if err != nil {
 			return err
 		}
-		switch keyType {
+		switch labelType {
 		case EtcTKCache:
-			outCacheCh <- &cm
+			outCacheCh <- &cm //直接把结构体指针放入chan
 
 		case EtcTKLog:
-			outLogCh <- &cm
+			outLogCh <- &cm //直接把结构体指针放入chan
+
 		}
 	} else {
 
@@ -174,12 +175,12 @@ func (ec *EtcConfig) watchFirstPut(keyType string, key string, b []byte, outCach
 }
 
 // watchSecondPut 第二次监听到key的put变化，用上一次的value到当前的比较，不同时就用当前的值
-func (ec *EtcConfig) watchSecondPut(keyType string, key string, val []byte, preVal []byte, outCacheCh chan *CacheConfig, outLogCh chan *CacheConfig, outConnCh chan map[string][]*ConnDetail) error {
+func (ec *EtcConfig) watchSecondPut(labelType string, key string, val []byte, preVal []byte, outCacheCh chan *CacheConfig, outLogCh chan *CacheConfig, outConnCh chan map[string][]*ConnDetail) error {
 	var cm CacheConfig
 	var m []ConnDetail
 	var preCm CacheConfig
 
-	if keyType == EtcTKCache || keyType == EtcTKLog { //如果监听到cache有变化
+	if labelType == EtcTKCache || labelType == EtcTKLog { //如果监听到cache有变化
 		err := zgoutils.Utils.Unmarshal(val, &cm)
 		if err != nil {
 			return err
@@ -191,7 +192,7 @@ func (ec *EtcConfig) watchSecondPut(keyType string, key string, val []byte, preV
 
 		if reflect.DeepEqual(cm, preCm) != true { //如果有变化
 
-			switch keyType {
+			switch labelType {
 
 			case EtcTKCache:
 				outCacheCh <- &cm
@@ -231,6 +232,7 @@ func (ec *EtcConfig) changeStructToPtr(m []ConnDetail, key string) map[string][]
 	}
 	hsm := make(map[string][]*ConnDetail)
 	hsm[key] = tmp
+
 	return hsm
 }
 

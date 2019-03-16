@@ -62,7 +62,7 @@ func Engine(opt *Options) error {
 
 	go zgolog.LogStore.StartQueue()
 
-	if opt.Env == "local" {
+	if opt.Env == config.Local {
 		if len(opt.Mongo) > 0 {
 			//todo someting
 			hsm := engine.getConfigByOption(config.Conf.Mongo, opt.Mongo)
@@ -136,8 +136,9 @@ func Engine(opt *Options) error {
 			go func(v *mvccpb.KeyValue) {
 				mk := string(v.Key)
 				smk := strings.Split(mk, "/")
+				labelType := smk[3]
 				b := v.Value
-				if smk[3] == "cache" { //如果cache配置
+				if labelType == config.EtcTKCache { //如果cache配置
 					cm := config.CacheConfig{}
 					err := zgoutils.Utils.Unmarshal(b, &cm)
 					if err != nil {
@@ -157,7 +158,7 @@ func Engine(opt *Options) error {
 							Cache = v
 						}
 					}()
-				} else if smk[3] == "log" { //init log存储配置 by etcd
+				} else if labelType == "log" { //init log存储配置 by etcd
 					cm := config.CacheConfig{}
 					err := zgoutils.Utils.Unmarshal(b, &cm)
 					if err != nil {
@@ -176,6 +177,7 @@ func Engine(opt *Options) error {
 					zgolog.LogWatch <- cc
 
 				} else if smk[1] == "project" && smk[2] == opt.Project { //init conn config by etcd
+					label := smk[4]
 
 					var m []config.ConnDetail
 					err := zgoutils.Utils.Unmarshal(b, &m)
@@ -186,15 +188,15 @@ func Engine(opt *Options) error {
 					var hsm = make(map[string][]*config.ConnDetail)
 					for _, vv := range m {
 						pvv := vv
-						hsm[smk[4]] = append(hsm[smk[4]], &pvv)
-						fmt.Printf("\n**********************资源项: %s **************************\n", smk[3])
+						hsm[label] = append(hsm[label], &pvv)
+						fmt.Printf("\n**********************资源项: %s **************************\n", labelType)
 						fmt.Printf("描述: %s\n", pvv.C)
-						fmt.Printf("Label: %s\n", smk[4])
+						fmt.Printf("Label: %s\n", label)
 						fmt.Printf("Host: %s\n", pvv.Host)
 						fmt.Printf("Port: %d\n", pvv.Port)
 						fmt.Printf("DbName: %s\n", pvv.DbName)
 					}
-					initConn(smk[3], hsm, smk[4])
+					initConn(labelType, hsm, label)
 
 				}
 			}(v)
