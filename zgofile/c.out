@@ -1,0 +1,22 @@
+mode: set
+git.zhugefang.com/gocore/zgo/zgofile/local.go:14.38,16.20 2 1
+git.zhugefang.com/gocore/zgo/zgofile/local.go:19.2,19.19 1 1
+git.zhugefang.com/gocore/zgo/zgofile/local.go:16.20,18.3 1 1
+git.zhugefang.com/gocore/zgo/zgofile/local.go:22.76,25.16 3 1
+git.zhugefang.com/gocore/zgo/zgofile/local.go:28.2,30.31 3 1
+git.zhugefang.com/gocore/zgo/zgofile/local.go:25.16,27.3 1 0
+git.zhugefang.com/gocore/zgo/zgofile/local.go:33.75,37.24 4 1
+git.zhugefang.com/gocore/zgo/zgofile/local.go:43.2,44.16 2 1
+git.zhugefang.com/gocore/zgo/zgofile/local.go:47.2,48.15 2 1
+git.zhugefang.com/gocore/zgo/zgofile/local.go:52.2,52.31 1 1
+git.zhugefang.com/gocore/zgo/zgofile/local.go:37.24,39.17 2 0
+git.zhugefang.com/gocore/zgo/zgofile/local.go:39.17,41.4 1 0
+git.zhugefang.com/gocore/zgo/zgofile/local.go:44.16,46.3 1 0
+git.zhugefang.com/gocore/zgo/zgofile/local.go:48.15,51.3 2 1
+git.zhugefang.com/gocore/zgo/zgofile/local.go:55.59,58.16 3 1
+git.zhugefang.com/gocore/zgo/zgofile/local.go:62.2,62.23 1 1
+git.zhugefang.com/gocore/zgo/zgofile/local.go:58.16,60.3 1 0
+git.zhugefang.com/gocore/zgo/zgofile/file.go:18.17,19.26 1 0
+git.zhugefang.com/gocore/zgo/zgofile/file.go:20.15,22.8 2 0
+git.zhugefang.com/gocore/zgo/zgofile/file.go:23.12,24.8 1 0
+git.zhugefang.com/gocore/zgo/zgofile/file.go:25.10,26.41 1 0

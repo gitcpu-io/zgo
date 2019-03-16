@@ -1,0 +1,335 @@
+{
+  "version": "0.5.0",
+  "env": "local",
+  "etcdHosts": [
+    "0.0.0.0:2381"
+  ],
+  "file": {
+    "type": "local",
+    "home": "/tmp"
+  },
+  "project": "zgo",
+  "projectPrefix": "zgo/project/",
+  "loglevel": "info",
+
+  "redis": [
+    {
+      "key": "redis_label_bj",
+      "values": [
+        {
+          "c": "北京主库1-----etcd redis",
+          "host": "localhost",
+          "port": 6379,
+          "connSize": 10,
+          "poolSize": 5000,
+          "username": "",
+          "password": ""
+        },
+        {
+          "c": "北京主库2-----etcd redis",
+          "host": "localhost",
+          "port": 6379,
+          "connSize": 10,
+          "poolSize": 5000,
+          "username": "",
+          "password": ""
+        }
+      ]
+    },
+    {
+      "key": "redis_label_sh",
+      "values": [
+        {
+          "c": "北京从库1=====redis",
+          "host": "localhost",
+          "port": 6379,
+          "connSize": 1,
+          "poolSize": 100,
+          "username": "",
+          "password": ""
+        },
+        {
+          "c": "北京从库3=====redis",
+          "host": "localhost",
+          "port": 6379,
+          "connSize": 50,
+          "poolSize": 222,
+          "username": "",
+          "password": ""
+        }
+      ]
+    }
+  ],
+  "pika": [
+    {
+      "key": "pika_label_rw",
+      "values": [
+        {
+          "c": "主库1-----pika from etcd",
+          "host": "101.201.110.130",
+          "port": 49221,
+          "connSize": 100,
+          "poolSize": 234,
+          "username": "",
+          "password": "",
+          "prefix": "sell:"
+        }
+      ]
+    },
+    {
+      "key": "pika_label_r",
+      "values": [
+        {
+          "c": "从库1=====pika",
+          "host": "101.201.110.130",
+          "port": 49221,
+          "connSize": 50,
+          "poolSize": 111,
+          "username": "",
+          "password": "",
+          "prefix": "sell:"
+        }
+      ]
+    }
+  ],
+  "kafka": [
+    {
+      "key": "kafka_label_bj",
+      "values": [
+        {
+          "c": "北京主库1-----etcd kafka",
+          "host": "localhost",
+          "port": 9092,
+          "connSize": 12,
+          "poolSize": 12
+        },
+        {
+          "c": "北京主库2-----etcd kafka",
+          "host": "localhost",
+          "port": 9092,
+          "connSize": 10,
+          "poolSize": 10
+        }
+      ]
+    },
+    {
+      "key": "kafka_label_sh",
+      "values": [
+        {
+          "c": "北京从库1=====kafka",
+          "host": "localhost",
+          "port": 9092,
+          "connSize": 50,
+          "poolSize": 111
+        },
+        {
+          "c": "北京从库3=====kafka",
+          "host": "localhost",
+          "port": 9092,
+          "connSize": 50,
+          "poolSize": 222
+        }
+      ]
+    }
+  ],
+  "nsq": [
+    {
+      "key": "nsq_label_bj",
+      "values": [
+        {
+          "c": "北京主库2-----etcd nsq",
+          "host": "localhost",
+          "port": 4150,
+          "connSize": 5,
+          "poolSize": 550
+        },
+        {
+          "c": "北京主库1-----etcd nsq",
+          "host": "localhost",
+          "port": 4150,
+          "connSize": 5,
+          "poolSize": 500
+        }
+
+      ]
+    },
+    {
+      "key": "nsq_label_sh",
+      "values": [
+        {
+          "c": "上海主库==333===etcd nsq",
+          "host": "localhost",
+          "port": 4150,
+          "connSize": 33,
+          "poolSize": 90
+        },
+        {
+          "c": "上海从库==33===etcd nsq",
+          "host": "localhost",
+          "port": 4150,
+          "connSize": 22,
+          "poolSize": 11
+        }
+      ]
+    }
+  ],
+  "mongo": [
+    {
+      "key": "mongo_label_borough",
+      "values": [
+        {
+          "c": "北京主库1-----etcd mongo",
+          "host": "123.56.173.28",
+          "port": 27017,
+          "username": "root",
+          "password": "Au3jIwERA34y",
+          "connSize": 10,
+          "poolSize": 20
+        }
+      ]
+    },
+    {
+      "key": "mongo_label_sh",
+      "values": [
+        {
+          "c": "上海从库1=====etcd mongo",
+          "host": "localhost",
+          "port": 27017,
+          "connSize": 5,
+          "poolSize": 789
+        },
+        {
+          "c": "上海从库2=====etcd mongo",
+          "host": "localhost",
+          "port": 27017,
+          "connSize": 5,
+          "poolSize": 456
+        }
+      ]
+    }
+  ],
+  "es": [
+    {
+      "key": "label_new",
+      "values": [
+        {
+          "c": "新房s集群",
+          "uri": "http://101.201.119.240:9900",
+          "host": "101.201.119.240",
+          "port": 9900,
+          "connSize": 10,
+          "poolSize": 100
+        }
+      ]
+    },
+    {
+      "key": "label_sell",
+      "values": [
+        {
+          "c": "二手房集群",
+          "uri": "http://101.201.28.195:9200",
+          "host": "localhost",
+          "port": 9200,
+          "connSize": 52,
+          "poolSize": 19998
+        }
+      ]
+    },
+    {
+      "key": "label_rent",
+      "values": [
+        {
+          "c": "租房集群",
+          "uri": "http://101.201.28.195:9200",
+          "host": "localhost",
+          "port": 9200,
+          "connSize": 51,
+          "poolSize": 19999
+        }
+      ]
+    }
+  ],
+  "mysql": [
+    {
+      "key": "mysql_sell_1",
+      "values": [
+        {
+          "c": "北京二手房库 etcd-旧实例w",
+          "t": "w",
+          "host": "localhost",
+          "port": 3307,
+          "username": "root",
+          "password": "root",
+          "maxIdleSize": 5,
+          "maxOpenConn": 5,
+          "dbName": "spider"
+        },
+        {
+          "c": "北京二手房库 etcd-旧实例r",
+          "t": "r",
+          "host": "localhost",
+          "port": 3307,
+          "username": "root",
+          "password": "root",
+          "maxIdleSize": 5,
+          "maxOpenConn": 5,
+          "dbName": "spider"
+        }
+      ]
+    },
+    {
+      "key": "mysql_sell_2",
+      "values": [
+        {
+          "c": "北京二手房库 旧实例w",
+          "t": "w",
+          "host": "localhost",
+          "port": 3308,
+          "username": "root",
+          "password": "root",
+          "maxIdleSize": 5,
+          "maxOpenConn": 10,
+          "dbName": "spider"
+        },
+        {
+          "c": "北京二手房库 旧实例r",
+          "t": "r",
+          "host": "localhost",
+          "port": 3308,
+          "username": "root",
+          "password": "root",
+          "maxIdleSize": 5,
+          "maxOpenConn": 10,
+          "dbName": "spider"
+        }
+      ]
+    }
+  ],
+  "cityDbConfig": {
+      "sell":{
+        "bj":"1",
+        "nj":"1",
+        "sh":"1",
+        "cd":"1",
+        "tj":"1",
+        "cq":"1",
+        "heb":"1"
+      }
+  },
+  "cache":{
+    "c": "cache",
+    "start": 0,
+    "dbType": "pika",
+    "label":"pika_label_rw",
+    "tcType": 2,
+    "rate": 2
+  },
+  "log":{
+    "c": "日志存储",
+    "start": 1,
+    "dbType": "file",
+    "label":"/tmp"
+  }
+
+}
+
