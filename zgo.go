@@ -194,7 +194,7 @@ func Engine(opt *Options) error {
 						fmt.Printf("Port: %d\n", pvv.Port)
 						fmt.Printf("DbName: %s\n", pvv.DbName)
 					}
-					initComponent(hsm, smk[3], smk[4])
+					initConn(smk[3], hsm, smk[4])
 
 				}
 			}(v)

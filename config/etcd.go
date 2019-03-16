@@ -21,17 +21,21 @@ import (
 
 var client *clientv3.Client
 
-func InitConfigByEtcd(project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
-	c, err := CreateClient() //创建etcd client
+type EtcConfig struct {
+	Key       string
+	Endpoints []string
+}
+
+func (ec *EtcConfig) InitConfigByEtcd() ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
+	c, err := ec.CreateClient() //创建etcd client
 	if err != nil || c == nil {
 		panic(errors.New("连接ETCD失败:" + err.Error()))
-		return nil, nil, nil, nil
+		return nil, nil, nil, nil, nil, nil
 	}
 	client = c
 
-	prefixKey := fmt.Sprintf("%s%s", ProjectPrefix, project)
 	//从etcd中取出key并赋值
-	response, err := client.KV.Get(context.TODO(), prefixKey, clientv3.WithPrefix())
+	response, err := client.KV.Get(context.TODO(), ec.Key, clientv3.WithPrefix())
 	if err != nil {
 		panic(errors.New("Etcd can't connected ..."))
 	}
@@ -40,125 +44,60 @@ func InitConfigByEtcd(project string) ([]*mvccpb.KeyValue, chan map[string][]*Co
 		fmt.Println("Etcd配置中心没有该项目信息,资源组件不可用,请联系zgo engine Admin管理平台添加...")
 	}
 
-	//ch := make(chan *mvccpb.KeyValue, 100)
-
-	//for _, v := range response.Kvs {
-	//	ch <- v //返回到其它channel中
-	//}
-	//从这个version开始监控
 	watchStartRev := response.Header.Revision + 1
-	ch1, ch2, ch3 := Watcher(prefixKey, watchStartRev)
 
-	return response.Kvs, ch1, ch2, ch3
+	ch1, ch2, ch3, ch4, ch5 := ec.Watcher(ec.Key, watchStartRev)
+
+	return response.Kvs, ch1, ch2, ch3, ch4, ch5
 }
 
-func Watcher(prefixKey string, watchStartRev int64) (chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
+func (ec *EtcConfig) Watcher(prefixKey string, watchStartRev int64) (chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
 
-	outConnCh := make(chan map[string][]*ConnDetail)
-	outCacheCh := make(chan *CacheConfig)
-	outLogCh := make(chan *CacheConfig)
+	outConnCh := make(chan map[string][]*ConnDetail) //put 资源chan
+	outCacheCh := make(chan *CacheConfig)            //put cache chan
+	outLogCh := make(chan *CacheConfig)              //put log chan
+
+	outDelConnCh := make(chan map[string][]*ConnDetail) //delete 资源chan
+	outDelCacheCh := make(chan map[string]*CacheConfig) //delete cache or log chan这里共用一个
 
 	go func() {
 		watcher := clientv3.NewWatcher(client)
+
 		wch := watcher.Watch(context.TODO(), prefixKey, clientv3.WithPrefix(), clientv3.WithPrevKV(), clientv3.WithRev(watchStartRev))
 
 		for r := range wch {
 			for _, v := range r.Events {
+				key := string(v.Kv.Key)
+				keyType := strings.Split(key, "/")[3]
+
 				switch v.Type {
-				case clientv3.EventTypePut:
-					key := string(v.Kv.Key)
-					b := v.Kv.Value
-					if v.IsCreate() {
-						keyType := strings.Split(key, "/")[3]
-						if keyType == "cache" || keyType == "log" { //如果监听到cache有变化
-							cm := CacheConfig{}
-							err := zgoutils.Utils.Unmarshal(b, &cm)
-							if err != nil {
-								fmt.Println("反序列化当前值失败", key)
-								continue
-							}
-							switch keyType {
-							case "cache":
-								outCacheCh <- &cm
+				case clientv3.EventTypeDelete: //监听到删除操作
+					val := v.PrevKv.Value
+					err := ec.watchDelete(keyType, key, val, outDelCacheCh, outDelConnCh)
+					if err != nil {
+						fmt.Println("反序列化当前值失败", key)
+						break
+					}
+				case clientv3.EventTypePut: //监听到put操作
 
-							case "log":
-								outLogCh <- &cm
-							}
+					val := v.Kv.Value
 
-						} else {
+					if v.IsCreate() { //如果监听到是第一次创建资源组件
 
-							m := []ConnDetail{}
-							err := zgoutils.Utils.Unmarshal(b, &m)
-							if err != nil {
-								fmt.Println("反序列化当前值失败", key)
-
-								continue
-							}
-
-							var tmp []*ConnDetail
-							for _, vv := range m {
-								pvv := vv
-								tmp = append(tmp, &pvv)
-							}
-							hsm := make(map[string][]*ConnDetail)
-							hsm[key] = tmp
-
-							outConnCh <- hsm
-
+						err := ec.watchFirstPut(keyType, key, val, outCacheCh, outLogCh, outConnCh)
+						if err != nil {
+							fmt.Println("反序列化当前值失败", key)
+							break
 						}
-					} else {
-						preb := v.PrevKv.Value //上一次的值
-						keyType := strings.Split(key, "/")[3]
-						if keyType == "cache" || keyType == "log" { //如果监听到cache有变化
-							cm := CacheConfig{}
-							precm := CacheConfig{}
-							err := zgoutils.Utils.Unmarshal(b, &cm)
-							if err != nil {
-								fmt.Println("反序列化当前值失败", key)
-								continue
-							}
-							err = zgoutils.Utils.Unmarshal(preb, &precm)
-							if err != nil {
-								fmt.Println("反序列上一个值失败", key)
-								continue
-							}
-							if reflect.DeepEqual(cm, precm) != true { //如果有变化
-								switch keyType {
-								case "cache":
-									outCacheCh <- &cm
 
-								case "log":
-									outLogCh <- &cm
-								}
-							}
+					} else { //如果监听到是第二次以上更新资源组件
 
-						} else {
+						preVal := v.PrevKv.Value //上一次的值
 
-							m := []ConnDetail{}
-							err := zgoutils.Utils.Unmarshal(b, &m)
-							if err != nil {
-								fmt.Println("反序列化当前值失败", key)
-
-								continue
-							}
-							prem := []ConnDetail{}
-							err = zgoutils.Utils.Unmarshal(preb, &prem)
-							if err != nil {
-								fmt.Println("反序列上一个值失败", key)
-								continue
-							}
-							if reflect.DeepEqual(m, prem) != true { //如果有变化
-								var tmp []*ConnDetail
-								for _, vv := range m {
-									pvv := vv
-									tmp = append(tmp, &pvv)
-								}
-								hsm := make(map[string][]*ConnDetail)
-								hsm[key] = tmp
-
-								outConnCh <- hsm
-							}
-
+						err := ec.watchSecondPut(keyType, key, val, preVal, outCacheCh, outLogCh, outConnCh)
+						if err != nil {
+							fmt.Println("反序列化当前值失败", key)
+							break
 						}
 					}
 
@@ -167,13 +106,144 @@ func Watcher(prefixKey string, watchStartRev int64) (chan map[string][]*ConnDeta
 			}
 		}
 	}()
-	return outConnCh, outCacheCh, outLogCh
+	return outConnCh, outCacheCh, outLogCh, outDelConnCh, outDelCacheCh
 }
 
-func CreateClient() (*clientv3.Client, error) {
+// watchDelete 监听到删除操作时
+func (ec *EtcConfig) watchDelete(keyType string, key string, b []byte, outDelCacheCh chan map[string]*CacheConfig, outDelConnCh chan map[string][]*ConnDetail) error {
+	var cm CacheConfig
+	var m []ConnDetail
+
+	if keyType == EtcTKCache || keyType == EtcTKLog {
+		//删除cache或log
+		err := zgoutils.Utils.Unmarshal(b, &cm)
+		if err != nil {
+			return err
+		}
+
+		hsm := make(map[string]*CacheConfig)
+
+		hsm[key] = &cm
+
+		outDelCacheCh <- hsm
+
+	} else {
+		//删除中间件redis/mysql/nsq/pika/mongo/kafka等
+		err := zgoutils.Utils.Unmarshal(b, &m)
+		if err != nil {
+			return err
+		}
+
+		hsm := ec.changeStructToPtr(m, key)
+
+		outDelConnCh <- hsm
+	}
+	return nil
+}
+
+// watchFirstPut 第一次监听到put操作，应用于资源组件第一次创建时
+func (ec *EtcConfig) watchFirstPut(keyType string, key string, b []byte, outCacheCh chan *CacheConfig, outLogCh chan *CacheConfig, outConnCh chan map[string][]*ConnDetail) error {
+	var cm CacheConfig
+	var m []ConnDetail
+
+	if keyType == EtcTKCache || keyType == EtcTKLog {
+		err := zgoutils.Utils.Unmarshal(b, &cm)
+		if err != nil {
+			return err
+		}
+		switch keyType {
+		case EtcTKCache:
+			outCacheCh <- &cm
+
+		case EtcTKLog:
+			outLogCh <- &cm
+		}
+	} else {
+
+		err := zgoutils.Utils.Unmarshal(b, &m)
+		if err != nil {
+			return err
+		}
+		hsm := ec.changeStructToPtr(m, key)
+
+		outConnCh <- hsm
+
+	}
+	return nil
+
+}
+
+// watchSecondPut 第二次监听到key的put变化，用上一次的value到当前的比较，不同时就用当前的值
+func (ec *EtcConfig) watchSecondPut(keyType string, key string, val []byte, preVal []byte, outCacheCh chan *CacheConfig, outLogCh chan *CacheConfig, outConnCh chan map[string][]*ConnDetail) error {
+	var cm CacheConfig
+	var m []ConnDetail
+	var preCm CacheConfig
+
+	if keyType == EtcTKCache || keyType == EtcTKLog { //如果监听到cache有变化
+		err := zgoutils.Utils.Unmarshal(val, &cm)
+		if err != nil {
+			return err
+		}
+		err = zgoutils.Utils.Unmarshal(preVal, &preCm)
+		if err != nil {
+			return err
+		}
+
+		if reflect.DeepEqual(cm, preCm) != true { //如果有变化
+
+			switch keyType {
+
+			case EtcTKCache:
+				outCacheCh <- &cm
+
+			case EtcTKLog:
+				outLogCh <- &cm
+			}
+		}
+
+	} else {
+
+		err := zgoutils.Utils.Unmarshal(val, &m)
+		if err != nil {
+			return err
+		}
+		err = zgoutils.Utils.Unmarshal(preVal, &preCm)
+		if err != nil {
+			return err
+		}
+		if reflect.DeepEqual(m, preCm) != true { //如果有变化使用当前的m
+
+			hsm := ec.changeStructToPtr(m, key)
+
+			outConnCh <- hsm
+		}
+
+	}
+	return nil
+}
+
+// changeStructToPtr 转化[]为map，且struct为ptr
+func (ec *EtcConfig) changeStructToPtr(m []ConnDetail, key string) map[string][]*ConnDetail {
+	var tmp []*ConnDetail
+	for _, vv := range m {
+		pvv := vv
+		tmp = append(tmp, &pvv)
+	}
+	hsm := make(map[string][]*ConnDetail)
+	hsm[key] = tmp
+	return hsm
+}
+
+func (ec *EtcConfig) CreateClient() (*clientv3.Client, error) {
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   Conf.EtcdHosts,
+		Endpoints:   ec.Endpoints,
 		DialTimeout: 20 * time.Second,
 	})
 	return cli, err
 }
+
+//nsq
+//"[{\"c\":\"北京主库2-----etcd nsq\",\"host\":\"localhost\",\"port\":4150,\"connSize\":5,\"poolSize\":550},{\"c\":\"北京主库1-----etcd nsq\",\"host\":\"localhost\",\"port\":4150,\"connSize\":5,\"poolSize\":500}]"
+
+//log
+//"{\"c\": \"日志存储3gg000443333g34433333444445599\",\"start\": 1,\"dbType\": \"file\",\"label\":\"/tmp\"}"

@@ -14,25 +14,37 @@ import (
 )
 
 const (
-	Version       = "0.5.0"        //zgo版本号
-	ProjectPrefix = "zgo/project/" //读取ETCD配置时prefix
-	FileStoreType = "local"        //文件存储类型
-	FileStoreHome = "/tmp"         //文件存储目录
-	Local         = "local"        //本地开发环境标识
-	Dev           = "dev"          //开发联调环境标识
-	Qa            = "qa"           //QA测试环境标识
-	Pro           = "pro"          //生产环境标识
+	Version       = "0.5.0"       //zgo版本号
+	ProjectPrefix = "zgo/project" //读取ETCD配置时prefix
+	FileStoreType = "local"       //文件存储类型
+	FileStoreHome = "/tmp"        //文件存储目录
+	Local         = "local"       //本地开发环境标识
+	Dev           = "dev"         //开发联调环境标识
+	Qa            = "qa"          //QA测试环境标识
+	Pro           = "pro"         //生产环境标识
+
+	//********************************以下是 etcd监听常量********************************
+	EtcTKCache = "cache"
+	EtcTKLog   = "log"
+	EtcTKMysql = "mysql"
+	EtcTKMongo = "mongo"
+	EtcTKRedis = "redis"
+	EtcTKPia   = "pika"
+	EtcTKNsq   = "nsq"
+	EtcTKKafka = "kafka"
+	EtcTKEs    = "es"
+	EtcTKEtc   = "etcd"
 )
 
 var (
-	DevEtcdHosts = []string{ //开发联调ETCD地址
+	DevEtcHosts = []string{ //开发联调ETCD地址
 		//"123.56.173.28:2380",
 		"localhost:2381",
 	}
-	QaEtcdHosts = []string{ //QA环境ETCD地址
+	QaEtcHosts = []string{ //QA环境ETCD地址
 		"123.56.173.28:2380",
 	}
-	ProEtcdHosts = []string{ //生产环境ETCD地址
+	ProEtcHosts = []string{ //生产环境ETCD地址
 		"123.56.173.28:2380",
 	}
 )
@@ -56,11 +68,11 @@ type ConnDetail struct {
 
 type CacheConfig struct {
 	//same as LogConfig so 共用一个struct
-	C      string `json:"c"`
+	C      string `json:"c,omitempty"`
 	Rate   int    `json:"rate,omitempty"`   // 缓存失效时间 倍率
-	Label  string `json:"label"`            // 缓存所需的 pikaLabel
-	Start  int    `json:"start"`            // 是否开启 1 开启 0关闭
-	DbType string `json:"dbType"`           // 数据库类型 默认pika
+	Label  string `json:"label,omitempty"`  // 缓存所需的 pikaLabel
+	Start  int    `json:"start,omitempty"`  // 是否开启 1 开启 0关闭
+	DbType string `json:"dbType,omitempty"` // 数据库类型 默认pika
 	TcType int    `json:"tcType,omitempty"` // 降级缓存类型 1正常降级缓存 2转为普通缓存
 }
 
@@ -100,15 +112,19 @@ type Labelconns struct {
 
 var Conf *allConfig
 
-func InitConfig(e, project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig) {
+func InitConfig(env, project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
 
-	ReadFileByConfig(e, project)
+	ReadFileByConfig(env, project)
 
-	if e != Local {
-		//用etcd
-		return InitConfigByEtcd(project)
+	if env != Local {
+		//用etcd的配置
+		ec := EtcConfig{
+			Key:       fmt.Sprintf("%s/%s", ProjectPrefix, project),
+			Endpoints: Conf.EtcdHosts,
+		}
+		return ec.InitConfigByEtcd()
 	}
-	return nil, nil, nil, nil
+	return nil, nil, nil, nil, nil, nil
 }
 
 func ReadFileByConfig(e, project string) {
@@ -138,7 +154,7 @@ func ReadFileByConfig(e, project string) {
 		Conf = &allConfig{
 			Env:       e,
 			Project:   project,
-			EtcdHosts: DevEtcdHosts,
+			EtcdHosts: DevEtcHosts,
 			File: FileStore{
 				Type: FileStoreType,
 				Home: FileStoreHome,
@@ -148,7 +164,7 @@ func ReadFileByConfig(e, project string) {
 		Conf = &allConfig{
 			Env:       e,
 			Project:   project,
-			EtcdHosts: QaEtcdHosts,
+			EtcdHosts: QaEtcHosts,
 			File: FileStore{
 				Type: FileStoreType,
 				Home: FileStoreHome,
@@ -158,7 +174,7 @@ func ReadFileByConfig(e, project string) {
 		Conf = &allConfig{
 			Env:       e,
 			Project:   project,
-			EtcdHosts: ProEtcdHosts,
+			EtcdHosts: ProEtcHosts,
 			File: FileStore{
 				Type: FileStoreType, //以后生产环境可以存到aws s3，在这里直接更改
 				Home: FileStoreHome,
