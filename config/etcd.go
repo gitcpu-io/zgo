@@ -246,3 +246,6 @@ func (ec *EtcConfig) CreateClient() (*clientv3.Client, error) {
 
 //cache
 //"{\"c\":\"cache\",\"rate\":2,\"label\":\"pika_label_rw\",\"start\":1,\"dbType\":\"pika\",\"tcType\":2}"
+
+//mysql
+//"[{\"c\":\"北京二手房库 etcd-旧实例1w\",\"host\":\"localhost\",\"port\":3307,\"connSize\":0,\"poolSize\":0,\"maxIdleSize\":5,\"maxOpenConn\":5,\"username\":\"root\",\"password\":\"root\",\"t\":\"w\",\"dbName\":\"mysql\"},{\"c\":\"北京二手房库 etcd-旧实例r\",\"host\":\"localhost\",\"port\":3307,\"connSize\":0,\"poolSize\":0,\"maxIdleSize\":5,\"maxOpenConn\":5,\"username\":\"root\",\"password\":\"root\",\"t\":\"r\",\"dbName\":\"mysql\"}]"

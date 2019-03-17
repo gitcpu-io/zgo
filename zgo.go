@@ -1,7 +1,6 @@
 package zgo
 
 import (
-	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
 	"git.zhugefang.com/gocore/zgo/zgocache"
 	"git.zhugefang.com/gocore/zgo/zgocrypto"
@@ -73,16 +72,9 @@ func Engine(opt *Options) error {
 		if len(opt.Mysql) > 0 {
 			//todo someting
 			hsm := engine.getConfigByOption(config.Conf.Mysql, opt.Mysql)
-			fmt.Println(hsm)
-			// 配置信息： 城市和数据库的关系
-			cdc := config.Conf.CityDbConfig
-			zgomysql.InitMysqlService(hsm, cdc)
-			var err error
-			Mysql, err = zgomysql.MysqlService(opt.Mysql[0])
-			if err != nil {
-				fmt.Println(err)
-			}
-
+			//fmt.Println(hsm)
+			in := <-zgomysql.InitMysql(hsm)
+			Mysql = in
 		}
 		if len(opt.Es) > 0 {
 			hsm := engine.getConfigByOption(config.Conf.Es, opt.Es)

@@ -42,14 +42,28 @@ type zgomongo struct {
 }
 
 //InitMongo 初始化连接mongo
-func InitMongo(hsm map[string][]*config.ConnDetail) chan *zgomongo {
+func InitMongo(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgomongo {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 
-	//currentLabels = hsm
-	for k, v := range hsm { //so big bug can't set hsm to currentLabels，must be for, may be have old label
-		currentLabels[k] = v
+	var hsm map[string][]*config.ConnDetail
+
+	if len(label) > 0 && len(currentLabels) > 0 { //此时是destory操作,传入的hsm是nil
+		//fmt.Println("--destory--前",currentLabels)
+		for _, v := range label {
+			delete(currentLabels, v)
+		}
+		hsm = currentLabels
+		//fmt.Println("--destory--后",currentLabels)
+
+	} else { //这是第一次创建操作或etcd中变更时init again操作
+		hsm = hsmIn
+		//currentLabels = hsm	//this operation is error
+		for k, v := range hsm { //so big bug can't set hsm to currentLabels，must be for, may be have old label
+			currentLabels[k] = v
+		}
 	}
+
 	InitMongoResource(hsm)
 
 	//自动为变量初始化对象

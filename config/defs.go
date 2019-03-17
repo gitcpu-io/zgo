@@ -48,6 +48,17 @@ var (
 	ProEtcHosts = []string{ //生产环境ETCD地址
 		"123.56.173.28:2380",
 	}
+	cityDbConfig = map[string]map[string]string{
+		"sell": {
+			"bj":  "1",
+			"nj":  "1",
+			"sh":  "1",
+			"cd":  "1",
+			"tj":  "1",
+			"cq":  "1",
+			"heb": "1",
+		},
+	}
 )
 
 type ConnDetail struct {
@@ -186,6 +197,9 @@ func ReadFileByConfig(e, project string) {
 	if Conf.Loglevel == "" {
 		Conf.Loglevel = DefaultLogLevel
 	}
+
+	//default init city db config
+	Conf.CityDbConfig = cityDbConfig
 
 	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Conf.Env)
 

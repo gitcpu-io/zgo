@@ -128,7 +128,7 @@ func (opt *Options) watchPutConn(inch chan map[string][]*config.ConnDetail) {
 						label := strings.Split(k, "/")[4] //改变label，去掉前缀
 						hsm[label] = v
 					}
-					fmt.Println("[init again]watchPutConn:", labelType, hsm)
+					fmt.Println("[init conn]watchPutConn:", labelType, hsm)
 					//[init again]watchPutConn: nsq map[nsq_label_bj:[0xc0004e62c0 0xc0004e6420]]
 
 					opt.initConn(labelType, hsm, mysqlLabel)
@@ -152,23 +152,41 @@ func (opt *Options) watchDeleteConn(ch chan map[string][]*config.ConnDetail) {
 					fmt.Println("[destroy conn]watchDeleteConn", labelType, label, v)
 					//[destroy conn]watchDeleteConn nsq nsq_label_bj [0xc0004e6840 0xc0004e68f0]
 
-					opt.destroyConn(labelType, label, v)
+					opt.destroyConn(labelType, label)
 				}
 			}
 		}
 	}()
 }
 
+/**
+1.从当前的currentLabels这个map中删除掉key
+2.call connpool的map，删除掉对应的key，让gc释放掉连接
+*/
 // destroyConn 具体删除操作
-func (opt *Options) destroyConn(labelType, label string, details []*config.ConnDetail) {
+func (opt *Options) destroyConn(labelType, label string) {
 	switch labelType {
 	case config.EtcTKMysql:
+		in := <-zgomysql.InitMysql(nil, label)
+		Mysql = in
 	case config.EtcTKMongo:
+		in := <-zgomongo.InitMongo(nil, label)
+		Mongo = in
 	case config.EtcTKRedis:
+		in := <-zgoredis.InitRedis(nil, label)
+		Redis = in
 	case config.EtcTKPia:
+		in := <-zgopika.InitPika(nil, label)
+		Pika = in
 	case config.EtcTKNsq:
+		in := <-zgonsq.InitNsq(nil, label)
+		Nsq = in
 	case config.EtcTKKafka:
+		in := <-zgokafka.InitKafka(nil, label)
+		Kafka = in
 	case config.EtcTKEs:
+		in := <-zgoes.InitEs(nil, label)
+		Es = in
 	case config.EtcTKEtc:
 	}
 }
@@ -229,7 +247,7 @@ func (opt *Options) watchDeleteCacheOrLog(ch chan map[string]*config.CacheConfig
 			for h := range ch {
 				for k, v := range h {
 					labelType := strings.Split(k, "/")[3]
-					fmt.Println("[destroy]watchDeleteCacheAndLog:", labelType, v)
+					fmt.Printf("[destroy %s]watchDeleteCacheAndLog: %v\n", labelType, v)
 					//[destroy]watchDeleteCacheAndLog: log &{日志存储 0 /tmp 1 file 0}
 
 					opt.destroyCacheAndLog(labelType, v)
@@ -274,16 +292,9 @@ func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDeta
 	switch labelType {
 	case config.EtcTKMysql:
 		//init mysql again
-		// 配置信息： 城市和数据库的关系
-		cdc := config.Conf.CityDbConfig
 		if len(hsm) > 0 {
-			zgomysql.InitMysqlService(hsm, cdc)
-			var err error
-			Mysql, err = zgomysql.MysqlService(mysqlLabel)
-
-			if err != nil {
-				fmt.Println(err)
-			}
+			in := <-zgomysql.InitMysql(hsm)
+			Mysql = in
 		}
 
 	case config.EtcTKMongo:
