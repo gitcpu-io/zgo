@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Version         = "0.5.0"       //zgo版本号
+	Version         = "0.6.0"       //zgo版本号
 	ProjectPrefix   = "zgo/project" //读取ETCD配置时prefix
 	DefaultLogLevel = "error"       //默认的日志格式
 	FileStoreType   = "local"       //文件存储类型
