@@ -259,6 +259,22 @@ func (dsl *DSL) SimpleAggs(field string, size int) interface{} {
 	}
 }
 
+func (dsl *DSL) NestedAggs(path, field string, size int) interface{} {
+	return map[string]interface{}{
+		"nested_field": map[string]interface{}{
+			"nested": map[string]interface{}{
+				"path": path,
+			},
+			"aggs": map[string]interface{}{
+				"aggs_field": map[string]interface{}{
+					"terms": field,
+					"size":  size,
+				},
+			},
+		},
+	}
+}
+
 func (dsl *DSL) Aggs2Field(field1 string, size1 int, field2 string, size2 int) interface{} {
 	return map[string]interface{}{
 		"aggs_field": map[string]interface{}{
