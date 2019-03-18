@@ -31,7 +31,7 @@ type Options struct {
 	Nsq      []string `json:"nsq"`
 }
 
-func (opt *Options) init() error {
+func (opt *Options) Init() error {
 	//init config
 	if opt.Env == "" {
 		opt.Env = config.Local

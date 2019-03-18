@@ -31,7 +31,7 @@ func Engine(opt *Options) error {
 		opt: opt,
 	}
 
-	err := opt.init() //把zgo_start中用户定义的，映射到zgo的内存变量上
+	err := opt.Init() //把zgo_start中用户定义的，映射到zgo的内存变量上
 
 	if err != nil {
 		return err
@@ -120,8 +120,6 @@ func Engine(opt *Options) error {
 			Start:  config.Conf.Log.Start,
 		}
 		zgolog.LogWatch <- cc
-
-	} else {
 
 	}
 

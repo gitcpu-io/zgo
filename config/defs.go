@@ -126,7 +126,7 @@ var Conf *allConfig
 
 func InitConfig(env, project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan map[string]*CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
 
-	ReadFileByConfig(env, project)
+	LoadConfig(env, project)
 
 	if env != Local {
 		//用etcd的配置
@@ -139,7 +139,7 @@ func InitConfig(env, project string) ([]*mvccpb.KeyValue, chan map[string][]*Con
 	return nil, nil, nil, nil, nil
 }
 
-func ReadFileByConfig(e, project string) {
+func LoadConfig(e, project string) {
 	var cf string
 	switch e {
 	case Local:
@@ -206,7 +206,7 @@ func ReadFileByConfig(e, project string) {
 }
 
 // LoadConfig 暂时不用
-func LoadConfig(path string) *allConfig {
+func LoadConfigByFile(path string) *allConfig {
 	var config allConfig
 	config_file, err := os.Open(path)
 	if err != nil {

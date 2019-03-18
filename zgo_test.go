@@ -86,11 +86,11 @@ func TestEngine(t *testing.T) {
 			nq.Producer(context.TODO(), "zgo_start", []byte("zgo engine is niubility from nsq"))
 
 			//****************************************test kafka
-			kq, err := Kafka.New("kafka_label_bj")
-			if err != nil {
-				fmt.Println("---error", err)
-			}
-			kq.Producer(context.TODO(), "zgo_start", []byte("zgo engine is niubility from kafka"))
+			//kq, err := Kafka.New("kafka_label_bj")
+			//if err != nil {
+			//	fmt.Println("---error", err)
+			//}
+			//kq.Producer(context.TODO(), "zgo_start", []byte("zgo engine is niubility from kafka"))
 
 		}
 	}
