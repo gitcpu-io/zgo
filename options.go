@@ -221,15 +221,15 @@ func (opt *Options) watchPutCacheOrLog(cacheLogCh chan map[string]*config.CacheC
 
 						Log = zgolog.InitLog(opt.Project)
 
-						cc := &config.CacheConfig{
-							DbType: config.Conf.Log.DbType,
-							Label:  config.Conf.Log.Label,
-							Start:  config.Conf.Log.Start,
+						cc := config.CacheConfig{
+							DbType: v.DbType,
+							Label:  v.Label,
+							Start:  v.Start,
 						}
 
-						fmt.Println("[init Log]watchPutCacheOrLog", labelType, cm)
+						fmt.Println("[init Log]watchPutCacheOrLog", labelType, cc)
 
-						zgolog.LogWatch <- cc
+						zgolog.LogWatch <- &cc
 					}
 				}
 
