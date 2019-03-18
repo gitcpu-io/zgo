@@ -26,11 +26,11 @@ type EtcConfig struct {
 	Endpoints []string
 }
 
-func (ec *EtcConfig) InitConfigByEtcd() ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
+func (ec *EtcConfig) InitConfigByEtcd() ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan map[string]*CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
 	c, err := ec.CreateClient() //创建etcd client
 	if err != nil || c == nil {
 		panic(errors.New("连接ETCD失败:" + err.Error()))
-		return nil, nil, nil, nil, nil, nil
+		return nil, nil, nil, nil, nil
 	}
 	client = c
 
@@ -46,19 +46,18 @@ func (ec *EtcConfig) InitConfigByEtcd() ([]*mvccpb.KeyValue, chan map[string][]*
 
 	watchStartRev := response.Header.Revision + 1
 
-	ch1, ch2, ch3, ch4, ch5 := ec.Watcher(ec.Key, watchStartRev)
+	ch1, ch2, ch3, ch4 := ec.Watcher(ec.Key, watchStartRev)
 
-	return response.Kvs, ch1, ch2, ch3, ch4, ch5
+	return response.Kvs, ch1, ch2, ch3, ch4
 }
 
-func (ec *EtcConfig) Watcher(prefixKey string, watchStartRev int64) (chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
+func (ec *EtcConfig) Watcher(prefixKey string, watchStartRev int64) (chan map[string][]*ConnDetail, chan map[string]*CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
 
-	outConnCh := make(chan map[string][]*ConnDetail) //put 资源chan
-	outCacheCh := make(chan *CacheConfig)            //put cache chan
-	outLogCh := make(chan *CacheConfig)              //put log chan
+	outConnCh := make(chan map[string][]*ConnDetail)    //put 资源chan
+	outCacheLogCh := make(chan map[string]*CacheConfig) //put cache or log to chan
 
-	outDelConnCh := make(chan map[string][]*ConnDetail) //delete 资源chan
-	outDelCacheCh := make(chan map[string]*CacheConfig) //delete cache or log chan这里共用一个
+	outDelConnCh := make(chan map[string][]*ConnDetail)    //delete 资源chan
+	outDelCacheLogCh := make(chan map[string]*CacheConfig) //delete cache or log chan这里共用一个
 
 	go func() {
 		watcher := clientv3.NewWatcher(client)
@@ -73,7 +72,7 @@ func (ec *EtcConfig) Watcher(prefixKey string, watchStartRev int64) (chan map[st
 				switch v.Type {
 				case clientv3.EventTypeDelete: //监听到删除操作
 					val := v.PrevKv.Value
-					err := ec.watchDelete(labelType, key, val, outDelCacheCh, outDelConnCh)
+					err := ec.watchDelete(labelType, key, val, outDelCacheLogCh, outDelConnCh)
 					if err != nil {
 						fmt.Println("反序列化当前值失败", key)
 						break
@@ -84,7 +83,7 @@ func (ec *EtcConfig) Watcher(prefixKey string, watchStartRev int64) (chan map[st
 
 					if v.IsCreate() { //如果监听到是第一次创建资源组件
 
-						err := ec.watchFirstPut(labelType, key, val, outCacheCh, outLogCh, outConnCh)
+						err := ec.watchFirstPut(labelType, key, val, outCacheLogCh, outConnCh)
 						if err != nil {
 							fmt.Println("反序列化当前值失败", key)
 							break
@@ -94,7 +93,7 @@ func (ec *EtcConfig) Watcher(prefixKey string, watchStartRev int64) (chan map[st
 
 						preVal := v.PrevKv.Value //上一次的值
 
-						err := ec.watchSecondPut(labelType, key, val, preVal, outCacheCh, outLogCh, outConnCh)
+						err := ec.watchSecondPut(labelType, key, val, preVal, outCacheLogCh, outConnCh)
 						if err != nil {
 							fmt.Println("反序列化当前值失败", key)
 							break
@@ -106,7 +105,7 @@ func (ec *EtcConfig) Watcher(prefixKey string, watchStartRev int64) (chan map[st
 			}
 		}
 	}()
-	return outConnCh, outCacheCh, outLogCh, outDelConnCh, outDelCacheCh
+	return outConnCh, outCacheLogCh, outDelConnCh, outDelCacheLogCh
 }
 
 // watchDelete 监听到删除操作时
@@ -142,7 +141,7 @@ func (ec *EtcConfig) watchDelete(labelType string, key string, b []byte, outDelC
 }
 
 // watchFirstPut 第一次监听到put操作，应用于资源组件第一次创建时
-func (ec *EtcConfig) watchFirstPut(labelType string, key string, b []byte, outCacheCh chan *CacheConfig, outLogCh chan *CacheConfig, outConnCh chan map[string][]*ConnDetail) error {
+func (ec *EtcConfig) watchFirstPut(labelType string, key string, b []byte, outCacheLogCh chan map[string]*CacheConfig, outConnCh chan map[string][]*ConnDetail) error {
 	var cm CacheConfig
 	var m []ConnDetail
 
@@ -151,14 +150,12 @@ func (ec *EtcConfig) watchFirstPut(labelType string, key string, b []byte, outCa
 		if err != nil {
 			return err
 		}
-		switch labelType {
-		case EtcTKCache:
-			outCacheCh <- &cm //直接把结构体指针放入chan
+		var hsm = make(map[string]*CacheConfig)
 
-		case EtcTKLog:
-			outLogCh <- &cm //直接把结构体指针放入chan
+		hsm[key] = &cm
 
-		}
+		outCacheLogCh <- hsm
+
 	} else {
 
 		err := zgoutils.Utils.Unmarshal(b, &m)
@@ -175,7 +172,7 @@ func (ec *EtcConfig) watchFirstPut(labelType string, key string, b []byte, outCa
 }
 
 // watchSecondPut 第二次监听到key的put变化，用上一次的value到当前的比较，不同时就用当前的值
-func (ec *EtcConfig) watchSecondPut(labelType string, key string, val []byte, preVal []byte, outCacheCh chan *CacheConfig, outLogCh chan *CacheConfig, outConnCh chan map[string][]*ConnDetail) error {
+func (ec *EtcConfig) watchSecondPut(labelType string, key string, val []byte, preVal []byte, outCacheLogCh chan map[string]*CacheConfig, outConnCh chan map[string][]*ConnDetail) error {
 	var cm CacheConfig
 	var m []ConnDetail
 	var preCm CacheConfig
@@ -192,14 +189,11 @@ func (ec *EtcConfig) watchSecondPut(labelType string, key string, val []byte, pr
 
 		if reflect.DeepEqual(cm, preCm) != true { //如果有变化
 
-			switch labelType {
+			var hsm = make(map[string]*CacheConfig)
 
-			case EtcTKCache:
-				outCacheCh <- &cm
+			hsm[key] = &cm
 
-			case EtcTKLog:
-				outLogCh <- &cm
-			}
+			outCacheLogCh <- hsm
 		}
 
 	} else {
@@ -249,3 +243,9 @@ func (ec *EtcConfig) CreateClient() (*clientv3.Client, error) {
 
 //log
 //"{\"c\": \"日志存储3gg000443333g34433333444445599\",\"start\": 1,\"dbType\": \"file\",\"label\":\"/tmp\"}"
+
+//cache
+//"{\"c\":\"cache\",\"rate\":2,\"label\":\"pika_label_rw\",\"start\":1,\"dbType\":\"pika\",\"tcType\":2}"
+
+//mysql
+//"[{\"c\":\"北京二手房库 etcd-旧实例1w\",\"host\":\"localhost\",\"port\":3307,\"connSize\":0,\"poolSize\":0,\"maxIdleSize\":5,\"maxOpenConn\":5,\"username\":\"root\",\"password\":\"root\",\"t\":\"w\",\"dbName\":\"mysql\"},{\"c\":\"北京二手房库 etcd-旧实例r\",\"host\":\"localhost\",\"port\":3307,\"connSize\":0,\"poolSize\":0,\"maxIdleSize\":5,\"maxOpenConn\":5,\"username\":\"root\",\"password\":\"root\",\"t\":\"r\",\"dbName\":\"mysql\"}]"

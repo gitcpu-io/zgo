@@ -1,9 +1,17 @@
 package zgo
 
 import (
+	"context"
+	"fmt"
 	"testing"
 	"time"
 )
+
+//mysql struct
+type MysqlUser struct {
+	Host int    `json:"host"`
+	User string `json:"user"`
+}
 
 func TestEngine(t *testing.T) {
 
@@ -50,10 +58,40 @@ func TestEngine(t *testing.T) {
 	for {
 		select {
 		case <-time.Tick(time.Duration(3) * time.Second):
+			//****************************************test log
 			Log.Error("start engine for test")
 
-			//n := zgokafka.Kafka("kafka_label_bj")
-			//n.Producer(context.TODO(), "zgo_start", []byte("dsfsdfsdfsfsfsdfsdfss"))
+			//****************************************test mysql default user table
+			//n, err := Mysql.New("mysql_sell_1")
+			//if err != nil {
+			//	fmt.Println("======error=====",err)
+			//}
+			//args := make(map[string]interface{})
+			//args["table"] = "user"
+			//args["query"] = " user = ? "
+			//args["args"] = []interface{}{string("root")}
+			//args["limit"] = 30
+			//args["offset"] = 0
+			//args["order"] = " host desc "
+			//obj := make([]MysqlUser,100)
+			//args["obj"] = &obj
+			//n.List(context.TODO(), args)
+			//fmt.Println(obj)
+
+			//****************************************test nsq
+			nq, err := Nsq.New()
+			if err != nil {
+				fmt.Println("---error", err)
+			}
+			nq.Producer(context.TODO(), "zgo_start", []byte("zgo engine is niubility from nsq"))
+
+			//****************************************test kafka
+			//kq, err := Kafka.New("kafka_label_bj")
+			//if err != nil {
+			//	fmt.Println("---error", err)
+			//}
+			//kq.Producer(context.TODO(), "zgo_start", []byte("zgo engine is niubility from kafka"))
+
 		}
 	}
 }

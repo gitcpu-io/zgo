@@ -77,7 +77,7 @@ func newService() (Mysqler, error) {
 		MaxOpenConn: 5,
 		MaxIdleSize: 5,
 	}
-	cityDbConfig := map[string]map[string]string{"sell": {"bj": "1", "sh": "2"}}
+	//config.Conf.CityDbConfig := map[string]map[string]string{"sell": {"bj": "1", "sh": "2"}}
 
 	var s1 []*config.ConnDetail
 	var s2 []*config.ConnDetail
@@ -92,10 +92,10 @@ func newService() (Mysqler, error) {
 		label_bj: s1,
 	}
 	//----------------------
-	InitMysqlService(hsm, cityDbConfig) //测试时表示使用mysql，在zgo_start中使用一次
+	InitMysql(hsm) //测试时表示使用mysql，在zgo_start中使用一次
 	//测试读取nsq数据，wait for sdk init connection
 	time.Sleep(2 * time.Second)
-	return MysqlService(label_bj)
+	return GetMysql(label_bj)
 }
 
 func testMysql(fn func(client Mysqler, i int, city string) chan int) {
@@ -224,7 +224,7 @@ func getMysql(client Mysqler, i int, city string) chan int {
 	return out
 }
 
-func createMysql(client Mysqler, i int, city string) chan int {
+func createMysql(ms Mysqler, i int, city string) chan int {
 	//还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -233,8 +233,8 @@ func createMysql(client Mysqler, i int, city string) chan int {
 	args := make(map[string]interface{})
 	args["table"] = "house"
 	args["obj"] = house1
-	label, _ := client.GetLabelByCityBiz(city, "sell")
-	client, err := client.MysqlService(label)
+	label, _ := ms.GetLabelByCityBiz(city, "sell")
+	client, err := GetMysql(label)
 	client.Create(ctx, args)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -253,7 +253,7 @@ func createMysql(client Mysqler, i int, city string) chan int {
 	return out
 }
 
-func listMysql(client Mysqler, i int, city string) chan int {
+func listMysql(ms Mysqler, i int, city string) chan int {
 	//还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -268,8 +268,8 @@ func listMysql(client Mysqler, i int, city string) chan int {
 	args["order"] = " id desc "
 	obj := make([]House, 0)
 	args["obj"] = &obj
-	label, _ := client.GetLabelByCityBiz(city, "sell")
-	client, err := client.MysqlService(label)
+	label, _ := ms.GetLabelByCityBiz(city, "sell")
+	client, err := GetMysql(label)
 	client.List(ctx, args)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -288,7 +288,7 @@ func listMysql(client Mysqler, i int, city string) chan int {
 	return out
 }
 
-func updateMysql(client Mysqler, i int, city string) chan int {
+func updateMysql(ms Mysqler, i int, city string) chan int {
 	//还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -297,8 +297,8 @@ func updateMysql(client Mysqler, i int, city string) chan int {
 	args := make(map[string]interface{})
 	args["table"] = "house"
 	args["obj"] = house1
-	label, _ := client.GetLabelByCityBiz(city, "sell")
-	client, err := client.MysqlService(label)
+	label, _ := ms.GetLabelByCityBiz(city, "sell")
+	client, err := GetMysql(label)
 	data := map[string]interface{}{"name": city + ":uHouse:" + string(i)}
 	args["data"] = data
 	c, _ := client.UpdateOne(ctx, args)
@@ -320,7 +320,7 @@ func updateMysql(client Mysqler, i int, city string) chan int {
 	return out
 }
 
-func countMysql(client Mysqler, i int, city string) chan int {
+func countMysql(ms Mysqler, i int, city string) chan int {
 	//还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -331,8 +331,8 @@ func countMysql(client Mysqler, i int, city string) chan int {
 	args["count"] = &count
 	args["query"] = " id < ? "
 	args["args"] = []interface{}{int(i)}
-	label, _ := client.GetLabelByCityBiz(city, "sell")
-	client, err := client.MysqlService(label)
+	label, _ := ms.GetLabelByCityBiz(city, "sell")
+	client, err := GetMysql(label)
 	client.Count(ctx, args)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -352,7 +352,7 @@ func countMysql(client Mysqler, i int, city string) chan int {
 	return out
 }
 
-func deleteMysql(client Mysqler, i int, city string) chan int {
+func deleteMysql(ms Mysqler, i int, city string) chan int {
 	//还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -362,8 +362,8 @@ func deleteMysql(client Mysqler, i int, city string) chan int {
 	args["table"] = "house"
 	args["obj"] = house1
 	args["id"] = i
-	label, _ := client.GetLabelByCityBiz(city, "sell")
-	client, err := client.MysqlService(label)
+	label, _ := ms.GetLabelByCityBiz(city, "sell")
+	client, err := GetMysql(label)
 	cn, _ := client.DeleteOne(ctx, args)
 	if err != nil {
 		fmt.Println(err.Error())

@@ -14,14 +14,15 @@ import (
 )
 
 const (
-	Version       = "0.5.0"       //zgo版本号
-	ProjectPrefix = "zgo/project" //读取ETCD配置时prefix
-	FileStoreType = "local"       //文件存储类型
-	FileStoreHome = "/tmp"        //文件存储目录
-	Local         = "local"       //本地开发环境标识
-	Dev           = "dev"         //开发联调环境标识
-	Qa            = "qa"          //QA测试环境标识
-	Pro           = "pro"         //生产环境标识
+	Version         = "0.6.0"       //zgo版本号
+	ProjectPrefix   = "zgo/project" //读取ETCD配置时prefix
+	DefaultLogLevel = "error"       //默认的日志格式
+	FileStoreType   = "local"       //文件存储类型
+	FileStoreHome   = "/tmp"        //文件存储目录
+	Local           = "local"       //本地开发环境标识
+	Dev             = "dev"         //开发联调环境标识
+	Qa              = "qa"          //QA测试环境标识
+	Pro             = "pro"         //生产环境标识
 
 	//********************************以下是 etcd监听常量********************************
 	EtcTKCache = "cache"
@@ -38,14 +39,25 @@ const (
 
 var (
 	DevEtcHosts = []string{ //开发联调ETCD地址
-		//"123.56.173.28:2380",
-		"localhost:2381",
+		"123.56.173.28:2380",
+		//"localhost:2381",
 	}
 	QaEtcHosts = []string{ //QA环境ETCD地址
 		"123.56.173.28:2380",
 	}
 	ProEtcHosts = []string{ //生产环境ETCD地址
 		"123.56.173.28:2380",
+	}
+	cityDbConfig = map[string]map[string]string{
+		"sell": {
+			"bj":  "1",
+			"nj":  "1",
+			"sh":  "1",
+			"cd":  "1",
+			"tj":  "1",
+			"cq":  "1",
+			"heb": "1",
+		},
 	}
 )
 
@@ -112,9 +124,9 @@ type Labelconns struct {
 
 var Conf *allConfig
 
-func InitConfig(env, project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan *CacheConfig, chan *CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
+func InitConfig(env, project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan map[string]*CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
 
-	ReadFileByConfig(env, project)
+	LoadConfig(env, project)
 
 	if env != Local {
 		//用etcd的配置
@@ -124,10 +136,10 @@ func InitConfig(env, project string) ([]*mvccpb.KeyValue, chan map[string][]*Con
 		}
 		return ec.InitConfigByEtcd()
 	}
-	return nil, nil, nil, nil, nil, nil
+	return nil, nil, nil, nil, nil
 }
 
-func ReadFileByConfig(e, project string) {
+func LoadConfig(e, project string) {
 	var cf string
 	switch e {
 	case Local:
@@ -182,12 +194,19 @@ func ReadFileByConfig(e, project string) {
 		}
 	}
 
+	if Conf.Loglevel == "" {
+		Conf.Loglevel = DefaultLogLevel
+	}
+
+	//default init city db config
+	Conf.CityDbConfig = cityDbConfig
+
 	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Conf.Env)
 
 }
 
 // LoadConfig 暂时不用
-func LoadConfig(path string) *allConfig {
+func LoadConfigByFile(path string) *allConfig {
 	var config allConfig
 	config_file, err := os.Open(path)
 	if err != nil {

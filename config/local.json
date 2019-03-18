@@ -206,6 +206,25 @@
           "poolSize": 456
         }
       ]
+    },
+    {
+      "key": "mongo_label_bj",
+      "values": [
+        {
+          "c": "北京从库1=====etcd mongo",
+          "host": "localhost",
+          "port": 27017,
+          "connSize": 5,
+          "poolSize": 789
+        },
+        {
+          "c": "北京从库2=====etcd mongo",
+          "host": "localhost",
+          "port": 27017,
+          "connSize": 5,
+          "poolSize": 456
+        }
+      ]
     }
   ],
   "es": [
@@ -214,7 +233,6 @@
       "values": [
         {
           "c": "新房s集群",
-          "uri": "http://101.201.119.240:9900",
           "host": "101.201.119.240",
           "port": 9900,
           "connSize": 10,
@@ -227,7 +245,6 @@
       "values": [
         {
           "c": "二手房集群",
-          "uri": "http://101.201.28.195:9200",
           "host": "localhost",
           "port": 9200,
           "connSize": 52,

@@ -18,7 +18,7 @@ type Base struct {
 }
 
 // 对外接口
-type MysqlResourcerInterface interface {
+type MysqlResourcer interface {
 	GetPool(t string) (*gorm.DB, error)
 	GetRPool() (*gorm.DB, error)
 	GetWPool() (*gorm.DB, error)
@@ -41,7 +41,7 @@ type mysqlResource struct {
 }
 
 // 对外函数 -- 创建mysqlResourcer对象
-func NewMysqlResourcer(label string) MysqlResourcerInterface {
+func NewMysqlResourcer(label string) MysqlResourcer {
 	return &mysqlResource{
 		label: label,
 	}
