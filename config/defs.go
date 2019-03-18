@@ -39,8 +39,8 @@ const (
 
 var (
 	DevEtcHosts = []string{ //开发联调ETCD地址
-		//"123.56.173.28:2380",
-		"localhost:2381",
+		"123.56.173.28:2380",
+		//"localhost:2381",
 	}
 	QaEtcHosts = []string{ //QA环境ETCD地址
 		"123.56.173.28:2380",
