@@ -18,7 +18,6 @@ func TestEsSearch(t *testing.T) {
 	hsm := make(map[string][]*config.ConnDetail)
 	cd_bj := config.ConnDetail{
 		C:        "北京主库-----es1",
-		Uri:      "http://101.201.119.240:9200",
 		Host:     "http://101.201.28.195",
 		Port:     9200,
 		ConnSize: 50,
@@ -26,7 +25,6 @@ func TestEsSearch(t *testing.T) {
 	}
 	cd_bj2 := config.ConnDetail{
 		C:        "北京主库-----es2",
-		Uri:      "http://101.201.119.240:9200",
 		Host:     "http://101.201.28.195",
 		Port:     9200,
 		ConnSize: 50,
@@ -34,7 +32,6 @@ func TestEsSearch(t *testing.T) {
 	}
 	cd_sh := config.ConnDetail{
 		C:        "上海主库-----es",
-		Uri:      "http://101.201.119.240:9200",
 		Host:     "http://101.201.28.195",
 		Port:     9200,
 		ConnSize: 50,
