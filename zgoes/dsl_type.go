@@ -270,7 +270,7 @@ func (dsl *DSL) NestedAggs(path, field string, size int) interface{} {
 			},
 			"aggs": map[string]interface{}{
 				"aggs_field": map[string]interface{}{
-					"terms": {
+					"terms": map[string]interface{}{
 						"field": field,
 						"size":  size,
 					},
