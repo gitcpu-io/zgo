@@ -59,7 +59,7 @@ func TestEngine(t *testing.T) {
 		select {
 		case <-time.Tick(time.Duration(3) * time.Second):
 			//****************************************test log
-			Log.Error("start engine for test")
+			//Log.Error("start engine for test")
 
 			//****************************************test mysql default user table
 			//n, err := Mysql.New("mysql_sell_1")

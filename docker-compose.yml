@@ -123,6 +123,20 @@ services:
       - "4150:4150"
     command: /nsqd --broadcast-address=nsqd --lookupd-tcp-address=nsqlookupd:4160 --data-path=/data
 
+#  nsqd2:
+#    image: nsqio/nsq
+#    depends_on:
+#      - nsqlookupd
+#    hostname: nsqd
+#    volumes:
+#      - ~/docker-data/nsq2:/data
+#    networks:
+#      - link-network
+#    ports:
+#      - "4153:4151"
+#      - "4152:4150"
+#    command: /nsqd --broadcast-address=nsqd --lookupd-tcp-address=nsqlookupd:4160 --data-path=/data
+
   nsqadmin:
     image: nsqio/nsq
     depends_on:

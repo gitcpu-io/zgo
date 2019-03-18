@@ -22,23 +22,24 @@ func TestProducer(t *testing.T) {
 		ConnSize: 5,
 		PoolSize: 246,
 	}
-	cd_bj2 := config.ConnDetail{
-		C:        "北京从库2-----nsq",
-		Host:     "localhost",
-		Port:     4150,
-		ConnSize: 50,
-		PoolSize: 135,
-	}
+	//cd_bj2 := config.ConnDetail{
+	//	C:        "北京从库2-----nsq",
+	//	Host:     "localhost",
+	//	Port:     4150,
+	//	ConnSize: 50,
+	//	PoolSize: 135,
+	//}
 	cd_sh := config.ConnDetail{
 		C:        "上海主库-----nsq",
 		Host:     "localhost",
-		Port:     4150,
+		Port:     4152,
 		ConnSize: 50,
 		PoolSize: 20000,
 	}
 	var s1 []*config.ConnDetail
 	var s2 []*config.ConnDetail
-	s1 = append(s1, &cd_bj, &cd_bj2)
+	//s1 = append(s1, &cd_bj, &cd_bj2)
+	s1 = append(s1, &cd_bj)
 	s2 = append(s2, &cd_sh)
 	hsm = map[string][]*config.ConnDetail{
 		label_bj: s1,
@@ -58,7 +59,7 @@ func TestProducer(t *testing.T) {
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 100 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 10 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
@@ -68,12 +69,12 @@ func TestProducer(t *testing.T) {
 		go func(i int) {
 			countChan <- i //统计开出去的goroutine
 			if i%2 == 0 {
-				ch := producer(label_sh, clientBj, i, true)
+				ch := producer("zgo_start", clientBj, i, true)
 				reply := <-ch
 				replyChan <- reply
 
 			} else {
-				ch := producer("zgo_start", clientSh, i, false)
+				ch := producer(label_sh, clientSh, i, false)
 				reply := <-ch
 				replyChan <- reply
 			}
