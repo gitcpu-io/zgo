@@ -88,6 +88,10 @@ func InitNsq(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgons
 		}
 	}
 
+	if len(hsm) == 0 {
+		return nil
+	}
+
 	InitNsqResource(hsm)
 
 	//自动为变量初始化对象

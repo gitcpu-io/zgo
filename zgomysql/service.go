@@ -64,6 +64,10 @@ func InitMysql(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgo
 		}
 	}
 
+	if len(hsm) == 0 {
+		return nil
+	}
+
 	InitMysqlResource(hsm)
 
 	//自动为变量初始化对象

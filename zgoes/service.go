@@ -38,6 +38,10 @@ func InitEs(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgoes 
 		}
 	}
 
+	if len(hsm) == 0 {
+		return nil
+	}
+
 	//自动为变量初始化对象
 	initLabel := ""
 	for k, _ := range hsm {

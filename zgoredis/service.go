@@ -77,6 +77,10 @@ func InitRedis(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgo
 		}
 	}
 
+	if len(hsm) == 0 {
+		return nil
+	}
+
 	InitRedisResource(hsm)
 
 	//自动为变量初始化对象

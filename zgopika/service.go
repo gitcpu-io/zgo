@@ -77,6 +77,10 @@ func InitPika(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgop
 		}
 	}
 
+	if len(hsm) == 0 {
+		return nil
+	}
+
 	InitPikaResource(hsm)
 
 	//自动为变量初始化对象

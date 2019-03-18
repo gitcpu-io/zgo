@@ -58,6 +58,10 @@ func InitKafka(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgo
 		}
 	}
 
+	if len(hsm) == 0 {
+		return nil
+	}
+
 	InitKafkaResource(hsm)
 
 	//自动为变量初始化对象
