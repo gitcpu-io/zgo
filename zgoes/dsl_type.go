@@ -247,8 +247,9 @@ func (dsl *DSL) GeoBoxField(field string, left_lat, left_lon,
 	return term
 }
 
+// field : field
+// return {"aggs_field": {"terms":{"field": field,"size": 10}}}
 func (dsl *DSL) SimpleAggs(field string, size int) interface{} {
-	//return fmt.Sprintf(`{"aggs_field": {"terms":{"field": %q,"size": %d}}}`, field, size)
 	return map[string]interface{}{
 		"aggs_field": map[string]interface{}{
 			"terms": map[string]interface{}{
@@ -259,6 +260,8 @@ func (dsl *DSL) SimpleAggs(field string, size int) interface{} {
 	}
 }
 
+// field : path.field
+// return {"nested_field": {"nested":{"path": path}, "aggs":{"aggs_field":{"terms":{"field": path.field, "size": size}}}}}
 func (dsl *DSL) NestedAggs(path, field string, size int) interface{} {
 	return map[string]interface{}{
 		"nested_field": map[string]interface{}{
@@ -267,8 +270,10 @@ func (dsl *DSL) NestedAggs(path, field string, size int) interface{} {
 			},
 			"aggs": map[string]interface{}{
 				"aggs_field": map[string]interface{}{
-					"terms": field,
-					"size":  size,
+					"terms": map[string]interface{}{
+						"field": field,
+						"size":  size,
+					},
 				},
 			},
 		},
