@@ -17,7 +17,7 @@ type MongoResourcer interface {
 	Create(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	Insert(ctx context.Context, args map[string]interface{}) error
 	FindOne(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	FindPage(ctx context.Context, args map[string]interface{}) ([]interface{}, error)
+	FindPage(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	Count(ctx context.Context, args map[string]interface{}) (int, error)
 	Pipe(ctx context.Context, pipe interface{}, values interface{}, args map[string]interface{}) (interface{}, error)
 	UpdateOne(ctx context.Context, args map[string]interface{}) error
@@ -131,13 +131,13 @@ func (m *mongoResource) Count(ctx context.Context, args map[string]interface{}) 
 }
 
 //分页查询 期望参数db table update query参数不传则为全部查询 select 为期望返回字段，若不填则自动为空
-func (m *mongoResource) FindPage(ctx context.Context, args map[string]interface{}) ([]interface{}, error) {
+func (m *mongoResource) FindPage(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 	judgeMongo(args)
 	s := <-m.connpool.GetConnChan(m.label)
 	preWorkForMongo(args)
-	ress := []interface{}{}
+	ress := args["obj"]
 	err := s.DB(args["db"].(string)).C(args["table"].(string)).Find(args["query"].(bson.M)).
-		Select(args["select"].(bson.M)).Skip(args["from"].(int)).Limit(args["limit"].(int)).Sort(args["sort"].([]string)...).All(&ress)
+		Select(args["select"].(bson.M)).Skip(args["from"].(int)).Limit(args["limit"].(int)).Sort(args["sort"].([]string)...).All(ress)
 	return ress, err
 }
 

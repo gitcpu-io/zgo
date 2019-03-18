@@ -22,7 +22,7 @@ type Mongoer interface {
 	UpdateAll(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	Delete(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	FindOne(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	FindPage(ctx context.Context, args map[string]interface{}) ([]interface{}, error)
+	FindPage(ctx context.Context, args map[string]interface{}) (interface{}, error)
 	Pipe(ctx context.Context, pipe interface{}, values interface{}, args map[string]interface{}) (interface{}, error)
 	Count(ctx context.Context, args map[string]interface{}) (int, error)
 	Get(ctx context.Context, args map[string]interface{}) (interface{}, error)
@@ -137,7 +137,7 @@ func (m *zgomongo) Delete(ctx context.Context, args map[string]interface{}) (int
 	return nil, m.res.DeleteOne(ctx, args)
 }
 
-func (m *zgomongo) FindPage(ctx context.Context, args map[string]interface{}) ([]interface{}, error) {
+func (m *zgomongo) FindPage(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 	//sort := args["sort"]
 	if args["from"] == nil {
 		args["from"] = 0

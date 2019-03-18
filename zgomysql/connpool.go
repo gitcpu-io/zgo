@@ -37,7 +37,10 @@ func GetPool(label string, T string) (*gorm.DB, error) {
 
 }
 
-// 初始化连接池
+// InitConnPool 初始化连接池
+/*
+ 1.
+*/
 func InitConnPool(hsm map[string][]*config.ConnDetail) {
 	for key, value := range hsm {
 		c := &connPool{
@@ -47,6 +50,10 @@ func InitConnPool(hsm map[string][]*config.ConnDetail) {
 	}
 }
 
+// setConnPoolToChan 创建链接池对象并放入全局Map内
+/*
+ 1. v []*config.ConnDetail  配置信息对象集合
+*/
 func (cp *connPool) setConnPoolToChan(v []*config.ConnDetail) {
 	for i := 0; i < len(v); i++ {
 		pool, err := cp.createClient(v[i])
@@ -67,6 +74,10 @@ func (cp *connPool) setConnPoolToChan(v []*config.ConnDetail) {
 	}
 }
 
+// createClient 创建链接池对象方法
+/*
+ 1. v *config.ConnDetail  配置信息对象
+*/
 func (cp *connPool) createClient(v *config.ConnDetail) (*gorm.DB, error) {
 	//fmt.Println("initConnPool", v)
 	host := fmt.Sprintf("%v:%v@(%v:%v)/%v?charset=utf8&parseTime=True&loc=Local", v.Username, v.Password, v.Host, v.Port, v.DbName)
@@ -89,4 +100,7 @@ func (cp *connPool) createClient(v *config.ConnDetail) (*gorm.DB, error) {
 	// 禁用复数表名
 	db.SingularTable(true)
 	return db, nil
+
+	// Output:
+	// gorm链接池对象，error信息
 }
