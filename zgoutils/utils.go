@@ -727,7 +727,7 @@ func (u *utils) GetString(str interface{}, d string) string {
 	case []byte:
 		return string(str.([]byte))
 	}
-	return fmt.Sprintf("%s", str)
+	return fmt.Sprintf("%v", str)
 }
 
 // 从map中得到指定的key
