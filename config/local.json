@@ -19,7 +19,7 @@
         {
           "c": "北京主库1-----etcd redis",
           "host": "localhost",
-          "port": 6379,
+          "port": 6380,
           "connSize": 10,
           "poolSize": 5000,
           "username": "",
@@ -28,7 +28,7 @@
         {
           "c": "北京主库2-----etcd redis",
           "host": "localhost",
-          "port": 6379,
+          "port": 6380,
           "connSize": 10,
           "poolSize": 5000,
           "username": "",
@@ -42,7 +42,7 @@
         {
           "c": "北京从库1=====redis",
           "host": "localhost",
-          "port": 6379,
+          "port": 6381,
           "connSize": 1,
           "poolSize": 100,
           "username": "",
@@ -51,7 +51,7 @@
         {
           "c": "北京从库3=====redis",
           "host": "localhost",
-          "port": 6379,
+          "port": 6381,
           "connSize": 50,
           "poolSize": 222,
           "username": "",
@@ -194,14 +194,14 @@
         {
           "c": "上海从库1=====etcd mongo",
           "host": "localhost",
-          "port": 27017,
+          "port": 27018,
           "connSize": 5,
           "poolSize": 789
         },
         {
           "c": "上海从库2=====etcd mongo",
           "host": "localhost",
-          "port": 27017,
+          "port": 27019,
           "connSize": 5,
           "poolSize": 456
         }
@@ -213,14 +213,14 @@
         {
           "c": "北京从库1=====etcd mongo",
           "host": "localhost",
-          "port": 27017,
+          "port": 27019,
           "connSize": 5,
           "poolSize": 789
         },
         {
           "c": "北京从库2=====etcd mongo",
           "host": "localhost",
-          "port": 27017,
+          "port": 27019,
           "connSize": 5,
           "poolSize": 456
         }

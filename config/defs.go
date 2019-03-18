@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Version         = "0.6.0"       //zgo版本号
+	Version         = "0.7.0"       //zgo版本号
 	ProjectPrefix   = "zgo/project" //读取ETCD配置时prefix
 	DefaultLogLevel = "error"       //默认的日志格式
 	FileStoreType   = "local"       //文件存储类型
@@ -62,14 +62,13 @@ var (
 )
 
 type ConnDetail struct {
-	C           string `json:"c"`
+	C           string `json:"c,omitempty"`
 	Host        string `json:"host,omitempty"`
 	Port        int    `json:"port,omitempty"`
 	ConnSize    int    `json:"connSize"`
 	PoolSize    int    `json:"poolSize"`
 	MaxIdleSize int    `json:"maxIdleSize,omitempty"` // mysql 最大空闲连接数
 	MaxOpenConn int    `json:"maxOpenConn,omitempty"` // mysql 最大可用连接数
-	Uri         string `json:"uri,omitempty"`
 	Username    string `json:"username,omitempty"`
 	Password    string `json:"password,omitempty"`
 	Db          int    `json:"db,omitempty"`

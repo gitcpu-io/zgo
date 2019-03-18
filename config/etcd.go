@@ -85,17 +85,16 @@ func (ec *EtcConfig) Watcher(prefixKey string, watchStartRev int64) (chan map[st
 
 						err := ec.watchFirstPut(labelType, key, val, outCacheLogCh, outConnCh)
 						if err != nil {
-							fmt.Println("反序列化当前值失败", key)
+							fmt.Println("create反序列化当前值失败", key)
 							break
 						}
 
 					} else { //如果监听到是第二次以上更新资源组件
 
 						preVal := v.PrevKv.Value //上一次的值
-
 						err := ec.watchSecondPut(labelType, key, val, preVal, outCacheLogCh, outConnCh)
 						if err != nil {
-							fmt.Println("反序列化当前值失败", key)
+							fmt.Println("update反序列化当前值失败", key)
 							break
 						}
 					}
@@ -174,8 +173,10 @@ func (ec *EtcConfig) watchFirstPut(labelType string, key string, b []byte, outCa
 // watchSecondPut 第二次监听到key的put变化，用上一次的value到当前的比较，不同时就用当前的值
 func (ec *EtcConfig) watchSecondPut(labelType string, key string, val []byte, preVal []byte, outCacheLogCh chan map[string]*CacheConfig, outConnCh chan map[string][]*ConnDetail) error {
 	var cm CacheConfig
-	var m []ConnDetail
 	var preCm CacheConfig
+
+	var m []ConnDetail
+	var pred []ConnDetail
 
 	if labelType == EtcTKCache || labelType == EtcTKLog { //如果监听到cache有变化
 		err := zgoutils.Utils.Unmarshal(val, &cm)
@@ -202,11 +203,11 @@ func (ec *EtcConfig) watchSecondPut(labelType string, key string, val []byte, pr
 		if err != nil {
 			return err
 		}
-		err = zgoutils.Utils.Unmarshal(preVal, &preCm)
+		err = zgoutils.Utils.Unmarshal(preVal, &pred)
 		if err != nil {
 			return err
 		}
-		if reflect.DeepEqual(m, preCm) != true { //如果有变化使用当前的m
+		if reflect.DeepEqual(m, pred) != true { //如果有变化使用当前的m
 
 			hsm := ec.changeStructToPtr(m, key)
 
@@ -239,6 +240,7 @@ func (ec *EtcConfig) CreateClient() (*clientv3.Client, error) {
 }
 
 //nsq
+//"[{\"id\": 1736112630935, \"c\": \"aa111222\", \"host\": \"localhost\", \"port\": 4150, \"connSize\": 5, \"poolSize\": 5}]"
 //"[{\"c\":\"北京主库2-----etcd nsq\",\"host\":\"localhost\",\"port\":4150,\"connSize\":5,\"poolSize\":550},{\"c\":\"北京主库1-----etcd nsq\",\"host\":\"localhost\",\"port\":4150,\"connSize\":5,\"poolSize\":500}]"
 
 //log
@@ -249,3 +251,7 @@ func (ec *EtcConfig) CreateClient() (*clientv3.Client, error) {
 
 //mysql
 //"[{\"c\":\"北京二手房库 etcd-旧实例1w\",\"host\":\"localhost\",\"port\":3307,\"connSize\":0,\"poolSize\":0,\"maxIdleSize\":5,\"maxOpenConn\":5,\"username\":\"root\",\"password\":\"root\",\"t\":\"w\",\"dbName\":\"mysql\"},{\"c\":\"北京二手房库 etcd-旧实例r\",\"host\":\"localhost\",\"port\":3307,\"connSize\":0,\"poolSize\":0,\"maxIdleSize\":5,\"maxOpenConn\":5,\"username\":\"root\",\"password\":\"root\",\"t\":\"r\",\"dbName\":\"mysql\"}]"
+
+//es
+//"[{\"c\":\"新房s集群\",\"host\":\"101.201.119.240\",\"port\":9900,\"connSize\":10,\"poolSize\":100}]"
+//"[{\"id\": 1670558046641, \"c\": \"地图找房\", \"host\": \"101.201.119.240\", \"port\": 9900, \"username\": \"\", \"password\": \"\", \"connSize\": 5, \"poolSize\": 1000}]"

@@ -30,21 +30,12 @@ services:
       - "2382:2380"
     command: /usr/local/bin/etcd --name s1 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster s1=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
 
-#  pika-9221:
-#    image: pikadb/pika
-#    ports:
-#      - 9221:9221
-#    volumes:
-#      - ~/docker-data/pika-9221:/data
-#    networks:
-#      - link-network
-
-  redis-6379:
+  redis-6381:
     image: redis
     ports:
-      - 6379:6379
+      - 6381:6379
     volumes:
-      - ~/docker-data/redis-6379:/data
+      - ~/docker-data/redis-6381:/data
     networks:
       - link-network
 
@@ -57,13 +48,13 @@ services:
     networks:
       - link-network
 
-  mongo-27017:
+  mongo-27019:
     image: mongo
     ports:
-      - 27017:27017
+      - 27019:27017
     volumes:
-      - ~/docker-data/mongo-27017/configdb:/data/configdb
-      - ~/docker-data/mongo-27017/db:/data/db
+      - ~/docker-data/mongo-27019/configdb:/data/configdb
+      - ~/docker-data/mongo-27019/db:/data/db
     networks:
       - link-network
 
@@ -123,20 +114,6 @@ services:
       - "4150:4150"
     command: /nsqd --broadcast-address=nsqd --lookupd-tcp-address=nsqlookupd:4160 --data-path=/data
 
-#  nsqd2:
-#    image: nsqio/nsq
-#    depends_on:
-#      - nsqlookupd
-#    hostname: nsqd
-#    volumes:
-#      - ~/docker-data/nsq2:/data
-#    networks:
-#      - link-network
-#    ports:
-#      - "4153:4151"
-#      - "4152:4150"
-#    command: /nsqd --broadcast-address=nsqd --lookupd-tcp-address=nsqlookupd:4160 --data-path=/data
-
   nsqadmin:
     image: nsqio/nsq
     depends_on:
@@ -173,6 +150,46 @@ services:
     container_name: kafka
     networks:
       - link-network
+
+#  elasticsearch:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
+#    container_name: elasticsearch
+#    environment:
+#      - cluster.name=docker-cluster
+#      - bootstrap.memory_lock=true
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#    volumes:
+#      - esdata1:/usr/share/elasticsearch/data
+#    ports:
+#      - 9200:9200
+#    networks:
+#      - link-network
+#  elasticsearch2:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
+#    container_name: elasticsearch2
+#    environment:
+#      - cluster.name=docker-cluster
+#      - bootstrap.memory_lock=true
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+#      - "discovery.zen.ping.unicast.hosts=elasticsearch"
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#    volumes:
+#      - esdata2:/usr/share/elasticsearch/data
+#    networks:
+#      - link-network
+#
+#volumes:
+#  esdata1:
+#    driver: local
+#  esdata2:
+#    driver: local
 
 networks:
   link-network:
