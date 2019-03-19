@@ -19,6 +19,16 @@ services:
 #  networks:
 #        - link-network
 
+  portainer:
+    image: portainer/portainer
+    ports:
+      - 9000:9000
+    container_name: portainer
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - link-network
+
   etcd:
     image: quay.io/coreos/etcd:v3.3.12
     networks:
@@ -151,45 +161,67 @@ services:
     networks:
       - link-network
 
-#  elasticsearch:
-#    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
-#    container_name: elasticsearch
-#    environment:
-#      - cluster.name=docker-cluster
-#      - bootstrap.memory_lock=true
-#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-#    ulimits:
-#      memlock:
-#        soft: -1
-#        hard: -1
-#    volumes:
-#      - esdata1:/usr/share/elasticsearch/data
-#    ports:
-#      - 9200:9200
-#    networks:
-#      - link-network
-#  elasticsearch2:
-#    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
-#    container_name: elasticsearch2
-#    environment:
-#      - cluster.name=docker-cluster
-#      - bootstrap.memory_lock=true
-#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-#      - "discovery.zen.ping.unicast.hosts=elasticsearch"
-#    ulimits:
-#      memlock:
-#        soft: -1
-#        hard: -1
-#    volumes:
-#      - esdata2:/usr/share/elasticsearch/data
-#    networks:
-#      - link-network
-#
-#volumes:
-#  esdata1:
-#    driver: local
-#  esdata2:
-#    driver: local
+  elastichd:
+    image: containerize/elastichd
+    ports:
+      - 9800:9800
+    links:
+      - elasticsearch:es # 打开localhost:9800后，输入http://es:9200 connect
+    networks:
+      - link-network
+
+  dejavu:
+    image: appbaseio/dejavu
+    ports:
+      - 1358:1358
+    networks:
+      - link-network
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
+    container_name: elasticsearch
+    environment:
+      - http.port=9200
+      - http.cors.enabled=true
+      - http.cors.allow-origin=http://127.0.0.1:1358,http://127.0.0.1:1358
+      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      - http.cors.allow-credentials=true
+      - cluster.name=elasticsearch
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - link-network
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
+    container_name: elasticsearch2
+    environment:
+      - cluster.name=elasticsearch
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata2:/usr/share/elasticsearch/data
+    networks:
+      - link-network
+
+volumes:
+  esdata1:
+    driver: local
+  esdata2:
+    driver: local
 
 networks:
   link-network:

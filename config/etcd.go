@@ -8,12 +8,15 @@ package config
 */
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
+	"io/ioutil"
+	"net/http"
 	"reflect"
 	"strings"
 	"time"
@@ -232,11 +235,28 @@ func (ec *EtcConfig) changeStructToPtr(m []ConnDetail, key string) map[string][]
 }
 
 func (ec *EtcConfig) CreateClient() (*clientv3.Client, error) {
+	//fmt.Println(ec.Endpoints)
+	//b, _ := SendGet("http://api.map.baidu.com/telematics/v3/weather?location=%E5%8C%97%E4%BA%AC&output=json&ak=5slgyqGDENN7Sy7pw29IUvrZ")
+	//fmt.Println("test api:",string(b))
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   ec.Endpoints,
 		DialTimeout: 20 * time.Second,
 	})
 	return cli, err
+}
+
+func SendGet(url string) ([]byte, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(bufio.NewReader(resp.Body))
+	if err != nil {
+		return nil, err
+	}
+	return body, err
 }
 
 //nsq
