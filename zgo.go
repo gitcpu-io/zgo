@@ -19,6 +19,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	kafkaCluter "github.com/bsm/sarama-cluster"
 	"github.com/nsqio/go-nsq"
+	"google.golang.org/grpc"
 )
 
 type engine struct {
@@ -149,6 +150,7 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
 type (
 	NsqMessage        = *nsq.Message
 	PartitionConsumer = kafkaCluter.PartitionConsumer
+	GrpcClientConn    = *grpc.ClientConn
 )
 
 var (
