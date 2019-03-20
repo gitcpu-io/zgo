@@ -22,8 +22,8 @@ func New() Httper {
 }
 
 type ErrResponse struct {
-	Status    int                    `json:"status"`
-	Msg       string                 `json:"msg"`
+	Status    int                    `json:"code"`
+	Msg       string                 `json:"message"`
 	ErrorCode string                 `json:"errorCode"`
 	Data      map[string]interface{} `json:data`
 }
@@ -35,11 +35,11 @@ var (
 )
 
 func (zh *zgohttp) JsonpOK(ctx iris.Context, r interface{}) (int, error) {
-	return ctx.JSONP(iris.Map{"status": 200, "data": r})
+	return ctx.JSONP(iris.Map{"code": 200, "data": r, "message": ""})
 }
 
 func (zh *zgohttp) JsonpErr(ctx iris.Context, msg string) (int, error) {
-	return ctx.JSONP(iris.Map{"status": 400, "msg": msg})
+	return ctx.JSONP(iris.Map{"code": 400, "message": msg, "data": make(map[string]interface{})})
 }
 
 // JsonOK 正常的返回方法
