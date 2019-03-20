@@ -36,8 +36,8 @@ services:
     volumes:
       - ~/docker-data/etcd-data:/etcd-data
     ports:
-      - "2381:2379"
-      - "2382:2380"
+      - "2381:2379" #切记测试机 123.56.173.28使用的是 2379
+      - "2382:2380" #切记测试机 123.56.173.28使用的是 2380
     command: /usr/local/bin/etcd --name s1 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster s1=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
 
   redis-6381:
@@ -202,7 +202,7 @@ services:
       - link-network
   elasticsearch2:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
-    container_name: elasticsearch2
+    container_name: elasticsearch102
     environment:
       - cluster.name=elasticsearch
       - bootstrap.memory_lock=true
