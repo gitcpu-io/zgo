@@ -196,7 +196,34 @@ func TestGetTimeInFormatRFC2616WithTZData(t *testing.T) {
 	assert.True(t, re.MatchString(s))
 }
 func TestJosn(t *testing.T) {
-	son := "{}";
+	son := "{}"
 	sss, _ := u.Marshal(son)
 	fmt.Println(string(sss))
+}
+
+func getTest() map[string]interface{} {
+	s1 := []string{"a", "b", "c", "ab", "abc"}
+
+	test := make(map[string]interface{})
+	t := make(map[string]interface{})
+
+	test["d"] = nil
+	test["b"] = []string{"a", "c", "d"}
+	test["a"] = true
+	test["c"] = "cccccccc"
+	test["mm"] = s1
+
+	t["b"] = []uint{2, 3, 4, 5}
+	t["a"] = float32(1.0)
+	t["f"] = []string{"a", "c", "d"}
+	t["e"] = true
+
+	test["abcd"] = t
+	return test
+}
+
+func TestMarshalMap(t *testing.T) {
+	test := getTest()
+	r, e := MarshalMap(test)
+	fmt.Println(r, e)
 }

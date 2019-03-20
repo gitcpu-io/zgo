@@ -766,5 +766,10 @@ func (u *utils) GetStringFromStringMap(dm map[string]string, key string, dft str
 	return data
 }
 
+//map[string]interface{} 按照给定顺序序列化输出
+func (u *utils) MarshalMap(mm map[string]interface{}) (string, error) {
+	return mapEncoder(mm)
+}
+
 // map根据key排序放入list并排序
 //func (u *utils)
