@@ -44,7 +44,7 @@ func (zh *zgohttp) JsonpErr(ctx iris.Context, msg string) (int, error) {
 
 // JsonOK 正常的返回方法
 func (zh *zgohttp) JsonOK(ctx iris.Context, r interface{}) (int, error) {
-	return ctx.JSON(iris.Map{"status": 200, "data": r, "msg": ""})
+	return ctx.JSON(iris.Map{"code": 200, "data": r, "message": ""})
 }
 
 // JsonExpectErr 预期内的错误，适用于调用func后 return出来的errors!=nil时的返回值
