@@ -170,8 +170,8 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 			return fn(ctx, param)
 		}
 		fmt.Println("超时：", time.Duration(timeout)*time.Second)
-		ctxTimeout, _ := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
-		//defer cancel()
+		ctxTimeout, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+		defer cancel()
 		ch := make(chan *funResult)
 
 		// 执行
