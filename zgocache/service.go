@@ -7,6 +7,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/config"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
+	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"github.com/json-iterator/go"
 	"log"
 	"reflect"
@@ -114,7 +115,7 @@ type funResult struct {
 // 缓存入redis结构体
 type cacheResult struct {
 	Result interface{}
-	Time   int
+	Time   int64
 }
 
 //zgocache 结构体
@@ -130,12 +131,12 @@ type zgocache struct {
 // 缓存装饰器
 func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
 	return func(ctx context.Context, param map[string]interface{}) (interface{}, error) {
-		fmt.Println("进入Decorate")
+		fmt.Println("Decorate")
 		if z.start != 1 {
 			return fn(ctx, param)
 		}
 		key := z.getKey(fn)
-		field, err := jsoniter.MarshalToString(param)
+		field, err := zgoutils.Utils.MarshalMap(param)
 		if err != nil {
 			// field转换失败 直接走函数获取数据
 			fmt.Println(err.Error())
@@ -150,10 +151,8 @@ func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
 			if data != nil && err == nil {
 				// 正常返回结果 存入缓存
 				z.setData(ctx, key, field, data)
-				fmt.Println("存入完成")
 			}
 			// 返回结果
-			fmt.Println("返回结果到service")
 			return data, err
 		}
 		return data, err
@@ -166,11 +165,13 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 		if z.tcType == 2 {
 			return z.Decorate(fn, 0)(ctx, param)
 		}
-		fmt.Println("进入TimeOutDecorate")
+		fmt.Println("TimeOutDecorate")
 		if z.start != 1 {
 			return fn(ctx, param)
 		}
-		ctxTimeout, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+		fmt.Println("超时：", time.Duration(timeout)*time.Second)
+		ctxTimeout, _ := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+		//defer cancel()
 		ch := make(chan *funResult)
 
 		// 执行
@@ -180,15 +181,16 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 				result,
 				err,
 			}
+			fmt.Println("执行完成")
 		}(ctxTimeout)
 
 		// 缓存结果
-		field, fieldErr := jsoniter.MarshalToString(param)
+		field, fieldErr := zgoutils.Utils.MarshalMap(param)
 		key := z.getKey(fn)
 
 		select {
 		case <-ctxTimeout.Done():
-			cancel()
+
 			fmt.Println("超时获取缓存")
 			// 拼接key 获取缓存返回
 			// 失败返回
@@ -238,11 +240,11 @@ func (z *zgocache) getData(ctx context.Context, key string, field string, expire
 		data := &cacheResult{}
 		jsoniter.UnmarshalFromString(value.(string), data)
 		if expire != 0 {
-			if data.Time < time.Now().Second()-expire*z.rate {
+			if data.Time < time.Now().Unix()-int64(expire)*int64(z.rate) {
+				fmt.Println("缓存已失效-------------")
 				return nil, errors.New("缓存已失效")
 			}
 		}
-		fmt.Println("有缓存")
 		return data.Result, nil
 	}
 }
@@ -250,7 +252,7 @@ func (z *zgocache) getData(ctx context.Context, key string, field string, expire
 func (z *zgocache) setData(ctx context.Context, key string, field string, data interface{}) {
 	// 开goroutine 存缓存
 	go func(ctx context.Context) {
-		d := &cacheResult{data, time.Now().Second()}
+		d := &cacheResult{data, time.Now().Unix()}
 		value, err := jsoniter.MarshalToString(d)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -258,7 +260,7 @@ func (z *zgocache) setData(ctx context.Context, key string, field string, data i
 		} else {
 			fmt.Println("存：", key, ":", field)
 			z.service.Hset(ctx, key, field, value)
-			fmt.Println(err.Error())
+			fmt.Println("存入完成")
 		}
 	}(ctx)
 	//return

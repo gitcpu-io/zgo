@@ -335,11 +335,11 @@
   },
   "cache":{
     "c": "cache",
-    "start": 0,
+    "start": 1,
     "dbType": "pika",
     "label":"pika_label_rw",
-    "tcType": 2,
-    "rate": 2
+    "tcType": 1,
+    "rate": 1
   },
   "log":{
     "c": "日志存储",
