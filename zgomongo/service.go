@@ -17,15 +17,15 @@ var (
 type Mongoer interface {
 	New(label ...string) (*zgomongo, error)
 	GetConnChan(label ...string) (chan *mgo.Session, error)
-	Create(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	Update(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	UpdateAll(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	Delete(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	FindOne(ctx context.Context, args map[string]interface{}) (interface{}, error)
-	FindPage(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	Create(ctx context.Context, args map[string]interface{}) error
+	Update(ctx context.Context, args map[string]interface{}) error
+	UpdateAll(ctx context.Context, args map[string]interface{}) error
+	Delete(ctx context.Context, args map[string]interface{}) error
+	FindOne(ctx context.Context, args map[string]interface{}) error
+	FindPage(ctx context.Context, args map[string]interface{}) error
 	Pipe(ctx context.Context, pipe interface{}, values interface{}, args map[string]interface{}) (interface{}, error)
 	Count(ctx context.Context, args map[string]interface{}) (int, error)
-	Get(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	Get(ctx context.Context, args map[string]interface{}) error
 	Insert(ctx context.Context, args map[string]interface{}) error
 	//InsertMany(ctx context.Context, args map[string]interface{}, docs ...interface{}) error
 }
@@ -116,32 +116,23 @@ func (m *zgomongo) GetConnChan(label ...string) (chan *mgo.Session, error) {
 	return m.res.GetConnChan(l), nil
 }
 
-func (m *zgomongo) Create(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+func (m *zgomongo) Create(ctx context.Context, args map[string]interface{}) error {
 	return m.res.Create(ctx, args)
 }
 
-func (m *zgomongo) Update(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	err := m.res.UpdateOne(ctx, args)
-	if err != nil {
-		return nil, err
-	}
-	return "success", err
+func (m *zgomongo) Update(ctx context.Context, args map[string]interface{}) error {
+	return m.res.UpdateOne(ctx, args)
 }
 
-func (m *zgomongo) UpdateAll(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-	err := m.res.UpdateAll(ctx, args)
-	if err != nil {
-		return nil, err
-	}
-	return "success", err
+func (m *zgomongo) UpdateAll(ctx context.Context, args map[string]interface{}) error {
+	return m.res.UpdateAll(ctx, args)
 }
 
-func (m *zgomongo) Delete(ctx context.Context, args map[string]interface{}) (interface{}, error) {
-
-	return nil, m.res.DeleteOne(ctx, args)
+func (m *zgomongo) Delete(ctx context.Context, args map[string]interface{}) error {
+	return m.res.DeleteOne(ctx, args)
 }
 
-func (m *zgomongo) FindPage(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+func (m *zgomongo) FindPage(ctx context.Context, args map[string]interface{}) error {
 	//sort := args["sort"]
 	if args["from"] == nil {
 		args["from"] = 0
@@ -160,7 +151,7 @@ func (m *zgomongo) FindPage(ctx context.Context, args map[string]interface{}) (i
 	//	args["query"].(bson.M))
 }
 
-func (m *zgomongo) Get(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+func (m *zgomongo) Get(ctx context.Context, args map[string]interface{}) error {
 	return m.res.Get(ctx, args)
 }
 
@@ -168,7 +159,7 @@ func (m *zgomongo) Insert(ctx context.Context, args map[string]interface{}) erro
 	return m.res.Insert(ctx, args)
 }
 
-func (m *zgomongo) FindOne(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+func (m *zgomongo) FindOne(ctx context.Context, args map[string]interface{}) error {
 	return m.res.FindOne(ctx, args)
 }
 
