@@ -114,6 +114,7 @@ type Utilser interface {
 	GetInt64FromStringMap(dm map[string]string, key string, dft int64) int64
 	GetStringFromMap(dm map[string]interface{}, key string, dft string) string
 	GetStringFromStringMap(dm map[string]string, key string, dft string) string
+	MarshalMap(mm map[string]interface{}) (string, error)
 }
 
 var loadLocationFromTZData func(name string, data []byte) (*time.Location, error) = nil
