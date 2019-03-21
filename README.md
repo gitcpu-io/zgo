@@ -147,7 +147,7 @@ err := AddHouse(context.TODO(), &h ,"bj")
 if err != nil {
     panic(err)
 }
-
+//二手房房源，添加操作
 func AddHouse(ctx context.Context, h *House, city string) error {
 	ms, err := zgo.Mysql.MysqlServiceByCityBiz(city, "sell")
 	if err != nil { //首先通过city获取到了它对应的label
@@ -182,39 +182,40 @@ type User struct {  //声明一个类型是User的结构体
 
 func GetUser()  {   //查询函数
 	u := User{}
-	res,err := getUser(&u)
+	//输入参数：上下文ctx，args具体的查询操作参数
+	args := make(map[string]interface{})
+	query := make(map[string]interface{})
+	query["name"] = "abc"
+
+	args["db"] = "test"
+	args["table"] = "user"
+	args["query"] = query
+	
+	res,err := getUser(&u,args)
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(res)
 }
 
-func getUser(u *User) (*User, error){
+func getUser(u *User, args map[string]interface{}) (*User, error){
 	//还需要一个上下文用来控制开出去的goroutine是否超时
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
-	//输入参数：上下文ctx，args具体的查询操作参数
-	args := make(map[string]interface{})
-	args["db"] = "test"
-	args["table"] = "user"
-	args["query"] = make(map[string]interface{})
+	
 
-	result, err := zgo.Mongo.Get(ctx, args) //一行命令调用zgo.Mongo.Get函数
+	result, err := zgo.Mongo.FindOne(ctx, args)
+
 	if err != nil {
 		zgo.Log.Error("取mongo中的数据失败" + err.Error())
-		panic(err)
+		return nil,err
 	}
-	
+
 	select {
-	case <-ctx.Done():  //如果从这个channel收到数据，表示zgo.Mongo.Get超时，你可以在下面do something
+	case <-ctx.Done():
 		return nil,errors.New("超时")
 	default:
-		if res,ok := result.(User);ok{  //通过type断言来返回
-			return &res,nil
-		}else{
-			zgo.Log.Error(err.Error())
-			return nil,errors.New("查询失败")
-		}
+		zgo.Utils.MapToStruct(result, u)    //用返回的map转成user结构体
 	}
 	return u,nil
 }
@@ -304,12 +305,12 @@ es的操作我们做了二层封装，第一个是dsl查询语句的封装，第
 	dsl := zgo.Es.NewDsl()
 
 	//第二步：构建dsl查询
-	m1 := dsl.TermField("type_id", level)
-	m2 := dsl.TermField("city", city)
+	m1 := dsl.TermField("type_id", "101")
+	m2 := dsl.TermField("city", "bj")
 	m3 := dsl.TermField("housetype", "sell")
 	m4 := dsl.GeoBoxField("location", location["topLeftLat"], location["topLeftLon"], location["bottomRightLat"], location["bottomRightLon"])
 	dsl.Must(m1, m2, m3, m4)
-	//第三步：对dsl添加查询域
+	//第三步：设置dsl返回的查询域
 	dsl.Set_SourceField("other_id", "keyword", "location", "sell_price")
 	dsl.SetFrom(0)
 	dsl.SetSize(20)
