@@ -59,6 +59,10 @@ func Engine(opt *Options) error {
 	//异步start 日志消费存储协程
 	zgolog.LogStore = zgolog.NewLogStore()
 
+	// 从local初始化缓存模块
+	in := <-zgocache.InitCache()
+	Cache = in
+
 	go zgolog.LogStore.StartQueue()
 
 	if opt.Env == config.Local {
@@ -111,9 +115,6 @@ func Engine(opt *Options) error {
 			in := <-zgokafka.InitKafka(hsm)
 			Kafka = in
 		}
-		// 从local初始化缓存模块
-		in := <-zgocache.InitCache()
-		Cache = in
 
 		cc := &config.CacheConfig{
 			DbType: config.Conf.Log.DbType,
