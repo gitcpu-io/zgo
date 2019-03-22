@@ -19,87 +19,87 @@ services:
 #  networks:
 #        - link-network
 
-  portainer:
-    image: portainer/portainer
-    ports:
-      - 9000:9000
-    container_name: portainer
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - link-network
-
-  etcd:
-    image: quay.io/coreos/etcd:v3.3.12
-    networks:
-      - link-network
-    volumes:
-      - ~/docker-data/etcd-data:/etcd-data
-    ports:
-      - "2381:2379" #切记测试机 123.56.173.28使用的是 2379
-      - "2382:2380" #切记测试机 123.56.173.28使用的是 2380
-    command: /usr/local/bin/etcd --name s1 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster s1=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
-
-  redis-6381:
-    image: redis
-    ports:
-      - 6381:6379
-    volumes:
-      - ~/docker-data/redis-6381:/data
-    networks:
-      - link-network
-
-  redis-6380:
-    image: redis
-    ports:
-      - 6380:6379
-    volumes:
-      - ~/docker-data/redis-6380:/data
-    networks:
-      - link-network
-
-  mongo-27019:
-    image: mongo
-    ports:
-      - 27019:27017
-    volumes:
-      - ~/docker-data/mongo-27019/configdb:/data/configdb
-      - ~/docker-data/mongo-27019/db:/data/db
-    networks:
-      - link-network
-
-  mongo-27018:
-    image: mongo
-    ports:
-      - 27018:27017
-    volumes:
-      - ~/docker-data/mongo-27018/configdb:/data/configdb
-      - ~/docker-data/mongo-27018/db:/data/db
-    networks:
-      - link-network
-
-  mysql-3307:
-    image: mysql
-    ports:
-      - 3307:3306
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - ~/docker-data/mysql-3307:/data
-    networks:
-      - link-network
-
-  mysql-3308:
-    image: mysql
-    ports:
-      - 3308:3306
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - ~/docker-data/mysql-3308:/data
-    networks:
-      - link-network
-
+#  portainer:
+#    image: portainer/portainer
+#    ports:
+#      - 9000:9000
+#    container_name: portainer
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    networks:
+#      - link-network
+#
+#  etcd:
+#    image: quay.io/coreos/etcd:v3.3.12
+#    networks:
+#      - link-network
+#    volumes:
+#      - ~/docker-data/etcd-data:/etcd-data
+#    ports:
+#      - "2381:2379" #切记测试机 123.56.173.28使用的是 2379
+#      - "2382:2380" #切记测试机 123.56.173.28使用的是 2380
+#    command: /usr/local/bin/etcd --name s1 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster s1=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
+#
+#  redis-6381:
+#    image: redis
+#    ports:
+#      - 6381:6379
+#    volumes:
+#      - ~/docker-data/redis-6381:/data
+#    networks:
+#      - link-network
+#
+#  redis-6380:
+#    image: redis
+#    ports:
+#      - 6380:6379
+#    volumes:
+#      - ~/docker-data/redis-6380:/data
+#    networks:
+#      - link-network
+#
+#  mongo-27019:
+#    image: mongo
+#    ports:
+#      - 27019:27017
+#    volumes:
+#      - ~/docker-data/mongo-27019/configdb:/data/configdb
+#      - ~/docker-data/mongo-27019/db:/data/db
+#    networks:
+#      - link-network
+#
+#  mongo-27018:
+#    image: mongo
+#    ports:
+#      - 27018:27017
+#    volumes:
+#      - ~/docker-data/mongo-27018/configdb:/data/configdb
+#      - ~/docker-data/mongo-27018/db:/data/db
+#    networks:
+#      - link-network
+#
+#  mysql-3307:
+#    image: mysql
+#    ports:
+#      - 3307:3306
+#    environment:
+#      MYSQL_ROOT_PASSWORD: root
+#    volumes:
+#      - ~/docker-data/mysql-3307:/data
+#    networks:
+#      - link-network
+#
+#  mysql-3308:
+#    image: mysql
+#    ports:
+#      - 3308:3306
+#    environment:
+#      MYSQL_ROOT_PASSWORD: root
+#    volumes:
+#      - ~/docker-data/mysql-3308:/data
+#    networks:
+#      - link-network
+#
   nsqlookupd:
     image: nsqio/nsq
     networks:
@@ -161,61 +161,61 @@ services:
     networks:
       - link-network
 
-  elastichd:
-    image: containerize/elastichd
-    ports:
-      - 9800:9800
-    links:
-      - elasticsearch:es # 打开localhost:9800后，输入http://es:9200 connect
-    networks:
-      - link-network
-
-  dejavu:
-    image: appbaseio/dejavu
-    ports:
-      - 1358:1358
-    networks:
-      - link-network
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
-    container_name: elasticsearch
-    environment:
-      - http.port=9200
-      - http.cors.enabled=true
-      - http.cors.allow-origin=http://127.0.0.1:1358,http://127.0.0.1:1358
-      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
-      - http.cors.allow-credentials=true
-      - cluster.name=elasticsearch
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - esdata1:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
-      - 9300:9300
-    networks:
-      - link-network
-  elasticsearch2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
-    container_name: elasticsearch102
-    environment:
-      - cluster.name=elasticsearch
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "discovery.zen.ping.unicast.hosts=elasticsearch"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - esdata2:/usr/share/elasticsearch/data
-    networks:
-      - link-network
+#  elastichd:
+#    image: containerize/elastichd
+#    ports:
+#      - 9800:9800
+#    links:
+#      - elasticsearch:es # 打开localhost:9800后，输入http://es:9200 connect
+#    networks:
+#      - link-network
+#
+#  dejavu:
+#    image: appbaseio/dejavu
+#    ports:
+#      - 1358:1358
+#    networks:
+#      - link-network
+#
+#  elasticsearch:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
+#    container_name: elasticsearch
+#    environment:
+#      - http.port=9200
+#      - http.cors.enabled=true
+#      - http.cors.allow-origin=http://127.0.0.1:1358,http://127.0.0.1:1358
+#      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+#      - http.cors.allow-credentials=true
+#      - cluster.name=elasticsearch
+#      - bootstrap.memory_lock=true
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#    volumes:
+#      - esdata1:/usr/share/elasticsearch/data
+#    ports:
+#      - 9200:9200
+#      - 9300:9300
+#    networks:
+#      - link-network
+#  elasticsearch2:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
+#    container_name: elasticsearch102
+#    environment:
+#      - cluster.name=elasticsearch
+#      - bootstrap.memory_lock=true
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+#      - "discovery.zen.ping.unicast.hosts=elasticsearch"
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#    volumes:
+#      - esdata2:/usr/share/elasticsearch/data
+#    networks:
+#      - link-network
 
 volumes:
   esdata1:

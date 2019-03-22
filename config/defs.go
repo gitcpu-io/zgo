@@ -20,15 +20,14 @@ const (
 	Warn         //2
 	Error        //3
 
-	Version         = "0.8.1"       //zgo版本号
-	ProjectPrefix   = "zgo/project" //读取ETCD配置时prefix
-	DefaultLogLevel = "warn"        //默认的日志格式
-	FileStoreType   = "local"       //文件存储类型
-	FileStoreHome   = "/tmp"        //文件存储目录
-	Local           = "local"       //本地开发环境标识
-	Dev             = "dev"         //开发联调环境标识
-	Qa              = "qa"          //QA测试环境标识
-	Pro             = "pro"         //生产环境标识
+	Version       = "0.8.1"       //zgo版本号
+	ProjectPrefix = "zgo/project" //读取ETCD配置时prefix
+	FileStoreType = "local"       //文件存储类型
+	FileStoreHome = "/tmp"        //文件存储目录
+	Local         = "local"       //本地开发环境标识
+	Dev           = "dev"         //开发联调环境标识
+	Qa            = "qa"          //QA测试环境标识
+	Pro           = "pro"         //生产环境标识
 
 	//********************************以下是 etcd监听常量********************************
 	EtcTKCache = "cache"
@@ -47,8 +46,8 @@ var Levels = []string{"debug", "info", "warn", "error"}
 
 var (
 	DevEtcHosts = []string{ //开发联调ETCD地
-		"10.45.146.41:2380", //测试时使用内网ip
-		//"123.56.173.28:2380", //如果本机联调，想用测试机的etcd可以使用公网ip
+		//"10.45.146.41:2380", //测试时使用内网ip
+		"123.56.173.28:2380", //如果本机联调，想用测试机的etcd可以使用公网ip
 		//"localhost:2381",
 	}
 	QaEtcHosts = []string{ //QA环境ETCD地址，同正式

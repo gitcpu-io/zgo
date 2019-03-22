@@ -113,7 +113,7 @@ func (z *zgolog) withCaller() (*log.Entry, interface{}) {
 func (z *zgolog) Debug(args ...interface{}) {
 	en, value := z.withCaller()
 
-	fmt.Println(config.Conf.Log.LogLevel, config.Debug, "---debug")
+	//fmt.Println(config.Conf.Log.LogLevel, config.Debug, "---debug")
 	if config.Conf.Log.LogLevel <= config.Debug {
 		lb := logBody{
 			Project: z.Project,
@@ -131,7 +131,7 @@ func (z *zgolog) Debug(args ...interface{}) {
 
 func (z *zgolog) Info(args ...interface{}) {
 	en, value := z.withCaller()
-	fmt.Println(config.Conf.Log.LogLevel, config.Info, "---info")
+	//fmt.Println(config.Conf.Log.LogLevel, config.Info, "---info")
 
 	if config.Conf.Log.LogLevel <= config.Info {
 		lb := logBody{
@@ -149,7 +149,7 @@ func (z *zgolog) Info(args ...interface{}) {
 
 func (z *zgolog) Warn(args ...interface{}) {
 	en, value := z.withCaller()
-	fmt.Println(config.Conf.Log.LogLevel, config.Warn, "---warn")
+	//fmt.Println(config.Conf.Log.LogLevel, config.Warn, "---warn")
 
 	if config.Conf.Log.LogLevel <= config.Warn {
 		lb := logBody{
@@ -168,7 +168,7 @@ func (z *zgolog) Warn(args ...interface{}) {
 func (z *zgolog) Error(args ...interface{}) {
 
 	en, value := z.withCaller()
-	fmt.Println(config.Conf.Log.LogLevel, config.Error, "---error")
+	//fmt.Println(config.Conf.Log.LogLevel, config.Error, "---error")
 
 	if config.Conf.Log.LogLevel <= config.Error {
 		lb := logBody{

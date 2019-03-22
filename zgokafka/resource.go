@@ -49,8 +49,12 @@ func (n *kafkaResource) Producer(ctx context.Context, topic string, body []byte)
 		out <- 0
 		return out, errors.New("message is empty")
 	}
-	producer := <-n.connpool.GetConnChan(n.label)
-	n.PublishAsync(topic, body, producer, out) // 发布消息
+	producer := n.connpool.GetConnChan(n.label)
+	if len(producer) == 0 {
+		out <- 0
+		return out, errors.New("conn is invalid")
+	}
+	n.PublishAsync(topic, body, <-producer, out) // 发布消息
 
 	return out, nil
 }
@@ -62,8 +66,13 @@ func (n *kafkaResource) ProducerMulti(ctx context.Context, topic string, body []
 		out <- 0
 		return out, errors.New("message is empty")
 	}
-	connChan := <-n.connpool.GetConnChan(n.label)
-	n.PublishMultiAsync(topic, body, connChan, out) // 发布消息
+	producer := n.connpool.GetConnChan(n.label)
+	if len(producer) == 0 {
+		out <- 0
+		return out, errors.New("conn is invalid")
+	}
+
+	n.PublishMultiAsync(topic, body, <-producer, out) // 发布消息
 
 	return out, nil
 }
