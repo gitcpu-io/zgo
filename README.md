@@ -29,12 +29,15 @@ zgo是专门为使用go语言的开发人员所设计和开发的， 它提供�
 * 12.zgo Utils提供了对常见的日期转换，高效Json序列与反序列化，字符编码，ip相关，输入判断，go中map和string转换等
 * 13.zgo Crypto提供了常用的md5,sha1,sha256,aes,rsa,hmac等加解密函数
 * 14.zgo File更加方便的一个函数调用get,set,append对文件进行操作
-* 15.zgo Map提供一种并发安全的map读写操作，本质是对go中map加RWmutex的一种实现
+* 15.zgo Map提供一种并发安全的map读写操作，本质是对go中map加RWmutex的一种实现，这个功能用于程序中的一级缓存，而redis和pika做为二级缓存
 
 ##zgo engine的依赖
-zgo engine使用etcd分布式数据库作为持久化存储，所有使用zgo建立的项目配置文件都存放到etcd，由etcd提供共享配置、服务注册、服务发现、监听机制
 
-微服务项目建立时从zgo engine admin平台申请项目id，并配置所用资源，你可能会使用mongo,redis或nsq，并开启日志存储到nsq，这样的一个服务
+* zgo engine使用etcd分布式数据库作为持久化存储，所有使用zgo engine建立的项目配置文件都存放到etcd，由etcd提供共享配置、服务注册、服务发现、监听机制
+
+* Etcd数据库的安全性，由于其采用了raft协议实现了强一致性的数据同步机制，确保分布式节点配置文件的同步性，另外速度方面也比较快,因为etcd的key以B树的形式存储在内存中, value以B+树的形式存储在硬盘中
+
+* 微服务项目建立时从zgo engine admin平台申请项目id，并配置所用资源，你可能会使用mongo,redis或nsq，并开启日志存储到nsq，这样的一个服务
 
 ##快速开启zgo start项目
 ###zgo_start项目是使用zgo engine的模板项目

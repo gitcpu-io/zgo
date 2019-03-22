@@ -16,6 +16,7 @@ var (
 type Rediser interface {
 	New(label ...string) (*zgoredis, error)
 	//Post
+	//hmset setnx setex
 	Set(ctx context.Context, key string, value string, time int) (interface{}, error)
 	Expire(ctx context.Context, key string, time int) (interface{}, error)
 	Hset(ctx context.Context, key string, name string, value string) (interface{}, error)

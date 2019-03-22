@@ -12,7 +12,7 @@ import (
 type RedisResourcer interface {
 	GetConnChan(label string) chan *radix.Pool
 	//Post
-	Set(ctx context.Context, key string, value string, time int) (interface{}, error)
+	Set(ctx context.Context, key string, value string, time int) (string, error)
 	Expire(ctx context.Context, key string, time int) (interface{}, error)
 	Hset(ctx context.Context, key string, name string, value string) (interface{}, error)
 	Lpush(ctx context.Context, key string, value string) (interface{}, error)
@@ -63,13 +63,19 @@ func (r *redisResource) GetConnChan(label string) chan *radix.Pool {
 	return r.connpool.GetConnChan(label)
 }
 
-func (r *redisResource) Set(ctx context.Context, key string, value string, time int) (interface{}, error) {
+func (r *redisResource) Set(ctx context.Context, key string, value string, time int) (string, error) {
 	s := <-r.connpool.GetConnChan(r.label)
-	pipline := radix.Pipeline(
-		radix.FlatCmd(nil, "SET", key, value),
-		radix.FlatCmd(nil, "Expire", key, time),
-	)
-	return nil, s.Do(pipline)
+	//pipline := radix.Pipeline(
+	//	radix.FlatCmd(nil, "SET", key, value),
+	//	radix.FlatCmd(nil, "Expire", key, time),
+	//)
+	var res string
+	if err := s.Do(radix.FlatCmd(&res, "SET", key, value)); err != nil {
+		return "", err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
 func (r *redisResource) Expire(ctx context.Context, key string, time int) (interface{}, error) {
