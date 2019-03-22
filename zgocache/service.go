@@ -170,9 +170,6 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int, obj interface{}) C
 		if z.tcType == 2 {
 			return z.Decorate(fn, 0, obj)(ctx, param)
 		}
-		fmt.Println("TimeOutDecorate")
-
-		fmt.Println("超时：", time.Duration(timeout)*time.Second)
 		ctxTimeout, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
 		defer cancel()
 		ch := make(chan *funResult)
