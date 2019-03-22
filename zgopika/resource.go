@@ -12,13 +12,13 @@ import (
 type PikaResourcer interface {
 	GetConnChan(label string) chan *radix.Pool
 	//Post
-	Set(ctx context.Context, key string, value string, time int) (interface{}, error)
-	Expire(ctx context.Context, key string, time int) (interface{}, error)
-	Hset(ctx context.Context, key string, name string, value string) (interface{}, error)
-	Lpush(ctx context.Context, key string, value string) (interface{}, error)
-	Rpush(ctx context.Context, key string, value string) (interface{}, error)
-	Sadd(ctx context.Context, key string, value string) (interface{}, error)
-	Srem(ctx context.Context, key string, value string) (interface{}, error)
+	Set(ctx context.Context, key string, value interface{}) (string, error)
+	Expire(ctx context.Context, key string, time int) (int, error)
+	Hset(ctx context.Context, key string, name string, value interface{}) (int, error)
+	Lpush(ctx context.Context, key string, value interface{}) (int, error)
+	Rpush(ctx context.Context, key string, value interface{}) (int, error)
+	Sadd(ctx context.Context, key string, value interface{}) (int, error)
+	Srem(ctx context.Context, key string, value interface{}) (int, error)
 	//Get
 	Exists(ctx context.Context, key string) (interface{}, error)
 	Get(ctx context.Context, key string) (interface{}, error)
@@ -28,7 +28,7 @@ type PikaResourcer interface {
 	Ttl(ctx context.Context, key string) (interface{}, error)
 	Type(ctx context.Context, key string) (interface{}, error)
 	Hlen(ctx context.Context, key string) (interface{}, error)
-	Hdel(ctx context.Context, key string, name string) (interface{}, error)
+	Hdel(ctx context.Context, key string, name interface{}) (int, error)
 	Hgetall(ctx context.Context, key string) (interface{}, error)
 	Del(ctx context.Context, key string) (interface{}, error)
 
@@ -39,7 +39,7 @@ type PikaResourcer interface {
 
 	Scard(ctx context.Context, key string) (interface{}, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
-	Sismember(ctx context.Context, key string, value string) (interface{}, error)
+	Sismember(ctx context.Context, key string, value interface{}) (int, error)
 }
 
 type pikaResource struct {
@@ -65,57 +65,95 @@ func (p *pikaResource) GetConnChan(label string) chan *radix.Pool {
 	return p.connpool.GetConnChan(label)
 }
 
-func (p *pikaResource) Set(ctx context.Context, key string, value string, time int) (interface{}, error) {
+func (p *pikaResource) Set(ctx context.Context, key string, value interface{}) (string, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
-	pipline := radix.Pipeline(
-		radix.FlatCmd(nil, "SET", key, value),
-		radix.FlatCmd(nil, "Expire", key, time),
-	)
-	return nil, s.Do(pipline)
+	var res string
+	if err := s.Do(radix.FlatCmd(&res, "SET", key, value)); err != nil {
+		return "", err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
-func (p *pikaResource) Expire(ctx context.Context, key string, time int) (interface{}, error) {
+func (p *pikaResource) Expire(ctx context.Context, key string, time int) (int, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
-	return nil, s.Do(radix.FlatCmd(nil, "Expire", key, time))
+	var res int
+	if err := s.Do(radix.FlatCmd(&res, "Expire", key, time)); err != nil {
+		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
-func (p *pikaResource) Hset(ctx context.Context, key string, name string, value string) (interface{}, error) {
+func (p *pikaResource) Hset(ctx context.Context, key string, name string, value interface{}) (int, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
-	return nil, s.Do(radix.FlatCmd(nil, "Hset", key, name, value))
+	var res int
+	if err := s.Do(radix.FlatCmd(&res, "Hset", key, name, value)); err != nil {
+		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
-func (p *pikaResource) Lpush(ctx context.Context, key string, value string) (interface{}, error) {
+func (p *pikaResource) Lpush(ctx context.Context, key string, value interface{}) (int, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
-	return nil, s.Do(radix.FlatCmd(nil, "Lpush", key, value))
+	var res int
+	if err := s.Do(radix.FlatCmd(&res, "Lpush", key, value)); err != nil {
+		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
-func (p *pikaResource) Rpush(ctx context.Context, key string, value string) (interface{}, error) {
+func (p *pikaResource) Rpush(ctx context.Context, key string, value interface{}) (int, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
-	return nil, s.Do(radix.FlatCmd(nil, "Rpush", key, value))
+	var res int
+	if err := s.Do(radix.FlatCmd(&res, "Rpush", key, value)); err != nil {
+		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
-func (p *pikaResource) Sadd(ctx context.Context, key string, value string) (interface{}, error) {
+func (p *pikaResource) Sadd(ctx context.Context, key string, value interface{}) (int, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
-	return nil, s.Do(radix.FlatCmd(nil, "Sadd", key, value))
+	var res int
+	if err := s.Do(radix.FlatCmd(&res, "Sadd", key, value)); err != nil {
+		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
-func (p *pikaResource) Srem(ctx context.Context, key string, value string) (interface{}, error) {
+func (p *pikaResource) Srem(ctx context.Context, key string, value interface{}) (int, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
-	return nil, s.Do(radix.FlatCmd(nil, "Srem", key, value))
+	var res int
+	if err := s.Do(radix.FlatCmd(&res, "Srem", key, value)); err != nil {
+		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
 func (p *pikaResource) Exists(ctx context.Context, key string) (interface{}, error) {
@@ -205,13 +243,13 @@ func (p *pikaResource) Hlen(ctx context.Context, key string) (interface{}, error
 	}
 }
 
-func (p *pikaResource) Hdel(ctx context.Context, key string, name string) (interface{}, error) {
+func (p *pikaResource) Hdel(ctx context.Context, key string, name interface{}) (int, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
 	var flag int
-	if err := s.Do(radix.FlatCmd(&flag, "Hlen", key)); err != nil {
-		return nil, err
+	if err := s.Do(radix.FlatCmd(&flag, "Hdel", key, name)); err != nil {
+		return 0, err
 	} else {
 		return flag, err
 	}
@@ -313,13 +351,13 @@ func (p *pikaResource) Smembers(ctx context.Context, key string) (interface{}, e
 	}
 }
 
-func (p *pikaResource) Sismember(ctx context.Context, key string, value string) (interface{}, error) {
+func (p *pikaResource) Sismember(ctx context.Context, key string, value interface{}) (int, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
 	var flag int
-	if err := s.Do(radix.FlatCmd(&flag, "Sismember", key)); err != nil {
-		return nil, err
+	if err := s.Do(radix.FlatCmd(&flag, "Sismember", key, value)); err != nil {
+		return 0, err
 	} else {
 		return flag, err
 	}

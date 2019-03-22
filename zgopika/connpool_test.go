@@ -36,7 +36,7 @@ func TestPikaGet(t *testing.T) {
 		PoolSize: 200,
 		Username: "",
 		Password: "",
-		Prefix:   "sell:",
+		Prefix:   "rent:",
 	}
 
 	cd_bj_r := config.ConnDetail{
@@ -47,7 +47,7 @@ func TestPikaGet(t *testing.T) {
 		PoolSize: 200,
 		Username: "",
 		Password: "",
-		Prefix:   "sell:",
+		Prefix:   "rent:",
 	}
 
 	//cd_sh := config.ConnDetail{
@@ -80,6 +80,82 @@ func TestPikaGet(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+
+	//ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	//defer cancel()
+
+	//1.set get
+	//res, err := clientBjRw.Set(ctx, "china666", 111111)
+	//
+	//res2, err := clientBjRw.Get(ctx, "china666")
+	//
+	//fmt.Println(res)
+	//
+	//fmt.Println(res2)
+	//2.expire
+	//res, err := clientBjRw.Expire(ctx, "china666", 20000)
+	//fmt.Println(res)
+
+	//3.hset hget hlen hdel
+	//res, err := clientBjRw.Hset(ctx, "china_lining", "liuwei", 9999)
+	//fmt.Println(res)
+	//
+	//res1, err := clientBjRw.Hget(ctx, "china_lining", "liuwei")
+	//fmt.Println(res1)
+
+	//res1, err := clientBjRw.Hlen(ctx, "china_lining")
+	//fmt.Println(res1)
+
+	//res1, err := clientBjRw.Hdel(ctx, "china_lining", "liuwei")
+	//fmt.Println(res1)
+
+	//res1, err := clientBjRw.Hgetall(ctx, "china_lining")
+	//fmt.Println(res1)
+
+	//res1, err := clientBjRw.Del(ctx, "china_lining")
+	//fmt.Println(res1)
+
+	//4.lpush rpush llen lrange lpop rpop
+
+	//res, err := clientBjRw.Lpush(ctx, "china_list", 23232343)
+	//fmt.Println(res)
+	//
+	//res2, err := clientBjRw.Llen(ctx, "china_list")
+	//fmt.Println(res2)
+
+	//res, err := clientBjRw.Lrange(ctx, "china_list", 0, 10)
+	//fmt.Println(res)
+
+	//res2, err := clientBjRw.Rpop(ctx, "china_list")
+	//fmt.Println(res2)
+
+	//5.sadd Scard Smembers Sismember
+	//res, err := clientBjRw.Sadd(ctx, "china_member", 1143402)
+	//fmt.Println(res)
+
+	//res, err := clientBjRw.Scard(ctx, "china_member")
+	//fmt.Println(res)
+
+	//res, err := clientBjRw.Srem(ctx, "china_member", 1143402)
+	//fmt.Println(res)
+
+	//res, err := clientBjRw.Smembers(ctx, "china_member")
+	//fmt.Println(res)
+
+	//res, err := clientBjRw.Sismember(ctx, "china_member", 1113402)
+	//fmt.Println(res)
+
+	//res, err := clientBjRw.Exists(ctx, "china_member")
+	//fmt.Println(res)
+
+	//res, err := clientBjRw.Keys(ctx, "*")
+	//fmt.Println(res)
+
+	//res, err := clientBjRw.Ttl(ctx, "china_member")
+	//fmt.Println(res)
+
+	//res, err := clientBjRw.Type(ctx, "china_member")
+	//fmt.Println(res)
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
@@ -195,7 +271,7 @@ func setSet(label string, client *zgopika, i int) chan int {
 		value = value + value
 	}
 
-	_, err := client.Set(ctx, key, value, 5000)
+	_, err := client.Set(ctx, key, value)
 	if err != nil {
 		panic(err)
 	}

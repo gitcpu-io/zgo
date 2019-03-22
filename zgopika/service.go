@@ -16,13 +16,13 @@ var (
 type Pikaer interface {
 	New(label ...string) (*zgopika, error)
 	//Post
-	Set(ctx context.Context, key string, value string, time int) (interface{}, error)
-	Expire(ctx context.Context, key string, time int) (interface{}, error)
-	Hset(ctx context.Context, key string, name string, value string) (interface{}, error)
-	Lpush(ctx context.Context, key string, value string) (interface{}, error)
-	Rpush(ctx context.Context, key string, value string) (interface{}, error)
-	Sadd(ctx context.Context, key string, value string) (interface{}, error)
-	Srem(ctx context.Context, key string, value string) (interface{}, error)
+	Set(ctx context.Context, key string, value interface{}) (string, error)
+	Expire(ctx context.Context, key string, time int) (int, error)
+	Hset(ctx context.Context, key string, name string, value interface{}) (int, error)
+	Lpush(ctx context.Context, key string, value interface{}) (int, error)
+	Rpush(ctx context.Context, key string, value interface{}) (int, error)
+	Sadd(ctx context.Context, key string, value interface{}) (int, error)
+	Srem(ctx context.Context, key string, value interface{}) (int, error)
 	//Get
 	Exists(ctx context.Context, key string) (interface{}, error)
 	Get(ctx context.Context, key string) (interface{}, error)
@@ -31,7 +31,7 @@ type Pikaer interface {
 	Ttl(ctx context.Context, key string) (interface{}, error)
 	Type(ctx context.Context, key string) (interface{}, error)
 	Hlen(ctx context.Context, key string) (interface{}, error)
-	Hdel(ctx context.Context, key string, name string) (interface{}, error)
+	Hdel(ctx context.Context, key string, name interface{}) (int, error)
 	Hgetall(ctx context.Context, key string) (interface{}, error)
 	Del(ctx context.Context, key string) (interface{}, error)
 	Llen(ctx context.Context, key string) (interface{}, error)
@@ -40,7 +40,7 @@ type Pikaer interface {
 	Rpop(ctx context.Context, key string) (interface{}, error)
 	Scard(ctx context.Context, key string) (interface{}, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
-	Sismember(ctx context.Context, key string, value string) (interface{}, error)
+	Sismember(ctx context.Context, key string, value interface{}) (int, error)
 }
 
 func Pika(l string) Pikaer {
@@ -118,31 +118,31 @@ func GetPika(label ...string) (*zgopika, error) {
 	}, nil
 }
 
-func (r *zgopika) Set(ctx context.Context, key string, value string, time int) (interface{}, error) {
-	return r.res.Set(ctx, key, value, time)
+func (r *zgopika) Set(ctx context.Context, key string, value interface{}) (string, error) {
+	return r.res.Set(ctx, key, value)
 }
 
-func (r *zgopika) Expire(ctx context.Context, key string, time int) (interface{}, error) {
+func (r *zgopika) Expire(ctx context.Context, key string, time int) (int, error) {
 	return r.res.Expire(ctx, key, time)
 }
 
-func (r *zgopika) Hset(ctx context.Context, key string, name string, value string) (interface{}, error) {
+func (r *zgopika) Hset(ctx context.Context, key string, name string, value interface{}) (int, error) {
 	return r.res.Hset(ctx, key, name, value)
 }
 
-func (r *zgopika) Lpush(ctx context.Context, key string, value string) (interface{}, error) {
+func (r *zgopika) Lpush(ctx context.Context, key string, value interface{}) (int, error) {
 	return r.res.Lpush(ctx, key, value)
 }
 
-func (r *zgopika) Rpush(ctx context.Context, key string, value string) (interface{}, error) {
-	return r.res.Lpush(ctx, key, value)
+func (r *zgopika) Rpush(ctx context.Context, key string, value interface{}) (int, error) {
+	return r.res.Rpush(ctx, key, value)
 }
 
-func (r *zgopika) Sadd(ctx context.Context, key string, value string) (interface{}, error) {
+func (r *zgopika) Sadd(ctx context.Context, key string, value interface{}) (int, error) {
 	return r.res.Sadd(ctx, key, value)
 }
 
-func (r *zgopika) Srem(ctx context.Context, key string, value string) (interface{}, error) {
+func (r *zgopika) Srem(ctx context.Context, key string, value interface{}) (int, error) {
 	return r.res.Srem(ctx, key, value)
 }
 
@@ -174,7 +174,7 @@ func (r *zgopika) Hlen(ctx context.Context, key string) (interface{}, error) {
 	return r.res.Hlen(ctx, key)
 }
 
-func (r *zgopika) Hdel(ctx context.Context, key string, name string) (interface{}, error) {
+func (r *zgopika) Hdel(ctx context.Context, key string, name interface{}) (int, error) {
 	return r.res.Hdel(ctx, key, name)
 }
 
@@ -210,6 +210,6 @@ func (r *zgopika) Smembers(ctx context.Context, key string) (interface{}, error)
 	return r.res.Smembers(ctx, key)
 }
 
-func (r *zgopika) Sismember(ctx context.Context, key string, value string) (interface{}, error) {
+func (r *zgopika) Sismember(ctx context.Context, key string, value interface{}) (int, error) {
 	return r.res.Sismember(ctx, key, value)
 }
