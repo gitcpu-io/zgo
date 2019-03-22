@@ -46,7 +46,7 @@ func InitCache() chan Cacher {
 
 type dbServicer interface {
 	Hget(ctx context.Context, key string, field string) (interface{}, error)
-	Hset(ctx context.Context, key string, field string, value string) (interface{}, error)
+	Hset(ctx context.Context, key string, field string, value interface{}) (int, error)
 }
 
 /*
@@ -162,14 +162,16 @@ func (z *zgocache) Decorate(fn CacheFunc, expire int, obj interface{}) CacheFunc
 // 降级缓存装饰器
 func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int, obj interface{}) CacheFunc {
 	return func(ctx context.Context, param map[string]interface{}) (interface{}, error) {
+		// start 是否启动 1 启动，0 停用
+		if z.start != 1 {
+			return fn(ctx, param)
+		}
 		// 当后端数据库服务异常时，通过etcd配置修改tcType为2。可转为走正常缓存逻辑，并且没有失效时间。
 		if z.tcType == 2 {
 			return z.Decorate(fn, 0, obj)(ctx, param)
 		}
 		fmt.Println("TimeOutDecorate")
-		if z.start != 1 {
-			return fn(ctx, param)
-		}
+
 		fmt.Println("超时：", time.Duration(timeout)*time.Second)
 		ctxTimeout, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
 		defer cancel()
