@@ -273,21 +273,10 @@
         {
           "c": "北京二手房库 etcd-旧实例w",
           "t": "w",
-          "host": "localhost",
-          "port": 3307,
-          "username": "root",
-          "password": "root",
-          "maxIdleSize": 5,
-          "maxOpenConn": 5,
-          "dbName": "spider"
-        },
-        {
-          "c": "北京二手房库 etcd-旧实例r",
-          "t": "r",
-          "host": "localhost",
-          "port": 3307,
-          "username": "root",
-          "password": "root",
+          "host": "101.201.119.240",
+          "port": 3306,
+          "username": "afe-rw",
+          "password": "HMugq0Fjz3bK67tHdSFottW2ORwSKpcJ",
           "maxIdleSize": 5,
           "maxOpenConn": 5,
           "dbName": "spider"

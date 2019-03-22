@@ -80,7 +80,11 @@ func (mr *mysqlResource) Get(ctx context.Context, args map[string]interface{}) e
 	if err != nil {
 		return err
 	}
-	err = gormPool.Table(args["table"].(string)).Where(args["query"], args["args"].([]interface{})...).First(args["obj"]).Error
+	gormPool = gormPool.Table(args["table"].(string))
+	if sel, ok := args["select"]; ok {
+		gormPool = gormPool.Select(sel)
+	}
+	err = gormPool.Where(args["query"], args["args"].([]interface{})...).First(args["obj"]).Error
 	return err
 }
 
