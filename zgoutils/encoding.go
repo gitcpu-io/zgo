@@ -74,6 +74,10 @@ func mapEncoder(mm map[string]interface{}) (string, error) {
 			stringEncoder(bb, string(v.([]byte)))
 		case []uint:
 			sliceUintEncoder(bb, v.([]uint))
+		case []float64:
+			sliceFloat64Encoder(bb, v.([]float64))
+		case []float32:
+			sliceFloat32Encoder(bb, v.([]float32))
 
 		case map[string]interface{}:
 			js, e = mapEncoder(v.(map[string]interface{}))
@@ -154,6 +158,30 @@ func sliceUintEncoder(bb *bytesBox, value []uint) {
 			bb.write(",")
 		}
 		intEncoder(bb, int(value[i]))
+	}
+	bb.write("]")
+}
+
+func sliceFloat64Encoder(bb *bytesBox, value []float64) {
+	bb.write("[")
+	var i, n = 0, len(value)
+	for i = 0; i < n; i++ {
+		if i > 0 {
+			bb.write(",")
+		}
+		floatEncoder(bb, value[i])
+	}
+	bb.write("]")
+}
+
+func sliceFloat32Encoder(bb *bytesBox, value []float32) {
+	bb.write("[")
+	var i, n = 0, len(value)
+	for i = 0; i < n; i++ {
+		if i > 0 {
+			bb.write(",")
+		}
+		floatEncoder(bb, float64(value[i]))
 	}
 	bb.write("]")
 }
