@@ -12,9 +12,7 @@ import "testing"
 func TestNewzgolog(t *testing.T) {
 	for i := 0; i < 10000; i++ {
 		go func(i int) {
-			zl := Newzgolog()
-			zl.Print("print")
-			zl.Printf("printf:%s", i)
+			zl := InitLog("")
 			zl.Info("info")
 			zl.Infof("infof:%s", i)
 			zl.Error("error")

@@ -17,22 +17,19 @@ var LbodyCh = make(chan *logBody, 2000)
 
 type Logger interface {
 	New() *zgolog
-	Error(args ...interface{})
-	Info(args ...interface{})
-	Print(args ...interface{})
-	Warn(args ...interface{})
 	Debug(args ...interface{})
-	Errorf(format string, args ...interface{})
-	Infof(format string, args ...interface{})
-	Printf(format string, args ...interface{})
-	Warnf(format string, args ...interface{})
+	Info(args ...interface{})
+	Warn(args ...interface{})
+	Error(args ...interface{})
 	Debugf(format string, args ...interface{})
+	Infof(format string, args ...interface{})
+	Warnf(format string, args ...interface{})
+	Errorf(format string, args ...interface{})
 }
 
 type zgolog struct {
-	Project  string
-	LogLevel string
-	Entry    *log.Logger
+	Project string
+	Entry   *log.Logger
 }
 
 type logBody struct {
@@ -45,23 +42,15 @@ type logBody struct {
 
 func InitLog(project string) *zgolog {
 	return &zgolog{
-		Project:  project,
-		LogLevel: config.Conf.Loglevel,
-		Entry:    log.New(),
+		Project: project,
+		Entry:   log.New(),
 	}
 }
 
 func (z *zgolog) New() *zgolog {
-	l := ""
-	if z.LogLevel == "" {
-		l = config.Conf.Loglevel
-	} else {
-		l = z.LogLevel
-	}
 	return &zgolog{
-		Project:  config.Conf.Project,
-		LogLevel: l,
-		Entry:    log.New(),
+		Project: config.Conf.Project,
+		Entry:   log.New(),
 	}
 }
 
@@ -91,16 +80,6 @@ func (z *zgolog) SetDebug(level string) *log.Logger {
 		format.TimestampFormat = "2006-01-02 15:04:05"
 		logger.Level = log.InfoLevel
 		logger.Formatter = format
-	case log.PanicLevel:
-		format := new(log.JSONFormatter)
-		format.TimestampFormat = "2006-01-02 15:04:05"
-		logger.Level = log.InfoLevel
-		logger.Formatter = format
-	case log.FatalLevel:
-		format := new(log.JSONFormatter)
-		format.TimestampFormat = "2006-01-02 15:04:05"
-		logger.Level = log.InfoLevel
-		logger.Formatter = format
 	default:
 		format := new(log.JSONFormatter)
 		format.TimestampFormat = "2006-01-02 15:04:05"
@@ -112,8 +91,9 @@ func (z *zgolog) SetDebug(level string) *log.Logger {
 
 func (z *zgolog) withCaller() (*log.Entry, interface{}) {
 	var value interface{}
-	z.SetDebug(config.Conf.Loglevel)
-	if config.Conf.Loglevel == "debug" {
+	ll := config.Levels[config.Conf.Log.LogLevel]
+	z.SetDebug(ll)
+	if config.Conf.Log.LogLevel == 0 {
 		// 支持goland点击跳转
 		value = fmt.Sprintf(" %+v:", stack.Caller(2))
 	} else {
@@ -130,144 +110,141 @@ func (z *zgolog) withCaller() (*log.Entry, interface{}) {
 	return en, value
 }
 
-func (z *zgolog) Error(args ...interface{}) {
-
+func (z *zgolog) Debug(args ...interface{}) {
 	en, value := z.withCaller()
 
-	lb := logBody{
-		Project: z.Project,
-		File:    value.(string),
-		Msg:     fmt.Sprint(args...),
-		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
-		Level:   "error",
+	fmt.Println(config.Conf.Log.LogLevel, config.Debug, "---debug")
+	if config.Conf.Log.LogLevel <= config.Debug {
+		lb := logBody{
+			Project: z.Project,
+			File:    value.(string),
+			Msg:     fmt.Sprint(args...),
+			Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+			Level:   config.Levels[config.Debug],
+		}
+		LbodyCh <- &lb
+
 	}
-	LbodyCh <- &lb
-	en.Error(args...)
+
+	en.Debug(args...)
 }
 
 func (z *zgolog) Info(args ...interface{}) {
 	en, value := z.withCaller()
+	fmt.Println(config.Conf.Log.LogLevel, config.Info, "---info")
 
-	lb := logBody{
-		Project: z.Project,
-		File:    value.(string),
-		Msg:     fmt.Sprint(args...),
-		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
-		Level:   "info",
+	if config.Conf.Log.LogLevel <= config.Info {
+		lb := logBody{
+			Project: z.Project,
+			File:    value.(string),
+			Msg:     fmt.Sprint(args...),
+			Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+			Level:   config.Levels[config.Info],
+		}
+		LbodyCh <- &lb
 	}
-	LbodyCh <- &lb
+
 	en.Info(args...)
-}
-
-func (z *zgolog) Print(args ...interface{}) {
-	en, value := z.withCaller()
-
-	lb := logBody{
-		Project: z.Project,
-		File:    value.(string),
-		Msg:     fmt.Sprint(args...),
-		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
-		Level:   "print",
-	}
-	LbodyCh <- &lb
-	en.Print(args...)
 }
 
 func (z *zgolog) Warn(args ...interface{}) {
 	en, value := z.withCaller()
+	fmt.Println(config.Conf.Log.LogLevel, config.Warn, "---warn")
 
-	lb := logBody{
-		Project: z.Project,
-		File:    value.(string),
-		Msg:     fmt.Sprint(args...),
-		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
-		Level:   "warn",
+	if config.Conf.Log.LogLevel <= config.Warn {
+		lb := logBody{
+			Project: z.Project,
+			File:    value.(string),
+			Msg:     fmt.Sprint(args...),
+			Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+			Level:   config.Levels[config.Warn],
+		}
+		LbodyCh <- &lb
 	}
-	LbodyCh <- &lb
+
 	en.Warn(args...)
 }
 
-func (z *zgolog) Debug(args ...interface{}) {
+func (z *zgolog) Error(args ...interface{}) {
+
 	en, value := z.withCaller()
+	fmt.Println(config.Conf.Log.LogLevel, config.Error, "---error")
 
-	lb := logBody{
-		Project: z.Project,
-		File:    value.(string),
-		Msg:     fmt.Sprint(args...),
-		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
-		Level:   "debug",
+	if config.Conf.Log.LogLevel <= config.Error {
+		lb := logBody{
+			Project: z.Project,
+			File:    value.(string),
+			Msg:     fmt.Sprint(args...),
+			Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+			Level:   config.Levels[config.Error],
+		}
+		LbodyCh <- &lb
+
 	}
-	LbodyCh <- &lb
-	en.Debug(args...)
-}
 
-func (z *zgolog) Errorf(format string, args ...interface{}) {
-	en, value := z.withCaller()
-
-	lb := logBody{
-		Project: z.Project,
-		File:    value.(string),
-		Msg:     fmt.Sprint(args...),
-		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
-		Level:   "error",
-	}
-	LbodyCh <- &lb
-	en.Errorf(format, args...)
-}
-
-func (z *zgolog) Infof(format string, args ...interface{}) {
-	en, value := z.withCaller()
-
-	lb := logBody{
-		Project: z.Project,
-		File:    value.(string),
-		Msg:     fmt.Sprint(args...),
-		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
-		Level:   "info",
-	}
-	LbodyCh <- &lb
-	en.Infof(format, args...)
-}
-
-func (z *zgolog) Printf(format string, args ...interface{}) {
-	en, value := z.withCaller()
-
-	lb := logBody{
-		Project: z.Project,
-		File:    value.(string),
-		Msg:     fmt.Sprint(args...),
-		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
-		Level:   "print",
-	}
-	LbodyCh <- &lb
-	en.Printf(format, args...)
-
-}
-
-func (z *zgolog) Warnf(format string, args ...interface{}) {
-	en, value := z.withCaller()
-
-	lb := logBody{
-		Project: z.Project,
-		File:    value.(string),
-		Msg:     fmt.Sprint(args...),
-		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
-		Level:   "warn",
-	}
-	LbodyCh <- &lb
-	en.Warnf(format, args...)
+	en.Error(args...)
 }
 
 func (z *zgolog) Debugf(format string, args ...interface{}) {
 	en, value := z.withCaller()
-
-	lb := logBody{
-		Project: z.Project,
-		File:    value.(string),
-		Msg:     fmt.Sprint(args...),
-		Time:    zgoutils.Utils.FormatFromUnixTime(-1),
-		Level:   "debug",
+	if config.Conf.Log.LogLevel <= config.Debug {
+		lb := logBody{
+			Project: z.Project,
+			File:    value.(string),
+			Msg:     fmt.Sprint(args...),
+			Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+			Level:   config.Levels[config.Debug],
+		}
+		LbodyCh <- &lb
 	}
-	LbodyCh <- &lb
+
 	en.Debugf(format, args...)
+}
+
+func (z *zgolog) Infof(format string, args ...interface{}) {
+	en, value := z.withCaller()
+	if config.Conf.Log.LogLevel <= config.Info {
+		lb := logBody{
+			Project: z.Project,
+			File:    value.(string),
+			Msg:     fmt.Sprint(args...),
+			Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+			Level:   config.Levels[config.Info],
+		}
+		LbodyCh <- &lb
+	}
+
+	en.Infof(format, args...)
+}
+
+func (z *zgolog) Warnf(format string, args ...interface{}) {
+	en, value := z.withCaller()
+	if config.Conf.Log.LogLevel <= config.Warn {
+		lb := logBody{
+			Project: z.Project,
+			File:    value.(string),
+			Msg:     fmt.Sprint(args...),
+			Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+			Level:   config.Levels[config.Warn],
+		}
+		LbodyCh <- &lb
+	}
+
+	en.Warnf(format, args...)
+}
+
+func (z *zgolog) Errorf(format string, args ...interface{}) {
+	en, value := z.withCaller()
+	if config.Conf.Log.LogLevel <= config.Error {
+		lb := logBody{
+			Project: z.Project,
+			File:    value.(string),
+			Msg:     fmt.Sprint(args...),
+			Time:    zgoutils.Utils.FormatFromUnixTime(-1),
+			Level:   config.Levels[config.Error],
+		}
+		LbodyCh <- &lb
+	}
+
+	en.Errorf(format, args...)
 }

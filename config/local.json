@@ -10,7 +10,6 @@
   },
   "project": "zgo",
   "projectPrefix": "zgo/project/",
-  "loglevel": "info",
 
   "redis": [
     {
@@ -345,7 +344,8 @@
     "c": "日志存储",
     "start": 1,
     "dbType": "file",
-    "label":"/tmp"
+    "label":"/tmp",
+    "loglevel": 0
   }
 
 }

@@ -41,9 +41,6 @@ func Engine(opt *Options) error {
 	if opt.Project != "" {
 		config.Conf.Project = opt.Project
 	}
-	if opt.Loglevel != "" {
-		config.Conf.Loglevel = opt.Loglevel
-	}
 
 	Crypto = zgocrypto.New()
 	File = zgofile.New()
@@ -122,6 +119,19 @@ func Engine(opt *Options) error {
 			Start:  config.Conf.Log.Start,
 		}
 		zgolog.LogWatch <- cc
+
+		if opt.Loglevel != "" {
+			ll := 0
+			for k, v := range config.Levels {
+				if v == opt.Loglevel {
+					ll = k
+					break
+				}
+			}
+			config.Conf.Log.LogLevel = ll
+		} else {
+			config.Conf.Log.LogLevel = config.Debug
+		}
 
 	}
 
