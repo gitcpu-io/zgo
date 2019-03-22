@@ -77,6 +77,8 @@ type Utilser interface {
 	StringToMap(str string) map[string]interface{}
 	//结构体转map[string]interface{}
 	StructToMap(interface{}) map[string]interface{}
+	//map转结构体
+	MapToStruct(input interface{}, out interface{})
 	// GrpcServiceMethod converts a gRPC method to a Go method
 	GrpcServiceMethodConverts(m string) (string, string, error)
 
@@ -286,6 +288,12 @@ func (u *utils) StructToMap(input interface{}) map[string]interface{} {
 	b, _ := jsonIterator.Marshal(input)
 	jsonIterator.Unmarshal(b, &m)
 	return m
+}
+
+//MapToStruct map[string]interface{}转结构体
+func (u *utils) MapToStruct(input interface{}, out interface{}) {
+	b, _ := jsonIterator.Marshal(input)
+	jsonIterator.Unmarshal(b, &out)
 }
 
 // GrpcServiceMethodConverts converts a gRPC method to a Go method
