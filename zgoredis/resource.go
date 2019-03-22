@@ -12,15 +12,15 @@ import (
 type RedisResourcer interface {
 	GetConnChan(label string) chan *radix.Pool
 	//Post
-	Set(ctx context.Context, key string, value string, time int) (string, error)
-	Expire(ctx context.Context, key string, time int) (interface{}, error)
-	Hset(ctx context.Context, key string, name string, value string) (interface{}, error)
-	Lpush(ctx context.Context, key string, value string) (interface{}, error)
-	Rpush(ctx context.Context, key string, value string) (interface{}, error)
-	Sadd(ctx context.Context, key string, value string) (interface{}, error)
-	Srem(ctx context.Context, key string, value string) (interface{}, error)
+	Set(ctx context.Context, key string, value interface{}) (string, error)
+	Expire(ctx context.Context, key string, time int) (int, error)
+	Hset(ctx context.Context, key string, name string, value interface{}) (int, error)
+	Lpush(ctx context.Context, key string, value interface{}) (int, error)
+	Rpush(ctx context.Context, key string, value interface{}) (int, error)
+	Sadd(ctx context.Context, key string, value interface{}) (int, error)
+	Srem(ctx context.Context, key string, value interface{}) (int, error)
 	//Get
-	Exists(ctx context.Context, key string) (interface{}, error)
+	Exists(ctx context.Context, key string) (int, error)
 	Get(ctx context.Context, key string) (interface{}, error)
 	Keys(ctx context.Context, pattern string) (interface{}, error)
 	//hget
@@ -28,7 +28,7 @@ type RedisResourcer interface {
 	Ttl(ctx context.Context, key string) (interface{}, error)
 	Type(ctx context.Context, key string) (interface{}, error)
 	Hlen(ctx context.Context, key string) (interface{}, error)
-	Hdel(ctx context.Context, key string, name string) (interface{}, error)
+	Hdel(ctx context.Context, key string, name interface{}) (int, error)
 	Hgetall(ctx context.Context, key string) (interface{}, error)
 	Del(ctx context.Context, key string) (interface{}, error)
 
@@ -39,7 +39,7 @@ type RedisResourcer interface {
 
 	Scard(ctx context.Context, key string) (interface{}, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
-	Sismember(ctx context.Context, key string, value string) (interface{}, error)
+	Sismember(ctx context.Context, key string, value interface{}) (int, error)
 }
 
 type redisResource struct {
@@ -63,12 +63,8 @@ func (r *redisResource) GetConnChan(label string) chan *radix.Pool {
 	return r.connpool.GetConnChan(label)
 }
 
-func (r *redisResource) Set(ctx context.Context, key string, value string, time int) (string, error) {
+func (r *redisResource) Set(ctx context.Context, key string, value interface{}) (string, error) {
 	s := <-r.connpool.GetConnChan(r.label)
-	//pipline := radix.Pipeline(
-	//	radix.FlatCmd(nil, "SET", key, value),
-	//	radix.FlatCmd(nil, "Expire", key, time),
-	//)
 	var res string
 	if err := s.Do(radix.FlatCmd(&res, "SET", key, value)); err != nil {
 		return "", err
@@ -78,41 +74,77 @@ func (r *redisResource) Set(ctx context.Context, key string, value string, time 
 	return res, nil
 }
 
-func (r *redisResource) Expire(ctx context.Context, key string, time int) (interface{}, error) {
+func (r *redisResource) Expire(ctx context.Context, key string, time int) (int, error) {
 	s := <-r.connpool.GetConnChan(r.label)
-	return nil, s.Do(radix.FlatCmd(nil, "Expire", key, time))
+	var res int
+	if err := s.Do(radix.FlatCmd(&res, "Expire", key, time)); err != nil {
+		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
-func (r *redisResource) Hset(ctx context.Context, key string, name string, value string) (interface{}, error) {
+func (r *redisResource) Hset(ctx context.Context, key string, name string, value interface{}) (int, error) {
 	s := <-r.connpool.GetConnChan(r.label)
-	return nil, s.Do(radix.FlatCmd(nil, "Hset", key, name, value))
+	var res int
+	if err := s.Do(radix.FlatCmd(&res, "Hset", key, name, value)); err != nil {
+		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
-func (r *redisResource) Lpush(ctx context.Context, key string, value string) (interface{}, error) {
+func (r *redisResource) Lpush(ctx context.Context, key string, value interface{}) (int, error) {
 	s := <-r.connpool.GetConnChan(r.label)
-	return nil, s.Do(radix.FlatCmd(nil, "Lpush", key, value))
+	var res int
+	if err := s.Do(radix.FlatCmd(&res, "Lpush", key, value)); err != nil {
+		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
-func (r *redisResource) Rpush(ctx context.Context, key string, value string) (interface{}, error) {
+func (r *redisResource) Rpush(ctx context.Context, key string, value interface{}) (int, error) {
 	s := <-r.connpool.GetConnChan(r.label)
-	return nil, s.Do(radix.FlatCmd(nil, "Rpush", key, value))
+	var res int
+	if err := s.Do(radix.FlatCmd(&res, "Rpush", key, value)); err != nil {
+		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
-func (r *redisResource) Sadd(ctx context.Context, key string, value string) (interface{}, error) {
+func (r *redisResource) Sadd(ctx context.Context, key string, value interface{}) (int, error) {
 	s := <-r.connpool.GetConnChan(r.label)
-	return nil, s.Do(radix.FlatCmd(nil, "Sadd", key, value))
+	var res int
+	if err := s.Do(radix.FlatCmd(&res, "Sadd", key, value)); err != nil {
+		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
-func (r *redisResource) Srem(ctx context.Context, key string, value string) (interface{}, error) {
+func (r *redisResource) Srem(ctx context.Context, key string, value interface{}) (int, error) {
 	s := <-r.connpool.GetConnChan(r.label)
-	return nil, s.Do(radix.FlatCmd(nil, "Srem", key, value))
+	var res int
+	if err := s.Do(radix.FlatCmd(&res, "Srem", key, value)); err != nil {
+		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
 }
 
-func (r *redisResource) Exists(ctx context.Context, key string) (interface{}, error) {
+func (r *redisResource) Exists(ctx context.Context, key string) (int, error) {
 	s := <-r.connpool.GetConnChan(r.label)
 	var flag int
 	if err := s.Do(radix.Cmd(&flag, "Exists", key)); err != nil {
-		return nil, err
+		return 0, err
 	} else {
 		return flag, err
 	}
@@ -181,11 +213,11 @@ func (r *redisResource) Hlen(ctx context.Context, key string) (interface{}, erro
 	}
 }
 
-func (r *redisResource) Hdel(ctx context.Context, key string, name string) (interface{}, error) {
+func (r *redisResource) Hdel(ctx context.Context, key string, name interface{}) (int, error) {
 	s := <-r.connpool.GetConnChan(r.label)
 	var flag int
-	if err := s.Do(radix.FlatCmd(&flag, "Hlen", key)); err != nil {
-		return nil, err
+	if err := s.Do(radix.FlatCmd(&flag, "Hdel", key, name)); err != nil {
+		return 0, err
 	} else {
 		return flag, err
 	}
@@ -271,11 +303,11 @@ func (r *redisResource) Smembers(ctx context.Context, key string) (interface{}, 
 	}
 }
 
-func (r *redisResource) Sismember(ctx context.Context, key string, value string) (interface{}, error) {
+func (r *redisResource) Sismember(ctx context.Context, key string, value interface{}) (int, error) {
 	s := <-r.connpool.GetConnChan(r.label)
 	var flag int
-	if err := s.Do(radix.FlatCmd(&flag, "Sismember", key)); err != nil {
-		return nil, err
+	if err := s.Do(radix.FlatCmd(&flag, "Sismember", key, value)); err != nil {
+		return 0, err
 	} else {
 		return flag, err
 	}

@@ -70,6 +70,82 @@ func TestRedisGet(t *testing.T) {
 		panic(err)
 	}
 
+	//ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	//defer cancel()
+
+	//1.set get
+	//res, err := clientLocal.Set(ctx, "china666", 999)
+	//
+	//res2, err := clientLocal.Get(ctx, "china666")
+	//
+	//fmt.Println(res)
+	//
+	//fmt.Println(res2)
+	//2.expire
+	//res, err := clientLocal.Expire(ctx, "china666", 20000)
+	//fmt.Println(res)
+
+	//3.hset hget hlen hdel
+	//res, err := clientLocal.Hset(ctx, "china_lining", "liuwei", 9999)
+	//fmt.Println(res)
+	//
+	//res1, err := clientLocal.Hget(ctx, "china_lining", "liuwei")
+	//fmt.Println(res1)
+
+	//res1, err := clientLocal.Hlen(ctx, "china_lining")
+	//fmt.Println(res1)
+
+	//res1, err := clientLocal.Hdel(ctx, "china_lining", "china")
+	//fmt.Println(res1)
+
+	//res1, err := clientLocal.Hgetall(ctx, "china_lining")
+	//fmt.Println(res1)
+
+	//res1, err := clientLocal.Del(ctx, "china_lining")
+	//fmt.Println(res1)
+
+	//4.lpush rpush llen lrange lpop rpop
+
+	//res, err := clientLocal.Rpush(ctx, "china_list", 23232343)
+	//fmt.Println(res)
+	//
+	//res2, err := clientLocal.Llen(ctx, "china_list")
+	//fmt.Println(res2)
+
+	//res, err := clientLocal.Lrange(ctx, "china_list", 0, 10)
+	//fmt.Println(res)
+
+	//res2, err := clientLocal.Rpop(ctx, "china_list")
+	//fmt.Println(res2)
+
+	//5.sadd Scard Smembers Sismember
+	//res, err := clientLocal.Sadd(ctx, "china_member", 1113402)
+	//fmt.Println(res)
+
+	//res, err := clientLocal.Scard(ctx, "china_member")
+	//	//fmt.Println(res)
+
+	//res, err := clientLocal.Srem(ctx, "china_member", 890)
+	//fmt.Println(res)
+
+	//res, err := clientLocal.Smembers(ctx, "china_member")
+	//fmt.Println(res)
+
+	//res, err := clientLocal.Sismember(ctx, "china_member", 456)
+	//fmt.Println(res)
+
+	//res, err := clientLocal.Exists(ctx, "china_member")
+	//fmt.Println(res)
+
+	//res, err := clientLocal.Keys(ctx, "*")
+	//fmt.Println(res)
+
+	//res, err := clientLocal.Ttl(ctx, "china_member")
+	//fmt.Println(res)
+
+	//res, err := clientLocal.Type(ctx, "china_member")
+	//fmt.Println(res)
+
 	//LpushCheck(label_bj, clientLocal, 0)
 	//
 	//getSet(label_sh, clientSpider, 0)
@@ -183,7 +259,7 @@ func setSet(label string, client *zgoredis, i int) chan int {
 		value = value + value
 	}
 
-	_, err := client.Set(ctx, key, value, 5000)
+	_, err := client.Set(ctx, key, value)
 	if err != nil {
 		panic(err)
 	}
