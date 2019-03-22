@@ -123,12 +123,13 @@ func (opt *Options) watchPutConn(inch chan map[string][]*config.ConnDetail) {
 					smk := strings.Split(k, "/")
 					labelType := smk[3]
 					hsm := make(map[string][]*config.ConnDetail)
+					var label string
 					for k, v := range h {
-						label := strings.Split(k, "/")[4] //改变label，去掉前缀
+						label = strings.Split(k, "/")[4] //改变label，去掉前缀
 						hsm[label] = v
 					}
-					fmt.Println("[init conn]watchPutConn:", labelType, hsm)
-					//[init again]watchPutConn: nsq map[nsq_label_bj:[0xc0004e62c0 0xc0004e6420]]
+					fmt.Printf("[init %s conn]watchPutConn: %s\n", labelType, label)
+					//[init mongo conn]watchPutConn: 1607450184770
 
 					opt.initConn(labelType, hsm)
 				}
@@ -144,12 +145,12 @@ func (opt *Options) watchDeleteConn(ch chan map[string][]*config.ConnDetail) {
 		if ch != nil {
 			//KEY: zgo/project/项目名/mysql/label名字
 			for h := range ch {
-				for k, v := range h {
+				for k, _ := range h {
 					smk := strings.Split(k, "/")
 					labelType := smk[3]
 					label := smk[4]
-					fmt.Println("[destroy conn]watchDeleteConn", labelType, label, v)
-					//[destroy conn]watchDeleteConn nsq nsq_label_bj [0xc0004e6840 0xc0004e68f0]
+					fmt.Printf("[destroy %s conn]watchDeleteConn %s\n", labelType, label)
+					//[destroy nsq conn]watchDeleteConn 1068052762090
 
 					opt.destroyConn(labelType, label)
 				}
