@@ -110,6 +110,7 @@ func (m *mongoResource) FindOne(ctx context.Context, args map[string]interface{}
 		}
 		preWorkForMongo(args)
 		s.DB(args["db"].(string)).C(args["table"].(string)).Find(args["query"].(bson.M)).Select(args["select"].(bson.M)).One(res)
+		return nil
 	}
 	return errors.New("未传入赋值对象")
 }
