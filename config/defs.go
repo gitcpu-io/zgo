@@ -14,15 +14,20 @@ import (
 )
 
 const (
-	Version         = "0.8.1"       //zgo版本号
-	ProjectPrefix   = "zgo/project" //读取ETCD配置时prefix
-	DefaultLogLevel = "error"       //默认的日志格式
-	FileStoreType   = "local"       //文件存储类型
-	FileStoreHome   = "/tmp"        //文件存储目录
-	Local           = "local"       //本地开发环境标识
-	Dev             = "dev"         //开发联调环境标识
-	Qa              = "qa"          //QA测试环境标识
-	Pro             = "pro"         //生产环境标识
+	//********************************以下是 loglevel 千万不要换顺序********************************
+	Debug = iota //0
+	Info         //1
+	Warn         //2
+	Error        //3
+
+	Version       = "0.8.1"       //zgo版本号
+	ProjectPrefix = "zgo/project" //读取ETCD配置时prefix
+	FileStoreType = "local"       //文件存储类型
+	FileStoreHome = "/tmp"        //文件存储目录
+	Local         = "local"       //本地开发环境标识
+	Dev           = "dev"         //开发联调环境标识
+	Qa            = "qa"          //QA测试环境标识
+	Pro           = "pro"         //生产环境标识
 
 	//********************************以下是 etcd监听常量********************************
 	EtcTKCache = "cache"
@@ -37,10 +42,12 @@ const (
 	EtcTKEtc   = "etcd"
 )
 
+var Levels = []string{"debug", "info", "warn", "error"}
+
 var (
 	DevEtcHosts = []string{ //开发联调ETCD地
-		"10.45.146.41:2380", //测试时使用内网ip
-		//"123.56.173.28:2380",	//如果本机联调，想用测试机的etcd可以使用公网ip
+		//"10.45.146.41:2380", //测试时使用内网ip
+		"123.56.173.28:2380", //如果本机联调，想用测试机的etcd可以使用公网ip
 		//"localhost:2381",
 	}
 	QaEtcHosts = []string{ //QA环境ETCD地址，同正式
@@ -82,12 +89,13 @@ type ConnDetail struct {
 
 type CacheConfig struct {
 	//same as LogConfig so 共用一个struct
-	C      string `json:"c,omitempty"`
-	Rate   int    `json:"rate,omitempty"`   // 缓存失效时间 倍率
-	Label  string `json:"label,omitempty"`  // 缓存所需的 pikaLabel
-	Start  int    `json:"start,omitempty"`  // 是否开启 1 开启 0关闭
-	DbType string `json:"dbType,omitempty"` // 数据库类型 默认pika
-	TcType int    `json:"tcType,omitempty"` // 降级缓存类型 1正常降级缓存 2转为普通缓存
+	LogLevel int    `json:"loglevel,omitempty"`
+	C        string `json:"c,omitempty"`
+	Rate     int    `json:"rate,omitempty"`   // 缓存失效时间 倍率
+	Label    string `json:"label,omitempty"`  // 缓存所需的 pikaLabel
+	Start    int    `json:"start,omitempty"`  // 是否开启 1 开启 0关闭
+	DbType   string `json:"dbType,omitempty"` // 数据库类型 默认pika
+	TcType   int    `json:"tcType,omitempty"` // 降级缓存类型 1正常降级缓存 2转为普通缓存
 }
 
 type LabelDetail struct {
@@ -104,7 +112,6 @@ type allConfig struct {
 	Env          string                       `json:"env"`
 	File         FileStore                    `json:"file,omitempty"`
 	Project      string                       `json:"project"`
-	Loglevel     string                       `json:"loglevel,omitempty"`
 	EtcdHosts    []string                     `json:"etcdHosts,omitempty"`
 	Nsq          []LabelDetail                `json:"nsq,omitempty"`
 	Mongo        []LabelDetail                `json:"mongo,omitempty"`
@@ -194,10 +201,6 @@ func LoadConfig(e, project string) {
 				Home: FileStoreHome,
 			},
 		}
-	}
-
-	if Conf.Loglevel == "" {
-		Conf.Loglevel = DefaultLogLevel
 	}
 
 	//default init city db config

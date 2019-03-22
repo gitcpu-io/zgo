@@ -122,16 +122,16 @@ func (opt *Options) watchPutConn(inch chan map[string][]*config.ConnDetail) {
 				for k, _ := range h {
 					smk := strings.Split(k, "/")
 					labelType := smk[3]
-					mysqlLabel := smk[4]
 					hsm := make(map[string][]*config.ConnDetail)
+					var label string
 					for k, v := range h {
-						label := strings.Split(k, "/")[4] //改变label，去掉前缀
+						label = strings.Split(k, "/")[4] //改变label，去掉前缀
 						hsm[label] = v
 					}
-					fmt.Println("[init conn]watchPutConn:", labelType, hsm)
-					//[init again]watchPutConn: nsq map[nsq_label_bj:[0xc0004e62c0 0xc0004e6420]]
+					fmt.Printf("[init %s conn]watchPutConn: %s\n", labelType, label)
+					//[init mongo conn]watchPutConn: 1607450184770
 
-					opt.initConn(labelType, hsm, mysqlLabel)
+					opt.initConn(labelType, hsm)
 				}
 			}
 		}
@@ -145,12 +145,12 @@ func (opt *Options) watchDeleteConn(ch chan map[string][]*config.ConnDetail) {
 		if ch != nil {
 			//KEY: zgo/project/项目名/mysql/label名字
 			for h := range ch {
-				for k, v := range h {
+				for k, _ := range h {
 					smk := strings.Split(k, "/")
 					labelType := smk[3]
 					label := smk[4]
-					fmt.Println("[destroy conn]watchDeleteConn", labelType, label, v)
-					//[destroy conn]watchDeleteConn nsq nsq_label_bj [0xc0004e6840 0xc0004e68f0]
+					fmt.Printf("[destroy %s conn]watchDeleteConn %s\n", labelType, label)
+					//[destroy nsq conn]watchDeleteConn 1068052762090
 
 					opt.destroyConn(labelType, label)
 				}
@@ -221,10 +221,16 @@ func (opt *Options) watchPutCacheOrLog(cacheLogCh chan map[string]*config.CacheC
 
 						Log = zgolog.InitLog(opt.Project)
 
+						config.Conf.Log.DbType = v.DbType
+						config.Conf.Log.Label = v.Label
+						config.Conf.Log.LogLevel = v.LogLevel
+						config.Conf.Log.Start = v.Start
+
 						cc := config.CacheConfig{
-							DbType: v.DbType,
-							Label:  v.Label,
-							Start:  v.Start,
+							DbType:   v.DbType,
+							Label:    v.Label,
+							Start:    v.Start,
+							LogLevel: v.LogLevel,
 						}
 
 						fmt.Println("[init Log]watchPutCacheOrLog", labelType, cc)
@@ -276,19 +282,21 @@ func (opt *Options) destroyCacheAndLog(labelType string, cf *config.CacheConfig)
 		//如果delete是log todo something
 		config.Conf.Log.DbType = cf.DbType
 		config.Conf.Log.Label = cf.Label
+		config.Conf.Log.LogLevel = cf.LogLevel
 		config.Conf.Log.Start = 0
 
 		cc := &config.CacheConfig{
-			DbType: cf.DbType,
-			Label:  cf.Label,
-			Start:  0,
+			DbType:   cf.DbType,
+			Label:    cf.Label,
+			LogLevel: cf.LogLevel,
+			Start:    0,
 		}
 		zgolog.LogWatch <- cc
 	}
 }
 
 // initConn具体的连接操作
-func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDetail, mysqlLabel string) {
+func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDetail) {
 	switch labelType {
 	case config.EtcTKMysql:
 		//init mysql again

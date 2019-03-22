@@ -70,30 +70,20 @@ func (n *nsqResource) Producer(ctx context.Context, topic string, body []byte) (
 		return out, errors.New("message is empty")
 	}
 
-	producer := <-n.connpool.GetConnChan(n.label)
+	ch := n.connpool.GetConnChan(n.label)
 
-	if producer == nil {
+	if len(ch) == 0 {
 		out <- 0
 		return out, errors.New("conn is nil")
 	}
 
-	//for {
-	//	if err := producer.Ping(); err != nil {
-	//		producer = <-n.connpool.GetConnChan(n.label)
-	//		fmt.Println("------producer is nil")
-	//	}else{
-	//		break
-	//	}
-	//	time.Sleep(10 * time.Millisecond)
-	//}
-
 	doneChan := make(chan *nsq.ProducerTransaction)
+	producer := <-ch
 	err := producer.PublishAsync(topic, body, doneChan) // 发布消息
-
 
 	if err != nil {
 		out <- 0
-		fmt.Println( err, "---PublishAsync error----")
+		fmt.Println(err, "---PublishAsync error----")
 		return out, nil
 	}
 	go func() {
@@ -116,8 +106,13 @@ func (n *nsqResource) ProducerMulti(ctx context.Context, topic string, body [][]
 		out <- 0
 		return out, errors.New("message is empty")
 	}
-	producer := <-n.connpool.GetConnChan(n.label)
+	ch := n.connpool.GetConnChan(n.label)
+	if len(ch) == 0 {
+		out <- 0
+		return out, errors.New("conn is nil")
+	}
 	doneChan := make(chan *nsq.ProducerTransaction)
+	producer := <-ch
 	err := producer.MultiPublishAsync(topic, body, doneChan) // 发布消息
 	if err != nil {
 		out <- 0
