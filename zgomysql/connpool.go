@@ -62,7 +62,8 @@ func (cp *connPool) setConnPoolToChan(v []*config.ConnDetail) {
 			log.Fatalf(err.Error())
 		} else {
 			key := fmt.Sprintf("%s", cp.label)
-
+			fmt.Printf("init Mysql to Pool ... [%s] Host:%s, Port:%d, MaxOpenConn:%d, MaxIdleSize:%d, T:%s,  %s\n",
+				cp.label, v[i].Host, v[i].Port, v[i].MaxOpenConn, v[i].MaxIdleSize, v[i].T, v[i].C)
 			if value, ok := connPoolMap[v[i].T]; ok { // 是否能获取到2级Map
 				value[key] = append(value[key], pool)
 			} else { // 创建二级map
