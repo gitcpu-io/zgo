@@ -99,18 +99,17 @@ func GetCache(start int, dbtype string, label string, rate int, tcType int) Cach
 // 对外接口
 type Cacher interface {
 	//NewPikaCacheService(label string, expire int, tcType int) Cacher
-	Decorate(fn CacheFunc, expire int, obj interface{}) CacheFunc
-	TimeOutDecorate(fn CacheFunc, timeout int, obj interface{}) CacheFunc
+	Decorate(fn CacheFunc, expire int) CacheFunc
+	TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc
 }
 
 // 缓存装饰器接收的函数类型
-type CacheFunc func(ctx context.Context, param map[string]interface{}) (interface{}, error)
+type CacheFunc func(ctx context.Context, param map[string]interface{}, obj interface{}) error
 
 // 函数返回值 channel接收时候用到
-type funResult struct {
-	result interface{}
-	err    error
-}
+//type funResult struct {
+//	err    error
+//}
 
 // 缓存入redis结构体
 type cacheResult struct {
@@ -131,58 +130,55 @@ type zgocache struct {
 // 缓存装饰器
 // 1.fn 真正执行的方法，必须符合CacheFunc类型
 // 2.expire 超时时间 单位s
-func (z *zgocache) Decorate(fn CacheFunc, expire int, obj interface{}) CacheFunc {
-	return func(ctx context.Context, param map[string]interface{}) (interface{}, error) {
+func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
+	return func(ctx context.Context, param map[string]interface{}, obj interface{}) error {
 		fmt.Println("Decorate")
 		if z.start != 1 {
-			return fn(ctx, param)
+			return fn(ctx, param, obj)
 		}
 		key := z.getKey(fn)
 		field, err := zgoutils.Utils.MarshalMap(param)
 		if err != nil {
 			// field转换失败 直接走函数获取数据
 			fmt.Println(err.Error())
-			return fn(ctx, param)
+			return fn(ctx, param, obj)
 		}
 
 		// 获取缓存
-		data, err := z.getData(ctx, key, field, expire, obj)
+		err = z.getData(ctx, key, field, expire, &obj)
 		if err != nil { // 有异常 或者 没有缓存
 			// 执行函数获取数据
-			data, err = fn(ctx, param)
-			if data != nil && err == nil {
+			err = fn(ctx, param, obj)
+			if obj != nil && err == nil {
 				// 正常返回结果 存入缓存
-				z.setData(ctx, key, field, data)
+				z.setData(ctx, key, field, obj)
 			}
 			// 返回结果
-			return data, err
+			return err
 		}
-		return data, err
+		return err
 	}
 }
 
 // 降级缓存装饰器
-func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int, obj interface{}) CacheFunc {
-	return func(ctx context.Context, param map[string]interface{}) (interface{}, error) {
+func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
+	return func(ctx context.Context, param map[string]interface{}, obj interface{}) error {
 		// start 是否启动 1 启动，0 停用
 		if z.start != 1 {
-			return fn(ctx, param)
+			return fn(ctx, param, obj)
 		}
 		// 当调用方法后续服务异常时，通过etcd配置修改tcType为2。可转为走正常缓存逻辑，并且没有失效时间。
 		if z.tcType == 2 {
-			return z.Decorate(fn, 0, obj)(ctx, param)
+			return z.Decorate(fn, 0)(ctx, param, obj)
 		}
 		ctxTimeout, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
 		defer cancel()
-		ch := make(chan *funResult)
+		ch := make(chan error)
 
 		// 执行
 		go func(ctx context.Context) {
-			result, err := fn(ctx, param)
-			ch <- &funResult{
-				result,
-				err,
-			}
+			err := fn(ctx, param, obj)
+			ch <- err
 			fmt.Println("执行完成")
 		}(ctxTimeout)
 
@@ -198,23 +194,23 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int, obj interface{}) C
 			// 失败返回
 			if fieldErr != nil {
 				fmt.Println(fieldErr.Error())
-				return nil, fieldErr
+				return fieldErr
 			}
 			// 返回
-			data, err := z.getData(ctx, key, field, 0, obj)
-			return data, err
+			err := z.getData(ctx, key, field, 0, &obj)
+			return err
 
 		case value, ok := <-ch:
 			if ok {
 				fmt.Println("获取成功")
 				// 查询成功返回数据 并 塞入缓存
 				z.setData(ctx, key, field, value)
-				return value, nil
+				return nil
 			}
 
 		}
 
-		return nil, errors.New("操作失败")
+		return errors.New("操作失败")
 	}
 }
 
@@ -223,7 +219,7 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int, obj interface{}) C
 //	return GetCache(z.start, "pika", label, expire, tcType)
 //}
 
-func (z *zgocache) getData(ctx context.Context, key string, field string, expire int, obj interface{}) (interface{}, error) {
+func (z *zgocache) getData(ctx context.Context, key string, field string, expire int, obj interface{}) error {
 	// 根据项目名，包名，类名，函数名称，拼接，然后数据库
 	//project := config.Project
 	//fn := runtime.FuncForPC(reflect.ValueOf(a).Pointer()).Name()
@@ -233,29 +229,31 @@ func (z *zgocache) getData(ctx context.Context, key string, field string, expire
 	value, err := z.service.Hget(ctx, key, field)
 	if err != nil {
 		fmt.Println(err.Error())
-		return nil, err
+		return err
 	} else if value == nil || value == "" {
 		fmt.Println("没有缓存")
-		return nil, errors.New("缓存数据为空")
+		return errors.New("缓存数据为空")
 	} else {
 		fmt.Println("有缓存-------------")
-		data := &cacheResult{Result: obj}
-		jsoniter.UnmarshalFromString(value.(string), data)
+		data := cacheResult{Result: &obj}
+		jsoniter.UnmarshalFromString(value.(string), &data)
 		if expire != 0 {
 			if data.Time < time.Now().Unix()-int64(expire)*int64(z.rate) {
 				fmt.Println("缓存已失效-------------")
-				return nil, errors.New("缓存已失效")
+				return errors.New("缓存已失效")
 			}
 		}
-		return data.Result, nil
+		return nil
 	}
 }
 
 func (z *zgocache) setData(ctx context.Context, key string, field string, data interface{}) {
 	// 开goroutine 存缓存
+	d := &cacheResult{data, time.Now().Unix()}
+	value, err := jsoniter.MarshalToString(d)
+
 	go func(ctx context.Context) {
-		d := &cacheResult{data, time.Now().Unix()}
-		value, err := jsoniter.MarshalToString(d)
+
 		if err != nil {
 			fmt.Println(err.Error())
 			fmt.Println("缓存放入失败")
