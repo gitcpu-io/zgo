@@ -145,7 +145,7 @@ func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
 		}
 
 		// 获取缓存
-		err = z.getData(ctx, key, field, expire, &obj)
+		err = z.getData(ctx, key, field, expire, obj)
 		if err != nil { // 有异常 或者 没有缓存
 			// 执行函数获取数据
 			err = fn(ctx, param, obj)
@@ -197,14 +197,17 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 				return fieldErr
 			}
 			// 返回
-			err := z.getData(ctx, key, field, 0, &obj)
+			err := z.getData(ctx, key, field, 0, obj)
 			return err
 
 		case value, ok := <-ch:
 			if ok {
 				fmt.Println("获取成功")
 				// 查询成功返回数据 并 塞入缓存
-				z.setData(ctx, key, field, value)
+				if value != nil {
+					return value
+				}
+				z.setData(ctx, key, field, obj)
 				return nil
 			}
 
@@ -235,7 +238,7 @@ func (z *zgocache) getData(ctx context.Context, key string, field string, expire
 		return errors.New("缓存数据为空")
 	} else {
 		fmt.Println("有缓存-------------")
-		data := cacheResult{Result: &obj}
+		data := cacheResult{Result: obj}
 		jsoniter.UnmarshalFromString(value.(string), &data)
 		if expire != 0 {
 			if data.Time < time.Now().Unix()-int64(expire)*int64(z.rate) {
