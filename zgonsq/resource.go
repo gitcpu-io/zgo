@@ -72,10 +72,10 @@ func (n *nsqResource) Producer(ctx context.Context, topic string, body []byte) (
 
 	ch := n.connpool.GetConnChan(n.label)
 
-	if len(ch) == 0 {
-		out <- 0
-		return out, errors.New("conn is nil")
-	}
+	//if len(ch) == 0 {
+	//	out <- 0
+	//	return out, errors.New("conn is nil")
+	//}
 
 	doneChan := make(chan *nsq.ProducerTransaction)
 	producer := <-ch
@@ -107,10 +107,10 @@ func (n *nsqResource) ProducerMulti(ctx context.Context, topic string, body [][]
 		return out, errors.New("message is empty")
 	}
 	ch := n.connpool.GetConnChan(n.label)
-	if len(ch) == 0 {
-		out <- 0
-		return out, errors.New("conn is nil")
-	}
+	//if len(ch) == 0 {
+	//	out <- 0
+	//	return out, errors.New("conn is nil")
+	//}
 	doneChan := make(chan *nsq.ProducerTransaction)
 	producer := <-ch
 	err := producer.MultiPublishAsync(topic, body, doneChan) // 发布消息
