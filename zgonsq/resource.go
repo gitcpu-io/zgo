@@ -92,7 +92,7 @@ func (n *nsqResource) Producer(ctx context.Context, topic string, body []byte) (
 			//fmt.Println(topic, "--发送到NSQ失败--", err)
 			out <- 0
 		} else {
-			fmt.Println(topic, "==发送到NSQ成功==", string(body), err)
+			//fmt.Println(topic, "==发送到NSQ成功==", string(body), err)
 			out <- 1
 		}
 	}()
