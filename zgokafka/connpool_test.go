@@ -20,21 +20,21 @@ func TestProducer(t *testing.T) {
 		C:        "北京主库-----kafka",
 		Host:     "localhost",
 		Port:     9092,
-		ConnSize: 100,
+		ConnSize: 10,
 		PoolSize: 20000,
 	}
 	cd_bj2 := config.ConnDetail{
 		C:        "北京从库2-----kafka",
 		Host:     "localhost",
 		Port:     9092,
-		ConnSize: 100,
+		ConnSize: 10,
 		PoolSize: 20000,
 	}
 	cd_sh := config.ConnDetail{
 		C:        "上海主库-----kafka",
 		Host:     "localhost",
 		Port:     9092,
-		ConnSize: 100,
+		ConnSize: 10,
 		PoolSize: 20000,
 	}
 	var s1 []*config.ConnDetail

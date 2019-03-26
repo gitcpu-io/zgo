@@ -14,18 +14,18 @@ type MysqlUser struct {
 func TestEngine(t *testing.T) {
 
 	err := Engine(&Options{
-		Env: "dev",
+		Env: "local",
 		//Project: "zgo_start",
 		Project: "1552641690",
 
 		//如果是在本地开发可以对下面的组件开启使用(local.json)，如果是线上，不需要填写，走的配置是etcd
 		Kafka: []string{
-			"kafka_label_bj",
-			"kafka_label_sh",
+			//"kafka_label_bj",
+			//"kafka_label_sh",
 		},
 		Nsq: []string{
 			"nsq_label_bj",
-			"nsq_label_sh",
+			//"nsq_label_sh",
 		},
 		Pika: []string{
 			//"pika_label_rw",

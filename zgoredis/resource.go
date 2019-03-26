@@ -13,8 +13,14 @@ type RedisResourcer interface {
 	GetConnChan(label string) chan *radix.Pool
 	//Post
 	Set(ctx context.Context, key string, value interface{}) (string, error)
+	//SETNX if Not eXists 1 如果key被设置了; 0 如果key没有被设置
+	Setnx(ctx context.Context, key string, value interface{}) (int, error)
+	//对key设置ttl为秒的过期; OK表示成功
+	Setex(ctx context.Context, key string, ttl int, value interface{}) (string, error)
 	Expire(ctx context.Context, key string, time int) (int, error)
 	Hset(ctx context.Context, key string, name string, value interface{}) (int, error)
+	Hmset(ctx context.Context, key string, values interface{}) (string, error)
+
 	Lpush(ctx context.Context, key string, value interface{}) (int, error)
 	Rpush(ctx context.Context, key string, value interface{}) (int, error)
 	Sadd(ctx context.Context, key string, value interface{}) (int, error)
@@ -74,6 +80,28 @@ func (r *redisResource) Set(ctx context.Context, key string, value interface{}) 
 	return res, nil
 }
 
+func (r *redisResource) Setnx(ctx context.Context, key string, value interface{}) (int, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var res int
+	if err := s.Do(radix.FlatCmd(&res, "SETNX", key, value)); err != nil {
+		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
+}
+
+func (r *redisResource) Setex(ctx context.Context, key string, ttl int, value interface{}) (string, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var res string
+	if err := s.Do(radix.FlatCmd(&res, "SETEX", key, ttl, value)); err != nil {
+		return "", err
+	} else {
+		return res, err
+	}
+	return res, nil
+}
+
 func (r *redisResource) Expire(ctx context.Context, key string, time int) (int, error) {
 	s := <-r.connpool.GetConnChan(r.label)
 	var res int
@@ -90,6 +118,17 @@ func (r *redisResource) Hset(ctx context.Context, key string, name string, value
 	var res int
 	if err := s.Do(radix.FlatCmd(&res, "Hset", key, name, value)); err != nil {
 		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
+}
+
+func (r *redisResource) Hmset(ctx context.Context, key string, values interface{}) (string, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var res string
+	if err := s.Do(radix.FlatCmd(&res, "HMSET", key, values)); err != nil {
+		return "", err
 	} else {
 		return res, err
 	}

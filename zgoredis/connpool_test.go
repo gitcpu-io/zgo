@@ -22,8 +22,8 @@ func TestRedisGet(t *testing.T) {
 	cd_bj := config.ConnDetail{
 		C:        "北京主库-----redis1",
 		Host:     "localhost",
-		Port:     6379,
-		ConnSize: 200,
+		Port:     6380,
+		ConnSize: 10,
 		PoolSize: 200,
 		Username: "",
 		Password: "",
@@ -32,8 +32,8 @@ func TestRedisGet(t *testing.T) {
 	cd_bj2 := config.ConnDetail{
 		C:        "北京从库-----redis2",
 		Host:     "localhost",
-		Port:     6379,
-		ConnSize: 200,
+		Port:     6380,
+		ConnSize: 10,
 		PoolSize: 200,
 		Username: "",
 		Password: "",
@@ -42,8 +42,8 @@ func TestRedisGet(t *testing.T) {
 	cd_sh := config.ConnDetail{
 		C:        "上海主库-----redis",
 		Host:     "localhost",
-		Port:     6379,
-		ConnSize: 200,
+		Port:     6380,
+		ConnSize: 10,
 		PoolSize: 200,
 		Username: "",
 		Password: "",
@@ -152,7 +152,7 @@ func TestRedisGet(t *testing.T) {
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 10000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 1000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
@@ -360,7 +360,7 @@ func TestConnPool_GetConnChan(t *testing.T) {
 			radix.DialTimeout(10*time.Second), radix.DialSelectDB(0), radix.DialAuthPass(""),
 		)
 	}
-	c, err := radix.NewPool("tcp", "127.0.0.1:6379", 10, radix.PoolConnFunc(customConnFunc))
+	c, err := radix.NewPool("tcp", "127.0.0.1:6380", 10, radix.PoolConnFunc(customConnFunc))
 	if err != nil {
 		fmt.Println("redis ", err)
 	}

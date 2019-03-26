@@ -111,7 +111,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 
 	for i := 0; i < hosts.ConnSize; i++ {
 		//把并发创建的数据库的连接channel，放进channel中
-		cp.connChanChan <- cp.createClient(fmt.Sprintf("%s:%d", hosts.Host, hosts.Port), hosts.Username, hosts.Password)
+		cp.connChanChan <- cp.createClient(fmt.Sprintf("%s:%d", hosts.Host, hosts.Port), hosts.DbName, hosts.Username, hosts.Password)
 	}
 
 	go func() {
@@ -142,14 +142,14 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 }
 
 //createClient 创建客户端连接
-func (cp *connPool) createClient(address string, username string, password string) chan *mgo.Session {
+func (cp *connPool) createClient(address string, dbname, username, password string) chan *mgo.Session {
 	out := make(chan *mgo.Session)
 	go func() {
 		//stime := time.Now()
 
 		dialInfo := mgo.DialInfo{
-			Addrs: []string{address},
-			//Database: "local",
+			Addrs:    []string{address},
+			Database: dbname,
 			Username: username,
 			Password: password,
 			//PoolLimit: 50000,
