@@ -90,7 +90,7 @@ func (cp *connPool) createClient(v *config.ConnDetail) (*gorm.DB, error) {
 	}
 	// 开发模式打开日志
 	//if config.ServerConfig.Env == DevelopmentMode {
-	db.LogMode(true)
+	//db.LogMode(true)
 	//}
 	// 最大空闲连接 5
 	//fmt.Println(v.MaxIdleSize)

@@ -832,7 +832,7 @@ make install
 
 docker-compose up -d
 
-##zgo 测试环境
+##zgo 本机使用dev时测试环境
 阿里云内网
 10.45.146.41
 阿里云公网
@@ -861,6 +861,17 @@ docker-compose up -d
 http://123.56.173.28:4171/
 
 1个etcd
-2380
+2382
 管理页面
 http://47.93.163.209:9097/
+
+1个es
+9200
+管理页面--打开localhost:9800后，输入http://es:9200 connect
+http://127.0.0.1:9800
+
+管理页面--打开http://127.0.0.1:1358，输入http://127.0.0.1:9200，后面输入index，connect
+http://127.0.0.1:1358
+
+1个portainer--用于查看所有docker中的资源
+http://127.0.0.1:9000
