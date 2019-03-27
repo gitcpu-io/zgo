@@ -24,6 +24,7 @@ func GetPool(label string, T string) (*gorm.DB, error) {
 	if pss, ok := connPoolMap[T]; ok {
 		if ps, ok1 := pss[label]; ok1 {
 			if len(ps) == 0 {
+				fmt.Println("错误的label：" + label)
 				return nil, errors.New("错误的label：" + label)
 			} else if len(ps) > 1 {
 				index := rand.Intn(len(ps)) //随机取一个相同label下的连接
@@ -33,6 +34,7 @@ func GetPool(label string, T string) (*gorm.DB, error) {
 			}
 		}
 	}
+	fmt.Println("GetPool param T is wrong")
 	return nil, errors.New("GetPool param T is wrong")
 
 }
@@ -62,8 +64,8 @@ func (cp *connPool) setConnPoolToChan(v []*config.ConnDetail) {
 			log.Fatalf(err.Error())
 		} else {
 			key := fmt.Sprintf("%s", cp.label)
-			fmt.Printf("init Mysql to Pool ... [%s] Host:%s, Port:%d, MaxOpenConn:%d, MaxIdleSize:%d, T:%s,  %s\n",
-				cp.label, v[i].Host, v[i].Port, v[i].MaxOpenConn, v[i].MaxIdleSize, v[i].T, v[i].C)
+			fmt.Printf("init Mysql to Pool ... [%s] Host:%s, Port:%d, MaxOpenConn:%d, MaxIdleSize:%d, T:%s, LogMode:%d, %s\n",
+				cp.label, v[i].Host, v[i].Port, v[i].MaxOpenConn, v[i].MaxIdleSize, v[i].T, v[i].LogMode, v[i].C)
 			if value, ok := connPoolMap[v[i].T]; ok { // 是否能获取到2级Map
 				value[key] = append(value[key], pool)
 			} else { // 创建二级map
@@ -80,7 +82,6 @@ func (cp *connPool) setConnPoolToChan(v []*config.ConnDetail) {
  1. v *config.ConnDetail  配置信息对象
 */
 func (cp *connPool) createClient(v *config.ConnDetail) (*gorm.DB, error) {
-	//fmt.Println("initConnPool", v)
 	host := fmt.Sprintf("%v:%v@(%v:%v)/%v?charset=utf8&parseTime=True&loc=Local", v.Username, v.Password, v.Host, v.Port, v.DbName)
 	db, err := gorm.Open("mysql", host)
 	if err != nil {
@@ -90,18 +91,13 @@ func (cp *connPool) createClient(v *config.ConnDetail) (*gorm.DB, error) {
 	}
 	// 开发模式打开日志
 	//if config.ServerConfig.Env == DevelopmentMode {
-	db.LogMode(true)
+	db.LogMode(v.LogMode == 1)
 	//}
 	// 最大空闲连接 5
-	//fmt.Println(v.MaxIdleSize)
 	db.DB().SetMaxIdleConns(v.MaxIdleSize)
 	// 最大打开链接 50
-	//fmt.Println(v.MaxOpenConn)
 	db.DB().SetMaxOpenConns(v.MaxOpenConn)
 	// 禁用复数表名
 	db.SingularTable(true)
 	return db, nil
-
-	// Output:
-	// gorm链接池对象，error信息
 }

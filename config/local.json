@@ -278,7 +278,8 @@
           "password": "HMugq0Fjz3bK67tHdSFottW2ORwSKpcJ",
           "maxIdleSize": 5,
           "maxOpenConn": 5,
-          "dbName": "spider"
+          "dbName": "spider",
+          "LogMode": 0
         }
       ]
     },
@@ -294,7 +295,8 @@
           "password": "root",
           "maxIdleSize": 5,
           "maxOpenConn": 10,
-          "dbName": "spider"
+          "dbName": "spider",
+          "LogMode": 1
         },
         {
           "c": "北京二手房库 旧实例r",
@@ -305,7 +307,8 @@
           "password": "root",
           "maxIdleSize": 5,
           "maxOpenConn": 10,
-          "dbName": "spider"
+          "dbName": "spider",
+          "LogMode": 1
         }
       ]
     }

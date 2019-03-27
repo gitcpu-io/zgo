@@ -84,7 +84,8 @@ type ConnDetail struct {
 	Db          int    `json:"db,omitempty"`
 	T           string `json:"t,omitempty"` // w 写入 r 只读
 	Prefix      string `json:"prefix,omitempty"`
-	DbName      string `json:"dbName,omitempty"` // 数据库名称
+	DbName      string `json:"dbName,omitempty"`  // 数据库名称
+	LogMode     int    `json:"logMode,omitempty"` // 日志类型
 }
 
 type CacheConfig struct {

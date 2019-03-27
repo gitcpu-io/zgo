@@ -3,6 +3,7 @@ package zgomysql
 import (
 	"context"
 	"errors"
+	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/jinzhu/gorm"
 )
@@ -67,6 +68,7 @@ func (mr *mysqlResource) GetWPool() (*gorm.DB, error) {
 }
 
 func (mr *mysqlResource) Get(ctx context.Context, args map[string]interface{}) error {
+	mr.validate(args)
 	var (
 		gormPool *gorm.DB
 		err      error
@@ -189,4 +191,13 @@ func (mr *mysqlResource) DeleteOne(ctx context.Context, args map[string]interfac
 		}
 	}
 	return 0, errors.New("mysql deleteOne method : id not allow null or 0")
+}
+
+func (mr *mysqlResource) validate(args map[string]interface{}, fields ...string) error {
+	for _, v := range fields {
+		if _, ok := args[v]; !ok {
+			return errors.New(fmt.Sprintf("参数错误，%s 不存在", v))
+		}
+	}
+	return nil
 }

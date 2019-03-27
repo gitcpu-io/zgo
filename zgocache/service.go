@@ -52,8 +52,8 @@ type dbServicer interface {
 /*
  GetCache 创建service对象的方法
  1.start 是否开启
- 2.dbtype 是否开启
- 3.label 是否开启
+ 2.dbtype 缓存底层数据库类型
+ 3.label 标签
  4.expire 是否开启
  5.tcType 超时对象
 */
@@ -132,7 +132,6 @@ type zgocache struct {
 // 2.expire 超时时间 单位s
 func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
 	return func(ctx context.Context, param map[string]interface{}, obj interface{}) error {
-		fmt.Println("Decorate")
 		if z.start != 1 {
 			return fn(ctx, param, obj)
 		}
@@ -179,7 +178,6 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 		go func(ctx context.Context) {
 			err := fn(ctx, param, obj)
 			ch <- err
-			fmt.Println("执行完成")
 		}(ctxTimeout)
 
 		// 缓存结果
@@ -188,8 +186,6 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 
 		select {
 		case <-ctxTimeout.Done():
-
-			fmt.Println("超时获取缓存")
 			// 拼接key 获取缓存返回
 			// 失败返回
 			if fieldErr != nil {
@@ -202,7 +198,6 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 
 		case value, ok := <-ch:
 			if ok {
-				fmt.Println("获取成功")
 				// 查询成功返回数据 并 塞入缓存
 				if value != nil {
 					return value
@@ -259,11 +254,8 @@ func (z *zgocache) setData(ctx context.Context, key string, field string, data i
 
 		if err != nil {
 			fmt.Println(err.Error())
-			fmt.Println("缓存放入失败")
 		} else {
-			fmt.Println("存：", key, ":", field)
 			z.service.Hset(ctx, key, field, value)
-			fmt.Println("存入完成")
 		}
 	}(ctx)
 	//return
