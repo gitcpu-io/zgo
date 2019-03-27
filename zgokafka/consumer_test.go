@@ -47,7 +47,7 @@ func TestConsumer(t *testing.T) {
 		panic(err)
 	}
 	c := chat{
-		Topic:   "zgo_start",
+		Topic:   label_bj,
 		GroupId: label_bj,
 		Kafka:   labelBj,
 	}

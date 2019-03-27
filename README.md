@@ -12,7 +12,7 @@ zgo是专门为使用go语言的开发人员所设计和开发的， 它提供�
 [![npm](zgo_engine.png)](http://wiki.zhugefang.com/display/ZGZFRDCENTER/zgo)
 
 
-##zgo的核心功能（共15个，2个数据库，2个缓存，2个消息队列，1个ES，1个Cache, 1个Log存储，1个Http，1个Grpc，4个边缘类组件）
+##zgo的核心功能（共15个，2个数据库，2个缓存，2个消息队列，1个ES，1个Cache, 1个Log存储，1个Http，1个Grpc，1个Map，3个工具类组件）
 * 1.zgo Mysql对gorm开发框架提供上层封装，通过channel内建连接池，提供高并发访问mysql，并支持函数调用时自动读写分离，开发人员无需关注主从数据库
 
 * 2.zgo Mongodb对mgo开发框架提供上层封装，改变框架原有session复制连接的使用方法，通过channel内建连接池，提供高并发访问mongodb数据库的增删改查
@@ -26,10 +26,10 @@ zgo是专门为使用go语言的开发人员所设计和开发的， 它提供�
 * 9.zgo Log提供了对日志的收集与处理，支持从配置中心定义存储到文件系统，或消息队列Nsq，Kafka
 * 10.zgo Http在iris web框架上提供了对api开发中统一，规范化的http response及响应码和错误message
 * 11.zgo Grpc提供了对google grpc上层的封装，通过protobuf定义数据传输格式，方便client和server端的使用
-* 12.zgo Utils提供了对常见的日期转换，高效Json序列与反序列化，字符编码，ip相关，输入判断，go中map和string转换等
-* 13.zgo Crypto提供了常用的md5,sha1,sha256,aes,rsa,hmac等加解密函数
-* 14.zgo File更加方便的一个函数调用get,set,append对文件进行操作
-* 15.zgo Map提供一种并发安全的map读写操作，本质是对go中map加RWmutex的一种实现，这个功能用于程序中的一级缓存，而redis和pika做为二级缓存
+* 12.zgo Map提供一种并发安全的map读写操作，本质是对go中map加RWmutex的一种实现，这个功能用于程序中的一级缓存，而redis和pika做为二级缓存
+* 13.zgo Utils提供了对常见的日期转换，高效Json序列与反序列化，字符编码，ip相关，输入判断，go中map和string转换等
+* 14.zgo Crypto提供了常用的md5,sha1,sha256,aes,rsa,hmac等加解密函数
+* 15.zgo File更加方便的一个函数调用get,set,append对文件进行操作
 
 ##zgo engine的依赖
 
@@ -150,21 +150,12 @@ err := AddHouse(context.TODO(), &h ,"bj")
 if err != nil {
     panic(err)
 }
-//二手房房源，添加操作
+//房源，添加操作
 func AddHouse(ctx context.Context, h *House, city string) error {
-	ms, err := zgo.Mysql.MysqlServiceByCityBiz(city, "sell")
-	if err != nil { //首先通过city获取到了它对应的label
-		return err
-	}
-	dbname, err1 := ms.GetDbByCityBiz(city, "sell")
-	if err1 != nil {    //通过城市获取数据库的名字
-		return err1
-	}
-
 	args := make(map[string]interface{})
 	args["obj"] = h
-	args["table"] = dbname + "." + h.TableName()
-	err2 := mysqlService.Create(ctx, args)
+	args["table"] = city + "." + "house"
+	err2 := zgo.Mysql.Create(ctx, args)
 	if err2 != nil {
 		return err2
 	}
@@ -523,16 +514,18 @@ es的操作我们做了二层封装，第一个是dsl查询语句的封装，第
 这里是一个使用Cache组件的demo，它有2个函数，GetData用来测试正常缓存，GetData1用来测试降级缓存。正常使用的方法是，如果你对你的查询操作，希望自动叠加上缓存功能，可以直接调用zgo.Cache.Decorate(传入你的函数名)(你原来函数的输入参数)，每次调用都用同样的方式；如果你想使用降级缓存可以zgo.Cache.TimeOutDecorate
 ```gotemplate
 type CacheDemo struct {}
+
+//QueryMysql 测试读取Mysqldb数据，wait for sdk init connection
 func (m CacheDemo) run() {
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
 
 	//查询参数
 	zgo.Engine(&zgo.Options{
-		Env:     "local",
-		Project: "zgo_start,
+		Env:     config.Conf.Env,
+		Project: config.Conf.Project,
 		Pika: []string{
-			"pika_label_rw", // 需要一个pika或是redis的配置，作为缓存的载体
+			"pika_label_rw", // 需要一个pika的配置
 		},
 	})
 	param := make(map[string]interface{})
@@ -543,49 +536,62 @@ func (m CacheDemo) run() {
 	param["ceshi5"] = 2
 	param["ceshi6"] = 2
 	param["ceshi7"] = 2
+	h := make(map[string]interface{})
 	// 无缓存
-	start := time.Now().Unix()
-	m.GetData(ctx, param)
-	fmt.Println("正常用时", time.Now().Unix()-start)
+	start := time.Now().UnixNano()
+	m.GetData(ctx, param, &h)
+	fmt.Println(h)
+	fmt.Println("正常用时", (time.Now().UnixNano()-start-2000000000)/1000)
 	fmt.Println("")
 
 	// 正常缓存
-	start = time.Now().Unix()
-	zgo.Cache.Decorate(m.GetData, 10)(ctx, param)
-	fmt.Println("第一次请求用时", time.Now().Unix()-start)
+	h1 := make(map[string]interface{})
+	start = time.Now().UnixNano()
+	zgo.Cache.Decorate(m.GetData, 1)(ctx, param, &h1)
+	fmt.Println(h1)
+	fmt.Println("第一次请求用时", (time.Now().UnixNano()-start-2000000000)/1000)
 
 	// 正常缓存第二次请求
-	time.Sleep(3)
 	fmt.Println("")
 	fmt.Println("-------第二次请求开始-----")
-	start = time.Now().Unix()
-	zgo.Cache.Decorate(m.GetData, 10)(ctx, param)
-	fmt.Println("第二次请求用时", time.Now().Unix()-start)
+	start = time.Now().UnixNano()
+	h2 := make(map[string]interface{})
+	zgo.Cache.Decorate(m.GetData, 10000000)(ctx, param, &h2)
+	fmt.Println(h2)
+	fmt.Println("第二次请求用时", (time.Now().UnixNano()-start)/1000)
 
-	start = time.Now().Unix()
+	start = time.Now().UnixNano()
 	fmt.Println("")
 	fmt.Println("")
 	fmt.Println(start)
 	fmt.Println("降级缓存测试：")
 	// 降级缓存正常情况
-	zgo.Cache.TimeOutDecorate(m.GetData1, 10)(ctx, param)
-	fmt.Println("正常降级缓存用时", time.Now().Unix()-start)
+	h3 := make(map[string]interface{})
+	zgo.Cache.TimeOutDecorate(m.GetData1, 10)(ctx, param, &h3)
+	fmt.Println(h3)
+	fmt.Println("正常降级缓存用时", (time.Now().UnixNano()-start-2000000000)/1000)
 	fmt.Println("")
 	fmt.Println("")
-	start = time.Now().Unix()
+	start = time.Now().UnixNano()
 	// 超时情况
-	zgo.Cache.TimeOutDecorate(m.GetData1, 1)(ctx, param)
-	fmt.Println("超时降级缓存用时", time.Now().Unix()-start)
+	h4 := make(map[string]interface{})
+	zgo.Cache.TimeOutDecorate(m.GetData1, 1)(ctx, param, &h4)
+	fmt.Println(h4)
+	fmt.Println("超时降级缓存用时", (time.Now().UnixNano()-start-1000000000)/1000)
 }
 
-func (m CacheDemo) GetData(ctx context.Context, param map[string]interface{}) (interface{}, error) {
+func (m CacheDemo) GetData(ctx context.Context, param map[string]interface{}, obj interface{}) error {
 	time.Sleep(2 * time.Second)
-	return map[string]interface{}{"test": "测试数据"}, nil
+	data := (*obj.(*map[string]interface{}))
+	data["test"] = "测试数据"
+	return nil
 }
 
-func (m CacheDemo) GetData1(ctx context.Context, param map[string]interface{}) (interface{}, error) {
+func (m CacheDemo) GetData1(ctx context.Context, param map[string]interface{}, obj interface{}) error {
 	time.Sleep(2 * time.Second)
-	return map[string]interface{}{"test": "测试数据"}, nil
+	data := (*obj.(*map[string]interface{}))
+	data["test"] = "测试数据"
+	return nil
 }
 ```
 ###zgo Log组件使用
@@ -606,37 +612,40 @@ zgo engine会替你把这些日志，输出到文件系统，或者是Nsq中，�
 ###yaml文件编写
 
 ####k8s yaml的编写
-v1 version的yaml文件不仅有Deployment，还带有Service Kind
-```yaml
+svc.yaml是一个k8s的Service Kind
+```gotemplate
 kind: Service
 apiVersion: v1
 metadata:
-  name: start
+  name: zgo-start
   labels:
-    app: start
+    app: zgo-start
 spec:
   selector:
-    app: start
+    app: zgo-start
   ports:
     - name: http
       port: 80
 ---
+```
+v1.yaml文件是个Deployment
+```yaml
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: start-v1
+  name: zgo-start-v1
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: start
+        app: zgo-start
         version: v1
     spec:
       restartPolicy: Always
       containers:
-        - name: start
-          image: registry.cn-beijing.aliyuncs.com/zhuge/start:v1
+        - name: zgo-start
+          image: registry.cn-beijing.aliyuncs.com/zhuge/zgo-start:v1.0.0
           ports:
             - containerPort: 80
           livenessProbe:
@@ -655,24 +664,24 @@ spec:
             periodSeconds: 3
 ---
 ```
-v2 的yaml文件仅有Deployment Kind就可以了
+v2.yaml文件仅有Deployment Kind就可以了，为什么要做v2.yaml，当更新时，需要蓝绿发布，除了image不同外，version也不同，并行运行v2
 ```yaml
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: start-v2
+  name: zgo-start-v2
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: start
+        app: zgo-start
         version: v2
     spec:
       restartPolicy: Always
       containers:
-        - name: start
-          image: registry.cn-beijing.aliyuncs.com/zhuge/start:v2
+        - name: zgo-start
+          image: registry.cn-beijing.aliyuncs.com/zhuge/zgo-start:v1.0.1
           ports:
             - containerPort: 80
           livenessProbe:
@@ -701,7 +710,7 @@ gateway.yaml如下
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: start-gateway
+  name: zgo-start-gateway
 spec:
   selector:
     istio: ingressgateway
@@ -713,24 +722,6 @@ spec:
       hosts:
         - "*"
 ---
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: start
-spec:
-  hosts:
-    - "*"
-  gateways:
-    - start-gateway
-  http:
-    - match:
-        - uri:
-            exact: /
-      route:
-        - destination:
-            host: start
-            port:
-              number: 80
 ```
 
 如果你想控制2个版本的流量，需要再建立一个DestinationRule，其中的subsets有2个version的label
@@ -738,16 +729,16 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: start
+  name: zgo-start
 spec:
-  host: start
+  host: zgo-start
   subsets:
-    - name: v1
-      labels:
-        version: v1
     - name: v2
       labels:
         version: v2
+    - name: v1
+      labels:
+        version: v1
 ---
 ```
 这样你就可以通过route功能实现流量控制新旧2个version的更新
@@ -755,20 +746,22 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: start
+  name: zgo-start
 spec:
   hosts:
-    - start
+    - "*"
+  gateways:
+    - zgo-start-gateway
   http:
     - route:
         - destination:
-            host: start
-            subset: v1
-          weight: 50
-        - destination:
-            host: start
+            host: zgo-start
             subset: v2
-          weight: 50
+          weight: 100
+        - destination:
+            host: zgo-start
+            subset: v1
+          weight: 0
 ```
 
 ##zgo engine各组件的性能测试
@@ -816,13 +809,13 @@ go tool cover -html=c.out
 
 go test -bench . -cpuprofile cpu.out
 
-go tool pprof cpu.out
+go tool pprof -http=":8081" cpu.out
 
 // 查看内存使用
 
 go test -memprofile mem.out
 
-go tool pprof mem.out
+go tool pprof -http=":8081" mem.out
 
 执行pprof后，然后输入web  或是quit 保证下载了svg
 
@@ -839,7 +832,7 @@ make install
 
 docker-compose up -d
 
-##zgo 测试环境
+##zgo 本机使用dev时测试环境
 阿里云内网
 10.45.146.41
 阿里云公网
@@ -868,6 +861,17 @@ docker-compose up -d
 http://123.56.173.28:4171/
 
 1个etcd
-2380
+2382
 管理页面
 http://47.93.163.209:9097/
+
+1个es
+9200
+管理页面--打开localhost:9800后，输入http://es:9200 connect
+http://127.0.0.1:9800
+
+管理页面--打开http://127.0.0.1:1358，输入http://127.0.0.1:9200，后面输入index，connect
+http://127.0.0.1:1358
+
+1个portainer--用于查看所有docker中的资源
+http://127.0.0.1:9000

@@ -290,24 +290,24 @@
           "c": "北京二手房库 旧实例w",
           "t": "w",
           "host": "localhost",
-          "port": 3308,
+          "port": 3307,
           "username": "root",
           "password": "root",
           "maxIdleSize": 5,
           "maxOpenConn": 10,
-          "dbName": "spider",
+          "dbName": "mysql",
           "LogMode": 1
         },
         {
           "c": "北京二手房库 旧实例r",
           "t": "r",
           "host": "localhost",
-          "port": 3308,
+          "port": 3307,
           "username": "root",
           "password": "root",
           "maxIdleSize": 5,
           "maxOpenConn": 10,
-          "dbName": "spider",
+          "dbName": "mysql",
           "LogMode": 1
         }
       ]

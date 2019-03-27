@@ -158,6 +158,7 @@ func (cp *connPool) createClient(address []string) chan *sarama.AsyncProducer {
 		//c.Net.KeepAlive = 30 * time.Minute
 		c.Net.MaxOpenRequests = 20000
 
+		//fmt.Println(address,"------connection kafka-------")
 		p, err := sarama.NewAsyncProducer(address, c)
 		if err != nil {
 			fmt.Printf("sarama.NewSyncProducer err:%s \n", err)
@@ -173,9 +174,9 @@ func (cp *connPool) createClient(address []string) chan *sarama.AsyncProducer {
 			}
 		}(p)
 		go func(p sarama.AsyncProducer) {
-			for v := range p.Successes() {
-				val, _ := v.Value.Encode()
-				fmt.Println(v.Offset, v.Partition, string(val))
+			for _ = range p.Successes() {
+				//val, _ := v.Value.Encode()
+				//fmt.Println(v.Offset, v.Partition, string(val))
 			}
 
 		}(p)

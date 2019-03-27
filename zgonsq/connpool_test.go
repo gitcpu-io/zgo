@@ -22,24 +22,24 @@ func TestProducer(t *testing.T) {
 		ConnSize: 5,
 		PoolSize: 246,
 	}
-	//cd_bj2 := config.ConnDetail{
-	//	C:        "北京从库2-----nsq",
-	//	Host:     "localhost",
-	//	Port:     4150,
-	//	ConnSize: 50,
-	//	PoolSize: 135,
-	//}
+	cd_bj2 := config.ConnDetail{
+		C:        "北京从库2-----nsq",
+		Host:     "localhost",
+		Port:     4150,
+		ConnSize: 5,
+		PoolSize: 135,
+	}
 	cd_sh := config.ConnDetail{
 		C:        "上海主库-----nsq",
 		Host:     "localhost",
-		Port:     4152,
-		ConnSize: 50,
-		PoolSize: 20000,
+		Port:     4150,
+		ConnSize: 5,
+		PoolSize: 2000,
 	}
 	var s1 []*config.ConnDetail
 	var s2 []*config.ConnDetail
-	//s1 = append(s1, &cd_bj, &cd_bj2)
-	s1 = append(s1, &cd_bj)
+	s1 = append(s1, &cd_bj, &cd_bj2)
+	//s1 = append(s1, &cd_bj2)
 	s2 = append(s2, &cd_sh)
 	hsm = map[string][]*config.ConnDetail{
 		label_bj: s1,
@@ -49,7 +49,7 @@ func TestProducer(t *testing.T) {
 	InitNsq(hsm) //测试时表示使用nsq，在zgo_start中使用一次
 
 	//测试读取nsq数据，wait for sdk init connection
-	time.Sleep(2 * time.Second)
+	time.Sleep(4 * time.Second)
 
 	clientBj, err := GetNsq(label_bj)
 	clientSh, err := GetNsq(label_sh)
@@ -59,7 +59,7 @@ func TestProducer(t *testing.T) {
 
 	var replyChan = make(chan int)
 	var countChan = make(chan int)
-	l := 10 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+	l := 1000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
 
 	count := []int{}
 	total := []int{}
@@ -69,7 +69,7 @@ func TestProducer(t *testing.T) {
 		go func(i int) {
 			countChan <- i //统计开出去的goroutine
 			if i%2 == 0 {
-				ch := producer("zgo_start", clientBj, i, true)
+				ch := producer(label_bj, clientBj, i, true)
 				reply := <-ch
 				replyChan <- reply
 

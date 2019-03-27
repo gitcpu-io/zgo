@@ -18,8 +18,13 @@ type Rediser interface {
 	//Post
 	//hmset setnx setex
 	Set(ctx context.Context, key string, value interface{}) (string, error)
+	//SETNX if Not eXists 1 如果key被设置了; 0 如果key没有被设置
+	Setnx(ctx context.Context, key string, value interface{}) (int, error)
+	//对key设置ttl为秒的过期; OK表示成功
+	Setex(ctx context.Context, key string, ttl int, value interface{}) (string, error)
 	Expire(ctx context.Context, key string, time int) (int, error)
 	Hset(ctx context.Context, key string, name string, value interface{}) (int, error)
+	Hmset(ctx context.Context, key string, values interface{}) (string, error)
 	Lpush(ctx context.Context, key string, value interface{}) (int, error)
 	Rpush(ctx context.Context, key string, value interface{}) (int, error)
 	Sadd(ctx context.Context, key string, value interface{}) (int, error)
@@ -123,12 +128,24 @@ func (r *zgoredis) Set(ctx context.Context, key string, value interface{}) (stri
 	return r.res.Set(ctx, key, value)
 }
 
+func (r *zgoredis) Setnx(ctx context.Context, key string, value interface{}) (int, error) {
+	return r.res.Setnx(ctx, key, value)
+}
+
+func (r *zgoredis) Setex(ctx context.Context, key string, ttl int, value interface{}) (string, error) {
+	return r.res.Setex(ctx, key, ttl, value)
+}
+
 func (r *zgoredis) Expire(ctx context.Context, key string, time int) (int, error) {
 	return r.res.Expire(ctx, key, time)
 }
 
 func (r *zgoredis) Hset(ctx context.Context, key string, name string, value interface{}) (int, error) {
 	return r.res.Hset(ctx, key, name, value)
+}
+
+func (r *zgoredis) Hmset(ctx context.Context, key string, values interface{}) (string, error) {
+	return r.res.Hmset(ctx, key, values)
 }
 
 func (r *zgoredis) Lpush(ctx context.Context, key string, value interface{}) (int, error) {

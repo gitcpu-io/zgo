@@ -20,21 +20,21 @@ func TestProducer(t *testing.T) {
 		C:        "北京主库-----kafka",
 		Host:     "localhost",
 		Port:     9092,
-		ConnSize: 100,
+		ConnSize: 10,
 		PoolSize: 20000,
 	}
 	cd_bj2 := config.ConnDetail{
 		C:        "北京从库2-----kafka",
 		Host:     "localhost",
 		Port:     9092,
-		ConnSize: 100,
+		ConnSize: 10,
 		PoolSize: 20000,
 	}
 	cd_sh := config.ConnDetail{
 		C:        "上海主库-----kafka",
 		Host:     "localhost",
 		Port:     9092,
-		ConnSize: 100,
+		ConnSize: 10,
 		PoolSize: 20000,
 	}
 	var s1 []*config.ConnDetail
@@ -49,7 +49,7 @@ func TestProducer(t *testing.T) {
 	InitKafka(hsm) //测试时表示使用kafka，在zgo_start中使用一次
 
 	//测试读取kafka数据，wait for sdk init connection
-	time.Sleep(20 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	clientBj, err := GetKafka(label_bj)
 	clientSh, err := GetKafka(label_sh)
@@ -69,12 +69,12 @@ func TestProducer(t *testing.T) {
 		go func(i int) {
 			countChan <- i //统计开出去的goroutine
 			if i%2 == 0 {
-				ch := producer(label_sh, clientBj, i, true)
+				ch := producer(label_bj, clientBj, i, true)
 				reply := <-ch
 				replyChan <- reply
 
 			} else {
-				ch := producer(label_bj, clientSh, i, false)
+				ch := producer(label_sh, clientSh, i, false)
 				reply := <-ch
 				replyChan <- reply
 			}
