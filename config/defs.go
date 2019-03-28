@@ -46,8 +46,8 @@ var Levels = []string{"debug", "info", "warn", "error"}
 
 var (
 	DevEtcHosts = []string{ //开发联调ETCD地
-		"10.45.146.41:2380", //测试时使用内网ip
-		//"123.56.173.28:2380", //如果本机联调，想用测试机的etcd可以使用公网ip
+		//"10.45.146.41:2380", //测试时使用内网ip
+		"123.56.173.28:2380", //如果本机联调，想用测试机的etcd可以使用公网ip
 		//"localhost:2381",
 	}
 	QaEtcHosts = []string{ //QA环境ETCD地址，同正式
