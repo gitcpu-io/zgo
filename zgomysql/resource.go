@@ -68,7 +68,10 @@ func (mr *mysqlResource) GetWPool() (*gorm.DB, error) {
 }
 
 func (mr *mysqlResource) Get(ctx context.Context, args map[string]interface{}) error {
-	mr.validate(args)
+	errv := mr.validate(args, "table", "query", "args", "obj")
+	if errv != nil {
+		return errv
+	}
 	var (
 		gormPool *gorm.DB
 		err      error
@@ -91,6 +94,10 @@ func (mr *mysqlResource) Get(ctx context.Context, args map[string]interface{}) e
 }
 
 func (mr *mysqlResource) List(ctx context.Context, args map[string]interface{}) error {
+	errv := mr.validate(args, "table", "query", "args", "obj")
+	if errv != nil {
+		return errv
+	}
 	var (
 		gormPool *gorm.DB
 		err      error
@@ -104,7 +111,11 @@ func (mr *mysqlResource) List(ctx context.Context, args map[string]interface{}) 
 	if err != nil {
 		return err
 	}
-	gormPool = gormPool.Table(args["table"].(string)).Where(args["query"], args["args"].([]interface{})...)
+	gormPool = gormPool.Table(args["table"].(string))
+	if sel, ok := args["select"]; ok {
+		gormPool = gormPool.Select(sel)
+	}
+	gormPool = gormPool.Where(args["query"], args["args"].([]interface{})...)
 	currentLimit := 30
 	if limit, ok := args["limit"]; ok {
 		gormPool = gormPool.Limit(limit)
@@ -125,6 +136,10 @@ func (mr *mysqlResource) List(ctx context.Context, args map[string]interface{}) 
 }
 
 func (mr *mysqlResource) Count(ctx context.Context, args map[string]interface{}) error {
+	errv := mr.validate(args, "table", "query", "args", "count")
+	if errv != nil {
+		return errv
+	}
 	var (
 		gormPool *gorm.DB
 		err      error
@@ -144,6 +159,11 @@ func (mr *mysqlResource) Count(ctx context.Context, args map[string]interface{})
 }
 
 func (mr *mysqlResource) Create(ctx context.Context, args map[string]interface{}) error {
+	errv := mr.validate(args, "table", "obj")
+	if errv != nil {
+		return errv
+	}
+
 	gormPool, err := mr.GetWPool()
 	if err != nil {
 		return err
@@ -158,6 +178,10 @@ func (mr *mysqlResource) Create(ctx context.Context, args map[string]interface{}
 }
 
 func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interface{}) (int, error) {
+	errv := mr.validate(args, "table", "id", "data")
+	if errv != nil {
+		return 0, errv
+	}
 	gormPool, err := mr.GetWPool()
 	if err != nil {
 		return 0, err
@@ -175,6 +199,10 @@ func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interfac
 }
 
 func (mr *mysqlResource) DeleteOne(ctx context.Context, args map[string]interface{}) (int, error) {
+	errv := mr.validate(args, "table", "obj")
+	if errv != nil {
+		return 0, errv
+	}
 	gormPool, err := mr.GetWPool()
 	if err != nil {
 		return 0, err
