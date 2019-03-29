@@ -351,7 +351,7 @@ func (p *pikaResource) Lrange(ctx context.Context, key string, start int, stop i
 	}
 }
 
-func (r *redisResource) Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error) {
+func (r *pikaResource) Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error) {
 	s := <-r.connpool.GetConnChan(r.label)
 	var listContent interface{}
 	if err := s.Do(radix.FlatCmd(&listContent, "Ltrim", key, start, stop)); err != nil {
