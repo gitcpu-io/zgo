@@ -48,7 +48,7 @@ type Rediser interface {
 	Scard(ctx context.Context, key string) (interface{}, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
-	Zrank(ctx context.Context, key string, member interface{}) (int, error)
+	Zrank(ctx context.Context, key string, member interface{}) (interface{}, error)
 	Zscore(ctx context.Context, key string, member interface{}) (string, error)
 	Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
 	Zrevrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
@@ -244,7 +244,7 @@ func (r *zgoredis) Sismember(ctx context.Context, key string, value interface{})
 	return r.res.Sismember(ctx, key, value)
 }
 
-func (r *zgoredis) Zrank(ctx context.Context, key string, member interface{}) (int, error) {
+func (r *zgoredis) Zrank(ctx context.Context, key string, member interface{}) (interface{}, error) {
 	return r.res.Zrank(ctx, key, member)
 }
 

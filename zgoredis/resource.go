@@ -48,7 +48,7 @@ type RedisResourcer interface {
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
 
-	Zrank(ctx context.Context, key string, member interface{}) (int, error)
+	Zrank(ctx context.Context, key string, member interface{}) (interface{}, error)
 	Zscore(ctx context.Context, key string, member interface{}) (string, error)
 	Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
 	Zrevrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
@@ -371,9 +371,9 @@ func (r *redisResource) Sismember(ctx context.Context, key string, value interfa
 	}
 }
 
-func (r *redisResource) Zrank(ctx context.Context, key string, member interface{}) (int, error) {
+func (r *redisResource) Zrank(ctx context.Context, key string, member interface{}) (interface{}, error) {
 	s := <-r.connpool.GetConnChan(r.label)
-	var rank int
+	var rank interface{}
 	if err := s.Do(radix.FlatCmd(&rank, "Zrank", key, member)); err != nil {
 		return 0, err
 	} else {
