@@ -42,6 +42,7 @@ type Pikaer interface {
 	Del(ctx context.Context, key string) (interface{}, error)
 	Llen(ctx context.Context, key string) (interface{}, error)
 	Lrange(ctx context.Context, key string, start int, stop int) (interface{}, error)
+	Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error)
 	Lpop(ctx context.Context, key string) (interface{}, error)
 	Rpop(ctx context.Context, key string) (interface{}, error)
 	Scard(ctx context.Context, key string) (interface{}, error)
@@ -217,6 +218,10 @@ func (r *zgopika) Llen(ctx context.Context, key string) (interface{}, error) {
 
 func (r *zgopika) Lrange(ctx context.Context, key string, start int, stop int) (interface{}, error) {
 	return r.res.Lrange(ctx, key, start, stop)
+}
+
+func (r *zgopika) Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error) {
+	return r.res.Ltrim(ctx, key, start, stop)
 }
 
 func (r *zgopika) Lpop(ctx context.Context, key string) (interface{}, error) {

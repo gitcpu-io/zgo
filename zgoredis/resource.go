@@ -40,6 +40,7 @@ type RedisResourcer interface {
 
 	Llen(ctx context.Context, key string) (interface{}, error)
 	Lrange(ctx context.Context, key string, start int, stop int) (interface{}, error)
+	Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error)
 	Lpop(ctx context.Context, key string) (interface{}, error)
 	Rpop(ctx context.Context, key string) (interface{}, error)
 
@@ -304,6 +305,16 @@ func (r *redisResource) Lrange(ctx context.Context, key string, start int, stop 
 	s := <-r.connpool.GetConnChan(r.label)
 	var listContent []string
 	if err := s.Do(radix.FlatCmd(&listContent, "Lrange", key, start, stop)); err != nil {
+		return nil, err
+	} else {
+		return listContent, err
+	}
+}
+
+func (r *redisResource) Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var listContent interface{}
+	if err := s.Do(radix.FlatCmd(&listContent, "Ltrim", key, start, stop)); err != nil {
 		return nil, err
 	} else {
 		return listContent, err
