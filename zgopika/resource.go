@@ -46,6 +46,14 @@ type PikaResourcer interface {
 	Scard(ctx context.Context, key string) (interface{}, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
+
+	Zrank(ctx context.Context, key string, member interface{}) (int, error)
+	Zscore(ctx context.Context, key string, member interface{}) (string, error)
+	Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
+	Zrevrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
+	ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error)
+	Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error)
+	Zrem(ctx context.Context, key string, member ...interface{}) (int, error)
 }
 
 type pikaResource struct {
@@ -346,7 +354,7 @@ func (p *pikaResource) Lpop(ctx context.Context, key string) (interface{}, error
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
-	var listContent int
+	var listContent string
 	if err := s.Do(radix.FlatCmd(&listContent, "Lpop", key)); err != nil {
 		return nil, err
 	} else {
@@ -358,8 +366,8 @@ func (p *pikaResource) Rpop(ctx context.Context, key string) (interface{}, error
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
-	var listContent int
-	if err := s.Do(radix.FlatCmd(&listContent, "Lpop", key)); err != nil {
+	var listContent string
+	if err := s.Do(radix.FlatCmd(&listContent, "Rpop", key)); err != nil {
 		return nil, err
 	} else {
 		return listContent, err
@@ -396,6 +404,108 @@ func (p *pikaResource) Sismember(ctx context.Context, key string, value interfac
 	key = prefix + key
 	var flag int
 	if err := s.Do(radix.FlatCmd(&flag, "Sismember", key, value)); err != nil {
+		return 0, err
+	} else {
+		return flag, err
+	}
+}
+
+func (p *pikaResource) Zrank(ctx context.Context, key string, member interface{}) (int, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
+	var rank int
+	if err := s.Do(radix.FlatCmd(&rank, "Zrank", key, member)); err != nil {
+		return 0, err
+	} else {
+		return rank, err
+	}
+}
+
+func (p *pikaResource) Zscore(ctx context.Context, key string, member interface{}) (string, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
+	var score string
+	if err := s.Do(radix.FlatCmd(&score, "Zscore", key, member)); err != nil {
+		return "", err
+	} else {
+		return score, err
+	}
+}
+
+func (p *pikaResource) Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
+	var setContent []string
+	if withscores {
+		if err := s.Do(radix.FlatCmd(&setContent, "Zrange", key, start, stop, "WITHSCORES")); err != nil {
+			return nil, err
+		} else {
+			return setContent, err
+		}
+	} else {
+		if err := s.Do(radix.FlatCmd(&setContent, "Zrange", key, start, stop)); err != nil {
+			return nil, err
+		} else {
+			return setContent, err
+		}
+	}
+
+}
+
+func (p *pikaResource) Zrevrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
+	var setContent []string
+	if withscores {
+		if err := s.Do(radix.FlatCmd(&setContent, "Zrevrange", key, start, stop, "WITHSCORES")); err != nil {
+			return nil, err
+		} else {
+			return setContent, err
+		}
+	} else {
+		if err := s.Do(radix.FlatCmd(&setContent, "Zrevrange", key, start, stop)); err != nil {
+			return nil, err
+		} else {
+			return setContent, err
+		}
+	}
+
+}
+
+func (p *pikaResource) ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
+	var score string
+	if err := s.Do(radix.FlatCmd(&score, "Zincrby", key, increment, member)); err != nil {
+		return "", err
+	} else {
+		return score, err
+	}
+}
+
+func (p *pikaResource) Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
+	var flag int
+	if err := s.Do(radix.FlatCmd(&flag, "Zadd", key, score, member)); err != nil {
+		return 0, err
+	} else {
+		return flag, err
+	}
+}
+
+func (p *pikaResource) Zrem(ctx context.Context, key string, member ...interface{}) (int, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
+	var flag int
+	if err := s.Do(radix.FlatCmd(&flag, "Zrem", key, member...)); err != nil {
 		return 0, err
 	} else {
 		return flag, err

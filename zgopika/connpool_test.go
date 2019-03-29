@@ -84,6 +84,13 @@ func TestPikaGet(t *testing.T) {
 	//ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	//defer cancel()
 
+	//0.set get
+	//res, err := clientBjRw.Zadd(ctx, "china_zset", 111, 2222)
+	//
+	//res2, err := clientBjRw.Get(ctx, "china666")
+	//
+	//fmt.Println(res)
+
 	//1.set get
 	//res, err := clientBjRw.Set(ctx, "china666", 111111)
 	//
