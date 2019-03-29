@@ -47,6 +47,13 @@ type Rediser interface {
 	Scard(ctx context.Context, key string) (interface{}, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
+	Zrank(ctx context.Context, key string, member interface{}) (int, error)
+	Zscore(ctx context.Context, key string, member interface{}) (string, error)
+	Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
+	Zrevrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
+	ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error)
+	Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error)
+	Zrem(ctx context.Context, key string, member ...interface{}) (int, error)
 }
 
 func Redis(l string) Rediser {
@@ -217,7 +224,7 @@ func (r *zgoredis) Lpop(ctx context.Context, key string) (interface{}, error) {
 }
 
 func (r *zgoredis) Rpop(ctx context.Context, key string) (interface{}, error) {
-	return r.res.Lpop(ctx, key)
+	return r.res.Rpop(ctx, key)
 }
 
 func (r *zgoredis) Scard(ctx context.Context, key string) (interface{}, error) {
@@ -230,4 +237,32 @@ func (r *zgoredis) Smembers(ctx context.Context, key string) (interface{}, error
 
 func (r *zgoredis) Sismember(ctx context.Context, key string, value interface{}) (int, error) {
 	return r.res.Sismember(ctx, key, value)
+}
+
+func (r *zgoredis) Zrank(ctx context.Context, key string, member interface{}) (int, error) {
+	return r.res.Zrank(ctx, key, member)
+}
+
+func (r *zgoredis) Zscore(ctx context.Context, key string, member interface{}) (string, error) {
+	return r.res.Zscore(ctx, key, member)
+}
+
+func (r *zgoredis) Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error) {
+	return r.res.Zrange(ctx, key, start, stop, withscores)
+}
+
+func (r *zgoredis) Zrevrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error) {
+	return r.res.Zrevrange(ctx, key, start, stop, withscores)
+}
+
+func (r *zgoredis) ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error) {
+	return r.res.ZINCRBY(ctx, key, increment, member)
+}
+
+func (r *zgoredis) Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error) {
+	return r.res.Zadd(ctx, key, score, member)
+}
+
+func (r *zgoredis) Zrem(ctx context.Context, key string, member ...interface{}) (int, error) {
+	return r.res.Zrem(ctx, key, member)
 }

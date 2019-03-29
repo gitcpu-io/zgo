@@ -73,6 +73,32 @@ func TestRedisGet(t *testing.T) {
 	//ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	//defer cancel()
 
+	//top
+	//ZRANK zadd zrange zincrby zrem zreverange ZSCORE
+	//res, err := clientLocal.Zrank(ctx, "page_rank", "bing.com")
+	//fmt.Println(res)
+
+	//res, err := clientLocal.Zscore(ctx, "page_rank", "bing.com")
+	//fmt.Println(res)
+
+	//res, err := clientLocal.Zrange(ctx, "page_rank", 0, -1, false)
+	//fmt.Println(res)
+
+	//res, err := clientLocal.Zrange(ctx, "page_rank", 0, -1, false)
+	//fmt.Println(res)
+
+	//res, err := clientLocal.Zrevrange(ctx, "page_rank", 0, -1, false)
+	//fmt.Println(res)
+
+	//res, err := clientLocal.ZINCRBY(ctx, "page_rank", 20, "bing.com")
+	//fmt.Println(res)
+
+	//res, err := clientLocal.Zadd(ctx, "page_rank", 20, "ssbing.com")
+	//fmt.Println(res)
+
+	//res, err := clientLocal.Zrem(ctx, "page_rank", "ooooewew", "ewewew")
+	//fmt.Println(res)
+
 	//1.set get
 	//res, err := clientLocal.Set(ctx, "china666", 999)
 	//
