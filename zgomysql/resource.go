@@ -186,14 +186,12 @@ func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interfac
 	if err != nil {
 		return 0, err
 	}
-	if v, ok := args["id"]; ok {
-		if v.(int) > 0 {
-			// args["data"] = map[string]interface{}{"name": "hello", "age": 18}
-			db := gormPool.Table(args["table"].(string)).Where(" id = ? ", args["id"]).Updates(args["data"])
-			count := db.RowsAffected
-			err = db.Error
-			return int(count), err
-		}
+	if _, ok := args["id"]; ok {
+		// args["data"] = map[string]interface{}{"name": "hello", "age": 18}
+		db := gormPool.Table(args["table"].(string)).Where(" id = ? ", args["id"]).Updates(args["data"])
+		count := db.RowsAffected
+		err = db.Error
+		return int(count), err
 	}
 	return 0, errors.New("mysql updateOne method : id not allow null or 0")
 }
