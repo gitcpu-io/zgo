@@ -42,11 +42,19 @@ type Pikaer interface {
 	Del(ctx context.Context, key string) (interface{}, error)
 	Llen(ctx context.Context, key string) (interface{}, error)
 	Lrange(ctx context.Context, key string, start int, stop int) (interface{}, error)
+	Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error)
 	Lpop(ctx context.Context, key string) (interface{}, error)
 	Rpop(ctx context.Context, key string) (interface{}, error)
 	Scard(ctx context.Context, key string) (interface{}, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
+	Zrank(ctx context.Context, key string, member interface{}) (interface{}, error)
+	Zscore(ctx context.Context, key string, member interface{}) (string, error)
+	Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
+	Zrevrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
+	ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error)
+	Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error)
+	Zrem(ctx context.Context, key string, member ...interface{}) (int, error)
 }
 
 func Pika(l string) Pikaer {
@@ -212,6 +220,10 @@ func (r *zgopika) Lrange(ctx context.Context, key string, start int, stop int) (
 	return r.res.Lrange(ctx, key, start, stop)
 }
 
+func (r *zgopika) Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error) {
+	return r.res.Ltrim(ctx, key, start, stop)
+}
+
 func (r *zgopika) Lpop(ctx context.Context, key string) (interface{}, error) {
 	return r.res.Lpop(ctx, key)
 }
@@ -230,4 +242,32 @@ func (r *zgopika) Smembers(ctx context.Context, key string) (interface{}, error)
 
 func (r *zgopika) Sismember(ctx context.Context, key string, value interface{}) (int, error) {
 	return r.res.Sismember(ctx, key, value)
+}
+
+func (r *zgopika) Zrank(ctx context.Context, key string, member interface{}) (interface{}, error) {
+	return r.res.Zrank(ctx, key, member)
+}
+
+func (r *zgopika) Zscore(ctx context.Context, key string, member interface{}) (string, error) {
+	return r.res.Zscore(ctx, key, member)
+}
+
+func (r *zgopika) Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error) {
+	return r.res.Zrange(ctx, key, start, stop, withscores)
+}
+
+func (r *zgopika) Zrevrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error) {
+	return r.res.Zrevrange(ctx, key, start, stop, withscores)
+}
+
+func (r *zgopika) ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error) {
+	return r.res.ZINCRBY(ctx, key, increment, member)
+}
+
+func (r *zgopika) Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error) {
+	return r.res.Zadd(ctx, key, score, member)
+}
+
+func (r *zgopika) Zrem(ctx context.Context, key string, member ...interface{}) (int, error) {
+	return r.res.Zrem(ctx, key, member)
 }
