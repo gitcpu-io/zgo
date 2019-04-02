@@ -1,0 +1,231 @@
+
+
+===mongo k8s no istio===
+wrk -c 100 -d 15 -t 8 --latency http://39.97.20.15/v1/mongo/bj/mongoget
+wrk -c 500 -d 15 -t 8 --latency http://39.97.20.15/v1/mongo/bj/mongoget
+wrk -c 1000 -d 15 -t 8 --latency http://39.97.20.15/v1/mongo/bj/mongoget
+wrk -t 8 -c 100 -d 15 --script=post.lua --latency http://39.97.20.15/v1/mongo/bj/mongoput
+wrk -t 8 -c 500 -d 15 --script=post.lua --latency http://39.97.20.15/v1/mongo/bj/mongoput
+wrk -t 8 -c 1000 -d 15 --script=post.lua --latency http://39.97.20.15/v1/mongo/bj/mongoput
+
+===mongo k8s and istio===
+wrk -c 100 -d 15 -t 8 --latency http://39.97.20.42/v1/mongo/bj/mongoget
+wrk -c 500 -d 15 -t 8 --latency http://39.97.20.42/v1/mongo/bj/mongoget
+wrk -c 1000 -d 15 -t 8 --latency http://39.97.20.42/v1/mongo/bj/mongoget
+wrk -t 8 -c 100 -d 15 --script=post.lua --latency http://39.97.20.42/v1/mongo/bj/mongoput
+wrk -t 8 -c 500 -d 15 --script=post.lua --latency http://39.97.20.42/v1/mongo/bj/mongoput
+wrk -t 8 -c 1000 -d 15 --script=post.lua --latency http://39.97.20.42/v1/mongo/bj/mongoput
+
+===mongo ECS 单节点===
+wrk -c 100 -d 15 -t 8 --latency http://10.146.151.102/v1/mongo/bj/mongoget
+wrk -c 500 -d 15 -t 8 --latency http://10.146.151.102/v1/mongo/bj/mongoget
+wrk -c 1000 -d 15 -t 8 --latency http://10.146.151.102/v1/mongo/bj/mongoget
+wrk -t 8 -c 100 -d 15 --script=post.lua --latency http://10.146.151.102/v1/mongo/bj/mongoput
+wrk -t 8 -c 500 -d 15 --script=post.lua --latency http://10.146.151.102/v1/mongo/bj/mongoput
+wrk -t 8 -c 1000 -d 15 --script=post.lua --latency http://10.146.151.102/v1/mongo/bj/mongoput
+
+
+
+===mysql k8s no istio===
+wrk -c 100 -d 15 -t 8 --latency http://39.97.20.15/v1/mysql/spider_bj/get
+wrk -c 500 -d 15 -t 8 --latency http://39.97.20.15/v1/mysql/spider_bj/get
+wrk -c 1000 -d 15 -t 8 --latency http://39.97.20.15/v1/mysql/spider_bj/get
+wrk -t 8 -c 100 -d 15 --script=post.lua --latency http://39.97.20.15/v1/mysql/spider_bj/put
+wrk -t 8 -c 500 -d 15 --script=post.lua --latency http://39.97.20.15/v1/mysql/spider_bj/put
+wrk -t 8 -c 1000 -d 15 --script=post.lua --latency http://39.97.20.15/v1/mysql/spider_bj/put
+
+===mysql k8s and istio===
+wrk -c 100 -d 15 -t 8 --latency http://39.97.20.42/v1/mysql/spider_bj/get
+wrk -c 500 -d 15 -t 8 --latency http://39.97.20.42/v1/mysql/spider_bj/get
+wrk -c 1000 -d 15 -t 8 --latency http://39.97.20.42/v1/mysql/spider_bj/get
+wrk -t 8 -c 100 -d 15 --script=post.lua --latency http://39.97.20.42/v1/mysql/spider_bj/put
+wrk -t 8 -c 500 -d 15 --script=post.lua --latency http://39.97.20.42/v1/mysql/spider_bj/put
+wrk -t 8 -c 1000 -d 15 --script=post.lua --latency http://39.97.20.42/v1/mysql/spider_bj/put
+
+
+==mysql==slb
+wrk -c 100 -d 15 -t 8 --latency http://10.146.151.102/v1/mysql/spider_bj/get
+wrk -c 500 -d 15 -t 8 --latency http://10.146.151.102/v1/mysql/spider_bj/get
+wrk -c 1000 -d 15 -t 8 --latency http://10.146.151.102/v1/mysql/spider_bj/get
+wrk -t 8 -c 100 -d 15 --script=post.lua --latency http://10.146.151.102/v1/mysql/spider_bj/put
+wrk -t 8 -c 500 -d 15 --script=post.lua --latency http://10.146.151.102/v1/mysql/spider_bj/put
+wrk -t 8 -c 1000 -d 15 --script=post.lua --latency http://10.146.151.102/v1/mysql/spider_bj/put
+
+es==k8s no istio
+wrk -t 8 -c 100 -d 15 --latency http://39.97.20.15/v1/es/bj/esquery
+wrk -t 8 -c 500 -d 15 --latency http://39.97.20.15/v1/es/bj/esquery
+wrk -t 8 -c 1000 -d 15 --latency http://39.97.20.15/v1/es/bj/esquery
+wrk -t 8 -c 100 -d 15 --script=post.lua --latency http://39.97.20.15/v1/es/bj/esput
+wrk -t 8 -c 500 -d 15 --script=post.lua --latency http://39.97.20.15/v1/es/bj/esput
+wrk -t 8 -c 1000 -d 15 --script=post.lua --latency http://39.97.20.15/v1/es/bj/esput
+
+es==k8s and istio
+wrk -t 8 -c 100 -d 15 --latency http://39.97.20.42/v1/es/bj/esquery
+wrk -t 8 -c 500 -d 15 --latency http://39.97.20.42/v1/es/bj/esquery
+wrk -t 8 -c 1000 -d 15 --latency http://39.97.20.42/v1/es/bj/esquery
+wrk -t 8 -c 100 -d 15 --script=post.lua --latency http://39.97.20.42/v1/es/bj/esput
+wrk -t 8 -c 500 -d 15 --script=post.lua --latency http://39.97.20.42/v1/es/bj/esput
+wrk -t 8 -c 1000 -d 15 --script=post.lua --latency http://39.97.20.42/v1/es/bj/esput
+
+es==SLB
+wrk -t 8 -c 100 -d 15 --latency http://10.146.151.102/v1/es/bj/esquery
+wrk -t 8 -c 500 -d 15 --latency http://10.146.151.102/v1/es/bj/esquery
+wrk -t 8 -c 1000 -d 15 --latency http://10.146.151.102/v1/es/bj/esquery
+wrk -t 8 -c 100 -d 15 --script=post.lua --latency http://10.146.151.102/v1/es/bj/esput
+wrk -t 8 -c 500 -d 15 --script=post.lua --latency http://10.146.151.102/v1/es/bj/esput
+wrk -t 8 -c 1000 -d 15 --script=post.lua --latency http://10.146.151.102/v1/es/bj/esput
+
+
+es==单节点
+wrk -t 8 -c 100 -d 15 --latency http://10.24.192.74/v1/es/bj/esquery
+
+wrk -t 8 -c 500 -d 15 --latency http://10.24.192.74/v1/es/bj/esquery
+
+wrk -t 8 -c 1000 -d 15 --latency http://10.24.192.74/v1/es/bj/esquery
+
+wrk -t 8 -c 100 -d 15 --script=post.lua --latency http://10.24.192.74/v1/es/bj/esput
+
+wrk -t 8 -c 500 -d 15 --script=post.lua --latency http://10.24.192.74/v1/es/bj/esput
+
+wrk -t 8 -c 1000 -d 15 --script=post.lua --latency http://10.24.192.74/v1/es/bj/esput
+
+es==单节点
+wrk -t 8 -c 100 -d 15 --latency http://10.25.94.208/v1/es/bj/esquery
+
+wrk -t 8 -c 500 -d 15 --latency http://10.25.94.208/v1/es/bj/esquery
+
+wrk -t 8 -c 1000 -d 15 --latency http://10.25.94.208/v1/es/bj/esquery
+
+wrk -t 8 -c 100 -d 15 --script=post.lua --latency http://10.25.94.208/v1/es/bj/esput
+
+wrk -t 8 -c 500 -d 15 --script=post.lua --latency http://10.25.94.208/v1/es/bj/esput
+
+wrk -t 8 -c 1000 -d 15 --script=post.lua --latency http://10.25.94.208/v1/es/bj/esput
+
+
+redis==k8s no isto
+wrk -t 8 -c 100 -d 15 --latency http://39.97.20.15/v1/redis/hashget
+wrk -t 8 -c 500 -d 15 --latency http://39.97.20.15/v1/redis/hashget
+wrk -t 8 -c 1000 -d 15 --latency http://39.97.20.15/v1/redis/hashget
+wrk -t 8 -c 100 -d 15 --latency http://39.97.20.15/v1/redis/hashput
+wrk -t 8 -c 500 -d 15  --latency http://39.97.20.15/v1/redis/hashput
+wrk -t 8 -c 1000 -d 15 --latency http://39.97.20.15/v1/redis/hashput
+
+redis==k8s and isto
+wrk -t 8 -c 100 -d 15 --latency http://39.97.20.42/v1/redis/hashget
+wrk -t 8 -c 500 -d 15 --latency http://39.97.20.42/v1/redis/hashget
+wrk -t 8 -c 1000 -d 15 --latency http://39.97.20.42/v1/redis/hashget
+wrk -t 8 -c 100 -d 15  --latency http://39.97.20.42/v1/redis/hashput
+wrk -t 8 -c 500 -d 15  --latency http://39.97.20.42/v1/redis/hashput
+wrk -t 8 -c 1000 -d 15  --latency http://39.97.20.42/v1/redis/hashput
+
+redis==ecs ELB
+wrk -t 8 -c 100 -d 15 --latency http://10.146.151.102/v1/redis/hashget
+wrk -t 8 -c 500 -d 15 --latency http://10.146.151.102/v1/redis/hashget
+wrk -t 8 -c 1000 -d 15 --latency http://10.146.151.102/v1/redis/hashget
+wrk -t 8 -c 100 -d 15  --latency http://10.146.151.102/v1/redis/hashput
+wrk -t 8 -c 500 -d 15 --latency http://10.146.151.102/v1/redis/hashput
+wrk -t 8 -c 1000 -d 15  --latency http://10.146.151.102/v1/redis/hashput
+
+===pika===
+./wrk -t 8 -c 100 -d 15 --latency http://192.168.0.91:32251/v1/pika/hashget
+./wrk -t 8 -c 500 -d 15 --latency http://192.168.0.91:32251/v1/pika/hashget
+./wrk -t 8 -c 1000 -d 15 --latency http://192.168.0.91:32251/v1/pika/hashget
+./wrk -t 8 -c 100 -d 15 --latency http://192.168.0.91:32251/v1/pika/hashput
+./wrk -t 8 -c 500 -d 15 --latency http://192.168.0.91:32251/v1/pika/hashput
+./wrk -t 8 -c 1000 -d 15 --latency http://192.168.0.91:32251/v1/pika/hashput
+
+===pika k8s no istio===
+wrk -t 8 -c 100 -d 15 --latency http://39.97.20.15/v1/pika/hashget
+wrk -t 8 -c 500 -d 15 --latency http://39.97.20.15/v1/pika/hashget
+wrk -t 8 -c 1000 -d 15 --latency http://39.97.20.15/v1/pika/hashget
+wrk -t 8 -c 100 -d 15 --latency http://39.97.20.15/v1/pika/hashput
+wrk -t 8 -c 500 -d 15 --latency http://39.97.20.15/v1/pika/hashput
+wrk -t 8 -c 1000 -d 15 --latency http://39.97.20.15/v1/pika/hashput
+
+===pika k8s and istio===
+wrk -t 8 -c 100 -d 15 --latency http://39.97.20.42/v1/pika/hashget
+wrk -t 8 -c 500 -d 15 --latency http://39.97.20.42/v1/pika/hashget
+wrk -t 8 -c 1000 -d 15 --latency http://39.97.20.42/v1/pika/hashget
+wrk -t 8 -c 100 -d 15 --latency http://39.97.20.42/v1/pika/hashput
+wrk -t 8 -c 500 -d 15 --latency http://39.97.20.42/v1/pika/hashput
+wrk -t 8 -c 1000 -d 15 --latency http://39.97.20.42/v1/pika/hashput
+
+===pika ECS SLB===
+wrk -t 8 -c 100 -d 15 --latency http://10.146.151.102/v1/pika/hashget
+wrk -t 8 -c 500 -d 15 --latency http://10.146.151.102/v1/pika/hashget
+wrk -t 8 -c 1000 -d 15 --latency http://10.146.151.102/v1/pika/hashget
+wrk -t 8 -c 100 -d 15 --latency http://10.146.151.102/v1/pika/hashput
+wrk -t 8 -c 500 -d 15 --latency http://10.146.151.102/v1/pika/hashput
+wrk -t 8 -c 1000 -d 15 --latency http://10.146.151.102/v1/pika/hashput
+
+
+
+
+==mysql ECS ELB压力测试==
+wrk -t 8 -c 100 -d 15 --latency http://10.146.151.102/v1/mysql/spider_bj/get
+wrk -t 8 -c 500 -d 15 --latency http://10.146.151.102/v1/mysql/spider_bj/get
+wrk -t 8 -c 1000 -d 15 --latency http://10.146.151.102/v1/mysql/spider_bj/get
+
+
+wrk -t 8 -c 100 -d 15 --script=post.lua --latency http://10.25.94.208/v1/mysql/spider_bj/put
+wrk -t 8 -c 500 -d 15 --script=post.lua --latency http://10.25.94.208/v1/mysql/spider_bj/put
+wrk -t 8 -c 1000 -d 15 --script=post.lua --latency http://10.25.94.208/v1/mysql/spider_bj/put
+
+===mongo ECS ELB===
+
+wrk -c 100 -d 15 -t 8  --latency "http://10.146.151.102/v1/mongo/bj/mongoget"
+wrk -c 500 -d 15 -t 8  --latency "http://10.146.151.102/v1/mongo/bj/mongoget"
+ wrk -c 1000 -d 15 -t 8  --latency "http://10.146.151.102/v1/mongo/bj/mongoget"
+
+
+wrk -t 8 -c 100 -d 15 --script=post.lua --latency "http://10.25.94.208/v1/mongo/bj/mongoput"
+wrk -t 8 -c 500 -d 15 --script=post.lua --latency "http://10.25.94.208/v1/mongo/bj/mongoput"
+wrk -t 8 -c 1000 -d 15 --script=post.lua --latency "http://10.25.94.208/v1/mongo/bj/mongoput"
+
+
+===nsq and kafka ECS ELB===
+wrk -c 100 -d 15 -t 8 --latency "http://10.146.151.102/v1/nsq/put?topic=1553845601"
+wrk -c 500 -d 15 -t 8 --latency "http://10.146.151.102/v1/nsq/put?topic=1553845601"
+wrk -c 1000 -d 15 -t 8 --latency "http://10.146.151.102/v1/nsq/put?topic=1553845601"
+
+wrk -c 100 -d 15 -t 8 --latency "http://10.146.151.102/v1/kafka/put?topic=1553845601"
+wrk -c 500 -d 15 -t 8 --latency "http://10.146.151.102/v1/kafka/put?topic=1553845601"
+wrk -c 1000 -d 15 -t 8 --latency "http://10.146.151.102/v1/kafka/put?topic=1553845601"
+
+
+===k8s and istio===
+wrk -c 100 -d 15 -t 8 --latency "http://39.97.20.42/v1/nsq/put?topic=1553481305"
+wrk -c 500 -d 15 -t 8 --latency "http://39.97.20.42/v1/nsq/put?topic=1553481305"
+wrk -c 1000 -d 15 -t 8 --latency "http://39.97.20.42/v1/nsq/put?topic=1553481305"
+
+wrk -c 100 -d 15 -t 8 --latency "http://39.97.20.42/v1/kafka/put?topic=1553481305"
+wrk -c 500 -d 15 -t 8 --latency "http://39.97.20.42/v1/kafka/put?topic=1553481305"
+wrk -c 1000 -d 15 -t 8 --latency "http://39.97.20.42/v1/kafka/put?topic=1553481305"
+
+===k8s no istio===
+wrk -c 100 -d 15 -t 8 --latency "http://39.97.20.15/v1/nsq/put?topic=1553481305"
+wrk -c 500 -d 15 -t 8 --latency "http://39.97.20.15/v1/nsq/put?topic=1553481305"
+wrk -c 1000 -d 15 -t 8 --latency "http://39.97.20.15/v1/nsq/put?topic=1553481305"
+
+wrk -c 100 -d 15 -t 8 --latency "http://39.97.20.15/v1/kafka/put?topic=1553481305"
+wrk -c 500 -d 15 -t 8 --latency "http://39.97.20.15/v1/kafka/put?topic=1553481305"
+wrk -c 1000 -d 15 -t 8 --latency "http://39.97.20.15/v1/kafka/put?topic=1553481305"
+
+===ECS ELB===
+wrk -c 100 -d 15 -t 8 --latency "http://10.146.151.102/v1/nsq/put?topic=1553845601"
+wrk -c 500 -d 15 -t 8 --latency "http://10.146.151.102/v1/nsq/put?topic=1553845601"
+wrk -c 1000 -d 15 -t 8 --latency "http://10.146.151.102/v1/nsq/put?topic=1553845601"
+
+wrk -c 100 -d 15 -t 8 --latency "http://10.146.151.102/v1/kafka/put?topic=1553845601"
+wrk -c 500 -d 15 -t 8 --latency "http://10.146.151.102/v1/kafka/put?topic=1553845601"
+wrk -c 1000 -d 15 -t 8 --latency "http://10.146.151.102/v1/kafka/put?topic=1553845601"
+
+===nsq-kafka-单节点work====
+./wrk -c 100 -d 15 -t 8 --latency "http://192.168.0.91:32251/v1/nsq/put?topic=1553845601"
+./wrk -c 500 -d 15 -t 8 --latency "http://192.168.0.91:32251/v1/nsq/put?topic=1553845601"
+./wrk -c 1000 -d 15 -t 8 --latency "http://192.168.0.91:32251/v1/nsq/put?topic=1553845601"
+
+./wrk -c 100 -d 15 -t 8 --latency "http://192.168.0.91:32251/v1/kafka/put?topic=1553845601"
+./wrk -c 500 -d 15 -t 8 --latency "http://192.168.0.91:32251/v1/kafka/put?topic=1553845601"
+./wrk -c 1000 -d 15 -t 8 --latency "http://192.168.0.91:32251/v1/kafka/put?topic=1553845601"
