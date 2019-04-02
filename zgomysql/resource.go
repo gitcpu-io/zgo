@@ -207,7 +207,7 @@ func (mr *mysqlResource) DeleteOne(ctx context.Context, args map[string]interfac
 	}
 	// 根据id删除
 	if v, ok := args["id"]; ok {
-		if v.(int) > 0 {
+		if v.(uint32) > 0 {
 			if !gormPool.NewRecord(args["obj"]) {
 				db := gormPool.Table(args["table"].(string)).Delete(args["obj"])
 				count := db.RowsAffected
