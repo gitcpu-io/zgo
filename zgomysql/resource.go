@@ -186,6 +186,10 @@ func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interfac
 	if err != nil {
 		return 0, err
 	}
+	if model, ok := args["model"]; ok {
+		// args["data"] = map[string]interface{}{"name": "hello", "age": 18}
+		gormPool = gormPool.Model(model)
+	}
 	if _, ok := args["id"]; ok {
 		// args["data"] = map[string]interface{}{"name": "hello", "age": 18}
 		db := gormPool.Table(args["table"].(string)).Where(" id = ? ", args["id"]).Updates(args["data"])
