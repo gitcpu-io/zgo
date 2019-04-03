@@ -112,8 +112,8 @@ func (e *zgoes) SearchDsl(ctx context.Context, index, table, dsl string, args ma
 func (e *zgoes) AddOneData(ctx context.Context, index, table, id, dsl string) (interface{}, error) {
 	return e.res.AddOneData(ctx, index, table, id, dsl)
 }
-func (e *zgoes) UpOneData(ctx context.Context, index, table, id, dsl string) (interface{}, error) {
-	return e.res.UpOneData(ctx, index, table, id, dsl)
+func (e *zgoes) UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error) {
+	return e.res.UpOneData(ctx, index, table, id, dataJson)
 }
 
 //func (e *zgoes)NewDsl() *mode.DSL {
