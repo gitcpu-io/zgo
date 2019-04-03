@@ -97,7 +97,8 @@ type Eser interface {
 	// 根据elastic dsl 语句查询数据 该接口只能执行查询操作
 	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
 	NewDsl() *DSL
-	AddOneData(ctx context.Context, index, table, dataJson string) (interface{}, error)
+	AddOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
+	UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
 }
 
 func (e *zgoes) New(label ...string) (*zgoes, error) {
@@ -108,8 +109,11 @@ func (e *zgoes) SearchDsl(ctx context.Context, index, table, dsl string, args ma
 	return e.res.SearchDsl(ctx, index, table, dsl, args)
 }
 
-func (e *zgoes) AddOneData(ctx context.Context, index, table, dsl string) (interface{}, error) {
-	return e.res.AddOneData(ctx, index, table, dsl)
+func (e *zgoes) AddOneData(ctx context.Context, index, table, id, dsl string) (interface{}, error) {
+	return e.res.AddOneData(ctx, index, table, id, dsl)
+}
+func (e *zgoes) UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error) {
+	return e.res.UpOneData(ctx, index, table, id, dataJson)
 }
 
 //func (e *zgoes)NewDsl() *mode.DSL {

@@ -15,7 +15,8 @@ import (
 //对外接口
 type EsResourcer interface {
 	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
-	AddOneData(ctx context.Context, index, table, dataJson string) (interface{}, error)
+	AddOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
+	UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
 }
 
 var mu sync.RWMutex
@@ -81,8 +82,8 @@ func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, ar
 	return maps, err
 }
 
-func (e *esResource) AddOneData(ctx context.Context, index, table, dataJson string) (interface{}, error) {
-	uri := e.uri + "/" + index + "/" + table
+func (e *esResource) AddOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error) {
+	uri := e.uri + "/" + index + "/" + table + "/" + id
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dataJson)) //post请求
 	if err != nil {
 		return nil, fmt.Errorf("es add data create request error: %v", err)
@@ -105,5 +106,30 @@ func (e *esResource) AddOneData(ctx context.Context, index, table, dataJson stri
 		return nil, fmt.Errorf("es add data umarshal error: %v", err)
 	}
 
+	return result, err
+}
+
+func (e *esResource) UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error) {
+	uri := e.uri + "/" + index + "/" + table + "/" + id + "/" + "_update"
+	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dataJson)) //post请求
+	if err != nil {
+		return nil, fmt.Errorf("es Up data create request error: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := e.GetConChan().Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("es Up data post error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	be, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("es Up data read body error: %v", err)
+	}
+	var result interface{}
+
+	if err := zgoutils.Utils.Unmarshal(be, &result); err != nil {
+		return nil, fmt.Errorf("es Up data umarshal error: %v", err)
+	}
 	return result, err
 }
