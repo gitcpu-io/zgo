@@ -110,7 +110,7 @@ func (e *esResource) AddOneData(ctx context.Context, index, table, id, dataJson 
 }
 
 func (e *esResource) UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error) {
-	uri := e.uri + "/" + index + "/" + table + "/" + id + "/" + "_update?pretty"
+	uri := e.uri + "/" + index + "/" + table + "/" + id + "/" + "_update"
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dataJson)) //post请求
 	if err != nil {
 		return nil, fmt.Errorf("es Up data create request error: %v", err)
