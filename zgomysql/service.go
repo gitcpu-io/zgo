@@ -187,6 +187,11 @@ func (ms *zgoMysql) UpdateOne(ctx context.Context, args map[string]interface{}) 
 	return ms.res.UpdateOne(ctx, args)
 }
 
+// UpdateMany
+func (ms *zgoMysql) UpdateMany(ctx context.Context, args map[string]interface{}) (int, error) {
+	return ms.res.UpdateMany(ctx, args)
+}
+
 // DeleteOne
 func (ms *zgoMysql) DeleteOne(ctx context.Context, args map[string]interface{}) (int, error) {
 	return ms.res.DeleteOne(ctx, args)

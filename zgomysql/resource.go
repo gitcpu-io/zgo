@@ -15,7 +15,7 @@ func InitMysqlResource(hsm map[string][]*config.ConnDetail) {
 
 // 基类 所有
 type Base struct {
-	Id int `json:"id"`
+	Id uint32 `json:"id"`
 }
 
 // 对外接口
@@ -28,6 +28,7 @@ type MysqlResourcer interface {
 	Get(ctx context.Context, args map[string]interface{}) error
 	Create(ctx context.Context, args map[string]interface{}) error
 	UpdateOne(ctx context.Context, args map[string]interface{}) (int, error)
+	UpdateMany(ctx context.Context, args map[string]interface{}) (int, error)
 	//UpdateAll(ctx context.Context, args map[string]interface{}) error
 	DeleteOne(ctx context.Context, args map[string]interface{}) (int, error)
 	//DeleteAll(ctx context.Context, args map[string]interface{}) error
@@ -178,7 +179,38 @@ func (mr *mysqlResource) Create(ctx context.Context, args map[string]interface{}
 }
 
 func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interface{}) (int, error) {
-	errv := mr.validate(args, "table", "id", "data")
+	errv := mr.validate(args, "table", "data")
+	if errv != nil {
+		return 0, errv
+	}
+	gormPool, err := mr.GetWPool()
+	if err != nil {
+		return 0, err
+	}
+	if model, ok := args["model"]; ok {
+		// args["data"] = map[string]interface{}{"name": "hello", "age": 18}
+		if model.(Base).Id > 0 {
+			gormPool = gormPool.Model(model)
+		}
+	}
+	gormPool = gormPool.Table(args["table"].(string))
+	if _, ok := args["id"]; ok {
+		// args["data"] = map[string]interface{}{"name": "hello", "age": 18}
+		gormPool = gormPool.Where(" id = ? ", args["id"])
+
+	}
+	if data, ok := args["data"]; ok {
+		db := gormPool.Updates(data)
+		count := db.RowsAffected
+		err = db.Error
+		return int(count), err
+	}
+
+	return 0, errors.New("mysql updateOne method : id not allow null or 0")
+}
+
+func (mr *mysqlResource) UpdateMany(ctx context.Context, args map[string]interface{}) (int, error) {
+	errv := mr.validate(args, "table", "ids", "data")
 	if errv != nil {
 		return 0, errv
 	}
@@ -192,7 +224,7 @@ func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interfac
 	}
 	if _, ok := args["id"]; ok {
 		// args["data"] = map[string]interface{}{"name": "hello", "age": 18}
-		db := gormPool.Table(args["table"].(string)).Where(" id = ? ", args["id"]).Updates(args["data"])
+		db := gormPool.Table(args["table"].(string)).Where(" id in (?) ", args["ids"]).Updates(args["data"])
 		count := db.RowsAffected
 		err = db.Error
 		return int(count), err
