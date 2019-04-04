@@ -22,12 +22,20 @@ type Mysqler interface {
 	Get(ctx context.Context, args map[string]interface{}) error
 	List(ctx context.Context, args map[string]interface{}) error
 	Count(ctx context.Context, args map[string]interface{}) error
-	Create(ctx context.Context, args map[string]interface{}) error
-	UpdateOne(ctx context.Context, args map[string]interface{}) (int, error)
-	DeleteOne(ctx context.Context, args map[string]interface{}) (int, error)
-	GetLabelByCityBiz(city string, biz string) (string, error)
-	GetDbByCityBiz(city string, biz string) (string, error)
-	MysqlServiceByCityBiz(city string, biz string) (Mysqler, error)
+	//Create(ctx context.Context, args map[string]interface{}) error
+	//UpdateOne(ctx context.Context, args map[string]interface{}) (int, error)
+	//DeleteOne(ctx context.Context, args map[string]interface{}) (int, error)
+	//GetLabelByCityBiz(city string, biz string) (string, error)
+	//GetDbByCityBiz(city string, biz string) (string, error)
+	//MysqlServiceByCityBiz(city string, biz string) (Mysqler, error)
+
+	Create(ctx context.Context, obj MysqlBaser) error
+	DeleteById(ctx context.Context, tableName string, id uint32) (int, error)
+	UpdateNotEmptyByObj(ctx context.Context, obj MysqlBaser) (int, error)
+	UpdateByData(ctx context.Context, obj MysqlBaser, data map[string]interface{}) (int, error)
+	UpdateByObj(ctx context.Context, obj MysqlBaser) (int, error)
+	UpdateMany(ctx context.Context, tableName string, query string, args []interface{}, data map[string]interface{}) (int, error)
+	Exec(ctx context.Context, sql string, values ...interface{}) (int, error)
 }
 
 // 内部就结构体
@@ -151,9 +159,9 @@ func (c *zgoMysql) New(label ...string) (Mysqler, error) {
 }
 
 // MysqlServiceByCityBiz
-func (c *zgoMysql) MysqlServiceByCityBiz(city string, biz string) (Mysqler, error) {
-	return MysqlServiceByCityBiz(city, biz)
-}
+//func (c *zgoMysql) MysqlServiceByCityBiz(city string, biz string) (Mysqler, error) {
+//	return MysqlServiceByCityBiz(city, biz)
+//}
 
 // Get
 func (ms *zgoMysql) Get(ctx context.Context, args map[string]interface{}) error {
@@ -178,31 +186,60 @@ func (ms *zgoMysql) Count(ctx context.Context, args map[string]interface{}) erro
 }
 
 // Create
-func (ms *zgoMysql) Create(ctx context.Context, args map[string]interface{}) error {
-	return ms.res.Create(ctx, args)
-}
+//func (ms *zgoMysql) Create(ctx context.Context, args map[string]interface{}) error {
+//	return ms.res.Create(ctx, args)
+//}
 
 // UpdateOne
-func (ms *zgoMysql) UpdateOne(ctx context.Context, args map[string]interface{}) (int, error) {
-	return ms.res.UpdateOne(ctx, args)
-}
+//func (ms *zgoMysql) UpdateOne(ctx context.Context, args map[string]interface{}) (int, error) {
+//	return ms.res.UpdateOne(ctx, args)
+//}
 
 // UpdateMany
-func (ms *zgoMysql) UpdateMany(ctx context.Context, args map[string]interface{}) (int, error) {
-	return ms.res.UpdateMany(ctx, args)
-}
+//func (ms *zgoMysql) UpdateMany(ctx context.Context, args map[string]interface{}) (int, error) {
+//	return ms.res.UpdateMany(ctx, args)
+//}
 
 // DeleteOne
-func (ms *zgoMysql) DeleteOne(ctx context.Context, args map[string]interface{}) (int, error) {
-	return ms.res.DeleteOne(ctx, args)
+//func (ms *zgoMysql) DeleteOne(ctx context.Context, args map[string]interface{}) (int, error) {
+//	return ms.res.DeleteOne(ctx, args)
+//}
+
+//// GetLabelByCityBiz根据城市
+//func (c *zgoMysql) GetLabelByCityBiz(city string, biz string) (string, error) {
+//	return GetLabelByCityBiz(city, biz)
+//}
+//
+//// GetDbByCityBiz根据城市和业务 获取dbname和实例label
+//func (c *zgoMysql) GetDbByCityBiz(city string, biz string) (string, error) {
+//	return GetDbByCityBiz(city, biz)
+//}
+
+func (ms *zgoMysql) Create(ctx context.Context, obj MysqlBaser) error {
+	return ms.res.Create(ctx, obj)
 }
 
-// GetLabelByCityBiz根据城市
-func (c *zgoMysql) GetLabelByCityBiz(city string, biz string) (string, error) {
-	return GetLabelByCityBiz(city, biz)
+func (ms *zgoMysql) DeleteById(ctx context.Context, tableName string, id uint32) (int, error) {
+	return ms.res.DeleteById(ctx, tableName, id)
 }
 
-// GetDbByCityBiz根据城市和业务 获取dbname和实例label
-func (c *zgoMysql) GetDbByCityBiz(city string, biz string) (string, error) {
-	return GetDbByCityBiz(city, biz)
+func (ms *zgoMysql) UpdateNotEmptyByObj(ctx context.Context, obj MysqlBaser) (int, error) {
+	return ms.res.UpdateNotEmptyByObj(ctx, obj)
+}
+
+func (ms *zgoMysql) UpdateByData(ctx context.Context, obj MysqlBaser, data map[string]interface{}) (int, error) {
+	return ms.res.UpdateByData(ctx, obj, data)
+}
+
+func (ms *zgoMysql) UpdateByObj(ctx context.Context, obj MysqlBaser) (int, error) {
+	return ms.res.UpdateByObj(ctx, obj)
+}
+
+func (ms *zgoMysql) UpdateMany(ctx context.Context, tableName string, query string, args []interface{}, data map[string]interface{}) (int, error) {
+	return ms.res.UpdateMany(ctx, tableName, query, args, data)
+}
+
+// Exec 执行原生sql
+func (ms *zgoMysql) Exec(ctx context.Context, sql string, values ...interface{}) (int, error) {
+	return ms.res.Exec(ctx, sql, values)
 }

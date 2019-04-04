@@ -13,11 +13,6 @@ func InitMysqlResource(hsm map[string][]*config.ConnDetail) {
 	InitConnPool(hsm)
 }
 
-// 基类 所有
-type Base struct {
-	Id uint32 `json:"id"`
-}
-
 // 对外接口
 type MysqlResourcer interface {
 	GetPool(t string) (*gorm.DB, error)
@@ -26,14 +21,14 @@ type MysqlResourcer interface {
 	List(ctx context.Context, args map[string]interface{}) error
 	Count(ctx context.Context, args map[string]interface{}) error
 	Get(ctx context.Context, args map[string]interface{}) error
-	Create(ctx context.Context, args map[string]interface{}) error
-	UpdateOne(ctx context.Context, args map[string]interface{}) (int, error)
-	UpdateMany(ctx context.Context, args map[string]interface{}) (int, error)
-	//UpdateAll(ctx context.Context, args map[string]interface{}) error
-	DeleteOne(ctx context.Context, args map[string]interface{}) (int, error)
-	//DeleteAll(ctx context.Context, args map[string]interface{}) error
-	//FindById(ctx context.Context, obj interface{}, id int) (int, error)
-	//FindById(ctx context.Context, obj interface{}, id int) (int, error)
+
+	Create(ctx context.Context, obj MysqlBaser) error
+	DeleteById(ctx context.Context, tableName string, id uint32) (int, error)
+	UpdateNotEmptyByObj(ctx context.Context, obj MysqlBaser) (int, error)
+	UpdateByData(ctx context.Context, obj MysqlBaser, data map[string]interface{}) (int, error)
+	UpdateByObj(ctx context.Context, obj MysqlBaser) (int, error)
+	UpdateMany(ctx context.Context, tableName string, query string, args []interface{}, data map[string]interface{}) (int, error)
+	Exec(ctx context.Context, sql string, values ...interface{}) (int, error)
 }
 
 //内部结构体
@@ -68,6 +63,7 @@ func (mr *mysqlResource) GetWPool() (*gorm.DB, error) {
 	return GetPool(mr.label, "w")
 }
 
+// 查询单个数据
 func (mr *mysqlResource) Get(ctx context.Context, args map[string]interface{}) error {
 	errv := mr.validate(args, "table", "query", "args", "obj")
 	if errv != nil {
@@ -94,6 +90,7 @@ func (mr *mysqlResource) Get(ctx context.Context, args map[string]interface{}) e
 	return err
 }
 
+// 查询列表数据
 func (mr *mysqlResource) List(ctx context.Context, args map[string]interface{}) error {
 	errv := mr.validate(args, "table", "query", "args", "obj")
 	if errv != nil {
@@ -136,6 +133,7 @@ func (mr *mysqlResource) List(ctx context.Context, args map[string]interface{}) 
 	return err
 }
 
+// 查询数量
 func (mr *mysqlResource) Count(ctx context.Context, args map[string]interface{}) error {
 	errv := mr.validate(args, "table", "query", "args", "count")
 	if errv != nil {
@@ -159,25 +157,7 @@ func (mr *mysqlResource) Count(ctx context.Context, args map[string]interface{})
 	return err
 }
 
-func (mr *mysqlResource) Create(ctx context.Context, args map[string]interface{}) error {
-	errv := mr.validate(args, "table", "obj")
-	if errv != nil {
-		return errv
-	}
-
-	gormPool, err := mr.GetWPool()
-	if err != nil {
-		return err
-	}
-	if gormPool.Table(args["table"].(string)).NewRecord(args["obj"]) {
-		err = gormPool.Table(args["table"].(string)).Create(args["obj"]).Error
-		return err
-	} else {
-		return errors.New("被创建对象不能有主键")
-	}
-
-}
-
+// 修改一条数据
 func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interface{}) (int, error) {
 	errv := mr.validate(args, "table", "data")
 	if errv != nil {
@@ -189,9 +169,7 @@ func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interfac
 	}
 	if model, ok := args["model"]; ok {
 		// args["data"] = map[string]interface{}{"name": "hello", "age": 18}
-		if model.(Base).Id > 0 {
-			gormPool = gormPool.Model(model)
-		}
+		gormPool = gormPool.Model(model)
 	}
 	gormPool = gormPool.Table(args["table"].(string))
 	if _, ok := args["id"]; ok {
@@ -209,52 +187,99 @@ func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interfac
 	return 0, errors.New("mysql updateOne method : id not allow null or 0")
 }
 
-func (mr *mysqlResource) UpdateMany(ctx context.Context, args map[string]interface{}) (int, error) {
-	errv := mr.validate(args, "table", "ids", "data")
-	if errv != nil {
-		return 0, errv
-	}
-	gormPool, err := mr.GetWPool()
-	if err != nil {
-		return 0, err
-	}
-	if model, ok := args["model"]; ok {
-		// args["data"] = map[string]interface{}{"name": "hello", "age": 18}
-		gormPool = gormPool.Model(model)
-	}
-	if _, ok := args["id"]; ok {
-		// args["data"] = map[string]interface{}{"name": "hello", "age": 18}
-		db := gormPool.Table(args["table"].(string)).Where(" id in (?) ", args["ids"]).Updates(args["data"])
-		count := db.RowsAffected
-		err = db.Error
-		return int(count), err
-	}
-	return 0, errors.New("mysql updateOne method : id not allow null or 0")
-}
-
-func (mr *mysqlResource) DeleteOne(ctx context.Context, args map[string]interface{}) (int, error) {
-	errv := mr.validate(args, "table", "obj")
-	if errv != nil {
-		return 0, errv
-	}
-	gormPool, err := mr.GetWPool()
-	if err != nil {
-		return 0, err
-	}
+// 根据Id删除
+func (mr *mysqlResource) DeleteById(ctx context.Context, tableName string, id uint32) (int, error) {
 	// 根据id删除
-	if v, ok := args["id"]; ok {
-		if v.(uint32) > 0 {
-			if !gormPool.NewRecord(args["obj"]) {
-				db := gormPool.Table(args["table"].(string)).Delete(args["obj"])
-				count := db.RowsAffected
-				err = db.Error
-				return int(count), err
-			}
-		}
+	if id > 0 {
+		return mr.Exec(ctx, " delete from ? where id = ? ", tableName, id)
 	}
 	return 0, errors.New("mysql deleteOne method : id not allow null or 0")
 }
 
+// 新增数据
+func (mr *mysqlResource) Create(ctx context.Context, obj MysqlBaser) error {
+	gormPool, err := mr.GetWPool()
+	if err != nil {
+		return err
+	}
+	if gormPool.NewRecord(obj) {
+		err = gormPool.Create(obj).Error
+		return err
+	} else {
+		return errors.New("被创建对象不能有主键")
+	}
+}
+
+// UpdateOneByData 根据data修改值
+func (mr *mysqlResource) UpdateByData(ctx context.Context, obj MysqlBaser, data map[string]interface{}) (int, error) {
+	gormPool, err := mr.GetWPool()
+	if err != nil {
+		return 0, err
+	}
+	if obj.GetID() == 0 {
+		return 0, errors.New("id不能为空")
+	}
+	gormPool = gormPool.Model(obj).Updates(data)
+	count := gormPool.RowsAffected
+	err = gormPool.Error
+	return int(count), err
+}
+
+// 更新数据，只更新非空字段
+func (mr *mysqlResource) UpdateNotEmptyByObj(ctx context.Context, obj MysqlBaser) (int, error) {
+	gormPool, err := mr.GetWPool()
+	if err != nil {
+		return 0, err
+	}
+	if obj.GetID() == 0 {
+		return 0, errors.New("id不能为空")
+	}
+	gormPool = gormPool.Model(obj).Update(obj)
+	count := gormPool.RowsAffected
+	err = gormPool.Error
+	return int(count), err
+}
+
+// 更新所有字段，不考虑非空 走回调方法
+func (mr *mysqlResource) UpdateByObj(ctx context.Context, obj MysqlBaser) (int, error) {
+	gormPool, err := mr.GetWPool()
+	if err != nil {
+		return 0, err
+	}
+	if obj.GetID() == 0 {
+		return 0, errors.New("id不能为空")
+	}
+	gormPool = gormPool.Model(obj).Omit(obj.Omit()).Save(obj)
+	count := gormPool.RowsAffected
+	err = gormPool.Error
+	return int(count), err
+}
+
+// UpdateMany 根据筛选条件批量修改数据 不支持回调方法
+func (mr *mysqlResource) UpdateMany(ctx context.Context, tableName string, query string, args []interface{}, data map[string]interface{}) (int, error) {
+	gormPool, err := mr.GetWPool()
+	if err != nil {
+		return 0, err
+	}
+	gormPool = gormPool.Table(tableName).Where(query, args).Updates(data)
+	count := gormPool.RowsAffected
+	err = gormPool.Error
+	return int(count), err
+}
+
+// Exec 执行sql语句
+func (mr *mysqlResource) Exec(ctx context.Context, sql string, values ...interface{}) (int, error) {
+	gormPool, err := mr.GetWPool()
+	if err != nil {
+		return 0, err
+	}
+	gormPool = gormPool.Exec(sql, values)
+	count := gormPool.RowsAffected
+	err = gormPool.Error
+	return int(count), err
+}
+
+// 校验参数是否齐全
 func (mr *mysqlResource) validate(args map[string]interface{}, fields ...string) error {
 	for _, v := range fields {
 		if _, ok := args[v]; !ok {
