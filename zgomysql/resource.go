@@ -86,6 +86,12 @@ func (mr *mysqlResource) Get(ctx context.Context, args map[string]interface{}) e
 	if sel, ok := args["select"]; ok {
 		gormPool = gormPool.Select(sel)
 	}
+	if order, ok := args["order"]; ok {
+		gormPool = gormPool.Order(order)
+	}
+	if group, ok := args["group"]; ok {
+		gormPool = gormPool.Group(group.(string))
+	}
 	err = gormPool.Where(args["query"], args["args"].([]interface{})...).First(args["obj"]).Error
 	return err
 }
@@ -128,6 +134,9 @@ func (mr *mysqlResource) List(ctx context.Context, args map[string]interface{}) 
 	}
 	if order, ok := args["order"]; ok {
 		gormPool = gormPool.Order(order)
+	}
+	if group, ok := args["group"]; ok {
+		gormPool = gormPool.Group(group.(string))
 	}
 	err = gormPool.Find(args["obj"]).Error
 	return err
