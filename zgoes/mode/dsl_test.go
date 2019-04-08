@@ -176,15 +176,6 @@ func TestDslStruct_2(t *testing.T) {
 	show(bstring)
 }
 
-func TestNestedDsl(t *testing.T) {
-	nst := map[string]interface{}{
-		"must":           []string{},
-		"should":         []string{},
-		"min_mum_should": 1,
-	}
+func TestUpEs(t *testing.T) {
 
-	dsl := NewDSL()
-	res := dsl.NestedDslTerm("path_to_nested", dsl.BoolMix(nst))
-	fmt.Println(res)
-	fmt.Println(marshal(res))
 }
