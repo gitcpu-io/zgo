@@ -44,7 +44,7 @@ func (ec *EtcConfig) InitConfigByEtcd() ([]*mvccpb.KeyValue, chan map[string][]*
 	}
 
 	if len(response.Kvs) == 0 {
-		fmt.Println("Etcd配置中心没有该项目信息,资源组件不可用,请联系zgo engine Admin管理平台添加...")
+		fmt.Printf("Etcd配置中心没有:%s,项目信息,资源组件不可用,请联系zgo engine Admin管理平台添加...\n", ec.Key)
 	}
 
 	watchStartRev := response.Header.Revision + 1

@@ -19,16 +19,17 @@ import (
 )
 
 type Options struct {
-	Env      string   `json:"env"`
-	Project  string   `json:"project"`
-	Loglevel string   `json:"loglevel"`
-	Mongo    []string `json:"mongo"`
-	Mysql    []string `json:"mysql"`
-	Es       []string `json:"es"`
-	Redis    []string `json:"redis"`
-	Pika     []string `json:"pika"`
-	Kafka    []string `json:"kafka"`
-	Nsq      []string `json:"nsq"`
+	Env       string   `json:"env"`
+	Project   string   `json:"project"`
+	EtcdHosts string   `json:"etcdHosts"`
+	Loglevel  string   `json:"loglevel"`
+	Mongo     []string `json:"mongo"`
+	Mysql     []string `json:"mysql"`
+	Es        []string `json:"es"`
+	Redis     []string `json:"redis"`
+	Pika      []string `json:"pika"`
+	Kafka     []string `json:"kafka"`
+	Nsq       []string `json:"nsq"`
 }
 
 func (opt *Options) Init() error {
