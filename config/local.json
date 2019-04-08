@@ -326,7 +326,7 @@
   },
   "cache":{
     "c": "cache",
-    "start": 1,
+    "start": 0,
     "dbType": "pika",
     "label":"pika_label_rw",
     "tcType": 1,
@@ -334,7 +334,7 @@
   },
   "log":{
     "c": "日志存储",
-    "start": 1,
+    "start": 0,
     "dbType": "file",
     "label":"/tmp",
     "loglevel": 0
