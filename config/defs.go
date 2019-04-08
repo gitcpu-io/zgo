@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strings"
 )
 
 const (
@@ -20,7 +21,7 @@ const (
 	Warn         //2
 	Error        //3
 
-	Version       = "0.9.2"       //zgo版本号
+	Version       = "0.9.3"       //zgo版本号
 	ProjectPrefix = "zgo/project" //读取ETCD配置时prefix
 	FileStoreType = "local"       //文件存储类型
 	FileStoreHome = "/tmp"        //文件存储目录
@@ -134,9 +135,9 @@ type Labelconns struct {
 
 var Conf *allConfig
 
-func InitConfig(env, project string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan map[string]*CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
+func InitConfig(env, project, etcdHosts string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan map[string]*CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
 
-	LoadConfig(env, project)
+	LoadConfig(env, project, etcdHosts)
 
 	if env != Local {
 		//用etcd的配置
@@ -149,7 +150,7 @@ func InitConfig(env, project string) ([]*mvccpb.KeyValue, chan map[string][]*Con
 	return nil, nil, nil, nil, nil
 }
 
-func LoadConfig(e, project string) {
+func LoadConfig(e, project, etcdHosts string) {
 	var cf string
 	switch e {
 	case Local:
@@ -182,6 +183,7 @@ func LoadConfig(e, project string) {
 				Home: FileStoreHome,
 			},
 		}
+
 	case Qa:
 		Conf = &allConfig{
 			Env:       e,
@@ -192,6 +194,7 @@ func LoadConfig(e, project string) {
 				Home: FileStoreHome,
 			},
 		}
+
 	case Pro:
 		Conf = &allConfig{
 			Env:       e,
@@ -202,12 +205,17 @@ func LoadConfig(e, project string) {
 				Home: FileStoreHome,
 			},
 		}
+
+	}
+
+	if etcdHosts != "" {
+		Conf.EtcdHosts = strings.Split(etcdHosts, ",")
 	}
 
 	//default init city db config
 	Conf.CityDbConfig = cityDbConfig
 
-	fmt.Printf("zgo engine %s is started on the ... %s\n", Version, Conf.Env)
+	fmt.Printf("zgo engine %s is started on the ... %s %s\n", Version, Conf.Env, Conf.EtcdHosts)
 
 }
 

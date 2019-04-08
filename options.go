@@ -46,7 +46,7 @@ func (opt *Options) Init() error {
 	}
 
 	//如果connCh有值表示启用了etcd为配置中心，并watch了key，等待变更ing...
-	resKvs, connCh, cacheLogCh, delConnCh, delCacheLogCh := config.InitConfig(opt.Env, opt.Project)
+	resKvs, connCh, cacheLogCh, delConnCh, delCacheLogCh := config.InitConfig(opt.Env, opt.Project, opt.EtcdHosts)
 
 	//监听put资源组件
 	opt.watchPutConn(connCh)

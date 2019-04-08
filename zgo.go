@@ -20,7 +20,6 @@ import (
 	kafkaCluter "github.com/bsm/sarama-cluster"
 	"github.com/nsqio/go-nsq"
 	"google.golang.org/grpc"
-	"strings"
 )
 
 type engine struct {
@@ -37,13 +36,6 @@ func Engine(opt *Options) error {
 
 	if err != nil {
 		return err
-	}
-
-	if opt.Project != "" {
-		config.Conf.Project = opt.Project
-	}
-	if opt.EtcdHosts != "" {
-		config.Conf.EtcdHosts = strings.Split(opt.EtcdHosts, ",")
 	}
 
 	Crypto = zgocrypto.New()
