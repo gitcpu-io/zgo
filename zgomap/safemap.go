@@ -112,6 +112,7 @@ func (m *safeMap) Range() chan *Sma {
 			}
 			out <- c
 		}
+		close(out)
 	}()
 	return out
 }

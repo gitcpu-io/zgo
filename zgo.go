@@ -40,7 +40,6 @@ func Engine(opt *Options) error {
 
 	Crypto = zgocrypto.New()
 	File = zgofile.New()
-	Map = zgomap.GetMap()
 
 	//初始化GRPC
 	Grpc = zgogrpc.GetGrpc()
@@ -176,6 +175,6 @@ var (
 	Log    zgolog.Logger
 	Utils  = zgoutils.New()
 	Crypto zgocrypto.Cryptoer
-	Map    zgomap.Maper
+	Map    = zgomap.GetMap()
 	File   zgofile.Filer
 )
