@@ -78,6 +78,34 @@ services:
     networks:
       - link-network
 
+  postgres-5433:
+    image: mdillon/postgis
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5433:5432
+    volumes:
+      - ~/docker-data/postgresql-5433:/var/lib/postgresql/data
+    networks:
+      - link-network
+
+  postgres-5434:
+    image: mdillon/postgis
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5434:5432
+    volumes:
+      - ~/docker-data/postgresql-5434:/var/lib/postgresql/data
+    networks:
+      - link-network
+
   mysql-3307:
     image: mysql
     ports:
