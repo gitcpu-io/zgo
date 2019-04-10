@@ -223,6 +223,16 @@ func (ms *zgoMysql) DeleteById(ctx context.Context, tableName string, id uint32)
 	return ms.res.DeleteById(ctx, tableName, id)
 }
 
+func (ms *zgoMysql) DeleteByObj(ctx context.Context, obj MysqlBaser) (int64, error) {
+	if obj.TableName() == "" {
+		return 0, errors.New("表名不存在")
+	}
+	if obj.GetID() == 0 {
+		return 0, errors.New("ID不能为0")
+	}
+	return ms.res.DeleteById(ctx, obj.TableName(), obj.GetID())
+}
+
 func (ms *zgoMysql) UpdateNotEmptyByObj(ctx context.Context, obj MysqlBaser) (int, error) {
 	return ms.res.UpdateNotEmptyByObj(ctx, obj)
 }
