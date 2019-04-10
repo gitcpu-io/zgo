@@ -30,7 +30,7 @@ type Mysqler interface {
 	//MysqlServiceByCityBiz(city string, biz string) (Mysqler, error)
 
 	Create(ctx context.Context, obj MysqlBaser) error
-	DeleteById(ctx context.Context, tableName string, id uint32) (int, error)
+	DeleteById(ctx context.Context, tableName string, id uint32) (int64, error)
 	UpdateNotEmptyByObj(ctx context.Context, obj MysqlBaser) (int, error)
 	UpdateByData(ctx context.Context, obj MysqlBaser, data map[string]interface{}) (int, error)
 	UpdateByObj(ctx context.Context, obj MysqlBaser) (int, error)
@@ -219,7 +219,7 @@ func (ms *zgoMysql) Create(ctx context.Context, obj MysqlBaser) error {
 	return ms.res.Create(ctx, obj)
 }
 
-func (ms *zgoMysql) DeleteById(ctx context.Context, tableName string, id uint32) (int, error) {
+func (ms *zgoMysql) DeleteById(ctx context.Context, tableName string, id uint32) (int64, error) {
 	return ms.res.DeleteById(ctx, tableName, id)
 }
 

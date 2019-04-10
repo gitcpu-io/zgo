@@ -25,7 +25,7 @@ type ErrResponse struct {
 	Status    int                    `json:"code"`
 	Msg       string                 `json:"message"`
 	ErrorCode string                 `json:"errorCode"`
-	Data      map[string]interface{} `json:data`
+	Data      map[string]interface{} `json:"data"`
 }
 
 var (
