@@ -9,7 +9,6 @@ type MysqlBaser interface {
 	GetID() uint32
 	SetID(id uint32)
 	TableName() string
-	DbName() string
 	Omit() string
 }
 
@@ -20,12 +19,10 @@ func (b *BaseModel) SetID(id uint32) {
 	b.Id = id
 }
 
-//func (b *BaseModel) TableName() string {
-//	return ""
-//}
-func (b *BaseModel) DbName() string {
+func (b *BaseModel) GetDB() string {
 	return ""
 }
+
 func (b *BaseModel) Omit() string {
 	return ""
 }
