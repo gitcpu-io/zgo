@@ -245,7 +245,7 @@ func (mr *mysqlResource) UpdateMany(ctx context.Context, tableName string, query
 	if err != nil {
 		return 0, err
 	}
-	gormPool = gormPool.Table(tableName).Where(query, args).Updates(data)
+	gormPool = gormPool.Table(tableName).Where(query, args...).Updates(data)
 	count := gormPool.RowsAffected
 	err = gormPool.Error
 	return int(count), err
