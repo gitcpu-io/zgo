@@ -166,7 +166,11 @@ func (c *zgoMysql) New(label ...string) (Mysqler, error) {
 
 // Get
 func (ms *zgoMysql) Get(ctx context.Context, args map[string]interface{}) error {
-	err := ms.res.Get(ctx, args)
+	db, err := ms.GetPool("w")
+	if err != nil {
+		return err
+	}
+	err = ms.res.Get(ctx, db, args)
 	return err
 }
 
@@ -176,7 +180,7 @@ func (ms *zgoMysql) GetPool(t string) (*gorm.DB, error) {
 	return pool, err
 }
 
-func (ms *zgoMysql) getPool(ctx context.Context, args map[string]interface{}) (*gorm.DB, error) {
+func (ms *zgoMysql) getDB(ctx context.Context, T string, args map[string]interface{}) (*gorm.DB, error) {
 	var (
 		db  *gorm.DB
 		err error
@@ -184,27 +188,16 @@ func (ms *zgoMysql) getPool(ctx context.Context, args map[string]interface{}) (*
 	if t, ok := args["T"]; ok {
 		db, err = ms.GetPool(t.(string))
 	} else {
-		db, err = ms.GetPool("r")
+		db, err = ms.GetPool(T)
 	}
 	return db, err
 }
 
 // List
 func (ms *zgoMysql) List(ctx context.Context, args map[string]interface{}) error {
-	var (
-		db  *gorm.DB
-		err error
-	)
-	if t, ok := args["T"]; ok {
-		db, err = ms.GetPool(t.(string))
-		if err != nil {
-			return err
-		}
-	} else {
-		db, err = ms.GetPool("r")
-		if err != nil {
-			return err
-		}
+	db, err := ms.getDB(ctx, "r", args)
+	if err != nil {
+		return err
 	}
 	return ms.res.List(ctx, db, args)
 }
@@ -249,17 +242,25 @@ func (ms *zgoMysql) Create(ctx context.Context, obj MysqlBaser) error {
 }
 
 func (ms *zgoMysql) DeleteById(ctx context.Context, tableName string, id uint32) (int, error) {
-	return ms.res.DeleteById(ctx, tableName, id)
+	db, err := ms.GetPool("w")
+	if err != nil {
+		return 0, err
+	}
+	return ms.res.DeleteById(ctx, db, tableName, id)
 }
 
 func (ms *zgoMysql) DeleteByObj(ctx context.Context, obj MysqlBaser) (int, error) {
+	db, err := ms.GetPool("w")
+	if err != nil {
+		return 0, err
+	}
 	if obj.TableName() == "" {
 		return 0, errors.New("表名不存在")
 	}
 	if obj.GetID() == 0 {
 		return 0, errors.New("ID不能为0")
 	}
-	return ms.res.DeleteById(ctx, obj.TableName(), obj.GetID())
+	return ms.res.DeleteById(ctx, db, obj.TableName(), obj.GetID())
 }
 
 func (ms *zgoMysql) UpdateNotEmptyByObj(ctx context.Context, obj MysqlBaser) (int, error) {

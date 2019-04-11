@@ -20,10 +20,10 @@ type MysqlResourcer interface {
 	GetWPool() (*gorm.DB, error)
 	List(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) error
 	Count(ctx context.Context, args map[string]interface{}) error
-	Get(ctx context.Context, args map[string]interface{}) error
+	Get(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) error
 
 	Create(ctx context.Context, obj MysqlBaser) error
-	DeleteById(ctx context.Context, tableName string, id uint32) (int, error)
+	DeleteById(ctx context.Context, gormPool *gorm.DB, tableName string, id uint32) (int, error)
 	UpdateNotEmptyByObj(ctx context.Context, obj MysqlBaser) (int, error)
 	UpdateByData(ctx context.Context, obj MysqlBaser, data map[string]interface{}) (int, error)
 	UpdateByObj(ctx context.Context, obj MysqlBaser) (int, error)
@@ -171,11 +171,11 @@ func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interfac
 }
 
 // 根据Id删除
-func (mr *mysqlResource) DeleteById(ctx context.Context, gormPool *gorm.DB, tableName string, id uint32) (int64, error) {
+func (mr *mysqlResource) DeleteById(ctx context.Context, gormPool *gorm.DB, tableName string, id uint32) (int, error) {
 	// 根据id删除
 	if id > 0 {
 		gormPool.Table(tableName).Delete(nil, map[string]uint32{"id": id})
-		return gormPool.RowsAffected, gormPool.Error
+		return int(gormPool.RowsAffected), gormPool.Error
 	}
 	return 0, errors.New("mysql deleteOne method : id not allow null or 0")
 }
