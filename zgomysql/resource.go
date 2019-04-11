@@ -174,7 +174,7 @@ func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interfac
 func (mr *mysqlResource) DeleteById(ctx context.Context, gormPool *gorm.DB, tableName string, id uint32) (int, error) {
 	// 根据id删除
 	if id > 0 {
-		gormPool.Table(tableName).Delete(nil, map[string]uint32{"id": id})
+		gormPool.Table(tableName).Delete(nil, "id = ?", id)
 		return int(gormPool.RowsAffected), gormPool.Error
 	}
 	return 0, errors.New("mysql deleteOne method : id not allow null or 0")
