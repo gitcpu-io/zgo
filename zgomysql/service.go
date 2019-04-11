@@ -176,8 +176,11 @@ func (ms *zgoMysql) Get(ctx context.Context, args map[string]interface{}) error 
 
 // GetPool
 func (ms *zgoMysql) GetPool(t string) (*gorm.DB, error) {
-	pool, err := ms.res.GetPool(t)
-	return pool, err
+	if t == "r" {
+		return ms.res.GetRPool()
+	} else {
+		return ms.res.GetWPool()
+	}
 }
 
 func (ms *zgoMysql) getDB(ctx context.Context, T string, args map[string]interface{}) (*gorm.DB, error) {
