@@ -166,7 +166,7 @@ func (c *zgoMysql) New(label ...string) (Mysqler, error) {
 
 // Get
 func (ms *zgoMysql) Get(ctx context.Context, args map[string]interface{}) error {
-	db, err := ms.GetPool("w")
+	db, err := ms.GetPool("r")
 	if err != nil {
 		return err
 	}
