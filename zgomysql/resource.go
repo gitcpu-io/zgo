@@ -23,7 +23,7 @@ type MysqlResourcer interface {
 	Get(ctx context.Context, args map[string]interface{}) error
 
 	Create(ctx context.Context, obj MysqlBaser) error
-	DeleteById(ctx context.Context, tableName string, id uint32) (int64, error)
+	DeleteById(ctx context.Context, tableName string, id uint32) (int, error)
 	UpdateNotEmptyByObj(ctx context.Context, obj MysqlBaser) (int, error)
 	UpdateByData(ctx context.Context, obj MysqlBaser, data map[string]interface{}) (int, error)
 	UpdateByObj(ctx context.Context, obj MysqlBaser) (int, error)
@@ -64,23 +64,10 @@ func (mr *mysqlResource) GetWPool() (*gorm.DB, error) {
 }
 
 // 查询单个数据
-func (mr *mysqlResource) Get(ctx context.Context, args map[string]interface{}) error {
+func (mr *mysqlResource) Get(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) error {
 	errv := mr.validate(args, "table", "query", "args", "obj")
 	if errv != nil {
 		return errv
-	}
-	var (
-		gormPool *gorm.DB
-		err      error
-	)
-	if T, ok := args["T"]; ok {
-		gormPool, err = mr.GetPool(T.(string))
-	} else {
-		gormPool, err = mr.GetRPool()
-	}
-
-	if err != nil {
-		return err
 	}
 	gormPool = gormPool.Table(args["table"].(string))
 	if sel, ok := args["select"]; ok {
@@ -92,28 +79,15 @@ func (mr *mysqlResource) Get(ctx context.Context, args map[string]interface{}) e
 	if group, ok := args["group"]; ok {
 		gormPool = gormPool.Group(group.(string))
 	}
-	err = gormPool.Where(args["query"], args["args"].([]interface{})...).First(args["obj"]).Error
+	err := gormPool.Where(args["query"], args["args"].([]interface{})...).First(args["obj"]).Error
 	return err
 }
 
 // 查询列表数据
-func (mr *mysqlResource) List(ctx context.Context, args map[string]interface{}) error {
+func (mr *mysqlResource) List(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) error {
 	errv := mr.validate(args, "table", "query", "args", "obj")
 	if errv != nil {
 		return errv
-	}
-	var (
-		gormPool *gorm.DB
-		err      error
-	)
-	if T, ok := args["T"]; ok {
-		gormPool, err = mr.GetPool(T.(string))
-	} else {
-		gormPool, err = mr.GetRPool()
-	}
-
-	if err != nil {
-		return err
 	}
 	gormPool = gormPool.Table(args["table"].(string))
 	if sel, ok := args["select"]; ok {
@@ -138,7 +112,7 @@ func (mr *mysqlResource) List(ctx context.Context, args map[string]interface{}) 
 	if group, ok := args["group"]; ok {
 		gormPool = gormPool.Group(group.(string))
 	}
-	err = gormPool.Find(args["obj"]).Error
+	err := gormPool.Find(args["obj"]).Error
 	return err
 }
 
@@ -197,13 +171,9 @@ func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interfac
 }
 
 // 根据Id删除
-func (mr *mysqlResource) DeleteById(ctx context.Context, tableName string, id uint32) (int64, error) {
+func (mr *mysqlResource) DeleteById(ctx context.Context, gormPool *gorm.DB, tableName string, id uint32) (int64, error) {
 	// 根据id删除
 	if id > 0 {
-		gormPool, err := mr.GetWPool()
-		if err != nil {
-			return 0, err
-		}
 		gormPool.Table(tableName).Delete(nil, map[string]uint32{"id": id})
 		return gormPool.RowsAffected, gormPool.Error
 	}
