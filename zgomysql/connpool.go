@@ -34,7 +34,6 @@ func GetPool(label string, T string) (*gorm.DB, error) {
 			}
 		}
 	}
-	fmt.Println("GetPool param T is wrong")
 	return nil, errors.New("GetPool param T is wrong")
 
 }
