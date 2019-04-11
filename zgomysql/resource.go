@@ -18,7 +18,7 @@ type MysqlResourcer interface {
 	GetPool(t string) (*gorm.DB, error)
 	GetRPool() (*gorm.DB, error)
 	GetWPool() (*gorm.DB, error)
-	List(ctx context.Context, args map[string]interface{}) error
+	List(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) error
 	Count(ctx context.Context, args map[string]interface{}) error
 	Get(ctx context.Context, args map[string]interface{}) error
 

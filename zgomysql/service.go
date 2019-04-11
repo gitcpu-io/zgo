@@ -176,9 +176,37 @@ func (ms *zgoMysql) GetPool(t string) (*gorm.DB, error) {
 	return pool, err
 }
 
+func (ms *zgoMysql) getPool(ctx context.Context, args map[string]interface{}) (*gorm.DB, error) {
+	var (
+		db  *gorm.DB
+		err error
+	)
+	if t, ok := args["T"]; ok {
+		db, err = ms.GetPool(t.(string))
+	} else {
+		db, err = ms.GetPool("r")
+	}
+	return db, err
+}
+
 // List
 func (ms *zgoMysql) List(ctx context.Context, args map[string]interface{}) error {
-	return ms.res.List(ctx, args)
+	var (
+		db  *gorm.DB
+		err error
+	)
+	if t, ok := args["T"]; ok {
+		db, err = ms.GetPool(t.(string))
+		if err != nil {
+			return err
+		}
+	} else {
+		db, err = ms.GetPool("r")
+		if err != nil {
+			return err
+		}
+	}
+	return ms.res.List(ctx, db, args)
 }
 
 // Count
