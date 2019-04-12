@@ -48,7 +48,7 @@ type PikaResourcer interface {
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
 
-	Zrank(ctx context.Context, key string, member interface{}) (interface{}, error)
+	Zrank(ctx context.Context, key string, member interface{}) (int, error)
 	Zscore(ctx context.Context, key string, member interface{}) (string, error)
 	Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
 	Zrevrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
@@ -421,11 +421,11 @@ func (p *pikaResource) Sismember(ctx context.Context, key string, value interfac
 	}
 }
 
-func (p *pikaResource) Zrank(ctx context.Context, key string, member interface{}) (interface{}, error) {
+func (p *pikaResource) Zrank(ctx context.Context, key string, member interface{}) (int, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
-	var rank interface{}
+	var rank int
 	if err := s.Do(radix.FlatCmd(&rank, "Zrank", key, member)); err != nil {
 		return 0, err
 	} else {
