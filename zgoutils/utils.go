@@ -102,6 +102,9 @@ type Utilser interface {
 	NowUnix() int
 	FormatFromUnixTime(t int64) string
 	FormatFromUnixTimeShort(t int64) string
+	FormatUnixTime(year int, month int, day int) string
+	FormatUnixTimeShort(year int, month int, day int) string
+	FormatUnixTimeYm(year int, month int, day int) string
 	ParseTime(str string) (time.Time, error)
 	Random(max int) int
 
@@ -562,6 +565,7 @@ func (u *utils) InitStructWithDefaultTag(bean interface{}) {
 
 const SysTimeform = "2006-01-02 15:04:05"
 const SysTimeformShort = "2006-01-02"
+const TimeformYm = "200601"
 
 // 中国时区
 var SysTimeLocation, _ = time.LoadLocation("Asia/Chongqing")
@@ -587,6 +591,21 @@ func (u *utils) FormatFromUnixTimeShort(t int64) string {
 	} else {
 		return time.Now().Format(SysTimeformShort)
 	}
+}
+
+// 将unix时间戳格式化为yyyymmdd H:i:s格式字符串
+func (u *utils) FormatUnixTime(year int, month int, day int) string {
+	return time.Unix(0, 0).AddDate(year, month, day).Format(SysTimeform)
+}
+
+// 将unix时间戳格式化为yyyymmdd格式字符串
+func (u *utils) FormatUnixTimeShort(year int, month int, day int) string {
+	return time.Unix(0, 0).AddDate(year, month, day).Format(SysTimeformShort)
+}
+
+// 将unix时间戳格式化为yyyymm格式字符串
+func (u *utils) FormatUnixTimeYm(year int, month int, day int) string {
+	return time.Unix(0, 0).AddDate(year, month, day).Format(TimeformYm)
 }
 
 // 将字符串转成时间

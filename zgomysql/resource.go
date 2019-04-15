@@ -19,16 +19,16 @@ type MysqlResourcer interface {
 	GetRPool() (*gorm.DB, error)
 	GetWPool() (*gorm.DB, error)
 	List(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) error
-	Count(ctx context.Context, args map[string]interface{}) error
+	Count(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) error
 	Get(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) error
 
-	Create(ctx context.Context, obj MysqlBaser) error
+	Create(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser) error
 	DeleteById(ctx context.Context, gormPool *gorm.DB, tableName string, id uint32) (int, error)
-	UpdateNotEmptyByObj(ctx context.Context, obj MysqlBaser) (int, error)
-	UpdateByData(ctx context.Context, obj MysqlBaser, data map[string]interface{}) (int, error)
-	UpdateByObj(ctx context.Context, obj MysqlBaser) (int, error)
-	UpdateMany(ctx context.Context, tableName string, query string, args []interface{}, data map[string]interface{}) (int, error)
-	Exec(ctx context.Context, sql string, values ...interface{}) (int, error)
+	UpdateNotEmptyByObj(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser) (int, error)
+	UpdateByData(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser, data map[string]interface{}) (int, error)
+	UpdateByObj(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser) (int, error)
+	UpdateMany(ctx context.Context, gormPool *gorm.DB, tableName string, query string, args []interface{}, data map[string]interface{}) (int, error)
+	Exec(ctx context.Context, gormPool *gorm.DB, sql string, values ...interface{}) (int, error)
 }
 
 //内部结构体
@@ -117,38 +117,21 @@ func (mr *mysqlResource) List(ctx context.Context, gormPool *gorm.DB, args map[s
 }
 
 // 查询数量
-func (mr *mysqlResource) Count(ctx context.Context, args map[string]interface{}) error {
+func (mr *mysqlResource) Count(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) error {
 	errv := mr.validate(args, "table", "query", "args", "count")
 	if errv != nil {
 		return errv
 	}
-	var (
-		gormPool *gorm.DB
-		err      error
-	)
-	if T, ok := args["T"]; ok {
-		gormPool, err = mr.GetPool(T.(string))
-	} else {
-		gormPool, err = mr.GetRPool()
-	}
-
-	if err != nil {
-		return err
-	}
 	gormPool = gormPool.Table(args["table"].(string)).Where(args["query"], args["args"].([]interface{})...)
-	err = gormPool.Count(args["count"]).Error
+	err := gormPool.Count(args["count"]).Error
 	return err
 }
 
 // 修改一条数据
-func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interface{}) (int, error) {
+func (mr *mysqlResource) UpdateOne(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) (int, error) {
 	errv := mr.validate(args, "table", "data")
 	if errv != nil {
 		return 0, errv
-	}
-	gormPool, err := mr.GetWPool()
-	if err != nil {
-		return 0, err
 	}
 	if model, ok := args["model"]; ok {
 		// args["data"] = map[string]interface{}{"name": "hello", "age": 18}
@@ -163,7 +146,7 @@ func (mr *mysqlResource) UpdateOne(ctx context.Context, args map[string]interfac
 	if data, ok := args["data"]; ok {
 		db := gormPool.Updates(data)
 		count := db.RowsAffected
-		err = db.Error
+		err := db.Error
 		return int(count), err
 	}
 
@@ -181,13 +164,9 @@ func (mr *mysqlResource) DeleteById(ctx context.Context, gormPool *gorm.DB, tabl
 }
 
 // 新增数据
-func (mr *mysqlResource) Create(ctx context.Context, obj MysqlBaser) error {
-	gormPool, err := mr.GetWPool()
-	if err != nil {
-		return err
-	}
+func (mr *mysqlResource) Create(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser) error {
 	if gormPool.NewRecord(obj) {
-		err = gormPool.Create(obj).Error
+		err := gormPool.Create(obj).Error
 		return err
 	} else {
 		return errors.New("被创建对象不能有主键")
@@ -195,71 +174,51 @@ func (mr *mysqlResource) Create(ctx context.Context, obj MysqlBaser) error {
 }
 
 // UpdateOneByData 根据data修改值
-func (mr *mysqlResource) UpdateByData(ctx context.Context, obj MysqlBaser, data map[string]interface{}) (int, error) {
-	gormPool, err := mr.GetWPool()
-	if err != nil {
-		return 0, err
-	}
+func (mr *mysqlResource) UpdateByData(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser, data map[string]interface{}) (int, error) {
 	if obj.GetID() == 0 {
 		return 0, errors.New("id不能为空")
 	}
 	gormPool = gormPool.Model(obj).Updates(data)
 	count := gormPool.RowsAffected
-	err = gormPool.Error
+	err := gormPool.Error
 	return int(count), err
 }
 
 // 更新数据，只更新非空字段
-func (mr *mysqlResource) UpdateNotEmptyByObj(ctx context.Context, obj MysqlBaser) (int, error) {
-	gormPool, err := mr.GetWPool()
-	if err != nil {
-		return 0, err
-	}
+func (mr *mysqlResource) UpdateNotEmptyByObj(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser) (int, error) {
 	if obj.GetID() == 0 {
 		return 0, errors.New("id不能为空")
 	}
 	gormPool = gormPool.Model(obj).Update(obj)
 	count := gormPool.RowsAffected
-	err = gormPool.Error
+	err := gormPool.Error
 	return int(count), err
 }
 
 // 更新所有字段，不考虑非空 走回调方法
-func (mr *mysqlResource) UpdateByObj(ctx context.Context, obj MysqlBaser) (int, error) {
-	gormPool, err := mr.GetWPool()
-	if err != nil {
-		return 0, err
-	}
+func (mr *mysqlResource) UpdateByObj(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser) (int, error) {
 	if obj.GetID() == 0 {
 		return 0, errors.New("id不能为空")
 	}
 	gormPool = gormPool.Model(obj).Omit(obj.Omit()).Save(obj)
 	count := gormPool.RowsAffected
-	err = gormPool.Error
+	err := gormPool.Error
 	return int(count), err
 }
 
 // UpdateMany 根据筛选条件批量修改数据 不支持回调方法
-func (mr *mysqlResource) UpdateMany(ctx context.Context, tableName string, query string, args []interface{}, data map[string]interface{}) (int, error) {
-	gormPool, err := mr.GetWPool()
-	if err != nil {
-		return 0, err
-	}
+func (mr *mysqlResource) UpdateMany(ctx context.Context, gormPool *gorm.DB, tableName string, query string, args []interface{}, data map[string]interface{}) (int, error) {
 	gormPool = gormPool.Table(tableName).Where(query, args...).Updates(data)
 	count := gormPool.RowsAffected
-	err = gormPool.Error
+	err := gormPool.Error
 	return int(count), err
 }
 
 // Exec 执行sql语句
-func (mr *mysqlResource) Exec(ctx context.Context, sql string, values ...interface{}) (int, error) {
-	gormPool, err := mr.GetWPool()
-	if err != nil {
-		return 0, err
-	}
+func (mr *mysqlResource) Exec(ctx context.Context, gormPool *gorm.DB, sql string, values ...interface{}) (int, error) {
 	gormPool = gormPool.Exec(sql, values)
 	count := gormPool.RowsAffected
-	err = gormPool.Error
+	err := gormPool.Error
 	return int(count), err
 }
 
