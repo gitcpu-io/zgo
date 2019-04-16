@@ -18,6 +18,7 @@ type RedisResourcer interface {
 	//对key设置ttl为秒的过期; OK表示成功
 	Setex(ctx context.Context, key string, ttl int, value interface{}) (string, error)
 	Expire(ctx context.Context, key string, time int) (int, error)
+	Incrby(ctx context.Context, key string, val int) (interface{}, error)
 	Hset(ctx context.Context, key string, name string, value interface{}) (int, error)
 	Hmset(ctx context.Context, key string, values interface{}) (string, error)
 
@@ -116,6 +117,17 @@ func (r *redisResource) Expire(ctx context.Context, key string, time int) (int, 
 	var res int
 	if err := s.Do(radix.FlatCmd(&res, "Expire", key, time)); err != nil {
 		return 0, err
+	} else {
+		return res, err
+	}
+	return res, nil
+}
+
+func (r *redisResource) Incrby(ctx context.Context, key string, val int) (interface{}, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var res string
+	if err := s.Do(radix.FlatCmd(&res, "Incrby", key, val)); err != nil {
+		return "", err
 	} else {
 		return res, err
 	}

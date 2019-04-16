@@ -22,6 +22,7 @@ type Pikaer interface {
 	//对key设置ttl为秒的过期; OK表示成功
 	Setex(ctx context.Context, key string, ttl int, value interface{}) (string, error)
 	Expire(ctx context.Context, key string, time int) (int, error)
+	Incrby(ctx context.Context, key string, val int) (interface{}, error)
 	Hset(ctx context.Context, key string, name string, value interface{}) (int, error)
 	Hmset(ctx context.Context, key string, values interface{}) (string, error)
 
@@ -146,6 +147,10 @@ func (r *zgopika) Setex(ctx context.Context, key string, ttl int, value interfac
 
 func (r *zgopika) Expire(ctx context.Context, key string, time int) (int, error) {
 	return r.res.Expire(ctx, key, time)
+}
+
+func (r *zgopika) Incrby(ctx context.Context, key string, val int) (interface{}, error) {
+	return r.res.Incrby(ctx, key, val)
 }
 
 func (r *zgopika) Hset(ctx context.Context, key string, name string, value interface{}) (int, error) {
