@@ -23,6 +23,7 @@ type Rediser interface {
 	//对key设置ttl为秒的过期; OK表示成功
 	Setex(ctx context.Context, key string, ttl int, value interface{}) (string, error)
 	Expire(ctx context.Context, key string, time int) (int, error)
+	Incrby(ctx context.Context, key string, val int) (interface{}, error)
 	Hset(ctx context.Context, key string, name string, value interface{}) (int, error)
 	Hmset(ctx context.Context, key string, values interface{}) (string, error)
 	Lpush(ctx context.Context, key string, value interface{}) (int, error)
@@ -146,6 +147,10 @@ func (r *zgoredis) Setex(ctx context.Context, key string, ttl int, value interfa
 
 func (r *zgoredis) Expire(ctx context.Context, key string, time int) (int, error) {
 	return r.res.Expire(ctx, key, time)
+}
+
+func (r *zgoredis) Incrby(ctx context.Context, key string, val int) (interface{}, error) {
+	return r.res.Incrby(ctx, key, val)
 }
 
 func (r *zgoredis) Hset(ctx context.Context, key string, name string, value interface{}) (int, error) {
