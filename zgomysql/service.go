@@ -18,7 +18,7 @@ type Mysqler interface {
 	//NewRs(label string) (MysqlResourcerInterface, error)
 	New(label ...string) (Mysqler, error)
 	// --- 事物方法
-	Begin() (Mysqler, error)
+	Begin(label string) (Mysqler, error)
 	Commit() error
 	RollBack()
 
@@ -37,6 +37,7 @@ type Mysqler interface {
 	UpdateByData(ctx context.Context, obj MysqlBaser, data map[string]interface{}) (int, error)
 	UpdateByObj(ctx context.Context, obj MysqlBaser) (int, error)
 	UpdateMany(ctx context.Context, tableName string, query string, args []interface{}, data map[string]interface{}) (int, error)
+	DeleteMany(ctx context.Context, tableName string, query string, args []interface{}) (int, error)
 	// --- 增删改方法 结束
 
 	Exec(ctx context.Context, sql string, values ...interface{}) (int, error)
@@ -122,14 +123,18 @@ func (c *zgoMysql) New(label ...string) (Mysqler, error) {
 	return GetMysql(label...)
 }
 
-func (ms *zgoMysql) Begin() (Mysqler, error) {
-	db, err := ms.GetPool("w")
-	db.Begin()
+func (ms *zgoMysql) Begin(label string) (Mysqler, error) {
+	mysql, err := GetMysql(label)
 	if err != nil {
 		return nil, err
 	}
+	db, err := mysql.GetPool("w")
+	if err != nil {
+		return nil, err
+	}
+	db = db.Begin()
 	return &zgoMysql{
-		ms.res,
+		mysql.res,
 		db,
 	}, nil
 }
@@ -289,6 +294,14 @@ func (ms *zgoMysql) UpdateMany(ctx context.Context, tableName string, query stri
 		return 0, err
 	}
 	return ms.res.UpdateMany(ctx, db, tableName, query, args, data)
+}
+
+func (ms *zgoMysql) DeleteMany(ctx context.Context, tableName string, query string, args []interface{}) (int, error) {
+	db, err := ms.GetPool("w")
+	if err != nil {
+		return 0, err
+	}
+	return ms.res.DeleteMany(ctx, db, tableName, query, args)
 }
 
 // Exec 执行原生sql

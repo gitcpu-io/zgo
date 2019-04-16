@@ -24,6 +24,7 @@ type MysqlResourcer interface {
 
 	Create(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser) error
 	DeleteById(ctx context.Context, gormPool *gorm.DB, tableName string, id uint32) (int, error)
+	DeleteMany(ctx context.Context, gormPool *gorm.DB, tableName string, query string, args []interface{}) (int, error)
 	UpdateNotEmptyByObj(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser) (int, error)
 	UpdateByData(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser, data map[string]interface{}) (int, error)
 	UpdateByObj(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser) (int, error)
@@ -209,6 +210,14 @@ func (mr *mysqlResource) UpdateByObj(ctx context.Context, gormPool *gorm.DB, obj
 // UpdateMany 根据筛选条件批量修改数据 不支持回调方法
 func (mr *mysqlResource) UpdateMany(ctx context.Context, gormPool *gorm.DB, tableName string, query string, args []interface{}, data map[string]interface{}) (int, error) {
 	gormPool = gormPool.Table(tableName).Where(query, args...).Updates(data)
+	count := gormPool.RowsAffected
+	err := gormPool.Error
+	return int(count), err
+}
+
+// UpdateMany 根据筛选条件批量修改数据 不支持回调方法
+func (mr *mysqlResource) DeleteMany(ctx context.Context, gormPool *gorm.DB, tableName string, query string, args []interface{}) (int, error) {
+	gormPool = gormPool.Table(tableName).Where(query, args...).Delete(nil)
 	count := gormPool.RowsAffected
 	err := gormPool.Error
 	return int(count), err
