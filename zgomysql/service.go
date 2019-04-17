@@ -3,6 +3,7 @@ package zgomysql
 import (
 	"context"
 	"errors"
+	"fmt"
 	"git.zhugefang.com/gocore/zgo/comm"
 	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/jinzhu/gorm"
@@ -17,8 +18,10 @@ var muLabel sync.RWMutex
 type Mysqler interface {
 	//NewRs(label string) (MysqlResourcerInterface, error)
 	New(label ...string) (Mysqler, error)
+	NewMysql(label ...string) Mysqler
+	GetDB(ctx context.Context, T string) (*gorm.DB, error)
 	// --- 事物方法
-	Begin(label string) (Mysqler, error)
+	Begin(label string) Mysqler
 	Commit() error
 	RollBack()
 
@@ -95,10 +98,7 @@ func InitMysql(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgo
 	}
 	out := make(chan *zgoMysql)
 	go func() {
-		in, err := GetMysql(initLabel)
-		if err != nil {
-			out <- nil
-		}
+		in := GetMysql(initLabel)
 		out <- in
 		close(out)
 	}()
@@ -108,35 +108,43 @@ func InitMysql(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgo
 }
 
 // GetMysql zgo内部获取一个连接mysql
-func GetMysql(label ...string) (*zgoMysql, error) {
+func GetMysql(label ...string) *zgoMysql {
 	l, err := comm.GetCurrentLabel(label, muLabel, currentLabels)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	return &zgoMysql{
 		res: NewMysqlResourcer(l),
-	}, nil
+	}
+}
+
+// Get
+func (ms *zgoMysql) GetDB(ctx context.Context, T string) (*gorm.DB, error) {
+	return ms.GetPool(T)
 }
 
 // New对外接口 获取新的Service对象
 func (c *zgoMysql) New(label ...string) (Mysqler, error) {
+	return GetMysql(label...), nil
+}
+
+// New对外接口 获取新的Service对象
+func (c *zgoMysql) NewMysql(label ...string) Mysqler {
 	return GetMysql(label...)
 }
 
-func (ms *zgoMysql) Begin(label string) (Mysqler, error) {
-	mysql, err := GetMysql(label)
-	if err != nil {
-		return nil, err
-	}
+func (ms *zgoMysql) Begin(label string) Mysqler {
+	mysql := GetMysql(label)
 	db, err := mysql.GetPool("w")
 	if err != nil {
-		return nil, err
+		fmt.Println(err.Error())
+		panic(err)
 	}
 	db = db.Begin()
 	return &zgoMysql{
 		mysql.res,
 		db,
-	}, nil
+	}
 }
 
 func (ms *zgoMysql) Commit() error {
