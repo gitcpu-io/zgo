@@ -99,6 +99,8 @@ type Eser interface {
 	NewDsl() *DSL
 	AddOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
 	UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
+    DeleteDsl(ctx context.Context, index, table, dsl string) (interface{}, error)
+
 }
 
 func (e *zgoes) New(label ...string) (*zgoes, error) {
@@ -114,6 +116,10 @@ func (e *zgoes) AddOneData(ctx context.Context, index, table, id, dsl string) (i
 }
 func (e *zgoes) UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error) {
 	return e.res.UpOneData(ctx, index, table, id, dataJson)
+}
+
+func (e *zgoes) DeleteDsl(ctx context.Context, index, table, dsl string) (interface{}, error) {
+	return e.res.DeleteDsl(ctx, index, table, dsl)
 }
 
 //func (e *zgoes)NewDsl() *mode.DSL {

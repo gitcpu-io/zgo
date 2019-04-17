@@ -17,6 +17,7 @@ type EsResourcer interface {
 	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
 	AddOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
 	UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
+    DeleteDsl(ctx context.Context, index, table, dsl string) (interface{}, error)
 }
 
 var mu sync.RWMutex
@@ -55,6 +56,40 @@ func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, ar
 	//定义es结果集返回结构体
 	uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"
 	//拼接es请求uti[索引+文档+_search]
+	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl)) //post请求
+	if err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json") //设置json协议解析头
+	resp, err := e.GetConChan().Do(req)                //获取绑定的地址执行请求
+	if err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	be, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+	if err := zgoutils.Utils.Unmarshal(be, &maps); err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+
+	return maps, err
+}
+
+
+//根据dsl语句执行删除
+func (e *esResource) DeleteDsl(ctx context.Context, index, table, dsl string) (interface{}, error) {
+	maps := map[string]interface{}{}
+	//定义es结果集返回结构体
+	uri := e.uri + "/" + index + "/" + table + "/" + "_delete_by_query"
+	//拼接es请求uti[索引+文档+_delete]
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl)) //post请求
 	if err != nil {
 		fmt.Print(err)
