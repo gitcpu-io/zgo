@@ -595,17 +595,17 @@ func (u *utils) FormatFromUnixTimeShort(t int64) string {
 
 // 将unix时间戳格式化为yyyymmdd H:i:s格式字符串
 func (u *utils) FormatUnixTime(year int, month int, day int) string {
-	return time.Unix(0, 0).AddDate(year, month, day).Format(SysTimeform)
+	return time.Now().AddDate(year, month, day).Format(SysTimeform)
 }
 
 // 将unix时间戳格式化为yyyymmdd格式字符串
 func (u *utils) FormatUnixTimeShort(year int, month int, day int) string {
-	return time.Unix(0, 0).AddDate(year, month, day).Format(SysTimeformShort)
+	return time.Now().AddDate(year, month, day).Format(SysTimeformShort)
 }
 
 // 将unix时间戳格式化为yyyymm格式字符串
 func (u *utils) FormatUnixTimeYm(year int, month int, day int) string {
-	return time.Unix(0, 0).AddDate(year, month, day).Format(TimeformYm)
+	return time.Now().AddDate(year, month, day).Format(TimeformYm)
 }
 
 // 将字符串转成时间

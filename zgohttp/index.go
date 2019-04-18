@@ -53,7 +53,7 @@ func (zh *zgohttp) JsonOK(ctx iris.Context, r interface{}) (int, error) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Header("Access-Control-Allow-Headers", "Content-Type")
 	ctx.Header("content-type", "application/json")
-	return ctx.JSON(iris.Map{"code": 200, "data": r, "message": ""})
+	return ctx.JSON(iris.Map{"code": 200, "data": r, "message": "操作成功"})
 }
 
 // JsonExpectErr 预期内的错误，适用于调用func后 return出来的errors!=nil时的返回值
