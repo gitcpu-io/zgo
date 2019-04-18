@@ -54,13 +54,14 @@ func (m *safeMap) Get(k interface{}) interface{} {
 func (m *safeMap) Set(k interface{}, v interface{}) bool {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	if val, ok := m.sm[k]; !ok {
-		m.sm[k] = v
-	} else if val != v {
-		m.sm[k] = v
-	} else {
-		return false
-	}
+	//if val, ok := m.sm[k]; !ok {
+	//	m.sm[k] = v
+	//} else if val != v {
+	//	m.sm[k] = v
+	//} else {
+	//	return false
+	//}
+	m.sm[k] = v
 	return true
 }
 
