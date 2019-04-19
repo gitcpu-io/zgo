@@ -81,7 +81,10 @@ func (mr *mysqlResource) Get(ctx context.Context, gormPool *gorm.DB, args map[st
 		gormPool = gormPool.Group(group.(string))
 	}
 	err := gormPool.Where(args["query"], args["args"].([]interface{})...).First(args["obj"]).Error
-	return err
+	if err != nil && err.Error() != "record not found" {
+		return err
+	}
+	return nil
 }
 
 // 查询列表数据
