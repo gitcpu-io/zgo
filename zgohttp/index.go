@@ -2,6 +2,7 @@ package zgohttp
 
 import (
 	"github.com/kataras/iris"
+	"time"
 )
 
 type Httper interface {
@@ -12,6 +13,7 @@ type Httper interface {
 	JsonParamErr(ctx iris.Context) (int, error)
 	JsonErr(ctx iris.Context, status int, code string, msg string) (int, error)
 	JsonExpectErr(ctx iris.Context, msg string) (int, error)
+	UseBefore(ctx iris.Context)
 }
 
 type zgohttp struct {
@@ -26,6 +28,7 @@ type ErrResponse struct {
 	Msg       string                 `json:"message"`
 	ErrorCode string                 `json:"errorCode"`
 	Data      map[string]interface{} `json:"data"`
+	Time      int64                  `json:"time"`
 }
 
 var (
@@ -38,14 +41,18 @@ func (zh *zgohttp) JsonpOK(ctx iris.Context, r interface{}) (int, error) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Header("Access-Control-Allow-Headers", "Content-Type")
 	ctx.Header("content-type", "application/json")
-	return ctx.JSONP(iris.Map{"code": 200, "data": r, "message": ""})
+	startTime := ctx.Values().GetInt64Default("startTime", time.Now().UnixNano())
+	time := (time.Now().UnixNano() - startTime) / 1e6
+	return ctx.JSONP(iris.Map{"code": 200, "data": r, "message": "", "time": time})
 }
 
 func (zh *zgohttp) JsonpErr(ctx iris.Context, msg string) (int, error) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Header("Access-Control-Allow-Headers", "Content-Type")
 	ctx.Header("content-type", "application/json")
-	return ctx.JSONP(iris.Map{"code": 400, "message": msg, "data": make(map[string]interface{})})
+	startTime := ctx.Values().GetInt64Default("startTime", time.Now().UnixNano())
+	time := (time.Now().UnixNano() - startTime) / 1e6
+	return ctx.JSONP(iris.Map{"code": 400, "message": msg, "data": make(map[string]interface{}), "time": time})
 }
 
 // JsonOK 正常的返回方法
@@ -53,7 +60,9 @@ func (zh *zgohttp) JsonOK(ctx iris.Context, r interface{}) (int, error) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Header("Access-Control-Allow-Headers", "Content-Type")
 	ctx.Header("content-type", "application/json")
-	return ctx.JSON(iris.Map{"code": 200, "data": r, "message": "操作成功"})
+	startTime := ctx.Values().GetInt64Default("startTime", time.Now().UnixNano())
+	time := (time.Now().UnixNano() - startTime) / 1e6
+	return ctx.JSON(iris.Map{"code": 200, "data": r, "message": "操作成功", "time": time})
 }
 
 // JsonExpectErr 预期内的错误，适用于调用func后 return出来的errors!=nil时的返回值
@@ -61,15 +70,19 @@ func (zh *zgohttp) JsonExpectErr(ctx iris.Context, msg string) (int, error) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Header("Access-Control-Allow-Headers", "Content-Type")
 	ctx.Header("content-type", "application/json")
-	return ctx.JSON(ErrResponse{Status: 500, Msg: msg, ErrorCode: "500", Data: make(map[string]interface{})})
+	startTime := ctx.Values().GetInt64Default("startTime", time.Now().UnixNano())
+	time := (time.Now().UnixNano() - startTime) / 1e6
+	return ctx.JSON(ErrResponse{Status: 500, Msg: msg, ErrorCode: "500", Data: make(map[string]interface{}), Time: time})
 }
 
-// JsonOtherErr 其他自定义返回方法 （业务本身的异常）
+// JsonOtherErr 其他自定义返回方法 （业务本身的异常)
 func (zh *zgohttp) JsonErr(ctx iris.Context, status int, code string, msg string) (int, error) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Header("Access-Control-Allow-Headers", "Content-Type")
 	ctx.Header("content-type", "application/json")
-	return ctx.JSON(ErrResponse{Status: status, Msg: msg, ErrorCode: code})
+	startTime := ctx.Values().GetInt64Default("startTime", time.Now().UnixNano())
+	time := (time.Now().UnixNano() - startTime) / 1e6
+	return ctx.JSON(ErrResponse{Status: status, Msg: msg, ErrorCode: code, Data: make(map[string]interface{}), Time: time})
 }
 
 // JsonServiceErr defer recover到panic的时候用的异常方法
@@ -78,7 +91,9 @@ func (zh *zgohttp) JsonServiceErr(ctx iris.Context) (int, error) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Header("Access-Control-Allow-Headers", "Content-Type")
 	ctx.Header("content-type", "application/json")
-	return ctx.JSON(ErrResponse{Status: 500, Msg: msg, ErrorCode: "500", Data: make(map[string]interface{})})
+	startTime := ctx.Values().GetInt64Default("startTime", time.Now().UnixNano())
+	time := (time.Now().UnixNano() - startTime) / 1e6
+	return ctx.JSON(ErrResponse{Status: 500, Msg: msg, ErrorCode: "500", Data: make(map[string]interface{}), Time: time})
 }
 
 // JsonParamErr 参数验证不通过时调用
@@ -87,5 +102,13 @@ func (zh *zgohttp) JsonParamErr(ctx iris.Context) (int, error) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Header("Access-Control-Allow-Headers", "Content-Type")
 	ctx.Header("content-type", "application/json")
-	return ctx.JSON(ErrResponse{Status: 400, Msg: msg, ErrorCode: "400", Data: make(map[string]interface{})})
+	startTime := ctx.Values().GetInt64Default("startTime", time.Now().UnixNano())
+	time := (time.Now().UnixNano() - startTime) / 1e6
+	return ctx.JSON(ErrResponse{Status: 400, Msg: msg, ErrorCode: "400", Data: make(map[string]interface{}), Time: time})
+}
+
+func (zh *zgohttp) UseBefore(ctx iris.Context) {
+	start := time.Now().UnixNano()
+	ctx.Values().Set("startTime", start)
+	ctx.Next()
 }
