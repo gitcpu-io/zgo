@@ -108,6 +108,12 @@ func (zh *zgohttp) JsonParamErr(ctx iris.Context) (int, error) {
 }
 
 func (zh *zgohttp) UseBefore(ctx iris.Context) {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(err)
+			zgo.Http.JsonServiceErr(ctx)
+		}
+	}()
 	start := time.Now().UnixNano()
 	ctx.Values().Set("startTime", start)
 	ctx.Next()
