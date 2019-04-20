@@ -96,16 +96,27 @@ func (opt *Options) parseConfig(resKvs []*mvccpb.KeyValue, connCh chan map[strin
 				label := smk[4]
 				var hsm = make(map[string][]*config.ConnDetail)
 				var tmp []*config.ConnDetail
+
 				for _, vv := range m {
 					pvv := vv
 					tmp = append(tmp, &pvv)
 
-					fmt.Printf("\n**********************资源项: %s **************************\n", labelType)
-					fmt.Printf("描述: %s\n", pvv.C)
-					fmt.Printf("Label: %s\n", label)
-					fmt.Printf("Host: %s\n", pvv.Host)
-					fmt.Printf("Port: %d\n", pvv.Port)
-					fmt.Printf("DbName: %s\n", pvv.DbName)
+					sb := strings.Builder{}
+					sb.WriteString(fmt.Sprintf("\n**********************资源项: %s **************************\n", labelType))
+					sb.WriteString(fmt.Sprintf("描述: %s\n", pvv.C))
+					sb.WriteString(fmt.Sprintf("Label: %s\n", label))
+					sb.WriteString(fmt.Sprintf("Host: %s\n", pvv.Host))
+					sb.WriteString(fmt.Sprintf("Port: %d\n", pvv.Port))
+					sb.WriteString(fmt.Sprintf("DbName: %s\n", pvv.DbName))
+					sb.WriteString(fmt.Sprintf("Db: %d\n", pvv.Db))
+					fmt.Println(sb.String())
+					//fmt.Printf("\n**********************资源项: %s **************************\n", labelType)
+					//fmt.Printf("描述: %s\n", pvv.C)
+					//fmt.Printf("Label: %s\n", label)
+					//fmt.Printf("Host: %s\n", pvv.Host)
+					//fmt.Printf("Port: %d\n", pvv.Port)
+					//fmt.Printf("DbName: %s\n", pvv.DbName)
+					//fmt.Printf("Db: %d\n", pvv.Db)
 				}
 				hsm[key] = tmp
 				connCh <- hsm

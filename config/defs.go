@@ -21,7 +21,7 @@ const (
 	Warn         //2
 	Error        //3
 
-	Version       = "0.9.5"       //zgo版本号
+	Version       = "0.9.6"       //zgo版本号
 	ProjectPrefix = "zgo/project" //读取ETCD配置时prefix
 	FileStoreType = "local"       //文件存储类型
 	FileStoreHome = "/tmp"        //文件存储目录
@@ -52,12 +52,12 @@ var (
 		//"localhost:2381",
 	}
 	QaEtcHosts = []string{ //QA环境ETCD地址，同正式
-		"zgoadminetcd101:2380",
+		"123.56.173.28:2380",
 	}
 	ProEtcHosts = []string{ //生产环境ETCD地址，需要使用内部dns解析，在k8s的worker节点配置/etc/hosts下面的域名和真实的etcd的ip
-		"zgoadminetcd101:2380",
-		"zgoadminetcd102:2380",
-		"zgoadminetcd103:2380",
+		"10.25.96.1:2380",
+		"10.26.100.217:2380",
+		"10.26.162.67:2380",
 	}
 	cityDbConfig = map[string]map[string]string{
 		"sell": {
