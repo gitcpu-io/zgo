@@ -1,6 +1,7 @@
 package zgohttp
 
 import (
+	"fmt"
 	"github.com/kataras/iris"
 	"time"
 )
@@ -111,7 +112,7 @@ func (zh *zgohttp) UseBefore(ctx iris.Context) {
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println(err)
-			zgo.Http.JsonServiceErr(ctx)
+			zh.JsonServiceErr(ctx)
 		}
 	}()
 	start := time.Now().UnixNano()
