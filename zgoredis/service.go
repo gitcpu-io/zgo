@@ -53,6 +53,8 @@ type Rediser interface {
 	Zscore(ctx context.Context, key string, member interface{}) (string, error)
 	Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
 	Zrevrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
+	Zrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffset, limitCount int) (interface{}, error)
+	Zrevrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffset, limitCount int) (interface{}, error)
 	ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error)
 	Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error)
 	Zrem(ctx context.Context, key string, member ...interface{}) (int, error)
@@ -263,6 +265,14 @@ func (r *zgoredis) Zrange(ctx context.Context, key string, start int, stop int, 
 
 func (r *zgoredis) Zrevrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error) {
 	return r.res.Zrevrange(ctx, key, start, stop, withscores)
+}
+
+func (r *zgoredis) Zrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffet, limitCount int) (interface{}, error) {
+	return r.res.Zrangebyscore(ctx, key, start, stop, withscores, limitOffet, limitCount)
+}
+
+func (r *zgoredis) Zrevrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffet, limitCount int) (interface{}, error) {
+	return r.res.Zrevrangebyscore(ctx, key, start, stop, withscores, limitOffet, limitCount)
 }
 
 func (r *zgoredis) ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error) {

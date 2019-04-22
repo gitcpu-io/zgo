@@ -53,6 +53,8 @@ type RedisResourcer interface {
 	Zscore(ctx context.Context, key string, member interface{}) (string, error)
 	Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
 	Zrevrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
+	Zrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffset, limitCount int) (interface{}, error)
+	Zrevrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffset, limitCount int) (interface{}, error)
 	ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error)
 	Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error)
 	Zrem(ctx context.Context, key string, member ...interface{}) (int, error)
@@ -433,6 +435,44 @@ func (r *redisResource) Zrevrange(ctx context.Context, key string, start int, st
 		}
 	} else {
 		if err := s.Do(radix.FlatCmd(&setContent, "Zrevrange", key, start, stop)); err != nil {
+			return nil, err
+		} else {
+			return setContent, err
+		}
+	}
+
+}
+
+func (r *redisResource) Zrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffset, limitCount int) (interface{}, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var setContent []string
+	if withscores {
+		if err := s.Do(radix.FlatCmd(&setContent, "ZRANGEBYSCORE", key, start, stop, "WITHSCORES", "LIMIT", limitOffset, limitCount)); err != nil {
+			return nil, err
+		} else {
+			return setContent, err
+		}
+	} else {
+		if err := s.Do(radix.FlatCmd(&setContent, "ZRANGEBYSCORE", key, start, stop, "LIMIT", limitOffset, limitCount)); err != nil {
+			return nil, err
+		} else {
+			return setContent, err
+		}
+	}
+
+}
+
+func (r *redisResource) Zrevrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffset, limitCount int) (interface{}, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var setContent []string
+	if withscores {
+		if err := s.Do(radix.FlatCmd(&setContent, "ZREVRANGEBYSCORE", key, start, stop, "WITHSCORES", "LIMIT", limitOffset, limitCount)); err != nil {
+			return nil, err
+		} else {
+			return setContent, err
+		}
+	} else {
+		if err := s.Do(radix.FlatCmd(&setContent, "ZREVRANGEBYSCORE", key, start, stop, "LIMIT", limitOffset, limitCount)); err != nil {
 			return nil, err
 		} else {
 			return setContent, err
