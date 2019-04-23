@@ -106,7 +106,10 @@ type Utilser interface {
 	FormatUnixTimeShort(year int, month int, day int) string
 	FormatUnixTimeYm(year int, month int, day int) string
 	ParseTime(str string) (time.Time, error)
+
 	Random(max int) int
+	RandRangeInt(min, max int) int
+	RandRangeInt64(min, max int64) int64
 
 	CreateSign(str string) string
 	Addslashes(str string) string
@@ -613,7 +616,7 @@ func (u *utils) ParseTime(str string) (time.Time, error) {
 	return time.ParseInLocation(SysTimeform, str, SysTimeLocation)
 }
 
-// 得到一个随机数
+// 得到指定最大值的一个随机数
 func (u *utils) Random(max int) int {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	if max < 1 {
@@ -621,6 +624,18 @@ func (u *utils) Random(max int) int {
 	} else {
 		return r.Intn(max)
 	}
+}
+
+// 生成指定范围内的一个随机数
+func (u *utils) RandRangeInt(min, max int) int {
+	rand.Seed(time.Now().UnixNano())
+	return min + rand.Intn(max-min+1)
+}
+
+// 生成指定范围内的一个随机数
+func (u *utils) RandRangeInt64(min, max int64) int64 {
+	rand.Seed(time.Now().UnixNano())
+	return min + rand.Int63n(max-min+1)
 }
 
 // 对字符串进行签名
