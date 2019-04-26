@@ -40,6 +40,8 @@ type Pikaer interface {
 	Hlen(ctx context.Context, key string) (interface{}, error)
 	Hdel(ctx context.Context, key string, name interface{}) (int, error)
 	Hgetall(ctx context.Context, key string) (interface{}, error)
+	Hincrby(ctx context.Context, key string, field string, inc int64) (int64, error)
+
 	Del(ctx context.Context, key string) (interface{}, error)
 	Llen(ctx context.Context, key string) (interface{}, error)
 	Lrange(ctx context.Context, key string, start int, stop int) (interface{}, error)
@@ -213,6 +215,10 @@ func (r *zgopika) Hdel(ctx context.Context, key string, name interface{}) (int, 
 
 func (r *zgopika) Hgetall(ctx context.Context, key string) (interface{}, error) {
 	return r.res.Hgetall(ctx, key)
+}
+
+func (r *zgopika) Hincrby(ctx context.Context, key, field string, inc int64) (int64, error) {
+	return r.res.Hincrby(ctx, key, field, inc)
 }
 
 func (r *zgopika) Del(ctx context.Context, key string) (interface{}, error) {

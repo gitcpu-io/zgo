@@ -37,6 +37,8 @@ type PikaResourcer interface {
 	Hlen(ctx context.Context, key string) (interface{}, error)
 	Hdel(ctx context.Context, key string, name interface{}) (int, error)
 	Hgetall(ctx context.Context, key string) (interface{}, error)
+	Hincrby(ctx context.Context, key string, field string, inc int64) (int64, error)
+
 	Del(ctx context.Context, key string) (interface{}, error)
 
 	Llen(ctx context.Context, key string) (interface{}, error)
@@ -97,8 +99,10 @@ func (p *pikaResource) Set(ctx context.Context, key string, value interface{}) (
 	return res, nil
 }
 
-func (r *pikaResource) Setnx(ctx context.Context, key string, value interface{}) (int, error) {
-	s := <-r.connpool.GetConnChan(r.label)
+func (p *pikaResource) Setnx(ctx context.Context, key string, value interface{}) (int, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
 	var res int
 	if err := s.Do(radix.FlatCmd(&res, "SETNX", key, value)); err != nil {
 		return 0, err
@@ -108,8 +112,10 @@ func (r *pikaResource) Setnx(ctx context.Context, key string, value interface{})
 	return res, nil
 }
 
-func (r *pikaResource) Setex(ctx context.Context, key string, ttl int, value interface{}) (string, error) {
-	s := <-r.connpool.GetConnChan(r.label)
+func (p *pikaResource) Setex(ctx context.Context, key string, ttl int, value interface{}) (string, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
 	var res string
 	if err := s.Do(radix.FlatCmd(&res, "SETEX", key, ttl, value)); err != nil {
 		return "", err
@@ -332,6 +338,18 @@ func (p *pikaResource) Hgetall(ctx context.Context, key string) (interface{}, er
 	}
 }
 
+func (p *pikaResource) Hincrby(ctx context.Context, key, field string, inc int64) (int64, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
+	var reply int64
+	if err := s.Do(radix.FlatCmd(&reply, "HINCRBY", key, field, inc)); err != nil {
+		return 0, err
+	} else {
+		return reply, err
+	}
+}
+
 func (p *pikaResource) Del(ctx context.Context, key string) (interface{}, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
@@ -368,8 +386,10 @@ func (p *pikaResource) Lrange(ctx context.Context, key string, start int, stop i
 	}
 }
 
-func (r *pikaResource) Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error) {
-	s := <-r.connpool.GetConnChan(r.label)
+func (p *pikaResource) Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
 	var listContent interface{}
 	if err := s.Do(radix.FlatCmd(&listContent, "Ltrim", key, start, stop)); err != nil {
 		return nil, err
@@ -504,8 +524,10 @@ func (p *pikaResource) Zrevrange(ctx context.Context, key string, start int, sto
 
 }
 
-func (r *pikaResource) Zrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffset, limitCount int) (interface{}, error) {
-	s := <-r.connpool.GetConnChan(r.label)
+func (p *pikaResource) Zrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffset, limitCount int) (interface{}, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
 	var setContent []string
 	if withscores {
 		if err := s.Do(radix.FlatCmd(&setContent, "ZRANGEBYSCORE", key, start, stop, "WITHSCORES", "LIMIT", limitOffset, limitCount)); err != nil {
@@ -523,8 +545,10 @@ func (r *pikaResource) Zrangebyscore(ctx context.Context, key string, start int,
 
 }
 
-func (r *pikaResource) Zrevrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffset, limitCount int) (interface{}, error) {
-	s := <-r.connpool.GetConnChan(r.label)
+func (p *pikaResource) Zrevrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffset, limitCount int) (interface{}, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
 	var setContent []string
 	if withscores {
 		if err := s.Do(radix.FlatCmd(&setContent, "ZREVRANGEBYSCORE", key, start, stop, "WITHSCORES", "LIMIT", limitOffset, limitCount)); err != nil {

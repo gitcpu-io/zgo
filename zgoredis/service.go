@@ -40,6 +40,8 @@ type Rediser interface {
 	Hlen(ctx context.Context, key string) (interface{}, error)
 	Hdel(ctx context.Context, key string, name string) (interface{}, error)
 	Hgetall(ctx context.Context, key string) (interface{}, error)
+	Hincrby(ctx context.Context, key string, field string, inc int64) (int64, error)
+
 	Del(ctx context.Context, key string) (interface{}, error)
 	Llen(ctx context.Context, key string) (interface{}, error)
 	Lrange(ctx context.Context, key string, start int, stop int) (interface{}, error)
@@ -213,6 +215,10 @@ func (r *zgoredis) Hdel(ctx context.Context, key string, name string) (interface
 
 func (r *zgoredis) Hgetall(ctx context.Context, key string) (interface{}, error) {
 	return r.res.Hgetall(ctx, key)
+}
+
+func (r *zgoredis) Hincrby(ctx context.Context, key, field string, inc int64) (int64, error) {
+	return r.res.Hincrby(ctx, key, field, inc)
 }
 
 func (r *zgoredis) Del(ctx context.Context, key string) (interface{}, error) {

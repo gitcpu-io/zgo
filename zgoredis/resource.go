@@ -37,6 +37,8 @@ type RedisResourcer interface {
 	Hlen(ctx context.Context, key string) (interface{}, error)
 	Hdel(ctx context.Context, key string, name interface{}) (int, error)
 	Hgetall(ctx context.Context, key string) (interface{}, error)
+	Hincrby(ctx context.Context, key string, field string, inc int64) (int64, error)
+
 	Del(ctx context.Context, key string) (interface{}, error)
 
 	Llen(ctx context.Context, key string) (interface{}, error)
@@ -292,6 +294,16 @@ func (r *redisResource) Hgetall(ctx context.Context, key string) (interface{}, e
 		return nil, err
 	} else {
 		return buzMap, err
+	}
+}
+
+func (p *redisResource) Hincrby(ctx context.Context, key, field string, inc int64) (int64, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	var reply int64
+	if err := s.Do(radix.FlatCmd(&reply, "HINCRBY", key, field, inc)); err != nil {
+		return 0, err
+	} else {
+		return reply, err
 	}
 }
 
