@@ -13,6 +13,8 @@ type PikaResourcer interface {
 	GetConnChan(label string) chan *radix.Pool
 	//Post
 	Set(ctx context.Context, key string, value interface{}) (string, error)
+	//设置分布式锁
+	SetMutex(ctx context.Context, key string, ttl int, value interface{}) (string, error)
 	//SETNX if Not eXists 1 如果key被设置了; 0 如果key没有被设置
 	Setnx(ctx context.Context, key string, value interface{}) (int, error)
 	//对key设置ttl为秒的过期; OK表示成功
@@ -92,6 +94,19 @@ func (p *pikaResource) Set(ctx context.Context, key string, value interface{}) (
 	key = prefix + key
 	var res string
 	if err := s.Do(radix.FlatCmd(&res, "SET", key, value)); err != nil {
+		return "", err
+	} else {
+		return res, err
+	}
+	return res, nil
+}
+
+func (p *pikaResource) SetMutex(ctx context.Context, key string, ttl int, value interface{}) (string, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
+	var res string
+	if err := s.Do(radix.FlatCmd(&res, "SET", key, value, "EX", ttl, "NX")); err != nil {
 		return "", err
 	} else {
 		return res, err

@@ -17,6 +17,8 @@ type Pikaer interface {
 	New(label ...string) (*zgopika, error)
 	//Post
 	Set(ctx context.Context, key string, value interface{}) (string, error)
+	//设置分布式锁
+	SetMutex(ctx context.Context, key string, ttl int, value interface{}) (string, error)
 	//SETNX if Not eXists 1 如果key被设置了; 0 如果key没有被设置
 	Setnx(ctx context.Context, key string, value interface{}) (int, error)
 	//对key设置ttl为秒的过期; OK表示成功
@@ -139,6 +141,10 @@ func GetPika(label ...string) (*zgopika, error) {
 
 func (r *zgopika) Set(ctx context.Context, key string, value interface{}) (string, error) {
 	return r.res.Set(ctx, key, value)
+}
+
+func (r *zgopika) SetMutex(ctx context.Context, key string, ttl int, value interface{}) (string, error) {
+	return r.res.SetMutex(ctx, key, ttl, value)
 }
 
 func (r *zgopika) Setnx(ctx context.Context, key string, value interface{}) (int, error) {

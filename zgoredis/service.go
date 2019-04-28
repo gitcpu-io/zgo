@@ -18,6 +18,8 @@ type Rediser interface {
 	//Post
 	//hmset setnx setex
 	Set(ctx context.Context, key string, value interface{}) (string, error)
+	//设置分布式锁
+	SetMutex(ctx context.Context, key string, ttl int, value interface{}) (string, error)
 	//SETNX if Not eXists 1 如果key被设置了; 0 如果key没有被设置
 	Setnx(ctx context.Context, key string, value interface{}) (int, error)
 	//对key设置ttl为秒的过期; OK表示成功
@@ -139,6 +141,10 @@ func GetRedis(label ...string) (*zgoredis, error) {
 
 func (r *zgoredis) Set(ctx context.Context, key string, value interface{}) (string, error) {
 	return r.res.Set(ctx, key, value)
+}
+
+func (r *zgoredis) SetMutex(ctx context.Context, key string, ttl int, value interface{}) (string, error) {
+	return r.res.SetMutex(ctx, key, ttl, value)
 }
 
 func (r *zgoredis) Setnx(ctx context.Context, key string, value interface{}) (int, error) {
