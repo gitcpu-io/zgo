@@ -2,6 +2,7 @@ package zgo
 
 import (
 	"git.zhugefang.com/gocore/zgo/config"
+	"git.zhugefang.com/gocore/zgo/limiter"
 	"git.zhugefang.com/gocore/zgo/zgocache"
 	"git.zhugefang.com/gocore/zgo/zgocrypto"
 	"git.zhugefang.com/gocore/zgo/zgoes"
@@ -177,4 +178,6 @@ var (
 	Crypto zgocrypto.Cryptoer
 	Map    = zgomap.GetMap()
 	File   zgofile.Filer
+
+	Limiter = limiter.New()
 )

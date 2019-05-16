@@ -36,20 +36,20 @@ type RedisResourcer interface {
 	Hget(ctx context.Context, key string, name string) (interface{}, error)
 	Ttl(ctx context.Context, key string) (interface{}, error)
 	Type(ctx context.Context, key string) (interface{}, error)
-	Hlen(ctx context.Context, key string) (interface{}, error)
+	Hlen(ctx context.Context, key string) (int, error)
 	Hdel(ctx context.Context, key string, name interface{}) (int, error)
 	Hgetall(ctx context.Context, key string) (interface{}, error)
 	Hincrby(ctx context.Context, key string, field string, inc int64) (int64, error)
 
 	Del(ctx context.Context, key string) (interface{}, error)
 
-	Llen(ctx context.Context, key string) (interface{}, error)
+	Llen(ctx context.Context, key string) (int, error)
 	Lrange(ctx context.Context, key string, start int, stop int) (interface{}, error)
 	Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error)
 	Lpop(ctx context.Context, key string) (interface{}, error)
 	Rpop(ctx context.Context, key string) (interface{}, error)
 
-	Scard(ctx context.Context, key string) (interface{}, error)
+	Scard(ctx context.Context, key string) (int, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
 
@@ -280,11 +280,11 @@ func (r *redisResource) Type(ctx context.Context, key string) (interface{}, erro
 	}
 }
 
-func (r *redisResource) Hlen(ctx context.Context, key string) (interface{}, error) {
+func (r *redisResource) Hlen(ctx context.Context, key string) (int, error) {
 	s := <-r.connpool.GetConnChan(r.label)
 	var dataLen int
 	if err := s.Do(radix.FlatCmd(&dataLen, "Hlen", key)); err != nil {
-		return nil, err
+		return 0, err
 	} else {
 		return dataLen, err
 	}
@@ -330,11 +330,11 @@ func (r *redisResource) Del(ctx context.Context, key string) (interface{}, error
 	}
 }
 
-func (r *redisResource) Llen(ctx context.Context, key string) (interface{}, error) {
+func (r *redisResource) Llen(ctx context.Context, key string) (int, error) {
 	s := <-r.connpool.GetConnChan(r.label)
 	var dataLen int
 	if err := s.Do(radix.FlatCmd(&dataLen, "Llen", key)); err != nil {
-		return nil, err
+		return 0, err
 	} else {
 		return dataLen, err
 	}
@@ -380,11 +380,11 @@ func (r *redisResource) Rpop(ctx context.Context, key string) (interface{}, erro
 	}
 }
 
-func (r *redisResource) Scard(ctx context.Context, key string) (interface{}, error) {
+func (r *redisResource) Scard(ctx context.Context, key string) (int, error) {
 	s := <-r.connpool.GetConnChan(r.label)
 	var setLen int
 	if err := s.Do(radix.FlatCmd(&setLen, "Scard", key)); err != nil {
-		return nil, err
+		return 0, err
 	} else {
 		return setLen, err
 	}

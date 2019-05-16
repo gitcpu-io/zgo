@@ -39,18 +39,18 @@ type Pikaer interface {
 	Hget(ctx context.Context, key string, name string) (interface{}, error)
 	Ttl(ctx context.Context, key string) (interface{}, error)
 	Type(ctx context.Context, key string) (interface{}, error)
-	Hlen(ctx context.Context, key string) (interface{}, error)
+	Hlen(ctx context.Context, key string) (int, error)
 	Hdel(ctx context.Context, key string, name interface{}) (int, error)
 	Hgetall(ctx context.Context, key string) (interface{}, error)
 	Hincrby(ctx context.Context, key string, field string, inc int64) (int64, error)
 
 	Del(ctx context.Context, key string) (interface{}, error)
-	Llen(ctx context.Context, key string) (interface{}, error)
+	Llen(ctx context.Context, key string) (int, error)
 	Lrange(ctx context.Context, key string, start int, stop int) (interface{}, error)
 	Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error)
 	Lpop(ctx context.Context, key string) (interface{}, error)
 	Rpop(ctx context.Context, key string) (interface{}, error)
-	Scard(ctx context.Context, key string) (interface{}, error)
+	Scard(ctx context.Context, key string) (int, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
 	Zrank(ctx context.Context, key string, member interface{}) (int, error)
@@ -211,7 +211,7 @@ func (r *zgopika) Type(ctx context.Context, key string) (interface{}, error) {
 	return r.res.Type(ctx, key)
 }
 
-func (r *zgopika) Hlen(ctx context.Context, key string) (interface{}, error) {
+func (r *zgopika) Hlen(ctx context.Context, key string) (int, error) {
 	return r.res.Hlen(ctx, key)
 }
 
@@ -231,7 +231,7 @@ func (r *zgopika) Del(ctx context.Context, key string) (interface{}, error) {
 	return r.res.Del(ctx, key)
 }
 
-func (r *zgopika) Llen(ctx context.Context, key string) (interface{}, error) {
+func (r *zgopika) Llen(ctx context.Context, key string) (int, error) {
 	return r.res.Llen(ctx, key)
 }
 
@@ -251,7 +251,7 @@ func (r *zgopika) Rpop(ctx context.Context, key string) (interface{}, error) {
 	return r.res.Lpop(ctx, key)
 }
 
-func (r *zgopika) Scard(ctx context.Context, key string) (interface{}, error) {
+func (r *zgopika) Scard(ctx context.Context, key string) (int, error) {
 	return r.res.Scard(ctx, key)
 }
 
