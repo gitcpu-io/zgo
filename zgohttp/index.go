@@ -14,7 +14,8 @@ type Httper interface {
 	JsonParamErr(ctx iris.Context) (int, error)
 	JsonErr(ctx iris.Context, status int, code string, msg string) (int, error)
 	JsonExpectErr(ctx iris.Context, msg string) (int, error)
-	UseBefore(ctx iris.Context)
+	UseBefore(ctx iris.Context) // 捕获异常，开始计时时间
+	AsyncMid(ctx iris.Context)  // 使用go程异步
 }
 
 type zgohttp struct {
@@ -118,4 +119,16 @@ func (zh *zgohttp) UseBefore(ctx iris.Context) {
 	start := time.Now().UnixNano()
 	ctx.Values().Set("startTime", start)
 	ctx.Next()
+}
+
+func (zh *zgohttp) AsyncMid(ctx iris.Context) {
+	ch := make(chan int)
+	go func() {
+		ctx.Next()
+		ch <- 1
+	}()
+	select {
+	case <-ch:
+		return
+	}
 }
