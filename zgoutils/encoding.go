@@ -13,6 +13,13 @@ type bytesBox struct {
 	box  *bytes.Buffer
 }
 
+func newBytesBoxForSlice() *bytesBox{
+	return &bytesBox{
+		sort: nil,
+		box:  new(bytes.Buffer),
+	}
+}
+
 func newBytesBox(mm map[string]interface{}) *bytesBox {
 	keys := make([]string, len(mm))
 	var i int
@@ -32,6 +39,79 @@ func newBytesBox(mm map[string]interface{}) *bytesBox {
 
 func MarshalMap(mm map[string]interface{}) (string, error) {
 	return mapEncoder(mm)
+}
+
+func MarshalSlice(ms []interface{}) (string, error) {
+	return sliceEncoder(ms)
+}
+
+func sliceEncoder(se []interface{}) (string, error){
+	bb := newBytesBoxForSlice()
+	//var k string
+	//var v interface{}
+	var e error
+	var js string
+	bb.write("[")
+	for i,v := range se {
+		switch v.(type) {
+		case bool:
+			boolEncoder(bb, v.(bool))
+		case string:
+			stringEncoder(bb, v.(string))
+		case int8:
+			intEncoder(bb, int(v.(int8)))
+		case int32:
+			intEncoder(bb, int(v.(int32)))
+		case int64:
+			intEncoder(bb, int(v.(int64)))
+		case int:
+			intEncoder(bb, v.(int))
+		case float32:
+			floatEncoder(bb, float64(v.(float32)))
+		case float64:
+			floatEncoder(bb, v.(float64))
+		case []string:
+			sliceStringEncoder(bb, v.([]string))
+		case []int:
+			sliceIntEncoder(bb, v.([]int))
+		case []byte:
+			stringEncoder(bb, string(v.([]byte)))
+		case []uint:
+			sliceUintEncoder(bb, v.([]uint))
+		case []float64:
+			sliceFloat64Encoder(bb, v.([]float64))
+		case []float32:
+			sliceFloat32Encoder(bb, v.([]float32))
+
+		case map[string]interface{}:
+			js, e = mapEncoder(v.(map[string]interface{}))
+
+			if e == nil {
+				bb.write(js)
+			} else {
+				return "", e
+			}
+		case []interface{} :
+			js, e = sliceEncoder(v.([]interface{}))
+			if e == nil{
+				bb.write(js)
+			} else {
+				return "", e
+			}
+
+		default:
+			if v == nil {
+				bb.write("null")
+			} else {
+				return "", fmt.Errorf("Json not support this type %v", reflect.TypeOf(v))
+			}
+		}
+		if i != len(se)-1{
+			bb.write(",")
+		}
+	}
+	bb.write("]")
+	return bb.String(), nil
 }
 
 func mapEncoder(mm map[string]interface{}) (string, error) {
@@ -83,6 +163,14 @@ func mapEncoder(mm map[string]interface{}) (string, error) {
 			js, e = mapEncoder(v.(map[string]interface{}))
 
 			if e == nil {
+				bb.write(js)
+			} else {
+				return "", e
+			}
+
+		case []interface{} :
+			js, e = sliceEncoder(v.([]interface{}))
+			if e == nil{
 				bb.write(js)
 			} else {
 				return "", e
