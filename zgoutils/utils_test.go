@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"reflect"
 	"regexp"
 	"strings"
 	"testing"
@@ -225,5 +226,19 @@ func getTest() map[string]interface{} {
 func TestMarshalMap(t *testing.T) {
 	test := getTest()
 	r, e := MarshalMap(test)
+	fmt.Println(r, e)
+}
+
+func TestMarshalSlice(t *testing.T) {
+	var test = []interface{}{1, 2, 3, 4, 5}
+	fmt.Println(test, reflect.TypeOf(test))
+	r, e := MarshalSlice(test)
+	fmt.Println(r, e)
+
+	t1 := make(map[string]interface{})
+	t1 ["a"] = test
+	t1 ["b"] = []interface{}{"a", "c", "e"}
+
+	r, e = MarshalMap(t1)
 	fmt.Println(r, e)
 }
