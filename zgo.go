@@ -158,6 +158,7 @@ type (
 	NsqMessage        = *nsq.Message
 	PartitionConsumer = kafkaCluter.PartitionConsumer
 	GrpcClientConn    = *grpc.ClientConn
+	Bucketer          = limiter.SimpleBucketer //zgo 自定义的bucket
 )
 
 var (

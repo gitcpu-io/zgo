@@ -8,13 +8,13 @@ package limiter
 */
 
 type Bucketer interface {
-	NewSimpleBucket(int) SimpleBucketer
+	NewSimpleBucket(int32) SimpleBucketer
 }
 
 type bucket struct {
 }
 
-func (b *bucket) NewSimpleBucket(c int) SimpleBucketer {
+func (b *bucket) NewSimpleBucket(c int32) SimpleBucketer {
 	return NewSimpleBucket(c)
 }
 
