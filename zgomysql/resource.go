@@ -94,6 +94,9 @@ func (mr *mysqlResource) List(ctx context.Context, gormPool *gorm.DB, args map[s
 		return errv
 	}
 	gormPool = gormPool.Table(args["table"].(string))
+	if join, ok := args["join"]; ok {
+		gormPool = gormPool.Joins(join.(string))
+	}
 	if sel, ok := args["select"]; ok {
 		gormPool = gormPool.Select(sel)
 	}
