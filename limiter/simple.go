@@ -8,7 +8,7 @@ package limiter
 */
 
 const (
-	max = 999999999
+	max = 9999
 )
 
 type SimpleBucketer interface {
