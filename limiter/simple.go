@@ -17,7 +17,7 @@ type SimpleBucketer interface {
 	Len() int32
 	Cap() int32
 	BeLeft() int32
-	Resize(size int32)
+	Resize(size, offset int32)
 	Clear() int32
 }
 
@@ -28,7 +28,7 @@ type SimpleBucket struct {
 }
 
 func NewBucket(cc int32) *SimpleBucket {
-	if cc <= 0 {
+	if cc <= 0 || cc > max {
 		cc = max
 	}
 	return &SimpleBucket{
@@ -44,12 +44,12 @@ func (cl *SimpleBucket) Get(num int32) int32 {
 		return -1
 	}
 
-	cLen := cl.Len()
-
-	if cl.offset != 0 && cLen > cl.offset {
+	if cl.offset != 0 {
 		//fmt.Println(cl.offset, "-------offset有值，返回不了")
 		return 0
 	}
+
+	cLen := cl.Len()
 
 	if cLen >= cl.capacity {
 		return 0
@@ -71,9 +71,10 @@ func (cl *SimpleBucket) Release(num int32) int32 {
 		return -1
 	}
 
-	if cl.offset != 0 && cl.offset-num >= 0 {
+	if cl.offset != 0 {
 		cl.offset -= num
 		//fmt.Println(cl.offset, "=========cl.offset==========")
+		return 0
 	}
 
 	beef := cl.Len()
@@ -117,7 +118,35 @@ func (cl *SimpleBucket) BeLeft() int32 {
 	return cl.Cap() - cl.Len()
 }
 
-func (cl *SimpleBucket) Resize(size int32) {
+func (cl *SimpleBucket) Resize(size int32, changeSize int32) {
+	if cl.capacity == size || size == 0 {
+		return //当传进来的size和原来长度一样时，不需要重置大小
+	}
+
+	oldCapacity := cl.capacity
+
+	cl.capacity = size
+
+	if oldCapacity > size { //如果减小
+		if cl.Len() >= changeSize {
+			//bucket中有足够的
+
+			cl.offset = 0
+
+			cl.Release(changeSize)
+
+		} else {
+			offset := changeSize - cl.Len()
+			//释放掉部分
+			cl.Release(cl.Len())
+
+			cl.offset = offset
+
+		}
+	}
+}
+
+func (cl *SimpleBucket) ResizeBack(size int32) {
 	if cl.capacity == size || size == 0 {
 		return //当传进来的size和原来长度一样时，不需要重置大小
 	}
