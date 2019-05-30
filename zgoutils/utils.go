@@ -35,18 +35,31 @@ var (
 	privateBlocks []*net.IPNet
 )
 
-func init() {
-	for _, b := range []string{"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "100.64.0.0/10"} {
-		if _, block, err := net.ParseCIDR(b); err == nil {
-			privateBlocks = append(privateBlocks, block)
-		}
-	}
-}
+const SysTimeform = "2006-01-02 15:04:05"
+const SysTimeformShort = "2006-01-02"
+const TimeformYm = "200601"
+
+// 中国时区
+var SysTimeLocation *time.Location
 
 var Utils Utilser
 
 func init() {
 	Utils = New()
+
+	s, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		//fmt.Errorf("%s",err)
+		SysTimeLocation = time.FixedZone("CST", 8*3600)
+	} else {
+		SysTimeLocation = s
+	}
+
+	for _, b := range []string{"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "100.64.0.0/10"} {
+		if _, block, err := net.ParseCIDR(b); err == nil {
+			privateBlocks = append(privateBlocks, block)
+		}
+	}
 }
 
 type Utilser interface {
@@ -565,13 +578,6 @@ func (u *utils) InitStructWithDefaultTag(bean interface{}) {
 		}
 	}
 }
-
-const SysTimeform = "2006-01-02 15:04:05"
-const SysTimeformShort = "2006-01-02"
-const TimeformYm = "200601"
-
-// 中国时区
-var SysTimeLocation, _ = time.LoadLocation("Asia/Chongqing")
 
 // 当前时间的时间戳
 func (u *utils) NowUnix() int {
