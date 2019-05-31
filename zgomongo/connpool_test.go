@@ -14,28 +14,28 @@ import (
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
-	//label_bj = "mongo_label_bj"
-	label_sh = "mongo_label_sh"
+	label_bj = "mongo_label_bj"
+	//label_sh = "mongo_label_sh"
 )
 
 func TestMongoGet(t *testing.T) {
 
 	//-------------test for start engine---------
 	hsm := make(map[string][]*config.ConnDetail)
-	//cd_bj := config.ConnDetail{
-	//	C:        "北京主库-----mongo1",
-	//	Host:     "localhost",
-	//	Port:     27017,
-	//	ConnSize: 50,
-	//	PoolSize: 789,
-	//}
-	//cd_bj2 := config.ConnDetail{
-	//	C:        "北京从库-----mongo2",
-	//	Host:     "localhost",
-	//	Port:     27017,
-	//	ConnSize: 5,
-	//	PoolSize: 456,
-	//}
+	cd_bj := config.ConnDetail{
+		C:        "北京主库-----mongo1",
+		Host:     "localhost",
+		Port:     27018,
+		ConnSize: 50,
+		PoolSize: 789,
+	}
+	cd_bj2 := config.ConnDetail{
+		C:        "北京从库-----mongo2",
+		Host:     "localhost",
+		Port:     27019,
+		ConnSize: 5,
+		PoolSize: 456,
+	}
 	//cd_sh := config.ConnDetail{
 	//	C:        "上海主库-----mongo",
 	//	Host:     "127.0.0.1",
@@ -43,22 +43,22 @@ func TestMongoGet(t *testing.T) {
 	//	ConnSize: 20,
 	//	PoolSize: 100,
 	//}
-	cd_sh := config.ConnDetail{
-		C:        "上海主库-----mongo",
-		Host:     "123.56.173.28",
-		Username: "root",
-		Password: "Au3jIwERA34y",
-		Port:     27017,
-		ConnSize: 20,
-		PoolSize: 100,
-	}
-	//var s1 []*config.ConnDetail
-	var s2 []*config.ConnDetail
-	//s1 = append(s1, &cd_bj, &cd_bj2)
-	s2 = append(s2, &cd_sh)
+	//cd_sh := config.ConnDetail{
+	//	C:        "上海主库-----mongo",
+	//	Host:     "123.56.173.28",
+	//	Username: "root",
+	//	Password: "Au3jIwERA34y",
+	//	Port:     27017,
+	//	ConnSize: 20,
+	//	PoolSize: 100,
+	//}
+	var s1 []*config.ConnDetail
+	//var s2 []*config.ConnDetail
+	s1 = append(s1, &cd_bj, &cd_bj2)
+	//s2 = append(s2, &cd_sh)
 	hsm = map[string][]*config.ConnDetail{
-		//label_bj: s1,
-		label_sh: s2,
+		label_bj: s1,
+		//label_sh: s2,
 	}
 	//----------------------
 
@@ -67,15 +67,15 @@ func TestMongoGet(t *testing.T) {
 	//测试读取nsq数据，wait for sdk init connection
 	//time.Sleep(2 * time.Second)
 
-	//clientBj, err := GetMongo(label_bj)
-	clientSh, err := GetMongo(label_sh)
+	clientBj, err := GetMongo(label_bj)
+	//clientSh, err := GetMongo(label_sh)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println("Before ...")
-	//insertData(label_sh, clientSh, 0)
-	findOneData(label_sh, clientSh, 0)
+	insertData(label_bj, clientBj, 0)
+	//findOneData(label_sh, clientSh, 0)
 	//CountDocData(label_sh, clientSh, 0)
 	fmt.Println("After ...")
 	//var replyChan = make(chan int)
