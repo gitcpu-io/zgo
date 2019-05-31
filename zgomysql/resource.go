@@ -130,6 +130,9 @@ func (mr *mysqlResource) Count(ctx context.Context, gormPool *gorm.DB, args map[
 		return errv
 	}
 	gormPool = gormPool.Table(args["table"].(string)).Where(args["query"], args["args"].([]interface{})...)
+	if join, ok := args["join"]; ok {
+		gormPool = gormPool.Joins(join.(string))
+	}
 	err := gormPool.Count(args["count"]).Error
 	return err
 }
