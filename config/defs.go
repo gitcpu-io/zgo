@@ -29,6 +29,7 @@ const (
 	Dev           = "dev"         //开发联调环境标识
 	Qa            = "qa"          //QA测试环境标识
 	Pro           = "pro"         //生产环境标识
+	Pro2          = "pro2"        //生产环境标识
 
 	//********************************以下是 etcd监听常量********************************
 	EtcTKCache = "cache"
@@ -205,7 +206,16 @@ func LoadConfig(e, project, etcdHosts string) {
 				Home: FileStoreHome,
 			},
 		}
-
+	case Pro2:
+		Conf = &allConfig{
+			Env:       e,
+			Project:   project,
+			EtcdHosts: ProEtcHosts,
+			File: FileStore{
+				Type: FileStoreType, //以后生产环境可以存到aws s3，在这里直接更改
+				Home: FileStoreHome,
+			},
+		}
 	}
 
 	if etcdHosts != "" {
