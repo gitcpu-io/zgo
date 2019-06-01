@@ -28,8 +28,11 @@ type SimpleBucket struct {
 }
 
 func NewBucket(cc int32) *SimpleBucket {
-	if cc <= 0 || cc > max {
+	if cc > max {
 		cc = max
+	}
+	if cc <= 0 {
+		cc = 0
 	}
 	return &SimpleBucket{
 		capacity: cc,
