@@ -21,8 +21,10 @@ type MongoResourcer interface {
 	Count(ctx context.Context, args map[string]interface{}) (int, error)
 	Pipe(ctx context.Context, pipe interface{}, values interface{}, args map[string]interface{}) (interface{}, error)
 	UpdateOne(ctx context.Context, args map[string]interface{}) error
+	UpdateById(ctx context.Context, id interface{}, args map[string]interface{}) error
 	UpdateAll(ctx context.Context, args map[string]interface{}) error
 	DeleteOne(ctx context.Context, args map[string]interface{}) error
+	DeleteById(ctx context.Context, _id interface{}, args map[string]interface{}) error
 	DeleteAll(ctx context.Context, args map[string]interface{}) error
 }
 
@@ -147,6 +149,22 @@ func (m *mongoResource) UpdateOne(ctx context.Context, args map[string]interface
 	return s.DB(args["db"].(string)).C(args["table"].(string)).Update(args["query"].(bson.M), args["update"].(bson.M))
 }
 
+func (m *mongoResource) UpdateById(ctx context.Context, _id interface{}, args map[string]interface{}) error {
+	s := <-m.connpool.GetConnChan(m.label)
+	if args["db"] == nil {
+		return errors.New("db is nil")
+	} else if args["table"] == nil {
+		return errors.New("table is nil")
+	}
+	var objId bson.ObjectId
+	if val, ok := _id.(string); !ok {
+		return errors.New("_id must be string")
+	} else {
+		objId = bson.ObjectIdHex(val)
+	}
+	return s.DB(args["db"].(string)).C(args["table"].(string)).UpdateId(objId, args["update"])
+}
+
 //修改多条数据，期望参数db table update query参数不传则为全部查询
 func (m *mongoResource) UpdateAll(ctx context.Context, args map[string]interface{}) error {
 	s := <-m.connpool.GetConnChan(m.label)
@@ -168,6 +186,22 @@ func (m *mongoResource) DeleteOne(ctx context.Context, args map[string]interface
 	judgeMongo(args)
 	preWorkForMongo(args)
 	return s.DB(args["db"].(string)).C(args["table"].(string)).Remove(args["query"])
+}
+
+func (m *mongoResource) DeleteById(ctx context.Context, _id interface{}, args map[string]interface{}) error {
+	if args["db"] == nil {
+		return errors.New("db is nil")
+	} else if args["table"] == nil {
+		return errors.New("table is nil")
+	}
+	s := <-m.connpool.GetConnChan(m.label)
+	var objId bson.ObjectId
+	if val, ok := _id.(string); !ok {
+		return errors.New("_id must be string")
+	} else {
+		objId = bson.ObjectIdHex(val)
+	}
+	return s.DB(args["db"].(string)).C(args["table"].(string)).RemoveId(objId)
 }
 
 func (m *mongoResource) DeleteAll(ctx context.Context, args map[string]interface{}) error {

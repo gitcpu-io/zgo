@@ -200,7 +200,7 @@
         {
           "c": "上海从库2=====etcd mongo",
           "host": "localhost",
-          "port": 27019,
+          "port": 27018,
           "connSize": 5,
           "poolSize": 456
         }

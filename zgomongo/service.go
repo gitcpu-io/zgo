@@ -19,8 +19,10 @@ type Mongoer interface {
 	GetConnChan(label ...string) (chan *mgo.Session, error)
 	Create(ctx context.Context, args map[string]interface{}) error
 	Update(ctx context.Context, args map[string]interface{}) error
+	UpdateById(ctx context.Context, _id interface{}, args map[string]interface{}) error
 	UpdateAll(ctx context.Context, args map[string]interface{}) error
 	Delete(ctx context.Context, args map[string]interface{}) error
+	DeleteById(ctx context.Context, _id interface{}, args map[string]interface{}) error
 	FindOne(ctx context.Context, args map[string]interface{}) error
 	FindPage(ctx context.Context, args map[string]interface{}) error
 	Pipe(ctx context.Context, pipe interface{}, values interface{}, args map[string]interface{}) (interface{}, error)
@@ -124,12 +126,20 @@ func (m *zgomongo) Update(ctx context.Context, args map[string]interface{}) erro
 	return m.res.UpdateOne(ctx, args)
 }
 
+func (m *zgomongo) UpdateById(ctx context.Context, _id interface{}, args map[string]interface{}) error {
+	return m.res.UpdateById(ctx, _id, args)
+}
+
 func (m *zgomongo) UpdateAll(ctx context.Context, args map[string]interface{}) error {
 	return m.res.UpdateAll(ctx, args)
 }
 
 func (m *zgomongo) Delete(ctx context.Context, args map[string]interface{}) error {
 	return m.res.DeleteOne(ctx, args)
+}
+
+func (m *zgomongo) DeleteById(ctx context.Context, _id interface{}, args map[string]interface{}) error {
+	return m.res.DeleteById(ctx, _id, args)
 }
 
 func (m *zgomongo) FindPage(ctx context.Context, args map[string]interface{}) error {
