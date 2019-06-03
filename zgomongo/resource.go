@@ -156,6 +156,10 @@ func (m *mongoResource) UpdateById(ctx context.Context, _id interface{}, args ma
 	} else if args["table"] == nil {
 		return errors.New("table is nil")
 	}
+	if args["update"] != nil {
+		update := updateMap2Bson(args["update"].(map[string]interface{}))
+		args["update"] = update
+	}
 	var objId bson.ObjectId
 	if val, ok := _id.(string); !ok {
 		return errors.New("_id must be string")
