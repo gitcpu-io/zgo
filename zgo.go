@@ -14,7 +14,9 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgomap"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
 	"git.zhugefang.com/gocore/zgo/zgomysql"
+	"git.zhugefang.com/gocore/zgo/zgoneo4j"
 	"git.zhugefang.com/gocore/zgo/zgonsq"
+	"git.zhugefang.com/gocore/zgo/zgopg"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
@@ -73,6 +75,20 @@ func Engine(opt *Options) error {
 			//fmt.Println(hsm)
 			in := <-zgomysql.InitMysql(hsm)
 			Mysql = in
+		}
+		if len(opt.Postgres) > 0 {
+			//todo someting
+			hsm := engine.getConfigByOption(config.Conf.Postgres, opt.Postgres)
+			//fmt.Println(hsm)
+			in := <-zgopg.InitPg(hsm)
+			PG = in
+		}
+		if len(opt.Neo4j) > 0 {
+			//todo someting
+			hsm := engine.getConfigByOption(config.Conf.Neo4j, opt.Neo4j)
+			//fmt.Println(hsm)
+			in := <-zgoneo4j.InitNeo4j(hsm)
+			Neo4j = in
 		}
 		if len(opt.Es) > 0 {
 			hsm := engine.getConfigByOption(config.Conf.Es, opt.Es)
@@ -170,6 +186,8 @@ var (
 	Redis zgoredis.Rediser
 	Pika  zgopika.Pikaer
 	Mysql zgomysql.Mysqler
+	PG    zgopg.Pger
+	Neo4j zgoneo4j.Neo4jer
 	Cache zgocache.Cacher
 
 	Http = zgohttp.New()

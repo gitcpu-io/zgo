@@ -10,7 +10,9 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgolog"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
 	"git.zhugefang.com/gocore/zgo/zgomysql"
+	"git.zhugefang.com/gocore/zgo/zgoneo4j"
 	"git.zhugefang.com/gocore/zgo/zgonsq"
+	"git.zhugefang.com/gocore/zgo/zgopg"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
@@ -25,6 +27,8 @@ type Options struct {
 	Loglevel  string   `json:"loglevel"`
 	Mongo     []string `json:"mongo"`
 	Mysql     []string `json:"mysql"`
+	Postgres  []string `json:"postgres"`
+	Neo4j     []string `json:"neo4j"`
 	Es        []string `json:"es"`
 	Redis     []string `json:"redis"`
 	Pika      []string `json:"pika"`
@@ -181,6 +185,12 @@ func (opt *Options) destroyConn(labelType, label string) {
 	case config.EtcTKMysql:
 		in := <-zgomysql.InitMysql(nil, label)
 		Mysql = in
+	case config.EtcTKPostgres:
+		in := <-zgopg.InitPg(nil, label)
+		PG = in
+	case config.EtcTKNeo4j:
+		in := <-zgoneo4j.InitNeo4j(nil, label)
+		Neo4j = in
 	case config.EtcTKMongo:
 		in := <-zgomongo.InitMongo(nil, label)
 		Mongo = in
@@ -316,7 +326,18 @@ func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDeta
 			in := <-zgomysql.InitMysql(hsm)
 			Mysql = in
 		}
-
+	case config.EtcTKPostgres:
+		//init postgres again
+		if len(hsm) > 0 {
+			in := <-zgopg.InitPg(hsm)
+			PG = in
+		}
+	case config.EtcTKNeo4j:
+		//init neo4j again
+		if len(hsm) > 0 {
+			in := <-zgoneo4j.InitNeo4j(hsm)
+			Neo4j = in
+		}
 	case config.EtcTKMongo:
 		//init mongo again
 		if len(hsm) > 0 {

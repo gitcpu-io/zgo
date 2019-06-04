@@ -94,6 +94,15 @@ func main() {
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
+
+	for _, v := range config.Conf.Postgres {
+		k := v.Key
+		value := v.Values
+		key := "zgo/project/zgo_start/postgres/" + k
+		val, _ := json.Marshal(value)
+		cli.KV.Put(context.TODO(), key, string(val))
+	}
+
 	//for _, v := range config.Conf.Pika {
 	//	k := v.Key
 	//	value := v.Values

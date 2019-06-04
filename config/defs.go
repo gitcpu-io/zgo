@@ -32,16 +32,18 @@ const (
 	Pro2          = "pro2"        //生产环境标识
 
 	//********************************以下是 etcd监听常量********************************
-	EtcTKCache = "cache"
-	EtcTKLog   = "log"
-	EtcTKMysql = "mysql"
-	EtcTKMongo = "mongo"
-	EtcTKRedis = "redis"
-	EtcTKPia   = "pika"
-	EtcTKNsq   = "nsq"
-	EtcTKKafka = "kafka"
-	EtcTKEs    = "es"
-	EtcTKEtc   = "etcd"
+	EtcTKCache    = "cache"
+	EtcTKLog      = "log"
+	EtcTKMysql    = "mysql"
+	EtcTKPostgres = "postgres"
+	EtcTKNeo4j    = "neo4j"
+	EtcTKMongo    = "mongo"
+	EtcTKRedis    = "redis"
+	EtcTKPia      = "pika"
+	EtcTKNsq      = "nsq"
+	EtcTKKafka    = "kafka"
+	EtcTKEs       = "es"
+	EtcTKEtc      = "etcd"
 )
 
 var Levels = []string{"debug", "info", "warn", "error"}
@@ -119,6 +121,8 @@ type allConfig struct {
 	Nsq          []LabelDetail                `json:"nsq,omitempty"`
 	Mongo        []LabelDetail                `json:"mongo,omitempty"`
 	Mysql        []LabelDetail                `json:"mysql,omitempty"`
+	Postgres     []LabelDetail                `json:"postgres,omitempty"`
+	Neo4j        []LabelDetail                `json:"neo4j,omitempty"`
 	Redis        []LabelDetail                `json:"redis,omitempty"`
 	Pika         []LabelDetail                `json:"pika,omitempty"`
 	Kafka        []LabelDetail                `json:"kafka,omitempty"`

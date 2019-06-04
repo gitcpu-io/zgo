@@ -1,6 +1,7 @@
 package zgo
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -14,9 +15,9 @@ type MysqlUser struct {
 func TestEngine(t *testing.T) {
 
 	err := Engine(&Options{
-		Env: "local",
-		//Project: "zgo_start",
-		Project: "1552641690",
+		Env:     "local",
+		Project: "zgo_start",
+		//Project: "1552641690",
 
 		//如果是在本地开发可以对下面的组件开启使用(local.json)，如果是线上，不需要填写，走的配置是etcd
 		Kafka: []string{
@@ -24,12 +25,18 @@ func TestEngine(t *testing.T) {
 			//"kafka_label_sh",
 		},
 		Nsq: []string{
-			"nsq_label_bj",
+			//"nsq_label_bj",
 			//"nsq_label_sh",
 		},
 		Pika: []string{
 			//"pika_label_rw",
 			//"pika_label_r",
+		},
+		//Postgres: []string{
+		//	"postgres_label_sh",
+		//},
+		Neo4j: []string{
+			"neo4j_label",
 		},
 		//Redis: []string{
 		//	"redis_label_bj",
@@ -58,7 +65,7 @@ func TestEngine(t *testing.T) {
 		select {
 		case <-time.Tick(time.Duration(3) * time.Second):
 			//****************************************test log
-			//Log.Error("start engine for test")
+			Log.Error("start engine for test")
 
 			//****************************************test mysql default user table
 			//n, err := Mysql.New("mysql_sell_1")
@@ -76,6 +83,22 @@ func TestEngine(t *testing.T) {
 			//args["obj"] = &obj
 			//n.List(context.TODO(), args)
 			//fmt.Println(obj)
+
+			//****************************************test postgres
+			//pgch, err := PG.GetDBChan("postgres_label_sh")
+			//if err != nil {
+			//	fmt.Println("---error", err)
+			//}
+			//db := <- pgch
+			//fmt.Println("zgo engine is niubility from postgres",db)
+
+			//****************************************test neo4j
+			neo4jch, err := Neo4j.GetDBChan("neo4j_label")
+			if err != nil {
+				fmt.Println("---error", err)
+			}
+			db := <-neo4jch
+			fmt.Println("zgo engine is niubility from neo4j", db)
 
 			//****************************************test nsq
 			//nq, err := Nsq.New()

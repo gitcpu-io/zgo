@@ -10,7 +10,6 @@
   },
   "project": "zgo",
   "projectPrefix": "zgo/project/",
-
   "redis": [
     {
       "key": "redis_label_bj",
@@ -149,7 +148,6 @@
           "connSize": 5,
           "poolSize": 500
         }
-
       ]
     },
     {
@@ -222,6 +220,54 @@
           "port": 27019,
           "connSize": 5,
           "poolSize": 456
+        }
+      ]
+    }
+  ],
+  "postgres": [
+    {
+      "key": "postgres_label_sh",
+      "values": [
+        {
+          "c": "上海主库1=====postgres 5433",
+          "host": "localhost",
+          "port": 5433,
+          "username": "postgres",
+          "password": "postgres",
+          "dbName": "postgres",
+          "connSize": 5,
+          "poolSize": 100
+        }
+      ]
+    },
+    {
+      "key": "postgres_label_bj",
+      "values": [
+        {
+          "c": "北京主库1===== postgres 5434",
+          "host": "localhost",
+          "port": 5434,
+          "username": "postgres",
+          "password": "postgres",
+          "dbName": "postgres",
+          "connSize": 5,
+          "poolSize": 100
+        }
+      ]
+    }
+  ],
+  "neo4j": [
+    {
+      "key": "neo4j_label",
+      "values": [
+        {
+          "c": "上海主库1=====neo4j 7687",
+          "host": "localhost",
+          "port": 7687,
+          "username": "neo4j",
+          "password": "12345678",
+          "connSize": 10,
+          "poolSize": 100
         }
       ]
     }
@@ -314,31 +360,30 @@
     }
   ],
   "cityDbConfig": {
-      "sell":{
-        "bj":"1",
-        "nj":"1",
-        "sh":"1",
-        "cd":"1",
-        "tj":"1",
-        "cq":"1",
-        "heb":"1"
-      }
+    "sell": {
+      "bj": "1",
+      "nj": "1",
+      "sh": "1",
+      "cd": "1",
+      "tj": "1",
+      "cq": "1",
+      "heb": "1"
+    }
   },
-  "cache":{
+  "cache": {
     "c": "cache",
     "start": 0,
     "dbType": "pika",
-    "label":"pika_label_rw",
+    "label": "pika_label_rw",
     "tcType": 1,
     "rate": 1
   },
-  "log":{
+  "log": {
     "c": "日志存储",
     "start": 0,
     "dbType": "file",
-    "label":"/tmp",
+    "label": "/tmp",
     "loglevel": 0
   }
-
 }
 
