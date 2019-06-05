@@ -2,35 +2,10 @@ version: '3'
 
 services:
 
-#  web:
-#    image: dck.zhuge.test/zgo
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    volumes:
-#    environment:
-#      REDIS_HOST: redis
-#      MYSQL_HOST: mysql
-#      MONGO_HOST: mongo
-#    depends_on:
-#      - redis
-#      - mongo
-#      - mysql
-#  networks:
-#        - link-network
-
-  portainer:
-    image: portainer/portainer
-    ports:
-      - 9000:9000
-    container_name: portainer
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - link-network
-
   etcd:
     image: quay.io/coreos/etcd:v3.3.12
+    container_name: etcd
+    restart: always
     networks:
       - link-network
     volumes:
@@ -42,15 +17,18 @@ services:
 
   redis-6381:
     image: redis
+    container_name: redis6381
+    restart: always
     ports:
       - 6381:6379
     volumes:
       - ~/docker-data/redis-6381:/data
     networks:
       - link-network
-
   redis-6380:
     image: redis
+    container_name: redis6380
+    restart: always
     ports:
       - 6380:6379
     volumes:
@@ -60,6 +38,8 @@ services:
 
   mongo-27019:
     image: mongo
+    container_name: mongo27019
+    restart: always
     ports:
       - 27019:27017
     volumes:
@@ -67,9 +47,10 @@ services:
       - ~/docker-data/mongo-27019/db:/data/db
     networks:
       - link-network
-
   mongo-27018:
     image: mongo
+    container_name: mongo27018
+    restart: always
     ports:
       - 27018:27017
     volumes:
@@ -80,6 +61,7 @@ services:
 
   postgres-5433:
     image: mdillon/postgis
+    container_name: postgres5433
     restart: always
     environment:
       POSTGRES_DB: postgres
@@ -91,9 +73,9 @@ services:
       - ~/docker-data/postgresql-5433:/var/lib/postgresql/data
     networks:
       - link-network
-
   postgres-5434:
     image: mdillon/postgis
+    container_name: postgres5434
     restart: always
     environment:
       POSTGRES_DB: postgres
@@ -108,10 +90,14 @@ services:
 
   mysql-3307:
     image: mysql
+    container_name: mysql3307
+    restart: always
     ports:
       - 3307:3306
     environment:
       MYSQL_ROOT_PASSWORD: root
+    command:
+      --default-authentication-plugin=mysql_native_password
     volumes:
       - ~/docker-data/mysql-3307:/data
     networks:
@@ -119,27 +105,113 @@ services:
 
   mysql-3308:
     image: mysql
+    container_name: mysql3308
+    restart: always
     ports:
       - 3308:3306
     environment:
       MYSQL_ROOT_PASSWORD: root
+    command:
+      --default-authentication-plugin=mysql_native_password
     volumes:
       - ~/docker-data/mysql-3308:/data
     networks:
       - link-network
 
-  nsqlookupd:
-    image: nsqio/nsq
+  neo4j:
+    image: neo4j
+    container_name: neo4j
+    ports:
+      - 7474:7474
+      - 7687:7687
+    #      - 2004:2004
+    #    environment:
+    #      - metrics-prometheus-enabled=true
+    #      - metrics.prometheus.endpoint=mock.com:2004
+    volumes:
+      - ~/docker-data/neo4j:/data
     networks:
       - link-network
-    hostname: nsqlookupd
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.1.1
+    container_name: elasticsearch
+    restart: always
+    environment:
+      - http.port=9200
+      - http.cors.enabled=true
+      - http.cors.allow-origin=http://localhost:1358,http://127.0.0.1:1358
+      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      - http.cors.allow-credentials=true
+      - node.name=node-1
+      - cluster.initial_master_nodes=node-1
+      - cluster.name=elasticsearch
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata71:/usr/share/elasticsearch/data
     ports:
-      - "4161:4161"
-      - "4160:4160"
-    command: /nsqlookupd
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - link-network
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.1.1
+    container_name: elasticsearch102
+    restart: always
+    environment:
+      - cluster.name=elasticsearch
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata72:/usr/share/elasticsearch/data
+    networks:
+      - link-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.1.1
+    container_name: kibana
+    restart: always
+    ports:
+      - 5601:5601
+    environment:
+      SERVER_NAME: kibana
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    networks:
+      - link-network
+
+  elastichd:
+    image: containerize/elastichd
+    container_name: elastichd
+    restart: always
+    ports:
+      - 9800:9800
+    links:
+      - elasticsearch:es # 打开localhost:9800后，输入http://es:9200 connect
+    networks:
+      - link-network
+
+  dejavu:
+    image: appbaseio/dejavu
+    container_name: dejavu
+    ports:
+      - 1358:1358
+    networks:
+      - link-network
 
   nsqd:
     image: nsqio/nsq
+    container_name: nsqd
+    restart: always
     depends_on:
       - nsqlookupd
     hostname: nsqd
@@ -151,9 +223,22 @@ services:
       - "4151:4151"
       - "4150:4150"
     command: /nsqd --broadcast-address=nsqd --lookupd-tcp-address=nsqlookupd:4160 --data-path=/data
+  nsqlookupd:
+    image: nsqio/nsq
+    container_name: nsqlookupd
+    restart: always
+    networks:
+      - link-network
+    hostname: nsqlookupd
+    ports:
+      - "4161:4161"
+      - "4160:4160"
+    command: /nsqlookupd
 
   nsqadmin:
     image: nsqio/nsq
+    container_name: nsqadmin
+    restart: always
     depends_on:
       - nsqlookupd
     hostname: nsqadmin
@@ -165,90 +250,171 @@ services:
 
   zookeeper:
     image: wurstmeister/zookeeper
+    container_name: zookeeper
     restart: unless-stopped
     hostname: zookeeper
+    volumes:
+      - ~/docker-data/zookeeper/data:/data
+      - ~/docker-data/zookeeper/datalog:/datalog
     ports:
-      - "2181:2181"
-    container_name: zookeeper
+      - 2181:2181
     networks:
       - link-network
 
   kafka:
     image: wurstmeister/kafka
+    container_name: kafka
+    restart: always
     ports:
-      - "9092:9092"
+      - 9092:9092
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: localhost
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ADVERTISED_HOST_NAME: mock.com
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_BROKER_ID: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_CREATE_TOPICS: "stream-in:1:1,stream-out:1:1"
+    volumes:
+      - ~/docker-data/kafka:/kafka
     depends_on:
       - zookeeper
-    container_name: kafka
     networks:
       - link-network
 
-  elastichd:
-    image: containerize/elastichd
+  ##########################################以下全部是监控 by Prometheus
+  # 所有container 监控by prometheus
+  cadvisor:
+    image: google/cadvisor
+    container_name: cadvisor
+    restart: always
     ports:
-      - 9800:9800
-    links:
-      - elasticsearch:es # 打开localhost:9800后，输入http://es:9200 connect
+      - 8070:8080
     networks:
       - link-network
 
-  dejavu:
-    image: appbaseio/dejavu
+  # grafana显示
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
     ports:
-      - 1358:1358
-    networks:
-      - link-network
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
-    container_name: elasticsearch
-    environment:
-      - http.port=9200
-      - http.cors.enabled=true
-      - http.cors.allow-origin=http://127.0.0.1:1358,http://127.0.0.1:1358
-      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
-      - http.cors.allow-credentials=true
-      - cluster.name=elasticsearch
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
+      - 3000:3000
+    environment:  #安装其它panel
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-piechart-panel,satellogic-3d-globe-panel,grafana-worldmap-panel,grafana-simple-json-datasource
     volumes:
-      - esdata1:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
-      - 9300:9300
+      - ~/docker-data/grafana:/var/lib/grafana
     networks:
       - link-network
-  elasticsearch2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
-    container_name: elasticsearch102
-    environment:
-      - cluster.name=elasticsearch
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "discovery.zen.ping.unicast.hosts=elasticsearch"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
+
+  # prometheus
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: always
+    ports:
+      - 9090:9090
+    networks:
+      - link-network
     volumes:
-      - esdata2:/usr/share/elasticsearch/data
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    environment:
+      - config.file=/etc/prometheus/prometheus.yml
+
+  # 服务器监控by prometheus node-exporter
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node_exporter
+    restart: always
+    ports:
+      - 9100:9100
+    networks:
+      - link-network
+
+  # redis监控by prometheus redis_exporter
+  redis-exporter:
+    image: oliver006/redis_exporter
+    container_name: redis_exporter
+    restart: always
+    ports:
+      - 9121:9121
+    networks:
+      - link-network
+    environment:
+      REDIS_ADDR: redis6380
+
+  # mongodb 监控
+  mongodb_exporter:
+    image: ssalaues/mongodb-exporter
+    container_name: mongodb_exporter
+    restart: always
+    ports:
+      - 9216:9216
+    networks:
+      - link-network
+    environment:
+      MONGODB_URL: mongodb://mongo27018
+
+  # postgresql 监控
+  postgres_exporter:
+    image: wrouesnel/postgres_exporter
+    container_name: postgres_exporter
+    restart: always
+    ports:
+      - 9187:9187
+    networks:
+      - link-network
+    environment:
+      DATA_SOURCE_NAME: postgresql://postgres:postgres@postgres5433/postgres?sslmode=disable
+
+  # mysql 监控
+  mysqld_exporter:
+    image: dataloop/mysqld_exporter
+    container_name: mysqld_exporter
+    restart: always
+    ports:
+      - 9104:9104
+    networks:
+      - link-network
+    environment:
+      DATA_SOURCE_NAME: root:root@(mock.com:3307)/
+
+  # elasticsearch 监控
+  elasticsearch_exporter:
+    container_name: elasticsearch_exporter
+    image: justwatch/elasticsearch_exporter
+    restart: always
+    command:
+      - '-es.uri=http://mock.com:9200'
+    ports:
+      - 9108:9108
+
+  # 服务器监控by prometheus kafka-exporter
+  kafka-exporter:
+    image: danielqsj/kafka-exporter
+    container_name: kafka_exporter
+    restart: always
+    environment:
+      - kafka.server=kafka:9092
+    ports:
+      - 9308:9308
+    networks:
+      - link-network
+
+  #所有容器dashboard
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    restart: always
+    ports:
+      - 9000:9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - link-network
 
 volumes:
-  esdata1:
+  esdata71:
     driver: local
-  esdata2:
+  esdata72:
     driver: local
 
 networks:
