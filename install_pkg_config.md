@@ -10,14 +10,14 @@ git clone https://github.com/neo4j-drivers/seabolt
 
 ####配置环境变量，如果不存在~/.bash_profile，就建立：
 
-####注意：1.0.2q是你本机openssl的版本，换到你的可能是 1.0.2r
+####注意：1.0.2r是你本机openssl的版本，换到你的可能是 1.0.2s
 ####注意：你的目录   -- 就是seabolt的下载目录
 
---------------请务必替换1.0.2q 和 你的目录-----------
+--------------请务必替换1.0.2r 和 你的目录-----------
 
-export OPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2q
+export OPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2r
 
-export OPENSSL_LIBRARIES=/usr/local/Cellar/openssl/1.0.2q/lib
+export OPENSSL_LIBRARIES=/usr/local/Cellar/openssl/1.0.2r/lib
 
 export PKG_CONFIG_PATH=$HOME/你的目录/seabolt/build/dist/share/pkgconfig
 
@@ -38,7 +38,7 @@ source ~/.bash_profile
 ./make_release.sh
 
 
-##如果不行就进入到seabolt目录的中 把安装好的.pc文件copy过去
+##进入到seabolt目录的中 把安装好的.pc文件copy过去
 cd seabolt
 
 sudo cp build/share/pkgconfig/seabolt17.pc build/share/pkgconfig/seabolt17-static.pc /usr/local/lib/pkgconfig
