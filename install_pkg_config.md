@@ -38,7 +38,7 @@ sudo cp seabolt17.pc seabolt17-static.pc /usr/local/lib/pkgconfig
 sudo cp lib/libseabolt17.1.dylib /usr/local/lib
 
 ##在你的项目所在目录执行下面这行
-go build -ldflags "-r $(pkg-config --variable=libdir seabolt17)”
+go build -ldflags "-r $(pkg-config --variable=libdir seabolt17)"
 
 
 
