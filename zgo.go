@@ -184,8 +184,10 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
 type (
 	NsqMessage        = *nsq.Message
 	PartitionConsumer = kafkaCluter.PartitionConsumer
-	GrpcClientConn    = *grpc.ClientConn
 	Bucketer          = limiter.SimpleBucketer //zgo 自定义的bucket
+
+	//grpc声明给使用者
+	GrpcClientConn = grpc.ClientConn
 
 	//postgres声明给使用者
 	PostgresDB                 = pg.DB
