@@ -26,7 +26,6 @@ import (
 	"github.com/go-pg/pg/orm"
 	"github.com/nsqio/go-nsq"
 	"go.etcd.io/etcd/clientv3"
-	"google.golang.org/grpc"
 )
 
 type engine struct {
@@ -187,7 +186,7 @@ type (
 	Bucketer          = limiter.SimpleBucketer //zgo 自定义的bucket
 
 	//grpc声明给使用者
-	GrpcClientConn = grpc.ClientConn
+	//GrpcClientConn = *grpc.ClientConn
 
 	//postgres声明给使用者
 	PostgresDB                 = pg.DB
