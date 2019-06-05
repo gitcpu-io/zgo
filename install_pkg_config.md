@@ -1,6 +1,8 @@
 ##第一步：进到seabolt目录，安装pkg-config、cmake和openssl
 brew install pkg-config
+
 brew install cmake
+
 brew install openssl
 
 ##第二步下载seabolt到你机器任意目录
