@@ -17,7 +17,7 @@ type EsResourcer interface {
 	SearchDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) (interface{}, error)
 	AddOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
 	UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
-    DeleteDsl(ctx context.Context, index, table, dsl string) (interface{}, error)
+	DeleteDsl(ctx context.Context, index, table, dsl string) (interface{}, error)
 }
 
 var mu sync.RWMutex
@@ -55,6 +55,9 @@ func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, ar
 	maps := map[string]interface{}{}
 	//定义es结果集返回结构体
 	uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"
+	if ignoreUnavailable, ok := args["ignoreUnavailable"]; ok {
+		uri = uri + "&ignore_unavailable=" + ignoreUnavailable.(string)
+	}
 	//拼接es请求uti[索引+文档+_search]
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl)) //post请求
 	if err != nil {
@@ -82,7 +85,6 @@ func (e *esResource) SearchDsl(ctx context.Context, index, table, dsl string, ar
 
 	return maps, err
 }
-
 
 //根据dsl语句执行删除
 func (e *esResource) DeleteDsl(ctx context.Context, index, table, dsl string) (interface{}, error) {
