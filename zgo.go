@@ -22,6 +22,8 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoredis"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	kafkaCluter "github.com/bsm/sarama-cluster"
+	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/orm"
 	"github.com/nsqio/go-nsq"
 	"go.etcd.io/etcd/clientv3"
 	"google.golang.org/grpc"
@@ -184,8 +186,14 @@ type (
 	PartitionConsumer = kafkaCluter.PartitionConsumer
 	GrpcClientConn    = *grpc.ClientConn
 	Bucketer          = limiter.SimpleBucketer //zgo 自定义的bucket
-	EtcdClientV3      = clientv3.Client
-	EtcdGetResponse   = clientv3.GetResponse
+
+	//postgres声明给使用者
+	PostgresDB                 = pg.DB
+	PostgresCreateTableOptions = orm.CreateTableOptions
+
+	//etcd声明给使用者
+	EtcdClientV3    = clientv3.Client
+	EtcdGetResponse = clientv3.GetResponse
 )
 
 var (
