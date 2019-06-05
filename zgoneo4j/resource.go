@@ -8,7 +8,7 @@ import (
 
 //Neo4jResourcer 给service使用
 type Neo4jResourcer interface {
-	GetDBChan(label string) chan neo4j.Session
+	GetConnChan(label string) chan neo4j.Session
 }
 
 //内部结构体
@@ -29,7 +29,7 @@ func InitNeo4jResource(hsm map[string][]*config.ConnDetail) {
 	InitConnPool(hsm)
 }
 
-//GetDBChan 返回存放连接的chan
-func (n *Neo4jResource) GetDBChan(label string) chan neo4j.Session {
-	return n.connpool.GetDBChan(label)
+//GetConnChan 返回存放连接的chan
+func (n *Neo4jResource) GetConnChan(label string) chan neo4j.Session {
+	return n.connpool.GetConnChan(label)
 }

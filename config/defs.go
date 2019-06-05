@@ -43,7 +43,7 @@ const (
 	EtcTKNsq      = "nsq"
 	EtcTKKafka    = "kafka"
 	EtcTKEs       = "es"
-	EtcTKEtc      = "etcd"
+	EtcTKEtcd     = "etcd"
 )
 
 var Levels = []string{"debug", "info", "warn", "error"}

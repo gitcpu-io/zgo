@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -32,6 +31,7 @@ import (
 	"go.etcd.io/etcd/clientv3/balancer/picker"
 	"go.etcd.io/etcd/clientv3/balancer/resolver/endpoint"
 	"go.etcd.io/etcd/etcdserver/api/v3rpc/rpctypes"
+	"go.etcd.io/etcd/pkg/logutil"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -79,7 +79,7 @@ type Client struct {
 	creds         *credentials.TransportCredentials
 	balancer      balancer.Balancer
 	resolverGroup *endpoint.ResolverGroup
-	mu            *sync.Mutex
+	mu            *sync.RWMutex
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -143,11 +143,13 @@ func (c *Client) Close() error {
 func (c *Client) Ctx() context.Context { return c.ctx }
 
 // Endpoints lists the registered endpoints for the client.
-func (c *Client) Endpoints() (eps []string) {
+func (c *Client) Endpoints() []string {
 	// copy the slice; protect original endpoints from being changed
-	eps = make([]string, len(c.cfg.Endpoints))
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	eps := make([]string, len(c.cfg.Endpoints))
 	copy(eps, c.cfg.Endpoints)
-	return
+	return eps
 }
 
 // SetEndpoints updates client's endpoints.
@@ -442,11 +444,11 @@ func newClient(cfg *Config) (*Client, error) {
 		creds:    creds,
 		ctx:      ctx,
 		cancel:   cancel,
-		mu:       new(sync.Mutex),
+		mu:       new(sync.RWMutex),
 		callOpts: defaultCallOpts,
 	}
 
-	lcfg := DefaultLogConfig
+	lcfg := logutil.DefaultZapLoggerConfig
 	if cfg.LogConfig != nil {
 		lcfg = *cfg.LogConfig
 	}
@@ -530,10 +532,10 @@ func (c *Client) roundRobinQuorumBackoff(waitBetween time.Duration, jitterFracti
 		n := uint(len(c.Endpoints()))
 		quorum := (n/2 + 1)
 		if attempt%quorum == 0 {
-			c.lg.Info("backoff", zap.Uint("attempt", attempt), zap.Uint("quorum", quorum), zap.Duration("waitBetween", waitBetween), zap.Float64("jitterFraction", jitterFraction))
+			c.lg.Debug("backoff", zap.Uint("attempt", attempt), zap.Uint("quorum", quorum), zap.Duration("waitBetween", waitBetween), zap.Float64("jitterFraction", jitterFraction))
 			return jitterUp(waitBetween, jitterFraction)
 		}
-		c.lg.Info("backoff skipped", zap.Uint("attempt", attempt), zap.Uint("quorum", quorum))
+		c.lg.Debug("backoff skipped", zap.Uint("attempt", attempt), zap.Uint("quorum", quorum))
 		return 0
 	}
 }
@@ -665,12 +667,4 @@ func IsConnCanceled(err error) bool {
 	}
 	// <= gRPC v1.7.x returns 'errors.New("grpc: the client connection is closing")'
 	return strings.Contains(err.Error(), "grpc: the client connection is closing")
-}
-
-func getHost(ep string) string {
-	url, uerr := url.Parse(ep)
-	if uerr != nil || !strings.Contains(ep, "://") {
-		return ep
-	}
-	return url.Host
 }

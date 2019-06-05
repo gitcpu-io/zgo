@@ -32,11 +32,14 @@ func TestEngine(t *testing.T) {
 			//"pika_label_rw",
 			//"pika_label_r",
 		},
-		//Postgres: []string{
-		//	"postgres_label_sh",
-		//},
+		Postgres: []string{
+			"postgres_label_sh",
+		},
 		Neo4j: []string{
 			"neo4j_label",
+		},
+		Etcd: []string{
+			"etcd_label",
 		},
 		//Redis: []string{
 		//	"redis_label_bj",
@@ -85,20 +88,31 @@ func TestEngine(t *testing.T) {
 			//fmt.Println(obj)
 
 			//****************************************test postgres
-			//pgch, err := PG.GetDBChan("postgres_label_sh")
-			//if err != nil {
-			//	fmt.Println("---error", err)
-			//}
-			//db := <- pgch
-			//fmt.Println("zgo engine is niubility from postgres",db)
-
-			//****************************************test neo4j
-			neo4jch, err := Neo4j.GetDBChan("neo4j_label")
+			pgch, err := Postgres.GetConnChan()
 			if err != nil {
 				fmt.Println("---error", err)
 			}
-			db := <-neo4jch
-			fmt.Println("zgo engine is niubility from neo4j", db)
+			if db, ok := <-pgch; ok {
+				fmt.Println("zgo engine is niubility from postgres", db)
+			}
+
+			//****************************************test neo4j
+			neo4jch, err := Neo4j.GetConnChan()
+			if err != nil {
+				fmt.Println("---error", err)
+			}
+			if neo, ok := <-neo4jch; ok {
+				fmt.Println("zgo engine is niubility from neo4j", neo)
+			}
+
+			//****************************************test etcd
+			etcdch, err := Etcd.GetConnChan()
+			if err != nil {
+				fmt.Println("---error", err)
+			}
+			if etc, ok := <-etcdch; ok {
+				fmt.Println("zgo engine is niubility from etcd", etc)
+			}
 
 			//****************************************test nsq
 			//nq, err := Nsq.New()

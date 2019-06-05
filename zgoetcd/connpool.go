@@ -1,9 +1,9 @@
-package zgoneo4j
+package zgoetcd
 
 import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"go.etcd.io/etcd/clientv3"
 	"math/rand"
 	"sync"
 	"time"
@@ -14,22 +14,22 @@ const (
 )
 
 var (
-	connChanMap = make(map[string]chan neo4j.Session)
+	connChanMap = make(map[string]chan *clientv3.Client)
 	mu          sync.RWMutex //用于锁定connChanMap
 	hsmu        sync.RWMutex
 )
 
 //连接对外的接口
 type ConnPooler interface {
-	GetConnChan(label string) chan neo4j.Session
+	GetConnChan(label string) chan *clientv3.Client
 }
 
 type connPool struct {
 	label        string
 	m            sync.RWMutex
-	connChan     chan neo4j.Session
-	clients      []neo4j.Session
-	connChanChan chan chan neo4j.Session
+	connChan     chan *clientv3.Client
+	clients      []*clientv3.Client
+	connChanChan chan chan *clientv3.Client
 }
 
 func NewConnPool(label string) *connPool {
@@ -57,8 +57,8 @@ func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 				index := fmt.Sprintf("%s:%d", label, k)
 				c := &connPool{
 					label:        label,
-					connChan:     make(chan neo4j.Session, v.PoolSize),
-					connChanChan: make(chan chan neo4j.Session, v.ConnSize),
+					connChan:     make(chan *clientv3.Client, v.PoolSize),
+					connChanChan: make(chan chan *clientv3.Client, v.ConnSize),
 				}
 				mu.Lock()
 				connChanMap[index] = c.connChan
@@ -83,7 +83,7 @@ func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 }
 
 //GetConnChan 通过label并发安全读map
-func (cp *connPool) GetConnChan(label string) chan neo4j.Session {
+func (cp *connPool) GetConnChan(label string) chan *clientv3.Client {
 	cp.m.RLock()
 	defer cp.m.RUnlock()
 
@@ -110,7 +110,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 
 	for i := 0; i < hosts.ConnSize; i++ {
 		//把并发创建的数据库的连接channel，放进channel中
-		cp.connChanChan <- cp.createClient(fmt.Sprintf("%s:%d", hosts.Host, hosts.Port), hosts.Username, hosts.Password, hosts.PoolSize)
+		cp.connChanChan <- cp.createClient(fmt.Sprintf("%s:%d", hosts.Host, hosts.Port), hosts.Username, hosts.Password)
 	}
 
 	go func() {
@@ -136,30 +136,29 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 
 	go func() {
 		time.Sleep(2000 * time.Millisecond) //仅仅为了查看创建的连接数，创建数据库连接时间：90ms
-		fmt.Printf("init Neo4j to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
+		fmt.Printf("init Etcd to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
 			len(cp.connChan), label, hosts.Host, hosts.Port, hosts.ConnSize, hosts.PoolSize, hosts.C)
 	}()
 }
 
 //createClient 创建客户端连接
-func (cp *connPool) createClient(address string, username, password string, poolSize int) chan neo4j.Session {
-	out := make(chan neo4j.Session)
+func (cp *connPool) createClient(address string, username, password string) chan *clientv3.Client {
+	out := make(chan *clientv3.Client)
 	go func() {
-		ar := fmt.Sprintf("%s%s", "bolt://", address)
-		if driver, err := neo4j.NewDriver(
-			ar,
-			neo4j.BasicAuth(username, password, ""), func(config *neo4j.Config) {
-				config.MaxConnectionPoolSize = poolSize
-			}); err == nil {
-			if session, err := driver.Session(neo4j.AccessModeWrite); err == nil {
-				out <- session
-			} else {
-				out <- nil
-			}
-		} else {
-			out <- nil
-		}
 
+		cli, err := clientv3.New(clientv3.Config{
+			Endpoints: []string{
+				address,
+			},
+			Username:    username,
+			Password:    password,
+			DialTimeout: 10 * time.Second,
+		})
+		if err != nil {
+			out <- nil
+			return
+		}
+		out <- cli
 	}()
 	return out
 }

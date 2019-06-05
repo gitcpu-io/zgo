@@ -1,10 +1,10 @@
-// zgoneo4j是对消息中间件Postgres的封装，提供新建连接，生产数据，消费数据接口
-package zgoneo4j
+// zgopostgres是对消息中间件Postgres的封装，提供新建连接，生产数据，消费数据接口
+package zgopostgres
 
 import (
 	"git.zhugefang.com/gocore/zgo/comm"
 	"git.zhugefang.com/gocore/zgo/config"
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/go-pg/pg"
 	"sync"
 )
 
@@ -13,35 +13,35 @@ var (
 	muLabel       sync.RWMutex                            //用于并发读写上面的map
 )
 
-//Neo4j 对外
-type Neo4jer interface {
+//Postgres 对外
+type Postgreser interface {
 	/*
 	 label: 可选，如果使用者，用了2个或多个label时，需要调用这个函数，传入label
 	*/
-	// New 生产一条消息到Neo4j
-	New(label ...string) (*zgoneo4j, error)
+	// New 生产一条消息到Postgres
+	New(label ...string) (*zgopostgres, error)
 
 	/*
 	 label: 可选，如果使用者，用了2个或多个label时，需要调用这个函数，传入label
 	*/
 	// GetConnChan 获取原生的生产者client，返回一个chan，使用者需要接收 <- chan
-	GetConnChan(label ...string) (chan neo4j.Session, error)
+	GetConnChan(label ...string) (chan *pg.DB, error)
 }
 
-// Neo4j用于对zgo.Neo4j这个全局变量赋值
-func Neo4j(label string) Neo4jer {
-	return &zgoneo4j{
-		res: NewNeo4jResourcer(label),
+// Postgres用于对zgo.Postgres这个全局变量赋值
+func Postgres(label string) Postgreser {
+	return &zgopostgres{
+		res: NewPostgresResourcer(label),
 	}
 }
 
-// zgoneo4j实现了Neo4j的接口
-type zgoneo4j struct {
-	res Neo4jResourcer //使用resource另外的一个接口
+// zgopostgres实现了Postgres的接口
+type zgopostgres struct {
+	res PostgresResourcer //使用resource另外的一个接口
 }
 
-// InitNeo4j 初始化连接postgres，用于使用者zgo.engine时，zgo init
-func InitNeo4j(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgoneo4j {
+// InitPostgres 初始化连接postgres，用于使用者zgo.engine时，zgo init
+func InitPostgres(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgopostgres {
 	muLabel.Lock()
 	defer muLabel.Unlock()
 
@@ -67,7 +67,7 @@ func InitNeo4j(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgo
 		return nil
 	}
 
-	InitNeo4jResource(hsm)
+	InitPostgresResource(hsm)
 
 	//自动为变量初始化对象
 	initLabel := ""
@@ -77,10 +77,10 @@ func InitNeo4j(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgo
 			break
 		}
 	}
-	out := make(chan *zgoneo4j)
+	out := make(chan *zgopostgres)
 	go func() {
 
-		in, err := GetNeo4j(initLabel)
+		in, err := GetPostgres(initLabel)
 		if err != nil {
 			panic(err)
 		}
@@ -92,24 +92,24 @@ func InitNeo4j(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgo
 
 }
 
-// GetNeo4j zgo内部获取一个连接postgres
-func GetNeo4j(label ...string) (*zgoneo4j, error) {
+// GetPostgres zgo内部获取一个连接postgres
+func GetPostgres(label ...string) (*zgopostgres, error) {
 	l, err := comm.GetCurrentLabel(label, muLabel, currentLabels)
 	if err != nil {
 		return nil, err
 	}
-	return &zgoneo4j{
-		res: NewNeo4jResourcer(l),
+	return &zgopostgres{
+		res: NewPostgresResourcer(l),
 	}, nil
 }
 
-// NewNeo4j获取一个Neo4j生产者的client，用于发送数据
-func (n *zgoneo4j) New(label ...string) (*zgoneo4j, error) {
-	return GetNeo4j(label...)
+// NewPostgres获取一个Postgres生产者的client，用于发送数据
+func (n *zgopostgres) New(label ...string) (*zgopostgres, error) {
+	return GetPostgres(label...)
 }
 
 //GetConnChan 供用户使用原生连接的chan
-func (n *zgoneo4j) GetConnChan(label ...string) (chan neo4j.Session, error) {
+func (n *zgopostgres) GetConnChan(label ...string) (chan *pg.DB, error) {
 	l, err := comm.GetCurrentLabel(label, muLabel, currentLabels)
 	if err != nil {
 		return nil, err

@@ -6,14 +6,15 @@ import (
 	"git.zhugefang.com/gocore/zgo/config"
 	"git.zhugefang.com/gocore/zgo/zgocache"
 	"git.zhugefang.com/gocore/zgo/zgoes"
+	"git.zhugefang.com/gocore/zgo/zgoetcd"
 	"git.zhugefang.com/gocore/zgo/zgokafka"
 	"git.zhugefang.com/gocore/zgo/zgolog"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
 	"git.zhugefang.com/gocore/zgo/zgomysql"
 	"git.zhugefang.com/gocore/zgo/zgoneo4j"
 	"git.zhugefang.com/gocore/zgo/zgonsq"
-	"git.zhugefang.com/gocore/zgo/zgopg"
 	"git.zhugefang.com/gocore/zgo/zgopika"
+	"git.zhugefang.com/gocore/zgo/zgopostgres"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"go.etcd.io/etcd/mvcc/mvccpb"
@@ -29,6 +30,7 @@ type Options struct {
 	Mysql     []string `json:"mysql"`
 	Postgres  []string `json:"postgres"`
 	Neo4j     []string `json:"neo4j"`
+	Etcd      []string `json:"etcd"`
 	Es        []string `json:"es"`
 	Redis     []string `json:"redis"`
 	Pika      []string `json:"pika"`
@@ -186,8 +188,8 @@ func (opt *Options) destroyConn(labelType, label string) {
 		in := <-zgomysql.InitMysql(nil, label)
 		Mysql = in
 	case config.EtcTKPostgres:
-		in := <-zgopg.InitPg(nil, label)
-		PG = in
+		in := <-zgopostgres.InitPostgres(nil, label)
+		Postgres = in
 	case config.EtcTKNeo4j:
 		in := <-zgoneo4j.InitNeo4j(nil, label)
 		Neo4j = in
@@ -209,7 +211,9 @@ func (opt *Options) destroyConn(labelType, label string) {
 	case config.EtcTKEs:
 		in := <-zgoes.InitEs(nil, label)
 		Es = in
-	case config.EtcTKEtc:
+	case config.EtcTKEtcd:
+		in := <-zgoetcd.InitEtcd(nil, label)
+		Etcd = in
 	}
 }
 
@@ -329,8 +333,8 @@ func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDeta
 	case config.EtcTKPostgres:
 		//init postgres again
 		if len(hsm) > 0 {
-			in := <-zgopg.InitPg(hsm)
-			PG = in
+			in := <-zgopostgres.InitPostgres(hsm)
+			Postgres = in
 		}
 	case config.EtcTKNeo4j:
 		//init neo4j again
@@ -381,8 +385,12 @@ func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDeta
 			Es = in
 		}
 
-	case config.EtcTKEtc:
+	case config.EtcTKEtcd:
 		//init etcd again
+		if len(hsm) > 0 {
+			in := <-zgoetcd.InitEtcd(hsm)
+			Etcd = in
+		}
 	}
 }
 

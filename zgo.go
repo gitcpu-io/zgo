@@ -6,6 +6,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgocache"
 	"git.zhugefang.com/gocore/zgo/zgocrypto"
 	"git.zhugefang.com/gocore/zgo/zgoes"
+	"git.zhugefang.com/gocore/zgo/zgoetcd"
 	"git.zhugefang.com/gocore/zgo/zgofile"
 	"git.zhugefang.com/gocore/zgo/zgogrpc"
 	"git.zhugefang.com/gocore/zgo/zgohttp"
@@ -16,12 +17,13 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgomysql"
 	"git.zhugefang.com/gocore/zgo/zgoneo4j"
 	"git.zhugefang.com/gocore/zgo/zgonsq"
-	"git.zhugefang.com/gocore/zgo/zgopg"
 	"git.zhugefang.com/gocore/zgo/zgopika"
+	"git.zhugefang.com/gocore/zgo/zgopostgres"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	kafkaCluter "github.com/bsm/sarama-cluster"
 	"github.com/nsqio/go-nsq"
+	"go.etcd.io/etcd/clientv3"
 	"google.golang.org/grpc"
 )
 
@@ -80,8 +82,8 @@ func Engine(opt *Options) error {
 			//todo someting
 			hsm := engine.getConfigByOption(config.Conf.Postgres, opt.Postgres)
 			//fmt.Println(hsm)
-			in := <-zgopg.InitPg(hsm)
-			PG = in
+			in := <-zgopostgres.InitPostgres(hsm)
+			Postgres = in
 		}
 		if len(opt.Neo4j) > 0 {
 			//todo someting
@@ -89,6 +91,13 @@ func Engine(opt *Options) error {
 			//fmt.Println(hsm)
 			in := <-zgoneo4j.InitNeo4j(hsm)
 			Neo4j = in
+		}
+		if len(opt.Etcd) > 0 {
+			//todo someting
+			hsm := engine.getConfigByOption(config.Conf.Etcd, opt.Etcd)
+			//fmt.Println(hsm)
+			in := <-zgoetcd.InitEtcd(hsm)
+			Etcd = in
 		}
 		if len(opt.Es) > 0 {
 			hsm := engine.getConfigByOption(config.Conf.Es, opt.Es)
@@ -175,20 +184,23 @@ type (
 	PartitionConsumer = kafkaCluter.PartitionConsumer
 	GrpcClientConn    = *grpc.ClientConn
 	Bucketer          = limiter.SimpleBucketer //zgo 自定义的bucket
+	EtcdClientV3      = clientv3.Client
+	EtcdGetResponse   = clientv3.GetResponse
 )
 
 var (
-	Kafka zgokafka.Kafkaer
-	Nsq   zgonsq.Nsqer
-	Mongo zgomongo.Mongoer
-	Es    zgoes.Eser
-	Grpc  zgogrpc.Grpcer
-	Redis zgoredis.Rediser
-	Pika  zgopika.Pikaer
-	Mysql zgomysql.Mysqler
-	PG    zgopg.Pger
-	Neo4j zgoneo4j.Neo4jer
-	Cache zgocache.Cacher
+	Kafka    zgokafka.Kafkaer
+	Nsq      zgonsq.Nsqer
+	Mongo    zgomongo.Mongoer
+	Es       zgoes.Eser
+	Grpc     zgogrpc.Grpcer
+	Redis    zgoredis.Rediser
+	Pika     zgopika.Pikaer
+	Mysql    zgomysql.Mysqler
+	Postgres zgopostgres.Postgreser
+	Neo4j    zgoneo4j.Neo4jer
+	Etcd     zgoetcd.Etcder
+	Cache    zgocache.Cacher
 
 	Http = zgohttp.New()
 

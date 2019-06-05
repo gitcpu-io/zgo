@@ -1,9 +1,9 @@
-package zgoneo4j
+package zgopostgres
 
 import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/go-pg/pg"
 	"math/rand"
 	"sync"
 	"time"
@@ -14,22 +14,22 @@ const (
 )
 
 var (
-	connChanMap = make(map[string]chan neo4j.Session)
+	connChanMap = make(map[string]chan *pg.DB)
 	mu          sync.RWMutex //用于锁定connChanMap
 	hsmu        sync.RWMutex
 )
 
 //连接对外的接口
 type ConnPooler interface {
-	GetConnChan(label string) chan neo4j.Session
+	GetConnChan(label string) chan *pg.DB
 }
 
 type connPool struct {
 	label        string
 	m            sync.RWMutex
-	connChan     chan neo4j.Session
-	clients      []neo4j.Session
-	connChanChan chan chan neo4j.Session
+	connChan     chan *pg.DB
+	clients      []*pg.DB
+	connChanChan chan chan *pg.DB
 }
 
 func NewConnPool(label string) *connPool {
@@ -57,8 +57,8 @@ func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 				index := fmt.Sprintf("%s:%d", label, k)
 				c := &connPool{
 					label:        label,
-					connChan:     make(chan neo4j.Session, v.PoolSize),
-					connChanChan: make(chan chan neo4j.Session, v.ConnSize),
+					connChan:     make(chan *pg.DB, v.PoolSize),
+					connChanChan: make(chan chan *pg.DB, v.ConnSize),
 				}
 				mu.Lock()
 				connChanMap[index] = c.connChan
@@ -83,7 +83,7 @@ func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 }
 
 //GetConnChan 通过label并发安全读map
-func (cp *connPool) GetConnChan(label string) chan neo4j.Session {
+func (cp *connPool) GetConnChan(label string) chan *pg.DB {
 	cp.m.RLock()
 	defer cp.m.RUnlock()
 
@@ -110,7 +110,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 
 	for i := 0; i < hosts.ConnSize; i++ {
 		//把并发创建的数据库的连接channel，放进channel中
-		cp.connChanChan <- cp.createClient(fmt.Sprintf("%s:%d", hosts.Host, hosts.Port), hosts.Username, hosts.Password, hosts.PoolSize)
+		cp.connChanChan <- cp.createClient(fmt.Sprintf("%s:%d", hosts.Host, hosts.Port), hosts.DbName, hosts.Username, hosts.Password, hosts.PoolSize)
 	}
 
 	go func() {
@@ -136,30 +136,23 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 
 	go func() {
 		time.Sleep(2000 * time.Millisecond) //仅仅为了查看创建的连接数，创建数据库连接时间：90ms
-		fmt.Printf("init Neo4j to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
+		fmt.Printf("init Postgres to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
 			len(cp.connChan), label, hosts.Host, hosts.Port, hosts.ConnSize, hosts.PoolSize, hosts.C)
 	}()
 }
 
 //createClient 创建客户端连接
-func (cp *connPool) createClient(address string, username, password string, poolSize int) chan neo4j.Session {
-	out := make(chan neo4j.Session)
+func (cp *connPool) createClient(address string, dbname, username, password string, poolSize int) chan *pg.DB {
+	out := make(chan *pg.DB)
 	go func() {
-		ar := fmt.Sprintf("%s%s", "bolt://", address)
-		if driver, err := neo4j.NewDriver(
-			ar,
-			neo4j.BasicAuth(username, password, ""), func(config *neo4j.Config) {
-				config.MaxConnectionPoolSize = poolSize
-			}); err == nil {
-			if session, err := driver.Session(neo4j.AccessModeWrite); err == nil {
-				out <- session
-			} else {
-				out <- nil
-			}
-		} else {
-			out <- nil
-		}
-
+		db := pg.Connect(&pg.Options{
+			Addr:     address,
+			Database: dbname,
+			User:     username,
+			Password: password,
+			PoolSize: poolSize,
+		})
+		out <- db
 	}()
 	return out
 }
