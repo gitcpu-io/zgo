@@ -1,9 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"git.zhugefang.com/gocore/zgo"
 	"git.zhugefang.com/gocore/zgo/config"
-	"gopkg.in/gin-gonic/gin.v1/json"
+
 	"time"
 
 	"fmt"
