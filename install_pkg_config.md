@@ -38,7 +38,7 @@ source ~/.bash_profile
 ./make_release.sh
 
 
-##如果不行就进入到seabolt目录的build/dist中 把安装好的.pc文件copy过去
+##如果不行就进入到seabolt目录的中 把安装好的.pc文件copy过去
 cd seabolt
 
 sudo cp build/share/pkgconfig/seabolt17.pc build/share/pkgconfig/seabolt17-static.pc /usr/local/lib/pkgconfig
