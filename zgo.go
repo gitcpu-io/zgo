@@ -24,6 +24,7 @@ import (
 	kafkaCluter "github.com/bsm/sarama-cluster"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
+	"github.com/neo4j/neo4j-go-driver/neo4j"
 	"github.com/nsqio/go-nsq"
 	"go.etcd.io/etcd/clientv3"
 )
@@ -191,6 +192,11 @@ type (
 	//postgres声明给使用者
 	PostgresDB                 = pg.DB
 	PostgresCreateTableOptions = orm.CreateTableOptions
+
+	//neo4j声明给使用者
+	Neo4jSession     = neo4j.Session
+	Neo4jTransaction = neo4j.Transaction
+	Neo4jResult      = neo4j.Result
 
 	//etcd声明给使用者
 	EtcdClientV3    = clientv3.Client

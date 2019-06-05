@@ -435,6 +435,12 @@
 			"revisionTime": "2018-07-18T01:23:57Z"
 		},
 		{
+			"checksumSHA1": "/cwK6bUKC5Qjj/T86CernZ2azsQ=",
+			"path": "github.com/neo4j/neo4j-go-driver/neo4j",
+			"revision": "72f1ee34a405f4da5a4bd5aeed957d4b777b9d6e",
+			"revisionTime": "2019-01-07T11:01:09Z"
+		},
+		{
 			"checksumSHA1": "MZdppx6laedD1LcVomiZ/Sfa6rE=",
 			"path": "github.com/nsqio/go-nsq",
 			"revision": "0527e80f3ba5ecff59ad8d07db607677b5dc056a",
@@ -1493,6 +1499,12 @@
 			"path": "gopkg.in/yaml.v2",
 			"revision": "24fc2a983ae39b4fe09cef3db434c812fdc97cff",
 			"revisionTime": "2019-02-12T00:16:53Z"
+		},
+		{
+			"checksumSHA1": "FauB4huCttPCgR/pu8Yi95fb2+8=",
+			"path": "mellium.im/sasl",
+			"revision": "2a61779921b6e437e546b15bd4d92331e593ff75",
+			"revisionTime": "2019-03-25T16:33:52Z"
 		}
 	],
 	"rootPath": "git.zhugefang.com/gocore/zgo"
