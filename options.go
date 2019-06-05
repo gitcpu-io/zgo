@@ -112,8 +112,12 @@ func (opt *Options) parseConfig(resKvs []*mvccpb.KeyValue, connCh chan map[strin
 					sb.WriteString(fmt.Sprintf("Label: %s\n", label))
 					sb.WriteString(fmt.Sprintf("Host: %s\n", pvv.Host))
 					sb.WriteString(fmt.Sprintf("Port: %d\n", pvv.Port))
-					sb.WriteString(fmt.Sprintf("DbName: %s\n", pvv.DbName))
-					sb.WriteString(fmt.Sprintf("Db: %d\n", pvv.Db))
+					if labelType == config.EtcTKMysql || labelType == config.EtcTKPostgres || labelType == config.EtcTKMongo {
+						sb.WriteString(fmt.Sprintf("DbName: %s\n", pvv.DbName))
+					}
+					if labelType == config.EtcTKRedis {
+						sb.WriteString(fmt.Sprintf("Db: %d\n", pvv.Db))
+					}
 					fmt.Println(sb.String())
 					//fmt.Printf("\n**********************资源项: %s **************************\n", labelType)
 					//fmt.Printf("描述: %s\n", pvv.C)
