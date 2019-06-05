@@ -11,7 +11,6 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgolog"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
 	"git.zhugefang.com/gocore/zgo/zgomysql"
-	"git.zhugefang.com/gocore/zgo/zgoneo4j"
 	"git.zhugefang.com/gocore/zgo/zgonsq"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgopostgres"
@@ -190,9 +189,9 @@ func (opt *Options) destroyConn(labelType, label string) {
 	case config.EtcTKPostgres:
 		in := <-zgopostgres.InitPostgres(nil, label)
 		Postgres = in
-	case config.EtcTKNeo4j:
-		in := <-zgoneo4j.InitNeo4j(nil, label)
-		Neo4j = in
+	//case config.EtcTKNeo4j:
+	//	in := <-zgoneo4j.InitNeo4j(nil, label)
+	//	Neo4j = in
 	case config.EtcTKMongo:
 		in := <-zgomongo.InitMongo(nil, label)
 		Mongo = in
@@ -338,10 +337,10 @@ func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDeta
 		}
 	case config.EtcTKNeo4j:
 		//init neo4j again
-		if len(hsm) > 0 {
-			in := <-zgoneo4j.InitNeo4j(hsm)
-			Neo4j = in
-		}
+		//if len(hsm) > 0 {
+		//	in := <-zgoneo4j.InitNeo4j(hsm)
+		//	Neo4j = in
+		//}
 	case config.EtcTKMongo:
 		//init mongo again
 		if len(hsm) > 0 {

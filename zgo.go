@@ -15,7 +15,6 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgomap"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
 	"git.zhugefang.com/gocore/zgo/zgomysql"
-	"git.zhugefang.com/gocore/zgo/zgoneo4j"
 	"git.zhugefang.com/gocore/zgo/zgonsq"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgopostgres"
@@ -24,7 +23,6 @@ import (
 	kafkaCluter "github.com/bsm/sarama-cluster"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
-	"github.com/neo4j/neo4j-go-driver/neo4j"
 	"github.com/nsqio/go-nsq"
 	"go.etcd.io/etcd/clientv3"
 )
@@ -87,13 +85,13 @@ func Engine(opt *Options) error {
 			in := <-zgopostgres.InitPostgres(hsm)
 			Postgres = in
 		}
-		if len(opt.Neo4j) > 0 {
-			//todo someting
-			hsm := engine.getConfigByOption(config.Conf.Neo4j, opt.Neo4j)
-			//fmt.Println(hsm)
-			in := <-zgoneo4j.InitNeo4j(hsm)
-			Neo4j = in
-		}
+		//if len(opt.Neo4j) > 0 {
+		//	//todo someting
+		//	hsm := engine.getConfigByOption(config.Conf.Neo4j, opt.Neo4j)
+		//	//fmt.Println(hsm)
+		//	in := <-zgoneo4j.InitNeo4j(hsm)
+		//	Neo4j = in
+		//}
 		if len(opt.Etcd) > 0 {
 			//todo someting
 			hsm := engine.getConfigByOption(config.Conf.Etcd, opt.Etcd)
@@ -194,9 +192,9 @@ type (
 	PostgresCreateTableOptions = orm.CreateTableOptions
 
 	//neo4j声明给使用者
-	Neo4jSession     = neo4j.Session
-	Neo4jTransaction = neo4j.Transaction
-	Neo4jResult      = neo4j.Result
+	//Neo4jSession     = neo4j.Session
+	//Neo4jTransaction = neo4j.Transaction
+	//Neo4jResult      = neo4j.Result
 
 	//etcd声明给使用者
 	EtcdClientV3    = clientv3.Client
@@ -213,9 +211,9 @@ var (
 	Pika     zgopika.Pikaer
 	Mysql    zgomysql.Mysqler
 	Postgres zgopostgres.Postgreser
-	Neo4j    zgoneo4j.Neo4jer
-	Etcd     zgoetcd.Etcder
-	Cache    zgocache.Cacher
+	//Neo4j    zgoneo4j.Neo4jer
+	Etcd  zgoetcd.Etcder
+	Cache zgocache.Cacher
 
 	Http = zgohttp.New()
 
