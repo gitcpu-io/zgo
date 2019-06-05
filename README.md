@@ -841,6 +841,7 @@ docker-compose up -d
 
 数字是端口号，供测试zgo admin使用，跑在docker里
 
+
 2个mysql
 3307
 3308
@@ -853,26 +854,43 @@ docker-compose up -d
 6380
 6381
 
+2个postgres
+5433
+5434
+
+1个etcd
+2381
+
+1个neo4j
+7687
+####Neo4j操作页面
+http://127.0.0.1:7474
+
+####redis监控页面,grafana,prometheus
+http://127.0.0.1:3000
+
+http://127.0.0.1:9090
+
 1个kafka
 9202
 
 1个nsq
 4150
-管理页面
-http://123.56.173.28:4171/
+####Nsq管理页面
+http://127.0.0.1:4171/
 
-1个etcd
-2382
-管理页面
+####Etcd管理页面
 http://47.93.163.209:9097/
 
 1个es
 9200
-管理页面--打开localhost:9800后，输入http://es:9200 connect
+####ES管理页面--打开localhost:9800后，输入http://es:9200 connect
 http://127.0.0.1:9800
 
-管理页面--打开http://127.0.0.1:1358，输入http://127.0.0.1:9200，后面输入index，connect
+#####管理页面--打开http://127.0.0.1:1358，输入http://127.0.0.1:9200
+后面输入index，connect
+
 http://127.0.0.1:1358
 
-1个portainer--用于查看所有docker中的资源
+####1个portainer--用于查看所有docker中的资源
 http://127.0.0.1:9000
