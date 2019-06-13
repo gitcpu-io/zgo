@@ -2,6 +2,7 @@ package zgogrpc
 
 import (
 	"context"
+	"fmt"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -28,7 +29,7 @@ func (e *grpcResource) Client(ctx context.Context, target string, opts ...grpc.D
 
 }
 func (e *grpcResource) Run(ctx context.Context, s *grpc.Server, port string) (string, error) {
-	lis, err := net.Listen("tcp", port)
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s%s", ":", port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
