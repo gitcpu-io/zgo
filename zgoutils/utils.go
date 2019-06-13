@@ -76,9 +76,6 @@ type Utilser interface {
 	//是否是银行卡号
 	IsBankCard(n int64) (ok bool, err error)
 
-	//获取当前时间时间戳，n= 10/13/19 位时间戳
-	GetTimestamp(n int) int64
-
 	//Marshal 序列化为json
 	Marshal(in interface{}) ([]byte, error)
 	//Unmarshal 反序列化为go 内存对象
@@ -112,6 +109,8 @@ type Utilser interface {
 	GetUrlFormedMap(map[string]string) string
 	InitStructWithDefaultTag(interface{})
 
+	//获取当前时间时间戳，n= 10/13/19 位时间戳
+	GetTimestamp(n int) int64
 	NowUnix() int
 	FormatFromUnixTime(t int64) string
 	FormatFromUnixTimeShort(t int64) string
@@ -119,7 +118,8 @@ type Utilser interface {
 	FormatUnixTimeShort(year int, month int, day int) string
 	FormatUnixTimeYm(year int, month int, day int) string
 	ParseTime(str string) (time.Time, error)
-
+	IsYesToday(t int64) bool
+	IsYesTodayByTime(t1, t2 int64) bool
 	Random(max int) int
 	RandRangeInt(min, max int) int
 	RandRangeInt64(min, max int64) int64
@@ -602,17 +602,17 @@ func (u *utils) FormatFromUnixTimeShort(t int64) string {
 	}
 }
 
-// 将unix时间戳格式化为yyyymmdd H:i:s格式字符串
+// 转化为yyyymmdd H:i:s格式字符串
 func (u *utils) FormatUnixTime(year int, month int, day int) string {
 	return time.Now().AddDate(year, month, day).Format(SysTimeform)
 }
 
-// 将unix时间戳格式化为yyyymmdd格式字符串
+// 转化为yyyymmdd格式字符串
 func (u *utils) FormatUnixTimeShort(year int, month int, day int) string {
 	return time.Now().AddDate(year, month, day).Format(SysTimeformShort)
 }
 
-// 将unix时间戳格式化为yyyymm格式字符串
+// 转化为yyyymm格式字符串
 func (u *utils) FormatUnixTimeYm(year int, month int, day int) string {
 	return time.Now().AddDate(year, month, day).Format(TimeformYm)
 }
@@ -620,6 +620,39 @@ func (u *utils) FormatUnixTimeYm(year int, month int, day int) string {
 // 将字符串转成时间
 func (u *utils) ParseTime(str string) (time.Time, error) {
 	return time.ParseInLocation(SysTimeform, str, SysTimeLocation)
+}
+
+// 判断unix时间是不是昨天
+func (u *utils) IsYesToday(t int64) bool {
+	ymd := u.FormatFromUnixTimeShort(t)
+
+	yesDay := time.Now().AddDate(0, 0, -1)
+	yd := u.FormatFromUnixTimeShort(yesDay.Unix())
+	//fmt.Println(ymd,yd)
+	if ymd == yd {
+		return true
+	} else {
+		return false
+	}
+}
+
+// 判断2个unix时间t1 是不是 t2的昨天
+func (u *utils) IsYesTodayByTime(t1, t2 int64) bool {
+	ymd := u.FormatFromUnixTimeShort(t1)
+	t2s := u.FormatFromUnixTime(t2)
+	parseTime, err := u.ParseTime(t2s)
+	if err != nil {
+		return false
+	}
+
+	yesDay := parseTime.AddDate(0, 0, -1)
+	yd := u.FormatFromUnixTimeShort(yesDay.Unix())
+
+	if ymd == yd {
+		return true
+	} else {
+		return false
+	}
 }
 
 // 得到指定最大值的一个随机数

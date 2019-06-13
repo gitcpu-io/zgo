@@ -21,6 +21,15 @@ var st = &struct {
 	A: "niubi",
 }
 
+func TestUtils_IsYesToday(t *testing.T) {
+	//fmt.Println(u.IsYesToday(1559819453))
+	fmt.Println(u.IsYesToday(1560297600))
+}
+
+func TestUtils_IsYesTodayByTime(t *testing.T) {
+	fmt.Println(u.IsYesTodayByTime(1560297600, 1560384000))
+}
+
 func TestUTF8GBK(t *testing.T) {
 	g, err := u.UTF82GBK([]byte("朱大仙儿"))
 	if err != nil {
@@ -236,8 +245,8 @@ func TestMarshalSlice(t *testing.T) {
 	fmt.Println(r, e)
 
 	t1 := make(map[string]interface{})
-	t1 ["a"] = test
-	t1 ["b"] = []interface{}{"a", "c", "e"}
+	t1["a"] = test
+	t1["b"] = []interface{}{"a", "c", "e"}
 
 	r, e = MarshalMap(t1)
 	fmt.Println(r, e)
