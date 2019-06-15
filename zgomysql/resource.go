@@ -234,7 +234,7 @@ func (mr *mysqlResource) DeleteMany(ctx context.Context, gormPool *gorm.DB, tabl
 
 // Exec 执行sql语句
 func (mr *mysqlResource) Exec(ctx context.Context, gormPool *gorm.DB, sql string, values ...interface{}) (int, error) {
-	gormPool = gormPool.Exec(sql)
+	gormPool = gormPool.Exec(sql, values...)
 	count := gormPool.RowsAffected
 	err := gormPool.Error
 	return int(count), err
