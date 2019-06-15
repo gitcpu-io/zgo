@@ -100,6 +100,7 @@ type Eser interface {
 	AddOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
 	UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
     DeleteDsl(ctx context.Context, index, table, dsl string) (interface{}, error)
+	UpDateByQuery(ctx context.Context, index, table, dsl string) (interface{}, error)
 
 }
 
@@ -120,6 +121,10 @@ func (e *zgoes) UpOneData(ctx context.Context, index, table, id, dataJson string
 
 func (e *zgoes) DeleteDsl(ctx context.Context, index, table, dsl string) (interface{}, error) {
 	return e.res.DeleteDsl(ctx, index, table, dsl)
+}
+
+func (e *zgoes) UpDateByQuery(ctx context.Context, index, table, dsl string) (interface{}, error) {
+	return e.res.UpDateByQuery(ctx, index, table, dsl)
 }
 
 //func (e *zgoes)NewDsl() *mode.DSL {
