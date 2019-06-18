@@ -1,9 +1,15 @@
 package zgohttp
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/context"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"runtime"
 	"strconv"
 	"time"
@@ -29,6 +35,11 @@ type Httper interface {
 	JsonExpectErr(ctx iris.Context, msg string) (int, error)
 	UseBefore(ctx iris.Context) // 捕获异常，开始计时时间
 	AsyncMid(ctx iris.Context)  // 使用go程异步
+
+	Get(url string) ([]byte, error)
+	Post(url string, play url.Values) ([]byte, error)
+	PostJson(url string, jsonData []byte) ([]byte, error)
+	PostForm(url string, formData []byte) ([]byte, error)
 }
 
 type zgohttp struct {
@@ -145,4 +156,97 @@ func (zh *zgohttp) AsyncMid(ctx iris.Context) {
 	case <-ch:
 		return
 	}
+}
+
+func (zh *zgohttp) Get(url string) ([]byte, error) {
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(bufio.NewReader(resp.Body))
+	if err != nil {
+		return nil, err
+	}
+	return body, err
+}
+
+func (zh *zgohttp) Post(url string, play url.Values) ([]byte, error) {
+	resp, err := http.PostForm(url, play)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	return body, err
+}
+
+func (zh *zgohttp) PostJson(url string, jsonData []byte) ([]byte, error) {
+
+	reader := bytes.NewReader([]byte(jsonData))
+	request, err := http.NewRequest("POST", url, reader)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	request.Header.Set("Content-Type", "application/json;charset=UTF-8")
+	client := http.Client{}
+	resp, err := client.Do(request)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	defer request.Body.Close()
+	defer resp.Body.Close()
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	return respBytes, nil
+}
+
+func (zh *zgohttp) PostForm(url string, jsonData []byte) ([]byte, error) {
+
+	var tmp interface{}
+
+	err := zgoutils.Utils.Unmarshal(jsonData, &tmp)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	tmpMap, ok := tmp.(map[string]interface{})
+
+	if !ok {
+		return nil, fmt.Errorf("Got (%v) is not JSON Map", string(jsonData))
+	}
+
+	var formData = make(map[string][]string)
+	for k, v := range tmpMap {
+		formData[k] = []string{fmt.Sprintf("%v", v)}
+	}
+
+	client := http.Client{}
+	resp, err := client.PostForm(url, formData)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	return respBytes, nil
 }
