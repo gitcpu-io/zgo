@@ -123,6 +123,8 @@ type Utilser interface {
 	Random(max int) int
 	RandRangeInt(min, max int) int
 	RandRangeInt64(min, max int64) int64
+	//获取任意一天0点的unix, 0表示当前，1表示明天，-1表示昨天，以此类推
+	GetAnyDayZeroUnixTimestamp(t int) int64
 
 	CreateSign(str string) string
 	Addslashes(str string) string
@@ -653,6 +655,12 @@ func (u *utils) IsYesTodayByTime(t1, t2 int64) bool {
 	} else {
 		return false
 	}
+}
+
+func (u *utils) GetAnyDayZeroUnixTimestamp(t int) int64 {
+	timeStr := time.Now().Format(SysTimeformShort)
+	t2, _ := time.ParseInLocation(SysTimeformShort, timeStr, time.Local)
+	return t2.AddDate(0, 0, t).Unix()
 }
 
 // 得到指定最大值的一个随机数
