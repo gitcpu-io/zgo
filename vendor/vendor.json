@@ -28,6 +28,12 @@
 			"revisionTime": "2018-12-06T09:48:27Z"
 		},
 		{
+			"checksumSHA1": "ZS/LGXY6LWMFZPWf61eTS5+QsME=",
+			"path": "github.com/bwmarrin/snowflake",
+			"revision": "c09e69ae59935edf6d85799e858c26de86b04cb3",
+			"revisionTime": "2019-04-12T22:30:32Z"
+		},
+		{
 			"checksumSHA1": "butr+Orbf1fd1hcLqNXYwUDAjcI=",
 			"origin": "go.etcd.io/etcd/vendor/github.com/coreos/go-semver/semver",
 			"path": "github.com/coreos/go-semver/semver",

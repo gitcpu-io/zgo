@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/bwmarrin/snowflake"
 	"github.com/fatih/structs"
 	"github.com/json-iterator/go"
 	"github.com/satori/go.uuid"
@@ -66,6 +67,9 @@ type Utilser interface {
 	GBK2UTF8(s []byte) ([]byte, error)
 	UTF82GBK(s []byte) ([]byte, error)
 	ToString(data interface{}) (string, error)
+
+	//雪花算法生成器
+	Snowflake(i ...int) snowflake.ID
 
 	//是否是email地址
 	IsEmail(email string) (ok bool, err error)
@@ -150,6 +154,22 @@ type utils struct{}
 
 func New() Utilser {
 	return &utils{}
+}
+
+func (u *utils) Snowflake(i ...int) snowflake.ID {
+	// Create a new Node with a Node number of 1
+	p := 1
+	if len(i) != 0 {
+		p = i[0]
+	}
+	node, err := snowflake.NewNode(int64(p))
+	if err != nil {
+		fmt.Println(err)
+		return 0
+	}
+
+	// Generate a snowflake ID.
+	return node.Generate()
 }
 
 // GBK2UTF8 transform s from GBK to UTF8 format
