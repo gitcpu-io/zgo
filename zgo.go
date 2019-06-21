@@ -184,9 +184,6 @@ type (
 	PartitionConsumer = kafkaCluter.PartitionConsumer
 	Bucketer          = limiter.SimpleBucketer //zgo 自定义的bucket
 
-	//grpc声明给使用者
-	//GrpcClientConn = *grpc.ClientConn
-
 	//postgres声明给使用者
 	PostgresDB                 = pg.DB
 	PostgresCreateTableOptions = orm.CreateTableOptions
@@ -202,15 +199,17 @@ type (
 )
 
 var (
-	Kafka    zgokafka.Kafkaer
-	Nsq      zgonsq.Nsqer
-	Mongo    zgomongo.Mongoer
-	Es       zgoes.Eser
-	Grpc     zgogrpc.Grpcer
-	Redis    zgoredis.Rediser
-	Pika     zgopika.Pikaer
-	Mysql    zgomysql.Mysqler
-	Postgres zgopostgres.Postgreser
+	Kafka             zgokafka.Kafkaer
+	Nsq               zgonsq.Nsqer
+	Mongo             zgomongo.Mongoer
+	Es                zgoes.Eser
+	Grpc              zgogrpc.Grpcer
+	Redis             zgoredis.Rediser
+	Pika              zgopika.Pikaer
+	Mysql             zgomysql.Mysqler
+	Postgres          zgopostgres.Postgreser
+	PostgresErrNoRows = pg.ErrNoRows
+
 	//Neo4j    zgoneo4j.Neo4jer
 	Etcd  zgoetcd.Etcder
 	Cache zgocache.Cacher
