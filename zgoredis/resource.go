@@ -65,7 +65,9 @@ type RedisResourcer interface {
 
 	Publish(ctx context.Context, key string, value string) (int, error)
 	Subscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error)
+	Unsubscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error)
 	PSubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error)
+	PUnsubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error)
 }
 
 type redisResource struct {
@@ -570,6 +572,32 @@ func (r *redisResource) PSubscribe(ctx context.Context, patterns ...string) (cha
 	ps := radix.PubSub(*s)
 	msgCh := make(chan radix.PubSubMessage)
 	if err := ps.PSubscribe(msgCh, patterns...); err == nil {
+		return msgCh, err
+	} else {
+		return nil, err
+	}
+
+}
+
+// Unsubscribe 取消订阅
+func (r *redisResource) Unsubscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error) {
+	s := <-r.connpool.GetCChan(r.label)
+	ps := radix.PubSub(*s)
+	msgCh := make(chan radix.PubSubMessage)
+	if err := ps.Unsubscribe(msgCh, chanName); err == nil {
+		return msgCh, err
+	} else {
+		return nil, err
+	}
+
+}
+
+// PUnsubscribe 取消模式订阅，模糊匹配channel的名字
+func (r *redisResource) PUnsubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error) {
+	s := <-r.connpool.GetCChan(r.label)
+	ps := radix.PubSub(*s)
+	msgCh := make(chan radix.PubSubMessage)
+	if err := ps.PUnsubscribe(msgCh, patterns...); err == nil {
 		return msgCh, err
 	} else {
 		return nil, err

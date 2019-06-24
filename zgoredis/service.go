@@ -70,6 +70,10 @@ type Rediser interface {
 	Subscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error)
 	// PSubscribe 模式订阅，模糊匹配channel的名字
 	PSubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error)
+	// Unsubscribe取消订阅
+	Unsubscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error)
+	// PUnsubscribe 取消模式订阅，模糊匹配channel的名字
+	PUnsubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error)
 }
 
 func Redis(l string) Rediser {
@@ -317,4 +321,12 @@ func (r *zgoredis) Subscribe(ctx context.Context, chanName string) (chan radix.P
 
 func (r *zgoredis) PSubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error) {
 	return r.res.PSubscribe(ctx, patterns...)
+}
+
+func (r *zgoredis) Unsubscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error) {
+	return r.res.Unsubscribe(ctx, chanName)
+}
+
+func (r *zgoredis) PUnsubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error) {
+	return r.res.PUnsubscribe(ctx, patterns...)
 }
