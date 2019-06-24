@@ -4,6 +4,7 @@ import (
 	"context"
 	"git.zhugefang.com/gocore/zgo/comm"
 	"git.zhugefang.com/gocore/zgo/config"
+	"github.com/mediocregopher/radix"
 	"sync"
 )
 
@@ -62,6 +63,13 @@ type Rediser interface {
 	ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error)
 	Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error)
 	Zrem(ctx context.Context, key string, member ...interface{}) (int, error)
+
+	// Publish 发布
+	Publish(ctx context.Context, key string, value string) (int, error)
+	// Subscribe订阅
+	Subscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error)
+	// PSubscribe 模式订阅，模糊匹配channel的名字
+	PSubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error)
 }
 
 func Redis(l string) Rediser {
@@ -297,4 +305,16 @@ func (r *zgoredis) Zadd(ctx context.Context, key string, score interface{}, memb
 
 func (r *zgoredis) Zrem(ctx context.Context, key string, member ...interface{}) (int, error) {
 	return r.res.Zrem(ctx, key, member)
+}
+
+func (r *zgoredis) Publish(ctx context.Context, key string, value string) (int, error) {
+	return r.res.Publish(ctx, key, value)
+}
+
+func (r *zgoredis) Subscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error) {
+	return r.res.Subscribe(ctx, chanName)
+}
+
+func (r *zgoredis) PSubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error) {
+	return r.res.PSubscribe(ctx, patterns...)
 }

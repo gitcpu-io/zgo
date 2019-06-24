@@ -62,6 +62,10 @@ type RedisResourcer interface {
 	ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error)
 	Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error)
 	Zrem(ctx context.Context, key string, member ...interface{}) (int, error)
+
+	Publish(ctx context.Context, key string, value string) (int, error)
+	Subscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error)
+	PSubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error)
 }
 
 type redisResource struct {
@@ -534,4 +538,41 @@ func (r *redisResource) Zrem(ctx context.Context, key string, member ...interfac
 	} else {
 		return flag, err
 	}
+}
+
+// Publish 发布
+func (r *redisResource) Publish(ctx context.Context, key string, value string) (int, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var flag int
+	if err := s.Do(radix.FlatCmd(&flag, "PUBLISH", key, value)); err != nil {
+		return 0, err
+	} else {
+		return flag, err
+	}
+}
+
+// Subscribe订阅
+func (r *redisResource) Subscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error) {
+	s := <-r.connpool.GetCChan(r.label)
+	ps := radix.PubSub(*s)
+	msgCh := make(chan radix.PubSubMessage)
+	if err := ps.Subscribe(msgCh, chanName); err == nil {
+		return msgCh, err
+	} else {
+		return nil, err
+	}
+
+}
+
+// PSubscribe 模式订阅，模糊匹配channel的名字
+func (r *redisResource) PSubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error) {
+	s := <-r.connpool.GetCChan(r.label)
+	ps := radix.PubSub(*s)
+	msgCh := make(chan radix.PubSubMessage)
+	if err := ps.PSubscribe(msgCh, patterns...); err == nil {
+		return msgCh, err
+	} else {
+		return nil, err
+	}
+
 }
