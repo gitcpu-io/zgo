@@ -5,6 +5,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/comm"
 	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/orm"
 	"sync"
 )
 
@@ -26,6 +27,8 @@ type Postgreser interface {
 	*/
 	// GetConnChan 获取原生的生产者client，返回一个chan，使用者需要接收 <- chan
 	GetConnChan(label ...string) (chan *pg.DB, error)
+
+	Scan(values ...interface{}) orm.ColumnScanner
 }
 
 // Postgres用于对zgo.Postgres这个全局变量赋值
@@ -115,4 +118,8 @@ func (n *zgopostgres) GetConnChan(label ...string) (chan *pg.DB, error) {
 		return nil, err
 	}
 	return n.res.GetConnChan(l), nil
+}
+
+func (n *zgopostgres) Scan(values ...interface{}) orm.ColumnScanner {
+	return n.res.Scan(values...)
 }
