@@ -126,29 +126,32 @@ type Rediser interface {
 	XAck(ctx context.Context, key string, groupName string, ids []string) (int32, error)
 
 	/*
-		m := make(map[string]*zgo.RedisStreamEntryID)
-		m["key-101"] = nil
-		streamReader := zgo.Redis.NewStreamReader(zgo.RedisStreamReaderOpts{
-			Streams:  m,
-			Group:    "group-101", //组名，需要前调用XGroupCreate
-			Consumer: "101", //消费者名
-		})
+		var streamName = "key-101"
+		var groupName = "group-102"
+
+		zgo.Redis.XGroupCreate(context.TODO(), streamName, groupName, "0") //从0开始, $从最新开始
+
+		streams := []string{
+			streamName,
+			"lol",
+		}
+		streamReader := zgo.Redis.NewStreamReader(streams, groupName, "101")
 
 		if streamReader.Err() != nil {
 			zgo.Log.Error(streamReader.Err())
 			return
 		}
 
-		for  {
-			if _, entries, ok := streamReader.Next() ; ok == true {
+		for {
+			if _, entries, ok := streamReader.Next(); ok == true {
 				if len(entries) > 0 {
-					fmt.Println(entries)
+					fmt.Println(groupName, "===", entries)
 				}
 			}
 		}
 	*/
 	//通过创建stream选项，来创建一个流的reader，然后在for中读到最新写进去的，默认xack为true, block为true
-	NewStreamReader(opts radix.StreamReaderOpts) radix.StreamReader
+	NewStreamReader(streams []string, group, consumer string) radix.StreamReader
 }
 
 func Redis(l string) Rediser {
@@ -444,6 +447,15 @@ func (r *zgoredis) XAck(ctx context.Context, key string, groupName string, ids [
 	return r.res.XAck(ctx, key, groupName, ids)
 }
 
-func (r *zgoredis) NewStreamReader(opts radix.StreamReaderOpts) radix.StreamReader {
+func (r *zgoredis) NewStreamReader(streams []string, group, consumer string) radix.StreamReader {
+	m := make(map[string]*radix.StreamEntryID)
+	for _, v := range streams {
+		m[v] = nil
+	}
+	opts := radix.StreamReaderOpts{
+		Streams:  m,
+		Group:    group,
+		Consumer: consumer,
+	}
 	return r.res.NewStreamReader(opts)
 }
