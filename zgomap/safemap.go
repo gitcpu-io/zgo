@@ -102,10 +102,12 @@ type Sma struct {
 }
 
 func (m *safeMap) Range() chan *Sma {
-	m.lock.RLock()
-	defer m.lock.RUnlock()
+	//m.lock.RLock()
+	//defer m.lock.RUnlock()
 	out := make(chan *Sma)
 	go func() {
+		m.lock.RLock()
+		defer m.lock.RUnlock()
 		for k, v := range m.sm {
 			c := &Sma{
 				Key: k,
