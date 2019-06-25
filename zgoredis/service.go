@@ -126,32 +126,35 @@ type Rediser interface {
 	XAck(ctx context.Context, key string, groupName string, ids []string) (int32, error)
 
 	/*
-		var streamName = "key-101"
-		var groupName = "group-102"
+			var streamName = "key-101"
+			var groupName = "group-102"
 
-		zgo.Redis.XGroupCreate(context.TODO(), streamName, groupName, "0") //从0开始, $从最新开始
+			zgo.Redis.XGroupCreate(context.TODO(), streamName, groupName, "0") //从0开始, $从最新开始
 
-		streams := []string{
-			streamName,
-			"lol",
-		}
-		streamReader := zgo.Redis.NewStreamReader(streams, groupName, "101")
+			streams := []string{
+				streamName,
+				"lol",
+			}
+			streamReader,err := zgo.Redis.NewStreamReader(streams, groupName, "101")
+			if err != nil {
+				zgo.Log.Error(err)
+				return
+		    }
+			if streamReader.Err() != nil {
+				zgo.Log.Error(streamReader.Err())
+				return
+			}
 
-		if streamReader.Err() != nil {
-			zgo.Log.Error(streamReader.Err())
-			return
-		}
-
-		for {
-			if _, entries, ok := streamReader.Next(); ok == true {
-				if len(entries) > 0 {
-					fmt.Println(groupName, "===", entries)
+			for {
+				if _, entries, ok := streamReader.Next(); ok == true {
+					if len(entries) > 0 {
+						fmt.Println(groupName, "===", entries)
+					}
 				}
 			}
-		}
 	*/
 	//通过创建stream选项，来创建一个流的reader，然后在for中读到最新写进去的，默认xack为true, block为true
-	NewStreamReader(streams []string, group, consumer string) radix.StreamReader
+	NewStreamReader(streams []string, group, consumer string) (radix.StreamReader, error)
 }
 
 func Redis(l string) Rediser {
@@ -447,7 +450,10 @@ func (r *zgoredis) XAck(ctx context.Context, key string, groupName string, ids [
 	return r.res.XAck(ctx, key, groupName, ids)
 }
 
-func (r *zgoredis) NewStreamReader(streams []string, group, consumer string) radix.StreamReader {
+func (r *zgoredis) NewStreamReader(streams []string, group, consumer string) (radix.StreamReader, error) {
+	if len(streams) <= 0 {
+		return nil, errors.New("stream key 至少有一个")
+	}
 	m := make(map[string]*radix.StreamEntryID)
 	for _, v := range streams {
 		m[v] = nil
@@ -457,5 +463,5 @@ func (r *zgoredis) NewStreamReader(streams []string, group, consumer string) rad
 		Group:    group,
 		Consumer: consumer,
 	}
-	return r.res.NewStreamReader(opts)
+	return r.res.NewStreamReader(opts), nil
 }
