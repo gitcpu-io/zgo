@@ -68,6 +68,17 @@ type RedisResourcer interface {
 	Unsubscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error)
 	PSubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error)
 	PUnsubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error)
+
+	//streams
+	XAdd(ctx context.Context, key string, id string, values interface{}) (string, error)
+	XLen(ctx context.Context, key string) (int32, error)
+	XDel(ctx context.Context, key string, ids []string) (int32, error)
+	XRange(ctx context.Context, key string, start, end string, count ...int) ([]map[string]map[string]string, error)
+	XRevRange(ctx context.Context, key string, start, end string, count ...int) ([]map[string]map[string]string, error)
+	XGroupCreate(ctx context.Context, key string, groupName string, id string) (string, error)
+	XGroupDestroy(ctx context.Context, key string, groupName string) (int32, error)
+	XAck(ctx context.Context, key string, groupName string, ids []string) (int32, error)
+	NewStreamReader(opts radix.StreamReaderOpts) radix.StreamReader
 }
 
 type redisResource struct {
@@ -603,4 +614,102 @@ func (r *redisResource) PUnsubscribe(ctx context.Context, patterns ...string) (c
 		return nil, err
 	}
 
+}
+
+func (r *redisResource) XAdd(ctx context.Context, key string, id string, values interface{}) (string, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var result string
+	if err := s.Do(radix.FlatCmd(&result, "XADD", key, id, values)); err != nil {
+		return "", err
+	} else {
+		return result, err
+	}
+}
+
+func (r *redisResource) XLen(ctx context.Context, key string) (int32, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var result int32
+	if err := s.Do(radix.FlatCmd(&result, "XLEN", key)); err != nil {
+		return 0, err
+	} else {
+		return result, err
+	}
+}
+
+func (r *redisResource) XDel(ctx context.Context, key string, ids []string) (int32, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var result int32
+	if err := s.Do(radix.FlatCmd(&result, "XDEL", key, ids)); err != nil {
+		return 0, err
+	} else {
+		return result, err
+	}
+}
+
+func (r *redisResource) XRange(ctx context.Context, key string, start, end string, count ...int) ([]map[string]map[string]string, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var result []map[string]map[string]string
+	var cmdAction radix.CmdAction
+	if len(count) > 0 {
+		cmdAction = radix.FlatCmd(&result, "XRANGE", key, start, end, "COUNT", count[0])
+	} else {
+		cmdAction = radix.FlatCmd(&result, "XRANGE", key, start, end)
+	}
+	if err := s.Do(cmdAction); err != nil {
+		return nil, err
+	} else {
+		return result, err
+	}
+}
+
+func (r *redisResource) XRevRange(ctx context.Context, key string, start, end string, count ...int) ([]map[string]map[string]string, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var result []map[string]map[string]string
+	var cmdAction radix.CmdAction
+	if len(count) > 0 {
+		cmdAction = radix.FlatCmd(&result, "XREVRANGE", key, start, end, "COUNT", count[0])
+	} else {
+		cmdAction = radix.FlatCmd(&result, "XREVRANGE", key, start, end)
+	}
+	if err := s.Do(cmdAction); err != nil {
+		return nil, err
+	} else {
+		return result, err
+	}
+}
+
+func (r *redisResource) XGroupCreate(ctx context.Context, key string, groupName string, id string) (string, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var result string
+	if err := s.Do(radix.FlatCmd(&result, "XGROUP", "CREATE", key, groupName, id)); err != nil {
+		return "", err
+	} else {
+		return result, err
+	}
+}
+
+func (r *redisResource) XGroupDestroy(ctx context.Context, key string, groupName string) (int32, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var result int32
+	if err := s.Do(radix.FlatCmd(&result, "XGROUP", "DESTROY", key, groupName)); err != nil {
+		return 0, err
+	} else {
+		return result, err
+	}
+}
+
+func (r *redisResource) XAck(ctx context.Context, key string, groupName string, ids []string) (int32, error) {
+	s := <-r.connpool.GetConnChan(r.label)
+	var result int32
+	if err := s.Do(radix.FlatCmd(&result, "XACK", key, groupName, ids)); err != nil {
+		return 0, err
+	} else {
+		return result, err
+	}
+}
+
+func (r *redisResource) NewStreamReader(opts radix.StreamReaderOpts) radix.StreamReader {
+	s := <-r.connpool.GetConnChan(r.label)
+
+	return radix.NewStreamReader(s, opts)
 }

@@ -2,6 +2,7 @@ package zgoredis
 
 import (
 	"context"
+	"errors"
 	"git.zhugefang.com/gocore/zgo/comm"
 	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/mediocregopher/radix"
@@ -66,14 +67,88 @@ type Rediser interface {
 
 	// Publish 发布
 	Publish(ctx context.Context, key string, value string) (int, error)
+
 	// Subscribe订阅
 	Subscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error)
+
 	// PSubscribe 模式订阅，模糊匹配channel的名字
+	// PSubscribe(context.TODO(), "my*")
 	PSubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error)
+
 	// Unsubscribe取消订阅
 	Unsubscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error)
+
 	// PUnsubscribe 取消模式订阅，模糊匹配channel的名字
 	PUnsubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error)
+
+	//streams流处理
+	//	m := make(map[string]string)
+	//	m["aaa"] = "aaa123"
+	//	m["bbb"] = "bbb123"
+	//	m["ccc"] = "ccc123"
+	//
+	//XAdd(context.TODO(), "key-101", "19000000000000", m)
+	//id 的值必须后加入的要大于之前加入的，m可以是map[string]string
+	XAdd(ctx context.Context, key string, id string, values interface{}) (string, error)
+
+	XLen(ctx context.Context, key string) (int32, error)
+
+	//	ids := []string{
+	//		"1561371910929-0",
+	//		"1561372099154-0",
+	//		}
+	//XDel(context.TODO(), "key-101", ids)
+	//ids可以string数组，删除一个或多个
+	XDel(ctx context.Context, key string, ids []string) (int32, error)
+
+	//按范围取XRange(context.TODO(), "key-101", "1561372594375-0", "1561372671389-0")，count可选，输入1表示取1条
+	//start可以是 - ; end可以是 + ; 表示全部
+	XRange(ctx context.Context, key string, start, end string, count ...int) ([]map[string]map[string]string, error)
+
+	//按范围反向取XRevrange(context.TODO(), "key-101", "1561372671389-0", "1561372594375-0")，count可选，输入1表示取1条
+	//start可以是 + ; end可以是 - ; 表示全部
+	XRevRange(ctx context.Context, key string, start, end string, count ...int) ([]map[string]map[string]string, error)
+
+	//创建消费者
+	//XGroupCreate(context.TODO(), "key-101", "group-101", "$")  $表示最后一个ID从最新的开始消费，也可以是0，表示从头开始，
+	XGroupCreate(ctx context.Context, key string, groupName string, id string) (string, error)
+
+	//删除消费者
+	//XGroupDestroy(context.TODO(), "key-101", "group-101")
+	XGroupDestroy(ctx context.Context, key string, groupName string) (int32, error)
+
+	//	ids := []string{
+	//		"19000000000010-0",
+	//		"1561372594375-0",
+	//	}
+	//XAck(context.TODO(), "key-101", "group-101", ids)
+	//ids可以string数组，确认一个或多个
+	XAck(ctx context.Context, key string, groupName string, ids []string) (int32, error)
+
+	/*
+		m := make(map[string]*zgo.RedisStreamEntryID)
+		m["key-101"] = nil
+		streamReader := zgo.Redis.NewStreamReader(zgo.RedisStreamReaderOpts{
+			Streams:  m,
+			Group:    "group-101", //组名，需要前调用XGroupCreate
+			Consumer: "101", //消费者名
+		})
+
+		if streamReader.Err() != nil {
+			zgo.Log.Error(streamReader.Err())
+			return
+		}
+
+		for  {
+			if _, entries, ok := streamReader.Next() ; ok == true {
+				if len(entries) > 0 {
+					fmt.Println(entries)
+				}
+			}
+		}
+	*/
+	//通过创建stream选项，来创建一个流的reader，然后在for中读到最新写进去的，默认xack为true, block为true
+	NewStreamReader(opts radix.StreamReaderOpts) radix.StreamReader
 }
 
 func Redis(l string) Rediser {
@@ -329,4 +404,46 @@ func (r *zgoredis) Unsubscribe(ctx context.Context, chanName string) (chan radix
 
 func (r *zgoredis) PUnsubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error) {
 	return r.res.PUnsubscribe(ctx, patterns...)
+}
+
+func (r *zgoredis) XAdd(ctx context.Context, key string, id string, values interface{}) (string, error) {
+	return r.res.XAdd(ctx, key, id, values)
+}
+
+func (r *zgoredis) XLen(ctx context.Context, key string) (int32, error) {
+	return r.res.XLen(ctx, key)
+}
+
+func (r *zgoredis) XDel(ctx context.Context, key string, ids []string) (int32, error) {
+	if len(ids) <= 0 {
+		return 0, errors.New("ID不能为空")
+	}
+	return r.res.XDel(ctx, key, ids)
+}
+
+func (r *zgoredis) XRange(ctx context.Context, key string, start, end string, count ...int) ([]map[string]map[string]string, error) {
+	return r.res.XRange(ctx, key, start, end, count...)
+}
+
+func (r *zgoredis) XRevRange(ctx context.Context, key string, start, end string, count ...int) ([]map[string]map[string]string, error) {
+	return r.res.XRevRange(ctx, key, start, end, count...)
+}
+
+func (r *zgoredis) XGroupCreate(ctx context.Context, key string, groupName string, id string) (string, error) {
+	return r.res.XGroupCreate(ctx, key, groupName, id)
+}
+
+func (r *zgoredis) XGroupDestroy(ctx context.Context, key string, groupName string) (int32, error) {
+	return r.res.XGroupDestroy(ctx, key, groupName)
+}
+
+func (r *zgoredis) XAck(ctx context.Context, key string, groupName string, ids []string) (int32, error) {
+	if len(ids) <= 0 {
+		return 0, errors.New("ID不能为空")
+	}
+	return r.res.XAck(ctx, key, groupName, ids)
+}
+
+func (r *zgoredis) NewStreamReader(opts radix.StreamReaderOpts) radix.StreamReader {
+	return r.res.NewStreamReader(opts)
 }

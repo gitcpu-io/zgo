@@ -23,6 +23,7 @@ import (
 	kafkaCluter "github.com/bsm/sarama-cluster"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
+	"github.com/mediocregopher/radix"
 	"github.com/nsqio/go-nsq"
 	"go.etcd.io/etcd/clientv3"
 )
@@ -187,6 +188,9 @@ type (
 	//postgres声明给使用者
 	PostgresDB                 = pg.DB
 	PostgresCreateTableOptions = orm.CreateTableOptions
+
+	RedisStreamReaderOpts = radix.StreamReaderOpts
+	RedisStreamEntryID    = radix.StreamEntryID
 
 	//neo4j声明给使用者
 	//Neo4jSession     = neo4j.Session

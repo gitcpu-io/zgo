@@ -22,7 +22,6 @@ var (
 
 	cChanMap = make(map[string]chan *radix.Conn)
 	cmu      sync.RWMutex //用于锁定connChanMap
-	chsmu    sync.RWMutex
 )
 
 type connPool struct {
