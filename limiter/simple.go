@@ -122,7 +122,7 @@ func (cl *SimpleBucket) BeLeft() int32 {
 }
 
 func (cl *SimpleBucket) Resize(size int32, changeSize int32) {
-	if cl.capacity == size || size == 0 {
+	if cl.capacity == size {
 		return //当传进来的size和原来长度一样时，不需要重置大小
 	}
 
