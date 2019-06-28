@@ -133,6 +133,9 @@ func (mr *mysqlResource) Count(ctx context.Context, gormPool *gorm.DB, args map[
 	if join, ok := args["join"]; ok {
 		gormPool = gormPool.Joins(join.(string))
 	}
+	if group, ok := args["group"]; ok {
+		gormPool = gormPool.Group(group.(string))
+	}
 	err := gormPool.Count(args["count"]).Error
 	return err
 }
