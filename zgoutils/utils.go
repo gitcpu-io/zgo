@@ -124,7 +124,12 @@ type Utilser interface {
 	ParseTime(str string) (time.Time, error)
 	IsYesToday(t int64) bool
 	IsYesTodayByTime(t1, t2 int64) bool
+	//生成最大数是max的一个随机数
 	Random(max int) int
+	//生成num个随机数0--9
+	RandomInt64(num int) (int64, error)
+	//生成num个随机数0--9,A--Z,a-z
+	RandomString(num int) string
 	RandRangeInt(min, max int) int
 	RandRangeInt64(min, max int64) int64
 	//获取任意一天0点的unix, 0表示当前，1表示明天，-1表示昨天，以此类推
@@ -691,6 +696,32 @@ func (u *utils) Random(max int) int {
 	} else {
 		return r.Intn(max)
 	}
+}
+
+// RandomString 生成num个随机0-9,A-Z随机数
+func (u *utils) RandomString(num int) string {
+	chars := []string{
+		"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+	}
+	res := strings.Builder{}
+	for i := 0; i < num; i++ {
+		id := u.Random(62)
+		res.WriteString(chars[id])
+	}
+	return res.String()
+}
+
+// RandomInt 生成num个随机0-9随机数
+func (u *utils) RandomInt64(num int) (int64, error) {
+	chars := []string{
+		"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+	}
+	res := strings.Builder{}
+	for i := 0; i < num; i++ {
+		id := u.Random(9)
+		res.WriteString(chars[id])
+	}
+	return strconv.ParseInt(res.String(), 10, 64)
 }
 
 // 生成指定范围内的一个随机数

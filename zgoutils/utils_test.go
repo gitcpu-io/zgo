@@ -251,3 +251,17 @@ func TestMarshalSlice(t *testing.T) {
 	r, e = MarshalMap(t1)
 	fmt.Println(r, e)
 }
+
+func TestUtils_Random(t *testing.T) {
+	fmt.Println(u.Random(10))
+}
+
+func TestUtils_RandomInt(t *testing.T) {
+	i, err := u.RandomInt64(6)
+
+	fmt.Println(i, err)
+}
+
+func TestUtils_RandomString(t *testing.T) {
+	fmt.Println(u.RandomString(16))
+}
