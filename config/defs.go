@@ -51,11 +51,11 @@ var Levels = []string{"debug", "info", "warn", "error"}
 var (
 	DevEtcHosts = []string{ //开发联调ETCD地
 		//"10.45.146.41:2380", //测试时使用内网ip
-		"123.56.173.28:2380", //如果本机联调，想用测试机的etcd可以使用公网ip
+		"47.95.20.12:2381", //如果本机联调，想用测试机的etcd可以使用公网ip
 		//"localhost:2381",
 	}
 	QaEtcHosts = []string{ //QA环境ETCD地址，同正式
-		"123.56.173.28:2380",
+		"47.95.20.12:2381",
 	}
 	ProEtcHosts = []string{ //生产环境ETCD地址，需要使用内部dns解析，在k8s的worker节点配置/etc/hosts下面的域名和真实的etcd的ip
 		"10.25.96.1:2380",
