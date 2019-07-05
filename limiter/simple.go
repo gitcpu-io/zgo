@@ -62,7 +62,7 @@ func NewBucket(cc int32) *SimpleBucket {
 	}
 	return &SimpleBucket{
 		capacity: cc,
-		bucket:   make(chan uint8, max1),
+		bucket:   make(chan uint8, chLen),
 		offset:   0,
 	}
 }
