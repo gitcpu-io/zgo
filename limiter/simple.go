@@ -8,7 +8,11 @@ package limiter
 */
 
 const (
-	max = 9999
+	max1 = 9999
+	max2 = 19999
+	max3 = 29999
+	max4 = 39999
+	max5 = 49999
 )
 
 type SimpleBucketer interface {
@@ -28,22 +32,44 @@ type SimpleBucket struct {
 }
 
 func NewBucket(cc int32) *SimpleBucket {
-	if cc > max {
-		cc = max
+	var chLen int32
+
+	if cc <= max5 {
+		chLen = max5
 	}
+	if cc <= max4 {
+		chLen = max4
+	}
+	if cc <= max3 {
+		chLen = max3
+	}
+	if cc <= max2 {
+		chLen = max2
+	}
+	if cc <= max1 {
+		chLen = max1
+	}
+
+	if chLen > max5 {
+		chLen = max5
+	}
+	if cc > max5 {
+		cc = max5
+	}
+
 	if cc <= 0 {
 		cc = 0
 	}
 	return &SimpleBucket{
 		capacity: cc,
-		bucket:   make(chan uint8, max),
+		bucket:   make(chan uint8, max1),
 		offset:   0,
 	}
 }
 
 // Get 提取指定num个token，如果不够返回真实可用的token个数
 func (cl *SimpleBucket) Get(num int32) int32 {
-	if num == 0 || num > max {
+	if num == 0 || num > max1 {
 		return -1
 	}
 
@@ -62,15 +88,24 @@ func (cl *SimpleBucket) Get(num int32) int32 {
 	if beef < num { //没有足够的token可以提取
 		num = beef
 	}
+	var ti int32
 	for i := 0; int32(i) < num; i++ {
-		cl.bucket <- 1
+		if cl.Len() < cl.capacity {
+			cl.bucket <- 1
+			ti++
+		} else {
+			break
+		}
+	}
+	if ti < num {
+		num = ti //真正取到的token
 	}
 	return num
 }
 
 // Release 释放指定个num的token，如果释放太多，按真实的可释放数
 func (cl *SimpleBucket) Release(num int32) int32 {
-	if num == 0 || num > max {
+	if num == 0 || num > max1 {
 		return -1
 	}
 
@@ -90,8 +125,17 @@ func (cl *SimpleBucket) Release(num int32) int32 {
 		num = beef
 	}
 
+	var ti int32
 	for i := 0; int32(i) < num; i++ {
-		<-cl.bucket
+		if cl.Len() > 0 {
+			<-cl.bucket
+			ti++
+		} else {
+			break
+		}
+	}
+	if ti < num {
+		num = ti //真正释放掉的数量
 	}
 	return num
 }
