@@ -34,6 +34,8 @@ type SimpleBucket struct {
 func NewBucket(cc int32) *SimpleBucket {
 	var chLen int32
 
+	chLen = cc
+
 	if cc <= max5 {
 		chLen = max5
 	}
