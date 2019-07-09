@@ -33,9 +33,9 @@ type Httper interface {
 	JsonParamErr(ctx iris.Context) (int, error)
 	JsonErr(ctx iris.Context, status int, code string, msg string) (int, error)
 	JsonExpectErr(ctx iris.Context, msg string) (int, error)
-	UseBefore(ctx iris.Context) // 捕获异常，开始计时时间
-	AsyncMid(ctx iris.Context)  // 使用go程异步
-
+	JsonFree(ctx iris.Context, content interface{}) (int, error) // 自定义返回结构体
+	UseBefore(ctx iris.Context)                                  // 捕获异常，开始计时时间
+	AsyncMid(ctx iris.Context)                                   // 使用go程异步
 	Get(url string) ([]byte, error)
 	Post(url string, play url.Values) ([]byte, error)
 	PostJson(url string, jsonData []byte) ([]byte, error)
@@ -80,6 +80,13 @@ func (zh *zgohttp) JsonOK(ctx iris.Context, r interface{}) (int, error) {
 	startTime := ctx.Values().GetInt64Default("startTime", time.Now().UnixNano())
 	takeTime := (time.Now().UnixNano() - startTime) / 1e6
 	return ctx.JSON(iris.Map{"code": 200, "data": r, "message": "操作成功", "time": takeTime})
+}
+
+// JsonOK 正常的返回方法
+func (zh *zgohttp) JsonFree(ctx iris.Context, content interface{}) (int, error) {
+	//startTime := ctx.Values().GetInt64Default("startTime", time.Now().UnixNano())
+	//takeTime := (time.Now().UnixNano() - startTime) / 1e6
+	return ctx.JSON(content)
 }
 
 // JsonExpectErr 预期内的错误，适用于调用func后 return出来的errors!=nil时的返回值
