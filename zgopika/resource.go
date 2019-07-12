@@ -64,7 +64,7 @@ type PikaResourcer interface {
 	Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error)
 	Zrem(ctx context.Context, key string, member ...interface{}) (int, error)
 
-	Rname(ctx context.Context, key string, newkey string) (int, error)
+	Rename(ctx context.Context, key string, newkey string) (int, error)
 }
 
 type pikaResource struct {
@@ -619,13 +619,13 @@ func (p *pikaResource) Zrem(ctx context.Context, key string, member ...interface
 	}
 }
 
-func (p *pikaResource) Rname(ctx context.Context, key string, newkey string) (int, error) {
+func (p *pikaResource) Rename(ctx context.Context, key string, newkey string) (int, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
 	newkey = prefix + newkey
 	var flag int
-	if err := s.Do(radix.FlatCmd(&flag, "Rname", key, newkey)); err != nil {
+	if err := s.Do(radix.FlatCmd(&flag, "Rename", key, newkey)); err != nil {
 		return 0, err
 	} else {
 		return flag, err
