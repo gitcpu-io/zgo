@@ -62,6 +62,8 @@ type Pikaer interface {
 	ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error)
 	Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error)
 	Zrem(ctx context.Context, key string, member ...interface{}) (int, error)
+
+	Rname(ctx context.Context, key string, newkey string) (int, error)
 }
 
 func Pika(l string) Pikaer {
@@ -297,4 +299,7 @@ func (r *zgopika) Zadd(ctx context.Context, key string, score interface{}, membe
 
 func (r *zgopika) Zrem(ctx context.Context, key string, member ...interface{}) (int, error) {
 	return r.res.Zrem(ctx, key, member)
+}
+func (r *zgopika) Rname(ctx context.Context, key string, newkey string) (int, error) {
+	return r.res
 }

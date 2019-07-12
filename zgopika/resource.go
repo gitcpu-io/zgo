@@ -63,6 +63,8 @@ type PikaResourcer interface {
 	ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error)
 	Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error)
 	Zrem(ctx context.Context, key string, member ...interface{}) (int, error)
+
+	Rname(ctx context.Context, key string, newkey string) (int, error)
 }
 
 type pikaResource struct {
@@ -611,6 +613,19 @@ func (p *pikaResource) Zrem(ctx context.Context, key string, member ...interface
 	key = prefix + key
 	var flag int
 	if err := s.Do(radix.FlatCmd(&flag, "Zrem", key, member...)); err != nil {
+		return 0, err
+	} else {
+		return flag, err
+	}
+}
+
+func (p *pikaResource) Rname(ctx context.Context, key string, newkey string) (int, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
+	newkey = prefix + newkey
+	var flag int
+	if err := s.Do(radix.FlatCmd(&flag, "Rname", key, newkey)); err != nil {
 		return 0, err
 	} else {
 		return flag, err
