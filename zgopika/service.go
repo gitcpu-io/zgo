@@ -63,7 +63,7 @@ type Pikaer interface {
 	Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error)
 	Zrem(ctx context.Context, key string, member ...interface{}) (int, error)
 
-	Rename(ctx context.Context, key string, newkey string) (int, error)
+	//Rename(ctx context.Context, key string, newkey string) (int, error) //pika 暂不支持
 }
 
 func Pika(l string) Pikaer {
@@ -300,6 +300,6 @@ func (r *zgopika) Zadd(ctx context.Context, key string, score interface{}, membe
 func (r *zgopika) Zrem(ctx context.Context, key string, member ...interface{}) (int, error) {
 	return r.res.Zrem(ctx, key, member)
 }
-func (r *zgopika) Rename(ctx context.Context, key string, newkey string) (int, error) {
-	return r.res.Rename(ctx, key, newkey)
-}
+//func (r *zgopika) Rename(ctx context.Context, key string, newkey string) (int, error) {
+//	return r.res.Rename(ctx, key, newkey)
+//}
