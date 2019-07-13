@@ -75,7 +75,7 @@ type Cryptoer interface {
 	RsaEncrypt(origData []byte, publicKey []byte) ([]byte, error)
 	RsaDecrypt(ciphertext []byte, privateKey []byte) ([]byte, error)
 
-	DecryptDataForWeixinUniond(encryptedData, key, iv string) (string, error)
+	DecryptDataForWXBizData(encryptedData, sessionKey, iv string) ([]byte, error)
 
 	//pkcs5
 	PKCS5Padding(c []byte, blockSize int) []byte
@@ -387,36 +387,47 @@ func (cp *crypto) RsaDecrypt(ciphertext []byte, privateKey []byte) ([]byte, erro
 	return rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
 }
 
-func AesCBCDncrypt(encryptData, key, iv []byte) (string, error) {
+func (cp *crypto) AesCBCDecrypt(encryptData, sessionKey, iv []byte) ([]byte, error) {
 	var aesBlockDecrypter cipher.Block
-	aesBlockDecrypter, err := aes.NewCipher(key)
+	aesBlockDecrypter, err := aes.NewCipher(sessionKey)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	decrypted := make([]byte, len(encryptData))
 	aesDecrypter := cipher.NewCBCDecrypter(aesBlockDecrypter, iv)
 	aesDecrypter.CryptBlocks(decrypted, encryptData)
 
-	return string(decrypted), nil
+	decrypted = cp.PKCS7UnPadding(decrypted)
+
+	return decrypted, nil
 }
 
-// DecryptDataForWeixinUniond
-func (cp *crypto) DecryptDataForWeixinUniond(encryptedData, key, iv string) (string, error) {
+// DecryptDataForWXBizData
+func (cp *crypto) DecryptDataForWXBizData(encryptedData, sessionKey, iv string) ([]byte, error) {
+
+	if len(sessionKey) != 24 {
+		return nil, errors.New("error sessionKey len must be 24")
+	}
+
+	if len(iv) != 24 {
+		return nil, errors.New("error iv len must be 24")
+	}
+
 	data, err := base64.StdEncoding.DecodeString(encryptedData)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	iKey, err := base64.StdEncoding.DecodeString(key)
+	iKey, err := base64.StdEncoding.DecodeString(sessionKey)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	iIv, err := base64.StdEncoding.DecodeString(iv)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	dnData, err := AesCBCDncrypt(data, iKey, iIv)
+	dnData, err := cp.AesCBCDecrypt(data, iKey, iIv)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	return dnData, nil
 }
