@@ -23,8 +23,8 @@ type Maper interface {
 	Delete(k interface{})
 	Size() int
 	Range() chan *Sma
-	Keys(mp map[string]string) []string
-	Values(mp map[string]string) []string
+	Keys() []string
+	Values() []string
 }
 
 // safeMap is concurrent security map
