@@ -124,19 +124,23 @@ func (m *safeMap) Range() chan *Sma {
 	}()
 	return out
 }
-func (m *safeMap) Keys(mp map[string]string) []string {
-	keys := make([]string, 0, len(mp))
-	for k := range mp {
-		keys = append(keys, k)
+func (m *safeMap) Keys() []string {
+	m.lock.RLock()
+	defer m.lock.RUnlock()
+	keys := make([]string, 0, len(m.sm))
+	for k := range m.sm {
+		keys = append(keys, k.(string))
 	}
 	sort.Strings(keys)
 	return keys
 
 }
-func (m *safeMap) Values(mp map[string]string) []string {
-	values := make([]string, 0, len(mp))
-	for _, v := range mp {
-		values = append(values, v)
+func (m *safeMap) Values() []string {
+	m.lock.RLock()
+	defer m.lock.RUnlock()
+	values := make([]string, 0, len(m.sm))
+	for _, v := range m.sm {
+		values = append(values, v.(string))
 	}
 	sort.Strings(values)
 	return values
