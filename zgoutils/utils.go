@@ -3,6 +3,7 @@ package zgoutils
 import (
 	"bytes"
 	"crypto/md5"
+	"crypto/sha1"
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
@@ -70,6 +71,8 @@ type Utilser interface {
 
 	//雪花算法生成器
 	Snowflake(i ...int) snowflake.ID
+	//sha1算法
+	SHA1(str string) string
 
 	//是否是email地址
 	IsEmail(email string) (ok bool, err error)
@@ -175,6 +178,12 @@ func (u *utils) Snowflake(i ...int) snowflake.ID {
 
 	// Generate a snowflake ID.
 	return node.Generate()
+}
+func (u *utils) SHA1(s string) string {
+	h := sha1.New()
+	h.Write([]byte(s))
+	bs := h.Sum(nil)
+	return fmt.Sprintf("%x", bs)
 }
 
 // GBK2UTF8 transform s from GBK to UTF8 format

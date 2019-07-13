@@ -1,6 +1,9 @@
 package zgomap
 
-import "sync"
+import (
+	"sort"
+	"sync"
+)
 
 /*
 @Time : 2019-03-15 11:29
@@ -20,6 +23,8 @@ type Maper interface {
 	Delete(k interface{})
 	Size() int
 	Range() chan *Sma
+	Keys(mp map[string]string) []string
+	Values(mp map[string]string) []string
 }
 
 // safeMap is concurrent security map
@@ -118,4 +123,21 @@ func (m *safeMap) Range() chan *Sma {
 		close(out)
 	}()
 	return out
+}
+func (m *safeMap) Keys(mp map[string]string) []string {
+	keys := make([]string, 0, len(mp))
+	for k := range mp {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+
+}
+func (m *safeMap) Values(mp map[string]string) []string {
+	values := make([]string, 0, len(mp))
+	for _, v := range mp {
+		values = append(values, v)
+	}
+	sort.Strings(values)
+	return values
 }
