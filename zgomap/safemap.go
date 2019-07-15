@@ -1,6 +1,7 @@
 package zgomap
 
 import (
+	"fmt"
 	"sort"
 	"sync"
 )
@@ -25,6 +26,7 @@ type Maper interface {
 	Range() chan *Sma
 	Keys() []string
 	Values() []string
+	Join(s string) string
 }
 
 // safeMap is concurrent security map
@@ -133,8 +135,8 @@ func (m *safeMap) Keys() []string {
 	}
 	sort.Strings(keys)
 	return keys
-
 }
+
 func (m *safeMap) Values() []string {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
@@ -144,4 +146,13 @@ func (m *safeMap) Values() []string {
 	}
 	sort.Strings(values)
 	return values
+}
+func (m *safeMap) Join(s string) string {
+	m.lock.RLock()
+	defer m.lock.RUnlock()
+	str := ""
+	for k, v := range m.sm {
+		str += fmt.Sprintf("%v=%v%v", k, v, s)
+	}
+	return str[:len(str)-len(s)]
 }

@@ -23,6 +23,7 @@ type Mongoer interface {
 	UpdateAll(ctx context.Context, args map[string]interface{}) error
 	Delete(ctx context.Context, args map[string]interface{}) error
 	DeleteById(ctx context.Context, _id interface{}, args map[string]interface{}) error
+	DeleteAll(ctx context.Context, args map[string]interface{}) error
 	FindOne(ctx context.Context, args map[string]interface{}) error
 	FindPage(ctx context.Context, args map[string]interface{}) error
 	Pipe(ctx context.Context, pipe interface{}, values interface{}, args map[string]interface{}) (interface{}, error)
@@ -179,6 +180,9 @@ func (m *zgomongo) Count(ctx context.Context, args map[string]interface{}) (int,
 
 func (m *zgomongo) Pipe(ctx context.Context, pipe interface{}, values interface{}, args map[string]interface{}) (interface{}, error) {
 	return m.res.Pipe(ctx, pipe, values, args)
+}
+func (m *zgomongo) DeleteAll(ctx context.Context, args map[string]interface{}) error {
+	return m.res.DeleteAll(ctx, args)
 }
 
 //func (m *zgomongo) InsertMany(ctx context.Context, args map[string]interface{}, docs ...interface{}) error {
