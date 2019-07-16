@@ -32,6 +32,7 @@ type Pikaer interface {
 	Rpush(ctx context.Context, key string, value interface{}) (int, error)
 	Sadd(ctx context.Context, key string, value interface{}) (int, error)
 	Srem(ctx context.Context, key string, value interface{}) (int, error)
+
 	//Get
 	Exists(ctx context.Context, key string) (interface{}, error)
 	Get(ctx context.Context, key string) (interface{}, error)
@@ -53,6 +54,8 @@ type Pikaer interface {
 	Scard(ctx context.Context, key string) (int, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
+	Srandmember(ctx context.Context, key string) (string, error)
+
 	Zrank(ctx context.Context, key string, member interface{}) (int, error)
 	Zscore(ctx context.Context, key string, member interface{}) (string, error)
 	Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
@@ -264,7 +267,9 @@ func (r *zgopika) Smembers(ctx context.Context, key string) (interface{}, error)
 func (r *zgopika) Sismember(ctx context.Context, key string, value interface{}) (int, error) {
 	return r.res.Sismember(ctx, key, value)
 }
-
+func (r *zgopika) Srandmember(ctx context.Context, key string) (string, error) {
+	return r.res.Srandmember(ctx, key)
+}
 func (r *zgopika) Zrank(ctx context.Context, key string, member interface{}) (int, error) {
 	return r.res.Zrank(ctx, key, member)
 }
@@ -300,6 +305,7 @@ func (r *zgopika) Zadd(ctx context.Context, key string, score interface{}, membe
 func (r *zgopika) Zrem(ctx context.Context, key string, member ...interface{}) (int, error) {
 	return r.res.Zrem(ctx, key, member)
 }
+
 //func (r *zgopika) Rename(ctx context.Context, key string, newkey string) (int, error) {
 //	return r.res.Rename(ctx, key, newkey)
 //}
