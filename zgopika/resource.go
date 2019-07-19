@@ -48,6 +48,7 @@ type PikaResourcer interface {
 	Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error)
 	Lpop(ctx context.Context, key string) (interface{}, error)
 	Rpop(ctx context.Context, key string) (interface{}, error)
+	Lrem(ctx context.Context, key string, count int, value string) (int, error)
 
 	Scard(ctx context.Context, key string) (int, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
@@ -425,6 +426,17 @@ func (p *pikaResource) Lpop(ctx context.Context, key string) (interface{}, error
 		return nil, err
 	} else {
 		return listContent, err
+	}
+}
+func (p *pikaResource) Lrem(ctx context.Context, key string, count int, value string) (int, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
+	var flag int
+	if err := s.Do(radix.FlatCmd(&flag, "Lrem", key, count, value)); err != nil {
+		return flag, err
+	} else {
+		return 0, err
 	}
 }
 
