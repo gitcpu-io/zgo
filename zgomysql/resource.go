@@ -74,6 +74,9 @@ func (mr *mysqlResource) Get(ctx context.Context, gormPool *gorm.DB, args map[st
 	if sel, ok := args["select"]; ok {
 		gormPool = gormPool.Select(sel)
 	}
+	if join, ok := args["join"]; ok {
+		gormPool = gormPool.Joins(join.(string))
+	}
 	if order, ok := args["order"]; ok {
 		gormPool = gormPool.Order(order)
 	}
