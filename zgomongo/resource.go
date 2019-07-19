@@ -7,6 +7,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"reflect"
 	"sync"
 )
 
@@ -242,14 +243,24 @@ func judgeMongo(args map[string]interface{}) error {
 }
 
 //map转化成bson 内置函数
-func map2Bson(arg map[string]interface{}) bson.M {
-	data, err := bson.Marshal(&arg)
-	if err != nil {
-		fmt.Println(err)
+//func map2Bson(arg map[string]interface{}) bson.M {
+func map2Bson(arg interface{}) bson.M {
+	switch arg.(type){
+	case bson.M:
+		return arg.(bson.M)
+	case map[string]interface{}:
+		return (bson.M)(arg.(map[string]interface{}))
+	default:
+		panic(fmt.Errorf("arg type is %v not bson.M or map[string]interface{}", reflect.TypeOf(arg)))
+		return nil
 	}
-	mmap := bson.M{}
-	bson.Unmarshal(data, &mmap)
-	return mmap
+	//data, err := bson.Marshal(&arg)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//mmap := bson.M{}
+	//bson.Unmarshal(data, &mmap)
+	//return mmap
 }
 
 //map转换成bson 并且添加$set  避免修改导致对删除其他字段  内置函数
@@ -267,7 +278,7 @@ func updateMap2Bson(arg map[string]interface{}) bson.M {
 //对mongo操作对前置工作 讲map类型转化为bson 内置函数
 func preWorkForMongo(args map[string]interface{}) {
 	if args["query"] != nil {
-		query := map2Bson(args["query"].(map[string]interface{}))
+		query := map2Bson(args["query"])
 		args["query"] = query
 	} else {
 		args["query"] = map[string]interface{}{}
@@ -281,7 +292,7 @@ func preWorkForMongo(args map[string]interface{}) {
 	}
 
 	if args["select"] != nil {
-		bySelect := map2Bson(args["select"].(map[string]interface{}))
+		bySelect := map2Bson(args["select"])
 		args["select"] = bySelect
 	} else {
 		args["select"] = map[string]interface{}{}
