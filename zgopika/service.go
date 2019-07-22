@@ -51,8 +51,10 @@ type Pikaer interface {
 	Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error)
 	Lpop(ctx context.Context, key string) (interface{}, error)
 	Lrem(ctx context.Context, key string, count int, value string) (int, error)
+	Rpoplpush(ctx context.Context, key1 string, key2 string) (interface{}, error)
 
 	Rpop(ctx context.Context, key string) (interface{}, error)
+
 	Scard(ctx context.Context, key string) (int, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
@@ -184,6 +186,10 @@ func (r *zgopika) Lpush(ctx context.Context, key string, value interface{}) (int
 
 func (r *zgopika) Rpush(ctx context.Context, key string, value interface{}) (int, error) {
 	return r.res.Rpush(ctx, key, value)
+}
+
+func (r *zgopika) Rpoplpush(ctx context.Context, key1 string, key2 string) (interface{}, error) {
+	return r.res.Rpoplpush(ctx, key1, key2)
 }
 
 func (r *zgopika) Sadd(ctx context.Context, key string, value interface{}) (int, error) {
