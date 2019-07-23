@@ -29,6 +29,7 @@ type Mysqler interface {
 	// --- 查询方法
 	Get(ctx context.Context, args map[string]interface{}) error
 	List(ctx context.Context, args map[string]interface{}) error
+	FindMaps(ctx context.Context, args map[string]interface{}) ([]map[string]interface{}, error)
 	Count(ctx context.Context, args map[string]interface{}) error
 	// --- 查询方法结束
 
@@ -201,6 +202,15 @@ func (ms *zgoMysql) List(ctx context.Context, args map[string]interface{}) error
 		return err
 	}
 	return ms.res.List(ctx, db, args)
+}
+
+// List
+func (ms *zgoMysql) FindMaps(ctx context.Context, args map[string]interface{}) ([]map[string]interface{}, error) {
+	db, err := ms.getDB(ctx, "r", args)
+	if err != nil {
+		return nil, err
+	}
+	return ms.res.FindMaps(ctx, db, args)
 }
 
 // Count

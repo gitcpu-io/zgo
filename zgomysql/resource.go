@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/jinzhu/gorm"
+	"reflect"
+	"time"
 )
 
 // 初始化 连接池
@@ -19,6 +21,7 @@ type MysqlResourcer interface {
 	GetRPool() (*gorm.DB, error)
 	GetWPool() (*gorm.DB, error)
 	List(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) error
+	FindMaps(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) ([]map[string]interface{}, error)
 	Count(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) error
 	Get(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) error
 
@@ -124,6 +127,76 @@ func (mr *mysqlResource) List(ctx context.Context, gormPool *gorm.DB, args map[s
 	}
 	err := gormPool.Find(args["obj"]).Error
 	return err
+}
+
+// 查询列表数据
+func (mr *mysqlResource) FindMaps(ctx context.Context, gormPool *gorm.DB, args map[string]interface{}) ([]map[string]interface{}, error) {
+	errv := mr.validate(args, "table", "query", "args")
+	if errv != nil {
+		return nil, errv
+	}
+	gormPool = gormPool.Table(args["table"].(string))
+	if join, ok := args["join"]; ok {
+		gormPool = gormPool.Joins(join.(string))
+	}
+	if sel, ok := args["select"]; ok {
+		gormPool = gormPool.Select(sel)
+	}
+	gormPool = gormPool.Where(args["query"], args["args"].([]interface{})...)
+	currentLimit := 30
+	if limit, ok := args["limit"]; ok {
+		gormPool = gormPool.Limit(limit)
+		currentLimit = limit.(int)
+	} else {
+		gormPool = gormPool.Limit(currentLimit)
+	}
+	if page, ok := args["page"]; ok {
+		gormPool = gormPool.Offset((page.(int) - 1) * currentLimit)
+	} else if offset, ok := args["offset"]; ok {
+		gormPool = gormPool.Offset(offset)
+	}
+	if order, ok := args["order"]; ok {
+		gormPool = gormPool.Order(order)
+	}
+	if group, ok := args["group"]; ok {
+		gormPool = gormPool.Group(group.(string))
+	}
+	rows, err := gormPool.Rows()
+	defer rows.Close()
+	columns, _ := rows.Columns()
+	length := len(columns)
+	results := make([]map[string]interface{}, 0)
+	for rows.Next() {
+		current := makeResultReceiver(length)
+		if err := rows.Scan(current...); err != nil {
+			panic(err)
+		}
+		value := make(map[string]interface{})
+		for i := 0; i < length; i++ {
+			key := columns[i]
+			val := *(current[i]).(*interface{})
+			if val == nil {
+				value[key] = nil
+				continue
+			}
+			vType := reflect.TypeOf(val)
+			switch vType.String() {
+			case "int64":
+				value[key] = val.(int64)
+			case "string":
+				value[key] = val.(string)
+			case "time.Time":
+				value[key] = val.(time.Time)
+			case "[]uint8":
+				value[key] = string(val.([]uint8))
+			default:
+				fmt.Printf("unsupport data type '%s' now\n", vType)
+				// TODO remember add other data type
+			}
+		}
+		results = append(results, value)
+	}
+	return results, err
 }
 
 // 查询数量
@@ -254,4 +327,13 @@ func (mr *mysqlResource) validate(args map[string]interface{}, fields ...string)
 		}
 	}
 	return nil
+}
+func makeResultReceiver(length int) []interface{} {
+	result := make([]interface{}, 0, length)
+	for i := 0; i < length; i++ {
+		var current interface{}
+		current = struct{}{}
+		result = append(result, &current)
+	}
+	return result
 }
