@@ -7,7 +7,6 @@ import (
 	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/jinzhu/gorm"
 	"reflect"
-	"time"
 )
 
 // 初始化 连接池
@@ -162,8 +161,14 @@ func (mr *mysqlResource) FindMaps(ctx context.Context, gormPool *gorm.DB, args m
 		gormPool = gormPool.Group(group.(string))
 	}
 	rows, err := gormPool.Rows()
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
 	defer rows.Close()
 	columns, _ := rows.Columns()
+	columnsT, _ := rows.ColumnTypes()
+	fmt.Println(columnsT)
 	length := len(columns)
 	results := make([]map[string]interface{}, 0)
 	for rows.Next() {
@@ -181,16 +186,18 @@ func (mr *mysqlResource) FindMaps(ctx context.Context, gormPool *gorm.DB, args m
 			}
 			vType := reflect.TypeOf(val)
 			switch vType.String() {
-			case "int64":
-				value[key] = val.(int64)
-			case "string":
-				value[key] = val.(string)
-			case "time.Time":
-				value[key] = val.(time.Time)
+			//case "int64":
+			//	value[key] = val.(int64)
+			//case "string":
+			//	value[key] = val.(string)
+			//case "time.Time":
+			//	value[key] = val.(time.Time)
 			case "[]uint8":
+				//fmt.Printf("unsupport data type '%s' now\n", vType)
 				value[key] = string(val.([]uint8))
 			default:
-				fmt.Printf("unsupport data type '%s' now\n", vType)
+				value[key] = val
+				//fmt.Printf("unsupport data type '%s' now\n", vType)
 				// TODO remember add other data type
 			}
 		}
