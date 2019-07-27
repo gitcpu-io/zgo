@@ -19,6 +19,8 @@ var u = New()
 var str = "http://www.baidu.com"
 var key = "ZhugeAd"
 
+var token_key = "zhugefang2016"
+
 func TestCrypto_AesDecrypt(t *testing.T) {
 	key := "9871267812345mn812345xyz"
 	encrypt := u.AesEncrypt(str, key)
@@ -103,6 +105,9 @@ func TestHmacSha256AndSha1(t *testing.T) {
 	}
 }
 
+
+
+
 func TestHkdfSha256AndSha1(t *testing.T) {
 	info := []byte{0x62, 0x72, 0x6f, 0x6f, 0x6b}
 	r, s, err := u.HkdfSha256RandomSalt([]byte("hello"), info, 12)
@@ -129,4 +134,16 @@ func TestHkdfSha256AndSha1(t *testing.T) {
 	}
 	t.Log(hex.EncodeToString(r), len(r))
 
+}
+
+func TestTpTokenEncode(t *testing.T) {
+	data := "13501242231|73721|1564130996"
+	encodeData := u.TokenEncode(data,token_key)
+	t.Log("encodeData...",encodeData)
+}
+
+func TestTpTokenDecode(t *testing.T) {
+	data := "vWRPOvW2wM_GHApp8NgGeA6tJpfPaO_L3mMrC3CBwypScROI4CMPPLCeFK_WgvLC5Mum78G-g8shHF0pW7Utkg=="
+	decodeData := u.TokenDecode(data,token_key)
+	t.Log("decodeData...",decodeData)
 }

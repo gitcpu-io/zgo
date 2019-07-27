@@ -15,9 +15,12 @@ import (
 	"encoding/hex"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"golang.org/x/crypto/hkdf"
 	"hash"
 	"io"
+	"strings"
+	"github.com/chentaihan/aesCbc"
 )
 
 /*
@@ -29,6 +32,8 @@ import (
 
 // AES256KeyLength is the length of key for AES 256 crypt
 const AES256KeyLength = 32
+
+const CRYPT_IV = "1234567890qwertyuiopasdfghjklzxc"
 
 var Crypto Cryptoer
 
@@ -100,6 +105,10 @@ type Cryptoer interface {
 	//hkdf-sha1
 	HkdfSha1RandomSalt(secret, info []byte, sl int) (key []byte, salt []byte, err error)
 	HkdfSha1WithSalt(secret, salt, info []byte) (key []byte, err error)
+
+	//thinkphp-token
+	TokenEncode(orig string, key string) string
+	TokenDecode(cryted string, key string) string
 }
 
 // Md5
@@ -530,4 +539,24 @@ func (cp *crypto) HkdfSha1WithSalt(secret, salt, info []byte) (key []byte, err e
 		return
 	}
 	return
+}
+
+// Thinkphp -tokenEncode
+func (cp *crypto)TokenEncode(orig string, key string) string {
+	aesCipher := aesCbc.NewAesCipher([]byte(key), []byte(CRYPT_IV))
+	encrData := aesCipher.Encrypt([]byte(CRYPT_IV + orig))
+	base64EncrData := base64.StdEncoding.WithPadding(base64.StdPadding).EncodeToString(encrData)
+	return strings.Replace(strings.Replace(base64EncrData,"+","-",-1),"/","_",-1)
+}
+
+// Thinkphp -tokenDecode
+func (cp *crypto)TokenDecode(cryted string, key string) string {
+	tfStr := strings.Replace(strings.Replace(strings.Replace(cryted,"-","+",-1),"_","/",-1)," ", "",-1)
+	decodeData,err := base64.StdEncoding.WithPadding(base64.StdPadding).DecodeString(tfStr)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	aesCipher := aesCbc.NewAesCipher([]byte(key), []byte(CRYPT_IV))
+	origData := aesCipher.Decrypt(decodeData)
+	return string(origData[32:])
 }
