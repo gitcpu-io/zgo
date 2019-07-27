@@ -32,6 +32,7 @@ type Pikaer interface {
 	Rpush(ctx context.Context, key string, value interface{}) (int, error)
 	Sadd(ctx context.Context, key string, value interface{}) (int, error)
 	Srem(ctx context.Context, key string, value interface{}) (int, error)
+
 	//Get
 	Exists(ctx context.Context, key string) (interface{}, error)
 	Get(ctx context.Context, key string) (interface{}, error)
@@ -49,10 +50,16 @@ type Pikaer interface {
 	Lrange(ctx context.Context, key string, start int, stop int) (interface{}, error)
 	Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error)
 	Lpop(ctx context.Context, key string) (interface{}, error)
+	Lrem(ctx context.Context, key string, count int, value string) (int, error)
+	Rpoplpush(ctx context.Context, key1 string, key2 string) (interface{}, error)
+
 	Rpop(ctx context.Context, key string) (interface{}, error)
+
 	Scard(ctx context.Context, key string) (int, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
+	Srandmember(ctx context.Context, key string) (string, error)
+
 	Zrank(ctx context.Context, key string, member interface{}) (int, error)
 	Zscore(ctx context.Context, key string, member interface{}) (string, error)
 	Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error)
@@ -181,6 +188,10 @@ func (r *zgopika) Rpush(ctx context.Context, key string, value interface{}) (int
 	return r.res.Rpush(ctx, key, value)
 }
 
+func (r *zgopika) Rpoplpush(ctx context.Context, key1 string, key2 string) (interface{}, error) {
+	return r.res.Rpoplpush(ctx, key1, key2)
+}
+
 func (r *zgopika) Sadd(ctx context.Context, key string, value interface{}) (int, error) {
 	return r.res.Sadd(ctx, key, value)
 }
@@ -249,6 +260,10 @@ func (r *zgopika) Lpop(ctx context.Context, key string) (interface{}, error) {
 	return r.res.Lpop(ctx, key)
 }
 
+func (r *zgopika) Lrem(ctx context.Context, key string, count int, value string) (int, error) {
+	return r.res.Lrem(ctx, key, count, value)
+}
+
 func (r *zgopika) Rpop(ctx context.Context, key string) (interface{}, error) {
 	return r.res.Lpop(ctx, key)
 }
@@ -264,7 +279,9 @@ func (r *zgopika) Smembers(ctx context.Context, key string) (interface{}, error)
 func (r *zgopika) Sismember(ctx context.Context, key string, value interface{}) (int, error) {
 	return r.res.Sismember(ctx, key, value)
 }
-
+func (r *zgopika) Srandmember(ctx context.Context, key string) (string, error) {
+	return r.res.Srandmember(ctx, key)
+}
 func (r *zgopika) Zrank(ctx context.Context, key string, member interface{}) (int, error) {
 	return r.res.Zrank(ctx, key, member)
 }
@@ -300,6 +317,7 @@ func (r *zgopika) Zadd(ctx context.Context, key string, score interface{}, membe
 func (r *zgopika) Zrem(ctx context.Context, key string, member ...interface{}) (int, error) {
 	return r.res.Zrem(ctx, key, member)
 }
+
 //func (r *zgopika) Rename(ctx context.Context, key string, newkey string) (int, error) {
 //	return r.res.Rename(ctx, key, newkey)
 //}

@@ -48,10 +48,14 @@ type PikaResourcer interface {
 	Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error)
 	Lpop(ctx context.Context, key string) (interface{}, error)
 	Rpop(ctx context.Context, key string) (interface{}, error)
+	Rpoplpush(ctx context.Context, key1 string, key2 string) (interface{}, error)
+
+	Lrem(ctx context.Context, key string, count int, value string) (int, error)
 
 	Scard(ctx context.Context, key string) (int, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
+	Srandmember(ctx context.Context, key string) (string, error)
 
 	Zrank(ctx context.Context, key string, member interface{}) (int, error)
 	Zscore(ctx context.Context, key string, member interface{}) (string, error)
@@ -426,6 +430,30 @@ func (p *pikaResource) Lpop(ctx context.Context, key string) (interface{}, error
 		return listContent, err
 	}
 }
+func (p *pikaResource) Lrem(ctx context.Context, key string, count int, value string) (int, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
+	var flag int
+	if err := s.Do(radix.FlatCmd(&flag, "Lrem", key, count, value)); err != nil {
+		return flag, err
+	} else {
+		return 0, err
+	}
+}
+
+func (p *pikaResource) Rpoplpush(ctx context.Context, key1 string, key2 string) (interface{}, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key1 = prefix + key1
+	key2 = prefix + key2
+	var listContent string
+	if err := s.Do(radix.FlatCmd(&listContent, "Rpoplpush", key1, key2)); err != nil {
+		return nil, err
+	} else {
+		return listContent, err
+	}
+}
 
 func (p *pikaResource) Rpop(ctx context.Context, key string) (interface{}, error) {
 	s := <-p.connpool.GetConnChan(p.label)
@@ -470,6 +498,18 @@ func (p *pikaResource) Sismember(ctx context.Context, key string, value interfac
 	var flag int
 	if err := s.Do(radix.FlatCmd(&flag, "Sismember", key, value)); err != nil {
 		return 0, err
+	} else {
+		return flag, err
+	}
+}
+
+func (p *pikaResource) Srandmember(ctx context.Context, key string) (string, error) {
+	s := <-p.connpool.GetConnChan(p.label)
+	prefix := p.connpool.GetPrefix(p.label)
+	key = prefix + key
+	var flag string
+	if err := s.Do(radix.FlatCmd(&flag, "Srandmember", key)); err != nil {
+		return "", err
 	} else {
 		return flag, err
 	}
