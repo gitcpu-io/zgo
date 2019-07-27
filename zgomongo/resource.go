@@ -22,6 +22,7 @@ type MongoResourcer interface {
 	Count(ctx context.Context, args map[string]interface{}) (int, error)
 	Pipe(ctx context.Context, pipe interface{}, values interface{}, args map[string]interface{}) (interface{}, error)
 	UpdateOne(ctx context.Context, args map[string]interface{}) error
+	Upsert(ctx context.Context, args map[string]interface{}) error
 	UpdateById(ctx context.Context, id interface{}, args map[string]interface{}) error
 	UpdateAll(ctx context.Context, args map[string]interface{}) error
 	DeleteOne(ctx context.Context, args map[string]interface{}) error
@@ -148,6 +149,14 @@ func (m *mongoResource) UpdateOne(ctx context.Context, args map[string]interface
 	judgeMongo(args)
 	preWorkForMongo(args)
 	return s.DB(args["db"].(string)).C(args["table"].(string)).Update(args["query"].(bson.M), args["update"].(bson.M))
+}
+
+func (m *mongoResource) Upsert(ctx context.Context, args map[string]interface{}) error {
+	s := <-m.connpool.GetConnChan(m.label)
+	judgeMongo(args)
+	preWorkForMongo(args)
+	_, err := s.DB(args["db"].(string)).C(args["table"].(string)).Upsert(args["query"].(bson.M), args["update"].(bson.M))
+	return err
 }
 
 func (m *mongoResource) UpdateById(ctx context.Context, _id interface{}, args map[string]interface{}) error {
