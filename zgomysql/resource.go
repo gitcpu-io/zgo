@@ -167,8 +167,8 @@ func (mr *mysqlResource) FindMaps(ctx context.Context, gormPool *gorm.DB, args m
 	}
 	defer rows.Close()
 	columns, _ := rows.Columns()
-	columnsT, _ := rows.ColumnTypes()
-	fmt.Println(columnsT)
+	//columnsT, _ := rows.ColumnTypes()
+	//fmt.Println(columnsT)
 	length := len(columns)
 	results := make([]map[string]interface{}, 0)
 	for rows.Next() {
