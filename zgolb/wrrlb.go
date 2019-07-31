@@ -14,7 +14,7 @@ import (
 
 type WR2er interface {
 	Add(child string)
-	AddWeight(child string, weight int) error
+	AddWeight(child string, weight int)
 	Exist(child string) bool
 	Remove(child string)
 	Balance() (string, error)
