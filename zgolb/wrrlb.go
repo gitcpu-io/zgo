@@ -27,7 +27,7 @@ type WR2 struct {
 }
 
 func NewWR2(childs ...string) *WR2 {
-	return &WR2{weight: 0, childs: childs}
+	return &WR2{weight: 1, childs: childs}
 }
 
 func (wr2 *WR2) Add(child string) {
