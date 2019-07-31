@@ -42,23 +42,22 @@ func (wr2 *WR2) Add(child string) {
 	wr2.childs = append(wr2.childs, child)
 }
 
-func (wr2 *WR2) AddWeight(child string, weight int) error {
+func (wr2 *WR2) AddWeight(child string, weight int) {
 	if weight < 0 || weight > 10 {
-		return errors.New("weight 0 <= must <= 10")
+		weight = 1
 	}
 	wr2.Lock()
 	defer wr2.Unlock()
 
 	for _, h := range wr2.childs {
 		if h == child {
-			return nil
+			return
 		}
 	}
 
 	for i := 0; i < weight; i++ {
 		wr2.childs = append(wr2.childs, child)
 	}
-	return nil
 }
 
 func (wr2 *WR2) Exist(child string) bool {
