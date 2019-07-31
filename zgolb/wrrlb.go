@@ -12,7 +12,7 @@ import (
 @project: zgo
 */
 
-type WrrLber interface {
+type WR2er interface {
 	Add(child string)
 	AddWeight(child string, weight int) error
 	Exist(child string) bool

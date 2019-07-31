@@ -184,7 +184,7 @@ type (
 	NsqMessage        = *nsq.Message
 	PartitionConsumer = kafkaCluter.PartitionConsumer
 	Bucketer          = zgolimiter.SimpleBucketer //zgo 自定义的bucket
-
+	WR2er             = zgolb.WR2er
 	//postgres声明给使用者
 	PostgresDB                 = pg.DB
 	PostgresCreateTableOptions = orm.CreateTableOptions

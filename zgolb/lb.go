@@ -8,13 +8,13 @@ package zgolb
 */
 
 type Lber interface {
-	WR2(childs ...string) WrrLber
+	WR2(childs ...string) WR2er
 }
 
 type lb struct {
 }
 
-func (b *lb) WR2(childs ...string) WrrLber {
+func (b *lb) WR2(childs ...string) WR2er {
 	return NewWR2(childs...)
 }
 
