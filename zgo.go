@@ -2,7 +2,6 @@ package zgo
 
 import (
 	"git.zhugefang.com/gocore/zgo/config"
-	"git.zhugefang.com/gocore/zgo/limiter"
 	"git.zhugefang.com/gocore/zgo/zgocache"
 	"git.zhugefang.com/gocore/zgo/zgocrypto"
 	"git.zhugefang.com/gocore/zgo/zgoes"
@@ -11,6 +10,8 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgogrpc"
 	"git.zhugefang.com/gocore/zgo/zgohttp"
 	"git.zhugefang.com/gocore/zgo/zgokafka"
+	"git.zhugefang.com/gocore/zgo/zgolb"
+	"git.zhugefang.com/gocore/zgo/zgolimiter"
 	"git.zhugefang.com/gocore/zgo/zgolog"
 	"git.zhugefang.com/gocore/zgo/zgomap"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
@@ -182,8 +183,8 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
 type (
 	NsqMessage        = *nsq.Message
 	PartitionConsumer = kafkaCluter.PartitionConsumer
-	Bucketer          = limiter.SimpleBucketer //zgo 自定义的bucket
-
+	Bucketer          = zgolimiter.SimpleBucketer //zgo 自定义的bucket
+	WR2er             = zgolb.WR2er
 	//postgres声明给使用者
 	PostgresDB                 = pg.DB
 	PostgresCreateTableOptions = orm.CreateTableOptions
@@ -222,5 +223,6 @@ var (
 	Map    = zgomap.GetMap()
 	File   zgofile.Filer
 
-	Limiter = limiter.New()
+	Limiter = zgolimiter.New()
+	LB      = zgolb.NewLB()
 )
