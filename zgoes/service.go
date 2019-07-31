@@ -99,9 +99,10 @@ type Eser interface {
 	NewDsl() *DSL
 	AddOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
 	UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
-    DeleteDsl(ctx context.Context, index, table, dsl string) (interface{}, error)
+	DeleteDsl(ctx context.Context, index, table, dsl string) (interface{}, error)
 	UpDateByQuery(ctx context.Context, index, table, dsl string) (interface{}, error)
-
+	ExistsIndices(ctx context.Context, index, table string) (bool, error)
+	CreateIndices(ctx context.Context, index, table string) (bool, error)
 }
 
 func (e *zgoes) New(label ...string) (*zgoes, error) {
@@ -125,6 +126,13 @@ func (e *zgoes) DeleteDsl(ctx context.Context, index, table, dsl string) (interf
 
 func (e *zgoes) UpDateByQuery(ctx context.Context, index, table, dsl string) (interface{}, error) {
 	return e.res.UpDateByQuery(ctx, index, table, dsl)
+}
+
+func (e *zgoes) ExistsIndices(ctx context.Context, index, table string) (bool, error) {
+	return e.res.ExistsIndices(ctx, index, table)
+}
+func (e *zgoes) CreateIndices(ctx context.Context, index, table string) (bool, error) {
+	return e.res.CreateIndices(ctx, index, table)
 }
 
 //func (e *zgoes)NewDsl() *mode.DSL {
