@@ -199,7 +199,7 @@ func (e *esResource) UpDateByQuery(ctx context.Context, index, table, dsl string
 	return result, err
 }
 
-// Exists 判断索引库是否存在
+// ExistsIndices 判断索引库是否存在
 func (e *esResource) ExistsIndices(ctx context.Context, index, table string) (bool, error) {
 	uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"
 
