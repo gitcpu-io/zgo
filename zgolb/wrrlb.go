@@ -43,8 +43,8 @@ func (wr2 *WR2) Add(child string) {
 }
 
 func (wr2 *WR2) AddWeight(child string, weight int) error {
-	if weight < 0 || weight > 100 {
-		return errors.New("weight 0 <= must <= 100")
+	if weight < 0 || weight > 10 {
+		return errors.New("weight 0 <= must <= 10")
 	}
 	wr2.Lock()
 	defer wr2.Unlock()
