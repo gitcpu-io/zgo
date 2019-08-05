@@ -38,10 +38,11 @@ type Httper interface {
 	AsyncMid(ctx iris.Context)                                   // 使用go程异步
 	Get(url string) ([]byte, error)
 	Post(url string, play url.Values) ([]byte, error)
-	PostJson(url string, jsonData []byte) ([]byte, error)
+	PostJson(url string, jsonData []byte, handler ...map[string]string) ([]byte, error)
 	PostForm(url string, formData []byte) ([]byte, error)
+	//钉钉机器人
+	Ding(token string, msg string)
 }
-
 type zgohttp struct {
 }
 
@@ -62,6 +63,17 @@ var (
 	ErrorDBError                = ErrResponse{Status: 500, Msg: "DB ops failed", ErrorCode: "003"}
 	ErrorInternalFaults         = ErrResponse{Status: 500, Msg: "Internal service error", ErrorCode: "004"}
 )
+
+func (u *zgohttp) Ding(token string, msg string) {
+	url := "https://oapi.dingtalk.com/robot/send?access_token=" + token
+	mps := map[string]interface{}{
+		"msgtype": "text",
+		"text":    map[string]string{"content": msg},
+	}
+	bytes, _ := zgoutils.Utils.Marshal(mps)
+	u.PostJson(url, bytes)
+	return
+}
 
 func (zh *zgohttp) JsonpOK(ctx iris.Context, r interface{}) (int, error) {
 	startTime := ctx.Values().GetInt64Default("startTime", time.Now().UnixNano())
@@ -191,7 +203,7 @@ func (zh *zgohttp) Post(url string, play url.Values) ([]byte, error) {
 	return body, err
 }
 
-func (zh *zgohttp) PostJson(url string, jsonData []byte) ([]byte, error) {
+func (zh *zgohttp) PostJson(url string, jsonData []byte, handler ...map[string]string) ([]byte, error) {
 
 	reader := bytes.NewReader([]byte(jsonData))
 	request, err := http.NewRequest("POST", url, reader)
@@ -201,6 +213,12 @@ func (zh *zgohttp) PostJson(url string, jsonData []byte) ([]byte, error) {
 		return nil, err
 	}
 	request.Header.Set("Content-Type", "application/json;charset=UTF-8")
+
+	if len(handler) > 0 {
+		for k, v := range handler[0] {
+			request.Header.Set(k, v)
+		}
+	}
 	client := http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
