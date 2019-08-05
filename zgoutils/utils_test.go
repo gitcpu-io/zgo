@@ -265,3 +265,11 @@ func TestUtils_RandomInt(t *testing.T) {
 func TestUtils_RandomString(t *testing.T) {
 	fmt.Println(u.RandomString(16))
 }
+
+func TestUtils_ParseAny(t *testing.T) {
+	parseAny, _ := u.ParseAny("20190731")
+	fmt.Println(parseAny.Unix())
+
+	fmt.Println(u.GetAnyDayZeroUnixTimestamp(-5))
+
+}
