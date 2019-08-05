@@ -267,9 +267,11 @@ func TestUtils_RandomString(t *testing.T) {
 }
 
 func TestUtils_ParseAny(t *testing.T) {
-	parseAny, _ := u.ParseTime("20190731")
+	//parseAny, _ := u.ParseTime("20190804")
+	parseAny, _ := u.ParseTime("2019-08-04 18:31:59")
+	fmt.Println(parseAny, "====")
 	fmt.Println(parseAny.Unix())
 
-	fmt.Println(u.GetAnyDayZeroUnixTimestamp(-5))
+	fmt.Println(u.GetAnyDayZeroUnixTimestamp(-1))
 
 }
