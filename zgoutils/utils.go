@@ -125,9 +125,10 @@ type Utilser interface {
 	FormatUnixTime(year int, month int, day int) string
 	FormatUnixTimeShort(year int, month int, day int) string
 	FormatUnixTimeYm(year int, month int, day int) string
-	ParseTime(str string) (time.Time, error)
+
 	//转化任意格式字符串为标准时间
-	ParseAny(str string) (time.Time, error)
+	ParseTime(str string) (time.Time, error)
+
 	IsYesToday(t int64) bool
 	IsYesTodayByTime(t1, t2 int64) bool
 	//生成最大数是max的一个随机数
@@ -658,13 +659,14 @@ func (u *utils) FormatUnixTimeYm(year int, month int, day int) string {
 
 // 将字符串转成时间
 func (u *utils) ParseTime(str string) (time.Time, error) {
-	return time.ParseInLocation(SysTimeform, str, SysTimeLocation)
+	//return time.ParseInLocation(SysTimeform, str, SysTimeLocation)
+	return dateparse.ParseIn(str, SysTimeLocation)
 }
 
 // 将字符串转成时间
-func (u *utils) ParseAny(str string) (time.Time, error) {
-	return dateparse.ParseIn(str, SysTimeLocation)
-}
+//func (u *utils) ParseAny(str string) (time.Time, error) {
+//	return dateparse.ParseIn(str, SysTimeLocation)
+//}
 
 // 判断unix时间是不是昨天
 func (u *utils) IsYesToday(t int64) bool {
