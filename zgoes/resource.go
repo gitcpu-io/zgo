@@ -19,6 +19,8 @@ type EsResourcer interface {
 	UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error)
 	DeleteDsl(ctx context.Context, index, table, dsl string) (interface{}, error)
 	UpDateByQuery(ctx context.Context, index, table, dsl string) (interface{}, error)
+	ExistsIndices(ctx context.Context, index, table string) (bool, error)
+	CreateIndices(ctx context.Context, index, table string) (bool, error)
 }
 
 var mu sync.RWMutex
@@ -195,4 +197,60 @@ func (e *esResource) UpDateByQuery(ctx context.Context, index, table, dsl string
 		return nil, fmt.Errorf("es Up data umarshal error: %v", err)
 	}
 	return result, err
+}
+
+// ExistsIndices 判断索引库是否存在
+func (e *esResource) ExistsIndices(ctx context.Context, index, table string) (bool, error) {
+	uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"
+
+	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader("")) //post请求
+	if err != nil {
+		return false, fmt.Errorf("es Up data create request error: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := e.GetConChan().Do(req)
+	if err != nil {
+		return false, fmt.Errorf("es Up data post error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	be, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false, fmt.Errorf("es Up data read body error: %v", err)
+	}
+
+	result := zgoutils.Utils.StringToMap(string(be))
+	// 判断是否有状态码404的返回
+	if result["status"] != nil && result["status"].(float64) == float64(404) {
+		return false, nil
+	}
+	return true, nil
+}
+
+// CreatIndices 创建索引库
+func (e *esResource) CreateIndices(ctx context.Context, index, table string) (bool, error) {
+	uri := e.uri + "/" + index + "?pretty"
+
+	req, err := http.NewRequest(http.MethodPut, uri, strings.NewReader("")) //post请求
+	if err != nil {
+		return false, fmt.Errorf("es Up data create request error: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := e.GetConChan().Do(req)
+	if err != nil {
+		return false, fmt.Errorf("es Up data post error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	be, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false, fmt.Errorf("es Up data read body error: %v", err)
+	}
+
+	result := zgoutils.Utils.StringToMap(string(be))
+	// 判断是否创建成功
+	if result["acknowledged"] != nil && result["acknowledged"] == true {
+		return true, nil
+	}
+	return false, nil
 }

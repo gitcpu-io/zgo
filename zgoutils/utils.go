@@ -12,6 +12,7 @@ import (
 	"github.com/bwmarrin/snowflake"
 	"github.com/fatih/structs"
 	"github.com/json-iterator/go"
+	"github.com/noaway/dateparse"
 	"github.com/satori/go.uuid"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
@@ -51,11 +52,11 @@ func init() {
 
 	s, err := time.LoadLocation("Asia/Shanghai")
 	if err != nil {
-		//fmt.Errorf("%s",err)
 		SysTimeLocation = time.FixedZone("CST", 8*3600)
 	} else {
 		SysTimeLocation = s
 	}
+	//time.Local = s
 
 	for _, b := range []string{"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "100.64.0.0/10"} {
 		if _, block, err := net.ParseCIDR(b); err == nil {
@@ -124,7 +125,10 @@ type Utilser interface {
 	FormatUnixTime(year int, month int, day int) string
 	FormatUnixTimeShort(year int, month int, day int) string
 	FormatUnixTimeYm(year int, month int, day int) string
+
+	//转化任意格式字符串为标准时间
 	ParseTime(str string) (time.Time, error)
+
 	IsYesToday(t int64) bool
 	IsYesTodayByTime(t1, t2 int64) bool
 	//生成最大数是max的一个随机数
@@ -655,8 +659,14 @@ func (u *utils) FormatUnixTimeYm(year int, month int, day int) string {
 
 // 将字符串转成时间
 func (u *utils) ParseTime(str string) (time.Time, error) {
-	return time.ParseInLocation(SysTimeform, str, SysTimeLocation)
+	//return time.ParseInLocation(SysTimeform, str, SysTimeLocation)
+	return dateparse.ParseIn(str, SysTimeLocation)
 }
+
+// 将字符串转成时间
+//func (u *utils) ParseAny(str string) (time.Time, error) {
+//	return dateparse.ParseIn(str, SysTimeLocation)
+//}
 
 // 判断unix时间是不是昨天
 func (u *utils) IsYesToday(t int64) bool {

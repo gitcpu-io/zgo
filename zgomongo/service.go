@@ -19,6 +19,7 @@ type Mongoer interface {
 	GetConnChan(label ...string) (chan *mgo.Session, error)
 	Create(ctx context.Context, args map[string]interface{}) error
 	Update(ctx context.Context, args map[string]interface{}) error
+	Upsert(ctx context.Context, args map[string]interface{}) error
 	UpdateById(ctx context.Context, _id interface{}, args map[string]interface{}) error
 	UpdateAll(ctx context.Context, args map[string]interface{}) error
 	Delete(ctx context.Context, args map[string]interface{}) error
@@ -125,6 +126,10 @@ func (m *zgomongo) Create(ctx context.Context, args map[string]interface{}) erro
 
 func (m *zgomongo) Update(ctx context.Context, args map[string]interface{}) error {
 	return m.res.UpdateOne(ctx, args)
+}
+
+func (m *zgomongo) Upsert(ctx context.Context, args map[string]interface{}) error {
+	return m.res.Upsert(ctx, args)
 }
 
 func (m *zgomongo) UpdateById(ctx context.Context, _id interface{}, args map[string]interface{}) error {
