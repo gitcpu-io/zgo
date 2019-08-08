@@ -16,11 +16,11 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/chentaihan/aesCbc"
 	"golang.org/x/crypto/hkdf"
 	"hash"
 	"io"
 	"strings"
-	"github.com/chentaihan/aesCbc"
 )
 
 /*
@@ -542,17 +542,17 @@ func (cp *crypto) HkdfSha1WithSalt(secret, salt, info []byte) (key []byte, err e
 }
 
 // Thinkphp -tokenEncode
-func (cp *crypto)TokenEncode(orig string, key string) string {
+func (cp *crypto) TokenEncode(orig string, key string) string {
 	aesCipher := aesCbc.NewAesCipher([]byte(key), []byte(CRYPT_IV))
 	encrData := aesCipher.Encrypt([]byte(CRYPT_IV + orig))
 	base64EncrData := base64.StdEncoding.WithPadding(base64.StdPadding).EncodeToString(encrData)
-	return strings.Replace(strings.Replace(base64EncrData,"+","-",-1),"/","_",-1)
+	return strings.Replace(strings.Replace(base64EncrData, "+", "-", -1), "/", "_", -1)
 }
 
 // Thinkphp -tokenDecode
-func (cp *crypto)TokenDecode(cryted string, key string) string {
-	tfStr := strings.Replace(strings.Replace(strings.Replace(cryted,"-","+",-1),"_","/",-1)," ", "",-1)
-	decodeData,err := base64.StdEncoding.WithPadding(base64.StdPadding).DecodeString(tfStr)
+func (cp *crypto) TokenDecode(cryted string, key string) string {
+	tfStr := strings.Replace(strings.Replace(strings.Replace(cryted, "-", "+", -1), "_", "/", -1), " ", "", -1)
+	decodeData, err := base64.StdEncoding.WithPadding(base64.StdPadding).DecodeString(tfStr)
 	if err != nil {
 		fmt.Println(err.Error())
 	}

@@ -34,6 +34,12 @@
 			"revisionTime": "2019-04-12T22:30:32Z"
 		},
 		{
+			"checksumSHA1": "31vC18ShF3kkc7mWMu8pW/J/PQA=",
+			"path": "github.com/chentaihan/aesCbc",
+			"revision": "6bf74157e3e1201b84ade455e17c46c3e3fd54e9",
+			"revisionTime": "2019-04-18T05:08:45Z"
+		},
+		{
 			"checksumSHA1": "butr+Orbf1fd1hcLqNXYwUDAjcI=",
 			"origin": "go.etcd.io/etcd/vendor/github.com/coreos/go-semver/semver",
 			"path": "github.com/coreos/go-semver/semver",
