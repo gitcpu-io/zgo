@@ -260,7 +260,7 @@ func (zh *zgohttp) PostForm(url string, jsonData []byte) ([]byte, error) {
 }
 
 func (zh *zgohttp) GetByProxy(httpUrl string, proxyAddr string, params map[string]interface{}) ([]byte, error) {
-	proxy, err := url.Parse(proxyAddr)
+	proxy, err := url.Parse("http://" + proxyAddr)
 	if err != nil {
 		return nil, err
 	}
