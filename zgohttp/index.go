@@ -40,6 +40,7 @@ type Httper interface {
 	Post(url string, play url.Values) ([]byte, error)
 	PostJson(url string, jsonData []byte) ([]byte, error)
 	PostForm(url string, formData []byte) ([]byte, error)
+	GetByProxy(httpUrl string, proxyAddr string, params map[string]interface{}) ([]byte, error)
 }
 
 type zgohttp struct {
@@ -256,4 +257,29 @@ func (zh *zgohttp) PostForm(url string, jsonData []byte) ([]byte, error) {
 	}
 
 	return respBytes, nil
+}
+
+func (zh *zgohttp) GetByProxy(httpUrl string, proxyAddr string, params map[string]interface{}) ([]byte, error) {
+	proxy, err := url.Parse(proxyAddr)
+	if err != nil {
+		return nil, err
+	}
+	netTransport := &http.Transport{
+		Proxy:               http.ProxyURL(proxy),
+		MaxIdleConnsPerHost: 10,
+	}
+	httpClient := &http.Client{
+		Transport: netTransport,
+	}
+	resp, err := httpClient.Get(httpUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(bufio.NewReader(resp.Body))
+	if err != nil {
+		return nil, err
+	}
+	return body, err
 }
