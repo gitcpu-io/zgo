@@ -364,7 +364,7 @@ func (p *pikaResource) Hincrby(ctx context.Context, key, field string, inc int64
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
 	var reply int64
-	if err := s.Do(radix.FlatCmd(&reply, "HINCRBY", key, field, inc)); err != nil {
+	if err := s.Do(radix.FlatCmd(&reply, "Hincrby", key, field, inc)); err != nil {
 		return 0, err
 	} else {
 		return reply, err
