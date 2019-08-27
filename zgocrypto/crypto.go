@@ -77,8 +77,9 @@ type Cryptoer interface {
 	AesDecrypt(cryted string, key string) string
 
 	//rsa
-	RsaEncrypt(origData []byte, publicKey []byte) ([]byte, error)
-	RsaDecrypt(ciphertext []byte, privateKey []byte) ([]byte, error)
+	GenerateRSAKey(bits int) ([]byte, []byte)
+	RsaEncrypt(origin []byte, publicKey []byte) ([]byte, error)
+	RsaDecrypt(cipher []byte, privateKey []byte) ([]byte, error)
 
 	DecryptDataForWXBizData(encryptedData, sessionKey, iv string) ([]byte, error)
 
@@ -369,8 +370,45 @@ func (cp *crypto) PKCS7UnPadding(origData []byte) []byte {
 	return origData[:(length - unpadding)]
 }
 
-// RsaEncrypt
-func (cp *crypto) RsaEncrypt(origData []byte, publicKey []byte) ([]byte, error) {
+// GenerateRSAKey 生成rsa的公匙和私匙
+func (cp *crypto) GenerateRSAKey(bits int) ([]byte, []byte) {
+	//GenerateKey函数使用随机数据生成器random生成一对具有指定字位数的RSA密钥
+	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
+	if err != nil {
+		return nil, nil
+	}
+	//通过x509标准将得到的rsa私钥序列化为ASN.1 的 DER编码字符串
+	X509PrivateKey := x509.MarshalPKCS1PrivateKey(privateKey)
+	//使用pem格式对x509输出的内容进行编码
+
+	var pri string
+	priv := bytes.NewBufferString(pri)
+
+	//构建一个pem.Block结构体对象
+	privateBlock := pem.Block{Type: "RSA Private Key", Bytes: X509PrivateKey}
+	//将数据保存到文件
+	pem.Encode(priv, &privateBlock)
+
+	//获取公钥的数据
+	publicKey := privateKey.PublicKey
+	//X509对公钥编码
+	X509PublicKey, err := x509.MarshalPKIXPublicKey(&publicKey)
+	if err != nil {
+		return nil, nil
+	}
+	//pem格式编码
+	var pub string
+	pubv := bytes.NewBufferString(pub)
+
+	publicBlock := pem.Block{Type: "RSA Public Key", Bytes: X509PublicKey}
+	//保存到文件
+	pem.Encode(pubv, &publicBlock)
+
+	return pubv.Bytes(), priv.Bytes()
+}
+
+// RsaEncrypt 用公匙加密
+func (cp *crypto) RsaEncrypt(origin []byte, publicKey []byte) ([]byte, error) {
 	block, _ := pem.Decode(publicKey)
 	if block == nil {
 		return nil, errors.New("public key error")
@@ -380,20 +418,20 @@ func (cp *crypto) RsaEncrypt(origData []byte, publicKey []byte) ([]byte, error) 
 		return nil, err
 	}
 	pub := pubInterface.(*rsa.PublicKey)
-	return rsa.EncryptPKCS1v15(rand.Reader, pub, origData)
+	return rsa.EncryptPKCS1v15(rand.Reader, pub, origin)
 }
 
-// RsaDecrypt
-func (cp *crypto) RsaDecrypt(ciphertext []byte, privateKey []byte) ([]byte, error) {
+// RsaDecrypt 用私匙解密
+func (cp *crypto) RsaDecrypt(cipher []byte, privateKey []byte) ([]byte, error) {
 	block, _ := pem.Decode(privateKey)
 	if block == nil {
-		return nil, errors.New("private key error!")
+		return nil, errors.New("private key error")
 	}
 	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
 		return nil, err
 	}
-	return rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
+	return rsa.DecryptPKCS1v15(rand.Reader, priv, cipher)
 }
 
 func (cp *crypto) AesCBCDecrypt(encryptData, sessionKey, iv []byte) ([]byte, error) {

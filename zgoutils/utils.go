@@ -114,6 +114,8 @@ type Utilser interface {
 
 	GetUUIDV4() string
 	GetMD5Base64([]byte) string
+	ByteToBase64([]byte) string
+	Base64ToByte(string) ([]byte, error)
 	GetGMTLocation() (*time.Location, error)
 	GetTimeInFormatISO8601() string
 	GetTimeInFormatRFC2616() string
@@ -590,6 +592,14 @@ func (u *utils) GetMD5Base64(bytes []byte) (base64Value string) {
 	md5Value := md5Ctx.Sum(nil)
 	base64Value = base64.StdEncoding.EncodeToString(md5Value)
 	return
+}
+
+func (u *utils) ByteToBase64(bytes []byte) string {
+	return base64.StdEncoding.EncodeToString(bytes)
+}
+
+func (u *utils) Base64ToByte(str string) ([]byte, error) {
+	return base64.StdEncoding.DecodeString(str)
 }
 
 func (u *utils) GetGMTLocation() (*time.Location, error) {
