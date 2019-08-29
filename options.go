@@ -152,7 +152,7 @@ func (opt *Options) watchPutConn(inch chan map[string][]*config.ConnDetail) {
 					fmt.Printf("[init %s conn]watchPutConn: %s\n", labelType, label)
 					//[init mongo conn]watchPutConn: 1607450184770
 
-					opt.initConn(labelType, hsm)
+					go opt.initConn(labelType, hsm)
 				}
 			}
 		}
