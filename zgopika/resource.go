@@ -55,7 +55,7 @@ type PikaResourcer interface {
 	Scard(ctx context.Context, key string) (int, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
-	Srandmember(ctx context.Context, key string) (string, error)
+	Srandmember(ctx context.Context, key string, count int) (interface{}, error)
 
 	Zrank(ctx context.Context, key string, member interface{}) (int, error)
 	Zscore(ctx context.Context, key string, member interface{}) (string, error)
@@ -503,13 +503,13 @@ func (p *pikaResource) Sismember(ctx context.Context, key string, value interfac
 	}
 }
 
-func (p *pikaResource) Srandmember(ctx context.Context, key string) (string, error) {
+func (p *pikaResource) Srandmember(ctx context.Context, key string, count int) (interface{}, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key
-	var flag string
-	if err := s.Do(radix.FlatCmd(&flag, "Srandmember", key)); err != nil {
-		return "", err
+	var flag []string
+	if err := s.Do(radix.FlatCmd(&flag, "Srandmember", key, count)); err != nil {
+		return nil, err
 	} else {
 		return flag, err
 	}

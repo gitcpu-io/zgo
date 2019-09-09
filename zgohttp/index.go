@@ -37,7 +37,7 @@ type Httper interface {
 	UseBefore(ctx iris.Context)                                  // 捕获异常，开始计时时间
 	AsyncMid(ctx iris.Context)                                   // 使用go程异步
 	Get(url string) ([]byte, error)
-	Post(url string, play url.Values) ([]byte, error)
+	Post(url string, play url.Values, handler ...map[string]string) ([]byte, error)
 	PostJson(url string, jsonData []byte, handler ...map[string]string) ([]byte, error)
 	PostForm(url string, formData []byte) ([]byte, error)
 	//钉钉机器人
@@ -193,11 +193,18 @@ func (zh *zgohttp) Get(url string) ([]byte, error) {
 	return body, err
 }
 
-func (zh *zgohttp) Post(url string, play url.Values) ([]byte, error) {
+func (zh *zgohttp) Post(url string, play url.Values, handler ...map[string]string) ([]byte, error) {
 	resp, err := http.PostForm(url, play)
 	if err != nil {
 		return nil, err
 	}
+
+	if len(handler) > 0 {
+		for k, v := range handler[0] {
+			resp.Header.Set(k, v)
+		}
+	}
+
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)

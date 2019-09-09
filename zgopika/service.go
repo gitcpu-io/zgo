@@ -58,7 +58,7 @@ type Pikaer interface {
 	Scard(ctx context.Context, key string) (int, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
-	Srandmember(ctx context.Context, key string) (string, error)
+	Srandmember(ctx context.Context, key string, count int) (interface{}, error)
 
 	Zrank(ctx context.Context, key string, member interface{}) (int, error)
 	Zscore(ctx context.Context, key string, member interface{}) (string, error)
@@ -279,8 +279,8 @@ func (r *zgopika) Smembers(ctx context.Context, key string) (interface{}, error)
 func (r *zgopika) Sismember(ctx context.Context, key string, value interface{}) (int, error) {
 	return r.res.Sismember(ctx, key, value)
 }
-func (r *zgopika) Srandmember(ctx context.Context, key string) (string, error) {
-	return r.res.Srandmember(ctx, key)
+func (r *zgopika) Srandmember(ctx context.Context, key string, count int) (interface{}, error) {
+	return r.res.Srandmember(ctx, key,count)
 }
 func (r *zgopika) Zrank(ctx context.Context, key string, member interface{}) (int, error) {
 	return r.res.Zrank(ctx, key, member)
