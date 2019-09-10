@@ -125,6 +125,9 @@ func (mr *mysqlResource) List(ctx context.Context, gormPool *gorm.DB, args map[s
 		gormPool = gormPool.Group(group.(string))
 	}
 	err := gormPool.Find(args["obj"]).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil
+	}
 	return err
 }
 
