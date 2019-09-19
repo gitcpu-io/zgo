@@ -14,6 +14,7 @@ import (
 	"github.com/fatih/structs"
 	"github.com/json-iterator/go"
 	"github.com/satori/go.uuid"
+	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 	"io"
@@ -87,9 +88,15 @@ type Utilser interface {
 	//Marshal 序列化为json
 	Marshal(in interface{}) ([]byte, error)
 	//Unmarshal 反序列化为go 内存对象
-	Unmarshal(message []byte, in interface{}) error
+	Unmarshal(bytes []byte, in interface{}) error
+
 	NewDecoder(reader io.Reader) *jsoniter.Decoder
 	NewEncoder(writer io.Writer) *jsoniter.Encoder
+
+	// mongo bson marshal
+	BsonMarshal(in interface{}) ([]byte, error)
+	// mongo bson unmarshal
+	BsonUnmarshal(bytes []byte, in interface{}) error
 
 	//string转map[string]interface{}
 	StringToMap(str string) map[string]interface{}
@@ -327,6 +334,16 @@ func (u *utils) Marshal(res interface{}) ([]byte, error) {
 //Unmarshal 反序列化为go 内存对象
 func (u *utils) Unmarshal(message []byte, in interface{}) error {
 	return jsonIterator.Unmarshal(message, in)
+}
+
+// bson Marshal 序列化为json
+func (u *utils) BsonMarshal(res interface{}) ([]byte, error) {
+	return bson.Marshal(res)
+}
+
+// bson Unmarshal 反序列化为go 内存对象
+func (u *utils) BsonUnmarshal(bytes []byte, in interface{}) error {
+	return bson.Unmarshal(bytes, in)
 }
 
 func (u *utils) NewDecoder(reader io.Reader) *jsoniter.Decoder {

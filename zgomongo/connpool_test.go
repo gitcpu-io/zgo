@@ -288,7 +288,7 @@ func getMongo(label string, client *zgomongo, i int) chan int {
 	args["table"] = "startup_log"
 	args["query"] = make(map[string]interface{})
 
-	result, err := client.Get(ctx, args)
+	err := client.Get(ctx, args)
 	if err != nil {
 		panic(err)
 	}
@@ -300,7 +300,7 @@ func getMongo(label string, client *zgomongo, i int) chan int {
 		out <- 10001
 		return out
 	default:
-		_, err := json.Marshal(result)
+		//_, err := json.Marshal(result)
 		if err != nil {
 			panic(err)
 		}
@@ -330,7 +330,7 @@ func createMongo(label string, client *zgomongo, i int) chan int {
 		Label: label,
 		Age:   i,
 	}
-	_, err := client.Create(ctx, args)
+	err := client.Create(ctx, args)
 	if err != nil {
 		panic(err)
 	}

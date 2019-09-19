@@ -9,6 +9,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoetcd"
 	"git.zhugefang.com/gocore/zgo/zgokafka"
 	"git.zhugefang.com/gocore/zgo/zgolog"
+	"git.zhugefang.com/gocore/zgo/zgomgo"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
 	"git.zhugefang.com/gocore/zgo/zgomysql"
 	"git.zhugefang.com/gocore/zgo/zgonsq"
@@ -26,6 +27,7 @@ type Options struct {
 	EtcdHosts string   `json:"etcdHosts"`
 	Loglevel  string   `json:"loglevel"`
 	Mongo     []string `json:"mongo"`
+	Mgo       []string `json:"mgo"`
 	Mysql     []string `json:"mysql"`
 	Postgres  []string `json:"postgres"`
 	Neo4j     []string `json:"neo4j"`
@@ -112,7 +114,7 @@ func (opt *Options) parseConfig(resKvs []*mvccpb.KeyValue, connCh chan map[strin
 					sb.WriteString(fmt.Sprintf("Label: %s\n", label))
 					sb.WriteString(fmt.Sprintf("Host: %s\n", pvv.Host))
 					sb.WriteString(fmt.Sprintf("Port: %d\n", pvv.Port))
-					if labelType == config.EtcTKMysql || labelType == config.EtcTKPostgres || labelType == config.EtcTKMongo {
+					if labelType == config.EtcTKMysql || labelType == config.EtcTKPostgres || labelType == config.EtcTKMongo || labelType == config.EtcTKMgo {
 						sb.WriteString(fmt.Sprintf("DbName: %s\n", pvv.DbName))
 					}
 					if labelType == config.EtcTKRedis {
@@ -199,6 +201,9 @@ func (opt *Options) destroyConn(labelType, label string) {
 	case config.EtcTKMongo:
 		in := <-zgomongo.InitMongo(nil, label)
 		Mongo = in
+	case config.EtcTKMgo:
+		in := <-zgomgo.InitMgo(nil, label)
+		Mgo = in
 	case config.EtcTKRedis:
 		in := <-zgoredis.InitRedis(nil, label)
 		Redis = in
@@ -350,6 +355,13 @@ func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDeta
 		if len(hsm) > 0 {
 			in := <-zgomongo.InitMongo(hsm)
 			Mongo = in
+		}
+
+	case config.EtcTKMgo:
+		//init mgo again
+		if len(hsm) > 0 {
+			in := <-zgomgo.InitMgo(hsm)
+			Mgo = in
 		}
 
 	case config.EtcTKRedis:

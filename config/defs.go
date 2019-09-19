@@ -21,7 +21,7 @@ const (
 	Warn         //2
 	Error        //3
 
-	Version       = "1.0.2"       //zgo版本号
+	Version       = "1.0.4"       //zgo版本号
 	ProjectPrefix = "zgo/project" //读取ETCD配置时prefix
 	FileStoreType = "local"       //文件存储类型
 	FileStoreHome = "/tmp"        //文件存储目录
@@ -38,12 +38,21 @@ const (
 	EtcTKPostgres = "postgres"
 	EtcTKNeo4j    = "neo4j"
 	EtcTKMongo    = "mongo"
+	EtcTKMgo      = "mgo"
 	EtcTKRedis    = "redis"
 	EtcTKPia      = "pika"
 	EtcTKNsq      = "nsq"
 	EtcTKKafka    = "kafka"
 	EtcTKEs       = "es"
 	EtcTKEtcd     = "etcd"
+
+	//****************************以下是 mongodb bulk write常量**************************
+	InsertOne  = "insertOne"
+	UpdateOne  = "updateOne"
+	ReplaceOne = "replaceOne"
+	DeleteOne  = "deleteOne"
+	UpdateMany = "updateMany"
+	DeleteMany = "deleteMany"
 )
 
 var Levels = []string{"debug", "info", "warn", "error"}
@@ -121,6 +130,7 @@ type allConfig struct {
 	EtcdHosts    []string                     `json:"etcdHosts,omitempty"`
 	Nsq          []LabelDetail                `json:"nsq,omitempty"`
 	Mongo        []LabelDetail                `json:"mongo,omitempty"`
+	Mgo          []LabelDetail                `json:"mgo,omitempty"`
 	Mysql        []LabelDetail                `json:"mysql,omitempty"`
 	Postgres     []LabelDetail                `json:"postgres,omitempty"`
 	Neo4j        []LabelDetail                `json:"neo4j,omitempty"`

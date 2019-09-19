@@ -14,6 +14,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgolimiter"
 	"git.zhugefang.com/gocore/zgo/zgolog"
 	"git.zhugefang.com/gocore/zgo/zgomap"
+	"git.zhugefang.com/gocore/zgo/zgomgo"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
 	"git.zhugefang.com/gocore/zgo/zgomysql"
 	"git.zhugefang.com/gocore/zgo/zgonsq"
@@ -26,6 +27,7 @@ import (
 	"github.com/go-pg/pg/orm"
 	"github.com/nsqio/go-nsq"
 	"go.etcd.io/etcd/clientv3"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type engine struct {
@@ -70,6 +72,13 @@ func Engine(opt *Options) error {
 			//fmt.Println("--zgo.go--",config.Mongo, opt.Mongo, hsm)
 			in := <-zgomongo.InitMongo(hsm)
 			Mongo = in
+		}
+		if len(opt.Mgo) > 0 {
+			//todo someting
+			hsm := engine.getConfigByOption(config.Conf.Mgo, opt.Mgo)
+			//fmt.Println("--zgo.go--",config.Conf.Mgo, opt.Mgo, hsm)
+			in := <-zgomgo.InitMgo(hsm)
+			Mgo = in
 		}
 
 		if len(opt.Mysql) > 0 {
@@ -197,12 +206,93 @@ type (
 	//etcd声明给使用者
 	EtcdClientV3    = clientv3.Client
 	EtcdGetResponse = clientv3.GetResponse
+
+	MgoObjectId           = primitive.ObjectID           //mongo bson id
+	MgoBulkWriteOperation = zgomgo.MgoBulkWriteOperation //多个并行计算
+	MgoArgs               = zgomgo.MgoArgs               //CRUD->mongodb时的传入参数，具体参数由以下选择，>>>>>请使用前详细阅读>>>>>
+	/*	Document     []interface{}    //保存时用到的结构体的指针
+		Result interface{}            //接受结构体的指针 比如: r := &User{} 这里的result就是r
+		Filter map[string]interface{} //查询条件
+		ArrayFilters []map[string]interface{} //子文档的查询条件
+		Fields map[string]interface{} //字段筛选，形如SQL中的select选择字段
+		Update map[string]interface{} //更新项 或 替换项
+		Sort map[string]interface{}   //排序 1是升序，-1是降序
+		Limit int64                   //限制数量
+		Skip int64                    //查询的offset，开区间，不包括这个skip对应的值
+		Upsert bool                   //当查询不到时，true表示插入一条新的
+	*/
+
+	/**
+	########################其中Filter构造如下########################
+	filter = make(map[string]interface{})
+	//filter["_id"] = "5d81e00bada5f1088cb1d236"
+	filter["username"] = "朱大仙儿"	//可以是某字段或_id
+	filter["houses"] = map[string]interface{}{
+		"$gte": 130,	//可以是其它$or、$not、$lt
+	}
+
+	########################其中ArrayFilters构造如下########################
+	var arrayFilters []map[string]interface{}
+	af := make(map[string]interface{})
+	//af["element"] = map[string]interface{}{
+	//	//这里的element对应下面update中的houses.$[element]，意思是数组中的每一项元素
+	//	"$gte": 134,
+	//}
+	af["elem.grade"] = map[string]interface{}{	//elem.grade和element二选一
+		"$gte": 70,
+	}
+	af["elem.mean"] = map[string]interface{}{	//但elem中可以有多个elem.xx或elem.yy
+		"$gte": 60,
+	}
+	arrayFilters = append(arrayFilters, af)
+
+	########################其中Update构造如下########################
+	update := make(map[string]interface{})
+	update["$inc"] = map[string]interface{}{	******$inc******
+		"age": 100,
+		"money": -100,
+		//可以有多个字段k,v;
+	}
+	update["$set"] = map[string]interface{}{	******$set******
+		"address": "FindOneAndUpdate更新",
+		"post": "100002",	//更新某字段
+		//"houses.$[element]": 411001, //如果houses是纯数组:[xx,xx,xx]
+		//子文档的$[element] 其中这个element可以自定义名字
+		"grades.$[elem].mean": 100, //如果grades是对象数组:[{k:v,mean:v},{k:v,mean:v}]
+		//子文档$[elem]
+		//可以有多个字段k,v;但只能有一个顶级字段，意味着$[element]和$[ele]二选一
+	}
+	type Score struct {
+		Grade int `json:"grade"`
+		Mean int `json:"mean"`
+	}
+	update["$push"] = map[string]interface{}{	******$push******
+		"scores": Score{	//已有一个数组，这里是一个个的push object对象进数组中
+			Grade: 70,
+			Mean:65,
+		},
+	}
+
+	########################其中Sort构造如下########################
+	sort := make(map[string]interface{})
+	sort["_id"] = 1 //1升序
+	sort["age] = -1	//-1降序
+
+	########################其中Fields构造如下########################
+	//如果返回错误：Projection cannot have a mix of inclusion and exclusion; //要么全是1，要么全是0
+	fields := make(map[string]interface{})
+	fields["age"] = 1 	//显示返回age字段
+	fields["address"] = 1
+	fields["username"] = 1
+	*/
+
 )
 
 var (
 	Kafka             zgokafka.Kafkaer
 	Nsq               zgonsq.Nsqer
 	Mongo             zgomongo.Mongoer
+	Mgo               zgomgo.Mgoer
 	Es                zgoes.Eser
 	Grpc              zgogrpc.Grpcer
 	Redis             zgoredis.Rediser
@@ -225,4 +315,11 @@ var (
 
 	Limiter = zgolimiter.New()
 	LB      = zgolb.NewLB()
+
+	MgoBulkWriteOperation_InsertOne  = config.InsertOne
+	MgoBulkWriteOperation_UpdateOne  = config.UpdateOne
+	MgoBulkWriteOperation_ReplaceOne = config.ReplaceOne
+	MgoBulkWriteOperation_DeleteOne  = config.DeleteOne
+	MgoBulkWriteOperation_UpdateMany = config.UpdateMany
+	MgoBulkWriteOperation_DeleteMany = config.DeleteMany
 )
