@@ -118,6 +118,11 @@ func (opt *Options) parseConfig(resKvs []*mvccpb.KeyValue, connCh chan map[strin
 						sb.WriteString(fmt.Sprintf("DbName: %s\n", pvv.DbName))
 					}
 					if labelType == config.EtcTKRedis {
+						cluster := "单机"
+						if pvv.Cluster == 1 {
+							cluster = "集群"
+						}
+						sb.WriteString(fmt.Sprintf("模式: %s\n", cluster))
 						sb.WriteString(fmt.Sprintf("Db: %d\n", pvv.Db))
 					}
 					fmt.Println(sb.String())

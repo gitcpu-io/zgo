@@ -3,6 +3,7 @@ package zgoredis
 import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
+	"github.com/kataras/iris/core/errors"
 	"github.com/mediocregopher/radix"
 	"math/rand"
 	"strings"
@@ -164,8 +165,12 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 
 	go func() {
 		time.Sleep(2000 * time.Millisecond) //仅仅为了查看创建的连接数，创建数据库连接时间：90ms
-		fmt.Printf("init Redis to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
-			len(cp.connChan), label, hosts.Host, hosts.Port, hosts.ConnSize, hosts.PoolSize, hosts.C)
+		cluster := "单机"
+		if hosts.Cluster == 1 {
+			cluster = "集群"
+		}
+		fmt.Printf("init Redis to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d 模式(%s), %s\n",
+			len(cp.connChan), label, hosts.Host, hosts.Port, hosts.ConnSize, hosts.PoolSize, cluster, hosts.C)
 	}()
 }
 
@@ -199,6 +204,13 @@ func (cp *connPool) GetCChan(label string) chan *radix.Conn {
 func (cp *connPool) createClient(host string, port int, db int, poolsize int, password string, cluster int) (chan interface{}, chan *radix.Conn) {
 	out := make(chan interface{})
 	out2 := make(chan *radix.Conn)
+	if cluster == 1 {
+		if db > 0 {
+			err := errors.New(fmt.Sprintf("集群模式下db库不能是%d，只能是0，主机：%s\n", db, host))
+			panic(err)
+			return out, out2
+		}
+	}
 	go func() {
 		customConnFunc := func(network, addr string) (radix.Conn, error) {
 			return radix.Dial(network, addr,
