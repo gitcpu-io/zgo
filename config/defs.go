@@ -100,6 +100,7 @@ type ConnDetail struct {
 	Prefix      string `json:"prefix,omitempty"`
 	DbName      string `json:"dbName,omitempty"`  // 数据库名称
 	LogMode     int    `json:"logMode,omitempty"` // 日志类型
+	Cluster     int    `json:"cluster,omitempty"` // 日志类型
 }
 
 type CacheConfig struct {

@@ -5,6 +5,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/mediocregopher/radix"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 )
@@ -16,7 +17,7 @@ const (
 )
 
 var (
-	connChanMap = make(map[string]chan *radix.Pool)
+	connChanMap = make(map[string]chan interface{})
 	mu          sync.RWMutex //用于锁定connChanMap
 	hsmu        sync.RWMutex
 
@@ -27,9 +28,9 @@ var (
 type connPool struct {
 	label        string
 	m            sync.RWMutex
-	connChan     chan *radix.Pool
-	clients      []*radix.Pool
-	connChanChan chan chan *radix.Pool
+	connChan     chan interface{}
+	clients      []interface{}
+	connChanChan chan chan interface{}
 	cChan        chan *radix.Conn
 	ccs          []*radix.Conn
 	cChanChan    chan chan *radix.Conn
@@ -43,7 +44,7 @@ func NewConnPool(label string) *connPool {
 
 //连接对外的接口
 type ConnPooler interface {
-	GetConnChan(label string) chan *radix.Pool
+	GetConnChan(label string) chan interface{}
 	GetCChan(label string) chan *radix.Conn
 }
 
@@ -55,7 +56,7 @@ func InitConnPool(hsm map[string][]*config.ConnDetail) {
 func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 	hsmu.RLock()
 	defer hsmu.RUnlock()
-	//connChanMap = make(map[string]chan *radix.Pool)
+	//connChanMap = make(map[string]chan interface{})
 	ch := make(chan *config.Labelconns)
 	go func() {
 		for lahosts := range ch {
@@ -66,9 +67,9 @@ func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
 				index := fmt.Sprintf("%s:%d", label, k)
 				c := &connPool{
 					label:        label,
-					connChan:     make(chan *radix.Pool, v.PoolSize),
+					connChan:     make(chan interface{}, v.PoolSize),
 					cChan:        make(chan *radix.Conn, v.PoolSize),
-					connChanChan: make(chan chan *radix.Pool, v.ConnSize),
+					connChanChan: make(chan chan interface{}, v.ConnSize),
 					cChanChan:    make(chan chan *radix.Conn, v.ConnSize),
 				}
 				mu.Lock()
@@ -116,7 +117,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 
 	for i := 0; i < 10; i++ {
 		//把并发创建的数据库的连接channel，放进channel中
-		cc, c := cp.createClient(fmt.Sprintf("%s:%d", hosts.Host, hosts.Port), hosts.Db, hosts.PoolSize, hosts.Password)
+		cc, c := cp.createClient(hosts.Host, hosts.Port, hosts.Db, hosts.PoolSize, hosts.Password, hosts.Cluster)
 		cp.connChanChan <- cc
 		cp.cChanChan <- c
 	}
@@ -169,7 +170,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 }
 
 //GetConnChan 通过label并发安全读map
-func (cp *connPool) GetConnChan(label string) chan *radix.Pool {
+func (cp *connPool) GetConnChan(label string) chan interface{} {
 	cp.m.RLock()
 	defer cp.m.RUnlock()
 
@@ -195,27 +196,87 @@ func (cp *connPool) GetCChan(label string) chan *radix.Conn {
 }
 
 //createClient 创建客户端连接
-func (cp *connPool) createClient(address string, db int, poolsize int, password string) (chan *radix.Pool, chan *radix.Conn) {
-	out := make(chan *radix.Pool)
+func (cp *connPool) createClient(host string, port int, db int, poolsize int, password string, cluster int) (chan interface{}, chan *radix.Conn) {
+	out := make(chan interface{})
 	out2 := make(chan *radix.Conn)
 	go func() {
-		//stime := time.Now()
-		//fmt.Println(address,db,poolsize,password)
 		customConnFunc := func(network, addr string) (radix.Conn, error) {
 			return radix.Dial(network, addr,
 				radix.DialTimeout(30*time.Second), radix.DialSelectDB(db), radix.DialAuthPass(password),
 			)
 		}
-		c, err := radix.NewPool("tcp", address, 10, radix.PoolConnFunc(customConnFunc))
-		if err != nil {
-			fmt.Println("redis ", err)
-			out <- nil
-			return
+
+		if cluster == 0 { //单机
+
+			if strings.Index(host, ",") != -1 {
+				host = strings.Split(host, ",")[0]
+			}
+			if strings.Index(host, ":") != -1 {
+				host = strings.Split(host, ":")[0]
+			}
+
+			address := fmt.Sprintf("%s:%d", host, port)
+			c, err := radix.NewPool("tcp", address, 10, radix.PoolConnFunc(customConnFunc))
+			if err != nil {
+				fmt.Println("redis ", err)
+				out <- nil
+				return
+			}
+
+			out <- c
+
+		} else if cluster == 1 { //集群模式
+
+			var address []string
+			arr := strings.Split(host, ",")
+			for _, v := range arr {
+				tmp := v
+				if strings.Index(tmp, ":") == -1 {
+					tmp = fmt.Sprintf("%s:%d", tmp, port)
+				}
+				address = append(address, tmp)
+			}
+			//fmt.Println("tmp address*************",address)
+
+			clusterPoolFunc := func(network, addr string) (radix.Client, error) {
+				return radix.NewPool(network, addr, 10, radix.PoolConnFunc(customConnFunc))
+			}
+
+			c, err := radix.NewCluster(address,
+				radix.ClusterPoolFunc(clusterPoolFunc), radix.ClusterSyncEvery(3*time.Second))
+			if err != nil {
+				fmt.Println("redis cluster ", err)
+				out <- nil
+				return
+			}
+			out <- c
 		}
-		out <- c
-		//fmt.Println(time.Now().Sub(stime))	//创建数据库连接时间：90ms
+
 	}()
 	go func() {
+		var address string
+		if cluster == 0 {
+			if strings.Index(host, ",") != -1 {
+				host = strings.Split(host, ",")[0]
+			}
+			if strings.Index(host, ":") != -1 {
+				host = strings.Split(host, ":")[0]
+			}
+			address = fmt.Sprintf("%s:%d", host, port)
+		} else {
+
+			arr := strings.Split(host, ",")
+			for _, v := range arr {
+				tmp := v
+				if strings.Index(tmp, ":") == -1 {
+					tmp = fmt.Sprintf("%s:%d", tmp, port)
+				}
+				address = tmp
+			}
+			if strings.Index(address, ":") == -1 {
+				address = fmt.Sprintf("%s:%d", host, port)
+			}
+		}
 		c, err := radix.Dial("tcp", address, radix.DialSelectDB(db), radix.DialAuthPass(password))
 		if err != nil {
 			fmt.Println("redis ", err)
