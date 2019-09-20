@@ -21,7 +21,7 @@ const (
 	Warn         //2
 	Error        //3
 
-	Version       = "1.0.4"       //zgo版本号
+	Version       = "1.0.5"       //zgo版本号
 	ProjectPrefix = "zgo/project" //读取ETCD配置时prefix
 	FileStoreType = "local"       //文件存储类型
 	FileStoreHome = "/tmp"        //文件存储目录
