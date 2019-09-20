@@ -759,6 +759,7 @@ func (m *zgomgo) FindOneAndDelete(ctx context.Context, coll *mongo.Collection, a
 
 }
 
+// Distinct 去重
 func (m *zgomgo) Distinct(ctx context.Context, coll *mongo.Collection, fieldName string, filter map[string]interface{}) ([]interface{}, error) {
 	opts := &options.DistinctOptions{}
 
@@ -767,6 +768,7 @@ func (m *zgomgo) Distinct(ctx context.Context, coll *mongo.Collection, fieldName
 	return m.res.Distinct(ctx, coll, fieldName, bmq, opts)
 }
 
+// BulkWrite 多个并行计算
 func (m *zgomgo) BulkWrite(ctx context.Context, coll *mongo.Collection, bulkWrites []*MgoBulkWriteOperation, order bool) (*mongo.BulkWriteResult, error) {
 	if coll == nil {
 		return nil, errNil
@@ -850,6 +852,7 @@ func (m *zgomgo) BulkWrite(ctx context.Context, coll *mongo.Collection, bulkWrit
 	return m.res.BulkWrite(ctx, coll, writeModels, opts)
 }
 
+// Aggregate 聚合查询
 func (m *zgomgo) Aggregate(ctx context.Context, coll *mongo.Collection, pipeline interface{}) ([][]byte, error) {
 	var ad bool
 	opts := &options.AggregateOptions{
@@ -858,6 +861,7 @@ func (m *zgomgo) Aggregate(ctx context.Context, coll *mongo.Collection, pipeline
 	return m.res.Aggregate(ctx, coll, pipeline, opts)
 }
 
+// Watch 监听
 func (m *zgomgo) Watch(ctx context.Context, coll *mongo.Collection, pipeline interface{}) (*mongo.ChangeStream, error) {
 	var fd options.FullDocument = "updateLookup"
 	opts := &options.ChangeStreamOptions{
