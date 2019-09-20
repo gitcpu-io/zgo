@@ -103,472 +103,274 @@ func (r *redisResource) GetConnChan(label string) chan interface{} {
 }
 
 func (r *redisResource) Set(ctx context.Context, key string, value interface{}) (string, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result string
 	flatCmd := radix.FlatCmd(&result, "SET", key, value)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) SetMutex(ctx context.Context, key string, ttl int, value interface{}) (string, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result string
 	flatCmd := radix.FlatCmd(&result, "SET", key, value, "EX", ttl, "NX")
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Setnx(ctx context.Context, key string, value interface{}) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "SETNX", key, value)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Setex(ctx context.Context, key string, ttl int, value interface{}) (string, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result string
 	flatCmd := radix.FlatCmd(&result, "SETEX", key, ttl, value)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Expire(ctx context.Context, key string, ttl int) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Expire", key, ttl)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Incrby(ctx context.Context, key string, val int) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result string
 	flatCmd := radix.FlatCmd(&result, "Incrby", key, val)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Hset(ctx context.Context, key string, field string, value interface{}) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Hset", key, field, value)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Hmset(ctx context.Context, key string, values interface{}) (string, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result string
 	flatCmd := radix.FlatCmd(&result, "HMSET", key, values)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Lpush(ctx context.Context, key string, value interface{}) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Lpush", key, value)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Rpush(ctx context.Context, key string, value interface{}) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Rpush", key, value)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Sadd(ctx context.Context, key string, value interface{}) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Sadd", key, value)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Srem(ctx context.Context, key string, value interface{}) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Srem", key, value)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Exists(ctx context.Context, key string) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Exists", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Get(ctx context.Context, key string) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result string
 	flatCmd := radix.FlatCmd(&result, "Get", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Keys(ctx context.Context, key string) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	if key == "*" {
 		return nil, errors.New("forbidden")
 	}
 	var result []string
 	flatCmd := radix.FlatCmd(&result, "Keys", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Hget(ctx context.Context, key string, name string) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result string
 	flatCmd := radix.FlatCmd(&result, "Hget", key, name)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Ttl(ctx context.Context, key string) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "ttl", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Type(ctx context.Context, key string) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result interface{}
 	flatCmd := radix.FlatCmd(&result, "Type", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Hlen(ctx context.Context, key string) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Hlen", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Hdel(ctx context.Context, key string, name interface{}) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Hdel", key, name)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Hgetall(ctx context.Context, key string) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result map[string]string
 	flatCmd := radix.FlatCmd(&result, "Hgetall", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Hincrby(ctx context.Context, key, field string, inc int64) (int64, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int64
 	flatCmd := radix.FlatCmd(&result, "HINCRBY", key, field, inc)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Del(ctx context.Context, key string) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "del", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Llen(ctx context.Context, key string) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Llen", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Lrange(ctx context.Context, key string, start int, stop int) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result []string
 	flatCmd := radix.FlatCmd(&result, "Lrange", key, start, stop)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Ltrim(ctx context.Context, key string, start int, stop int) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result interface{}
 	flatCmd := radix.FlatCmd(&result, "Ltrim", key, start, stop)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Lpop(ctx context.Context, key string) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result string
 	flatCmd := radix.FlatCmd(&result, "Lpop", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Rpop(ctx context.Context, key string) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result string
 	flatCmd := radix.FlatCmd(&result, "Rpop", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Scard(ctx context.Context, key string) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Scard", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Smembers(ctx context.Context, key string) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result []string
 	flatCmd := radix.FlatCmd(&result, "Smembers", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Sismember(ctx context.Context, key string, value interface{}) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Sismember", key, value)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Zrank(ctx context.Context, key string, member interface{}) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Zrank", key, member)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Zscore(ctx context.Context, key string, member interface{}) (string, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result string
 	flatCmd := radix.FlatCmd(&result, "Zscore", key, member)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Zrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result []string
 	var flatCmd radix.CmdAction
 	if withscores {
@@ -576,18 +378,12 @@ func (r *redisResource) Zrange(ctx context.Context, key string, start int, stop 
 	} else {
 		flatCmd = radix.FlatCmd(&result, "Zrange", key, start, stop)
 	}
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Zrevrange(ctx context.Context, key string, start int, stop int, withscores bool) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result []string
 	var flatCmd radix.CmdAction
 	if withscores {
@@ -595,18 +391,11 @@ func (r *redisResource) Zrevrange(ctx context.Context, key string, start int, st
 	} else {
 		flatCmd = radix.FlatCmd(&result, "Zrevrange", key, start, stop)
 	}
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Zrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffset, limitCount int) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
 	var result []string
 	var flatCmd radix.CmdAction
 	if withscores {
@@ -614,18 +403,12 @@ func (r *redisResource) Zrangebyscore(ctx context.Context, key string, start int
 	} else {
 		flatCmd = radix.FlatCmd(&result, "ZRANGEBYSCORE", key, start, stop, "LIMIT", limitOffset, limitCount)
 	}
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Zrevrangebyscore(ctx context.Context, key string, start int, stop int, withscores bool, limitOffset, limitCount int) (interface{}, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result []string
 	var flatCmd radix.CmdAction
 	if withscores {
@@ -633,70 +416,40 @@ func (r *redisResource) Zrevrangebyscore(ctx context.Context, key string, start 
 	} else {
 		flatCmd = radix.FlatCmd(&result, "ZREVRANGEBYSCORE", key, start, stop, "LIMIT", limitOffset, limitCount)
 	}
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result string
 	flatCmd := radix.FlatCmd(&result, "Zincrby", key, increment, member)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Zadd", key, score, member)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) Zrem(ctx context.Context, key string, member ...interface{}) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Zrem", key, member...)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 // Publish 发布
 func (r *redisResource) Publish(ctx context.Context, key string, value string) (int, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int
 	flatCmd := radix.FlatCmd(&result, "PUBLISH", key, value)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
@@ -753,49 +506,31 @@ func (r *redisResource) PUnsubscribe(ctx context.Context, patterns ...string) (c
 }
 
 func (r *redisResource) XAdd(ctx context.Context, key string, id string, values interface{}) (string, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result string
 	flatCmd := radix.FlatCmd(&result, "XADD", key, id, values)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) XLen(ctx context.Context, key string) (int32, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int32
 	flatCmd := radix.FlatCmd(&result, "XLEN", key)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) XDel(ctx context.Context, key string, ids []string) (int32, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int32
 	flatCmd := radix.FlatCmd(&result, "XDEL", key, ids)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) XRange(ctx context.Context, key string, start, end string, count ...int) ([]map[string]map[string]string, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result []map[string]map[string]string
 	var flatCmd radix.CmdAction
 	if len(count) > 0 {
@@ -803,18 +538,12 @@ func (r *redisResource) XRange(ctx context.Context, key string, start, end strin
 	} else {
 		flatCmd = radix.FlatCmd(&result, "XRANGE", key, start, end)
 	}
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) XRevRange(ctx context.Context, key string, start, end string, count ...int) ([]map[string]map[string]string, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result []map[string]map[string]string
 	var flatCmd radix.CmdAction
 	if len(count) > 0 {
@@ -822,55 +551,31 @@ func (r *redisResource) XRevRange(ctx context.Context, key string, start, end st
 	} else {
 		flatCmd = radix.FlatCmd(&result, "XREVRANGE", key, start, end)
 	}
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) XGroupCreate(ctx context.Context, key string, groupName string, id string) (string, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result string
 	flatCmd := radix.FlatCmd(&result, "XGROUP", "CREATE", key, groupName, id)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) XGroupDestroy(ctx context.Context, key string, groupName string) (int32, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int32
 	flatCmd := radix.FlatCmd(&result, "XGROUP", "DESTROY", key, groupName)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
 func (r *redisResource) XAck(ctx context.Context, key string, groupName string, ids []string) (int32, error) {
-	sn := <-r.connpool.GetConnChan(r.label)
+
 	var result int32
 	flatCmd := radix.FlatCmd(&result, "XACK", key, groupName, ids)
-	var err error
-	switch s := sn.(type) {
-	case *radix.Pool:
-		err = s.Do(flatCmd)
-	case *radix.Cluster:
-		err = s.Do(flatCmd)
-	}
+	err := r.deal(flatCmd)
 	return result, err
 }
 
@@ -878,8 +583,21 @@ func (r *redisResource) NewStreamReader(opts radix.StreamReaderOpts) radix.Strea
 	sn := <-r.connpool.GetConnChan(r.label)
 	switch s := sn.(type) {
 	case *radix.Pool:
+		return radix.NewStreamReader(s, opts)
 	case *radix.Cluster:
 		return radix.NewStreamReader(s, opts)
 	}
 	return nil
+}
+
+func (r *redisResource) deal(flatCmd radix.CmdAction) error {
+	sn := <-r.connpool.GetConnChan(r.label)
+	var err error
+	switch s := sn.(type) {
+	case *radix.Pool:
+		err = s.Do(flatCmd)
+	case *radix.Cluster:
+		err = s.Do(flatCmd)
+	}
+	return err
 }
