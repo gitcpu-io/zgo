@@ -1138,6 +1138,12 @@
 			"revisionTime": "2019-02-12T00:16:53Z"
 		},
 		{
+			"checksumSHA1": "9QKBlDoeb7yZjQZlBWEUXB3kenA=",
+			"path": "go.mongodb.org/mongo-driver/mongo",
+			"revision": "4ce0ae63789cc26fee16f3b52dae7aa1f2751131",
+			"revisionTime": "2019-09-17T09:38:22Z"
+		},
+		{
 			"checksumSHA1": "qFs0grHlbWDk8I7+1+wWvHfmWxA=",
 			"path": "go.uber.org/atomic",
 			"revision": "5328d69c76a98d1d21c773653a5a78fa28d89921",
