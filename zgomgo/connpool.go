@@ -163,7 +163,7 @@ func (cp *connPool) createClient(address string, poolSize int) chan *mongo.Clien
 			//	"47.95.20.12:27019",
 			//},
 		}
-		opts.SetMaxPoolSize(uint64(poolSize))
+		opts.SetMaxPoolSize(uint16(poolSize))
 		c, err := mongo.Connect(ctx, options.Client().ApplyURI(address), opts)
 		//c, err := mongo.Connect(ctx, opts)
 		if err != nil {
