@@ -40,6 +40,12 @@
 			"revisionTime": "2019-04-18T05:08:45Z"
 		},
 		{
+			"checksumSHA1": "pQdQAyva/nOnQXh4sQLui5rvsbQ=",
+			"path": "github.com/cloudflare/golz4",
+			"revision": "ef862a3cdc58a6f1fee4e3af3d44fbe279194cde",
+			"revisionTime": "2015-02-17T21:48:14Z"
+		},
+		{
 			"checksumSHA1": "butr+Orbf1fd1hcLqNXYwUDAjcI=",
 			"origin": "go.etcd.io/etcd/vendor/github.com/coreos/go-semver/semver",
 			"path": "github.com/coreos/go-semver/semver",
@@ -391,6 +397,12 @@
 			"checksumSHA1": "xnz61Omintrn+UB/Rv2Hh5BgTZw=",
 			"path": "github.com/json-iterator/go",
 			"revision": ""
+		},
+		{
+			"checksumSHA1": "QMuAE4pnWZmAb5+mGGwQOK+n/f0=",
+			"path": "github.com/kshvakov/clickhouse",
+			"revision": "9cd15cb01ac9af097f6c770a4acbbe21f9a274f8",
+			"revisionTime": "2019-09-18T16:13:02Z"
 		},
 		{
 			"checksumSHA1": "V17OmM8gfW+VOfuP4nbaHMwugds=",

@@ -3,6 +3,7 @@ package zgo
 import (
 	"git.zhugefang.com/gocore/zgo/config"
 	"git.zhugefang.com/gocore/zgo/zgocache"
+	"git.zhugefang.com/gocore/zgo/zgoclickhouse"
 	"git.zhugefang.com/gocore/zgo/zgocrypto"
 	"git.zhugefang.com/gocore/zgo/zgoes"
 	"git.zhugefang.com/gocore/zgo/zgoetcd"
@@ -94,6 +95,13 @@ func Engine(opt *Options) error {
 			//fmt.Println(hsm)
 			in := <-zgopostgres.InitPostgres(hsm)
 			Postgres = in
+		}
+		if len(opt.ClickHouse) > 0 {
+			//todo someting
+			hsm := engine.getConfigByOption(config.Conf.ClickHouse, opt.ClickHouse)
+			//fmt.Println(hsm)
+			in := <-zgoclickhouse.InitClickHouse(hsm)
+			CK = in
 		}
 		//if len(opt.Neo4j) > 0 {
 		//	//todo someting
@@ -299,6 +307,7 @@ var (
 	Pika              zgopika.Pikaer
 	Mysql             zgomysql.Mysqler
 	Postgres          zgopostgres.Postgreser
+	CK                zgoclickhouse.ClickHouseer
 	PostgresErrNoRows = pg.ErrNoRows
 
 	//Neo4j    zgoneo4j.Neo4jer

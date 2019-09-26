@@ -133,6 +133,38 @@ services:
     networks:
       - link-network
 
+  clickhouse-server:
+    image: yandex/clickhouse-server
+    container_name: clickhouse-server
+    ports:
+      - "8123:8123" ##http
+      - "9019:9000" ##tcp
+      - "9009:9009"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - ~/docker-data/clickhouse:/var/lib/clickhouse
+    networks:
+      - link-network
+
+  clickhouse-tabix-web-client:
+    image: spoonest/clickhouse-tabix-web-client
+    container_name: clickhouse-tabix-web-client
+    ports:
+      - 9020:80  #web port
+    environment:
+      #      USER: admin
+      #      PASSWORD: admin
+      CH_HOST: clickhouse-server
+    #      CH_LOGIN: default
+    #      CH_PASSWORD:
+    depends_on:
+      - clickhouse-server
+    networks:
+      - link-network
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.1.1
     container_name: elasticsearch

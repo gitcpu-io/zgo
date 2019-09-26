@@ -1,15 +1,12 @@
 package config
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"io/ioutil"
-	"os"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strings"
 )
@@ -21,7 +18,7 @@ const (
 	Warn         //2
 	Error        //3
 
-	Version       = "1.0.8"       //zgo版本号
+	Version       = "1.1.0"       //zgo版本号
 	ProjectPrefix = "zgo/project" //读取ETCD配置时prefix
 	FileStoreType = "local"       //文件存储类型
 	FileStoreHome = "/tmp"        //文件存储目录
@@ -32,19 +29,20 @@ const (
 	Pro2          = "pro2"        //生产环境标识
 
 	//********************************以下是 etcd监听常量********************************
-	EtcTKCache    = "cache"
-	EtcTKLog      = "log"
-	EtcTKMysql    = "mysql"
-	EtcTKPostgres = "postgres"
-	EtcTKNeo4j    = "neo4j"
-	EtcTKMongo    = "mongo"
-	EtcTKMgo      = "mgo"
-	EtcTKRedis    = "redis"
-	EtcTKPia      = "pika"
-	EtcTKNsq      = "nsq"
-	EtcTKKafka    = "kafka"
-	EtcTKEs       = "es"
-	EtcTKEtcd     = "etcd"
+	EtcTKCache      = "cache"
+	EtcTKLog        = "log"
+	EtcTKMysql      = "mysql"
+	EtcTKPostgres   = "postgres"
+	EtcTKClickHouse = "clickhouse"
+	EtcTKNeo4j      = "neo4j"
+	EtcTKMongo      = "mongo"
+	EtcTKMgo        = "mgo"
+	EtcTKRedis      = "redis"
+	EtcTKPia        = "pika"
+	EtcTKNsq        = "nsq"
+	EtcTKKafka      = "kafka"
+	EtcTKEs         = "es"
+	EtcTKEtcd       = "etcd"
 
 	//****************************以下是 mongodb bulk write常量**************************
 	InsertOne  = "insertOne"
@@ -134,6 +132,7 @@ type allConfig struct {
 	Mgo          []LabelDetail                `json:"mgo,omitempty"`
 	Mysql        []LabelDetail                `json:"mysql,omitempty"`
 	Postgres     []LabelDetail                `json:"postgres,omitempty"`
+	ClickHouse   []LabelDetail                `json:"clickhouse,omitempty"`
 	Neo4j        []LabelDetail                `json:"neo4j,omitempty"`
 	Redis        []LabelDetail                `json:"redis,omitempty"`
 	Pika         []LabelDetail                `json:"pika,omitempty"`
@@ -243,66 +242,4 @@ func LoadConfig(e, project, etcdHosts string) {
 
 	fmt.Printf("zgo engine %s is started on the ... %s %s\n", Version, Conf.Env, Conf.EtcdHosts)
 
-}
-
-// LoadConfig 暂时不用
-func LoadConfigByFile(path string) *allConfig {
-	var config allConfig
-	config_file, err := os.Open(path)
-	if err != nil {
-		emit("Failed to open config file '%s': %s\n", path, err)
-		return &config
-	}
-
-	fi, _ := config_file.Stat()
-	if size := fi.Size(); size > (10 << 20) {
-		emit("config file (%q) size exceeds reasonable limit (%d) - aborting", path, size)
-		return &config // REVU: shouldn't this return an error, then?
-	}
-
-	if fi.Size() == 0 {
-		emit("config file (%q) is empty, skipping", path)
-		return &config
-	}
-
-	buffer := make([]byte, fi.Size())
-	_, err = config_file.Read(buffer)
-	//emit("\n %s\n", buffer)
-
-	buffer, err = StripComments(buffer) //去掉注释
-	if err != nil {
-		emit("Failed to strip comments from json: %s\n", err)
-		return &config
-	}
-
-	buffer = []byte(os.ExpandEnv(string(buffer))) //特殊
-
-	err = zgoutils.Utils.Unmarshal(buffer, &config) //解析json格式数据
-	if err != nil {
-		emit("Failed unmarshalling json: %s\n", err)
-		return &config
-	}
-	return &config
-}
-
-func StripComments(data []byte) ([]byte, error) {
-	data = bytes.Replace(data, []byte("\r"), []byte(""), 0) // Windows
-	lines := bytes.Split(data, []byte("\n"))                //split to muli lines
-	filtered := make([][]byte, 0)
-
-	for _, line := range lines {
-		match, err := regexp.Match(`^\s*#`, line)
-		if err != nil {
-			return nil, err
-		}
-		if !match {
-			filtered = append(filtered, line)
-		}
-	}
-
-	return bytes.Join(filtered, []byte("\n")), nil
-}
-
-func emit(msgfmt string, args ...interface{}) {
-	fmt.Printf(msgfmt, args...)
 }

@@ -423,6 +423,24 @@
       ]
     }
   ],
+  "clickhouse": [
+    {
+      "key": "clickhouse",
+      "values": [
+        {
+          "c": "clickhouse实例",
+          "host": "47.95.20.12",
+          "port": 9019,
+          "username": "default",
+          "password": "",
+          "connSize": 10,
+          "poolSize": 100,
+          "dbName": "default",
+          "logMode": 0
+        }
+      ]
+    }
+  ],
   "cityDbConfig": {
     "sell": {
       "bj": "1",
