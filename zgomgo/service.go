@@ -63,6 +63,7 @@ type Mgoer interface {
 
 	// FindOne 通过条件只查询一条
 	// 此时 args 可选如下：[
+	// Filter: 查询条件
 	// Fields: 字段筛选
 	// Sort: 排序 1是升序，-1是降序
 	// Skip: 查询的offset，开区间，不包括这个skip的值
@@ -71,6 +72,7 @@ type Mgoer interface {
 
 	// Find 查询多条,未查到返回空的[]
 	// 此时 args 可选如下：[
+	// Filter: 查询条件
 	// Fields: 字段筛选
 	// Sort: 排序 1是升序，-1是降序
 	// Skip: 查询的offset，开区间，不包括这个skip的值
@@ -80,6 +82,7 @@ type Mgoer interface {
 
 	// Count 查询数量,未查到返回0
 	// 此时 args 可选如下：[
+	// Filter: 查询条件
 	// Skip: 查询的offset，开区间，不包括这个skip的值
 	// Limit: 限限的返回数量
 	// ]
