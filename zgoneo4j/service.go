@@ -1,4 +1,4 @@
-// zgoneo4j是对消息中间件Postgres的封装，提供新建连接，生产数据，消费数据接口
+// zgoneo4j是对中间件Neo4j的封装，提供新建连接
 package zgoneo4j
 
 import (
@@ -40,7 +40,7 @@ type zgoneo4j struct {
 	res Neo4jResourcer //使用resource另外的一个接口
 }
 
-// InitNeo4j 初始化连接postgres，用于使用者zgo.engine时，zgo init
+// InitNeo4j 初始化连接，用于使用者zgo.engine时，zgo init
 func InitNeo4j(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgoneo4j {
 	muLabel.Lock()
 	defer muLabel.Unlock()
@@ -92,7 +92,7 @@ func InitNeo4j(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgo
 
 }
 
-// GetNeo4j zgo内部获取一个连接postgres
+// GetNeo4j zgo内部获取一个连接
 func GetNeo4j(label ...string) (*zgoneo4j, error) {
 	l, err := comm.GetCurrentLabel(label, muLabel, currentLabels)
 	if err != nil {
