@@ -909,12 +909,28 @@ login: default
 
 password: 空
 
+##Rabbitmq
+5672
+
+集群：25672
+
+####rabbitmq管理页面
+
+http://47.95.20.12:8672
+
+管理账号/密码：admin/admin
+
 ##Kafka
 1个kafka
 
 生产：9202
 
 消费：2081
+
+####Kafka管理页面
+http://47.95.20.12:9093
+
+管理账号/密码：admin/admin
 
 ##Nsq
 1个nsq
@@ -923,7 +939,6 @@ password: 空
 
 ####Nsq管理页面
 http://47.95.20.12:4171
-
 
 ##ES
 1个es

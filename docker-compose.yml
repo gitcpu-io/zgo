@@ -304,11 +304,53 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_BROKER_ID: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_NUM_PARTITIONS: 2
       KAFKA_CREATE_TOPICS: "stream-in:1:1,stream-out:1:1"
     volumes:
       - ~/docker-data/kafka:/kafka
     depends_on:
       - zookeeper
+    networks:
+      - link-network
+
+  kafka-admin:
+    image: sheepkiller/kafka-manager
+    container_name: kafkamanager
+    environment:
+      ZK_HOSTS: zookeeper:2181
+      APPLICATION_SECRET: letmein
+      KM_ARGS: -Djava.net.preferIPv4Stack=true
+    ports:
+      - 9093:9000
+    links:
+      - zookeeper
+      - kafka
+    networks:
+      - link-network
+
+  rabbitmq:
+    image: rabbitmq:3
+    container_name: rabbitmq
+    ports:
+      #      - 4369:4369
+      #      - 5671:5671
+      - 5672:5672
+      - 25672:25672
+    volumes:
+      - ~/docker-data/rabbitmq:/var/lib/rabbitmq
+    networks:
+      - link-network
+
+  rabbitmq-admin:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-admin
+    ports:
+      - 8672:15672  #web port
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    depends_on:
+      - rabbitmq
     networks:
       - link-network
 
