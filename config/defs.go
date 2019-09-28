@@ -34,6 +34,7 @@ const (
 	EtcTKMysql      = "mysql"
 	EtcTKPostgres   = "postgres"
 	EtcTKClickHouse = "clickhouse"
+	EtcTKRabbitmq   = "rabbitmq"
 	EtcTKNeo4j      = "neo4j"
 	EtcTKMongo      = "mongo"
 	EtcTKMgo        = "mgo"
@@ -98,7 +99,8 @@ type ConnDetail struct {
 	Prefix      string `json:"prefix,omitempty"`
 	DbName      string `json:"dbName,omitempty"`  // 数据库名称
 	LogMode     int    `json:"logMode,omitempty"` // 日志类型
-	Cluster     int    `json:"cluster,omitempty"` // 日志类型
+	Cluster     int    `json:"cluster,omitempty"` // 是否是集群 用于redis
+	Vhost       string `json:"vhost,omitempty"`   // 虚拟目录用于rabbitmq
 }
 
 type CacheConfig struct {
@@ -133,6 +135,7 @@ type allConfig struct {
 	Mysql        []LabelDetail                `json:"mysql,omitempty"`
 	Postgres     []LabelDetail                `json:"postgres,omitempty"`
 	ClickHouse   []LabelDetail                `json:"clickhouse,omitempty"`
+	Rabbitmq     []LabelDetail                `json:"rabbitmq,omitempty"`
 	Neo4j        []LabelDetail                `json:"neo4j,omitempty"`
 	Redis        []LabelDetail                `json:"redis,omitempty"`
 	Pika         []LabelDetail                `json:"pika,omitempty"`

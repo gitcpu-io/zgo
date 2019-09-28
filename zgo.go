@@ -21,12 +21,14 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgonsq"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgopostgres"
+	"git.zhugefang.com/gocore/zgo/zgorabbitmq"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	kafkaCluter "github.com/bsm/sarama-cluster"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
 	"github.com/nsqio/go-nsq"
+	"github.com/streadway/amqp"
 	"go.etcd.io/etcd/clientv3"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -102,6 +104,13 @@ func Engine(opt *Options) error {
 			//fmt.Println(hsm)
 			in := <-zgoclickhouse.InitClickHouse(hsm)
 			CK = in
+		}
+		if len(opt.Rabbitmq) > 0 {
+			//todo someting
+			hsm := engine.getConfigByOption(config.Conf.Rabbitmq, opt.Rabbitmq)
+			//fmt.Println(hsm)
+			in := <-zgorabbitmq.InitRabbitmq(hsm)
+			MQ = in
 		}
 		//if len(opt.Neo4j) > 0 {
 		//	//todo someting
@@ -198,10 +207,11 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
 
 //定义外部使用的类型
 type (
-	NsqMessage        = *nsq.Message
-	PartitionConsumer = kafkaCluter.PartitionConsumer
-	Bucketer          = zgolimiter.SimpleBucketer //zgo 自定义的bucket
-	WR2er             = zgolb.WR2er
+	RabbitmqPublishing = amqp.Publishing
+	NsqMessage         = *nsq.Message
+	PartitionConsumer  = kafkaCluter.PartitionConsumer
+	Bucketer           = zgolimiter.SimpleBucketer //zgo 自定义的bucket
+	WR2er              = zgolb.WR2er
 	//postgres声明给使用者
 	PostgresDB                 = pg.DB
 	PostgresCreateTableOptions = orm.CreateTableOptions
@@ -308,6 +318,7 @@ var (
 	Mysql             zgomysql.Mysqler
 	Postgres          zgopostgres.Postgreser
 	CK                zgoclickhouse.ClickHouseer
+	MQ                zgorabbitmq.Rabbitmqer
 	PostgresErrNoRows = pg.ErrNoRows
 
 	//Neo4j    zgoneo4j.Neo4jer

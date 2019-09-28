@@ -170,6 +170,38 @@
       ]
     }
   ],
+  "rabbitmq": [
+    {
+      "key": "mq_label_bj",
+      "values": [
+        {
+          "c": "北京-----rabbitmq",
+          "host": "47.95.20.12",
+          "port": 5672,
+          "username": "account",
+          "password": "account",
+          "connSize": 5,
+          "poolSize": 550,
+          "vhost": "/account"
+        }
+      ]
+    },
+    {
+      "key": "mq_label_sh",
+      "values": [
+        {
+          "c": "上海=====rabbitmq",
+          "host": "47.95.20.12",
+          "port": 5672,
+          "username": "guest",
+          "password": "guest",
+          "connSize": 33,
+          "poolSize": 90,
+          "vhost": "/"
+        }
+      ]
+    }
+  ],
   "mgo": [
     {
       "key": "mgo_label_bj",

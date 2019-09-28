@@ -16,6 +16,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgonsq"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgopostgres"
+	"git.zhugefang.com/gocore/zgo/zgorabbitmq"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"go.etcd.io/etcd/mvcc/mvccpb"
@@ -32,6 +33,7 @@ type Options struct {
 	Mysql      []string `json:"mysql"`
 	Postgres   []string `json:"postgres"`
 	ClickHouse []string `json:"clickhouse"`
+	Rabbitmq   []string `json:"rabbitmq"`
 	Neo4j      []string `json:"neo4j"`
 	Etcd       []string `json:"etcd"`
 	Es         []string `json:"es"`
@@ -119,6 +121,9 @@ func (opt *Options) parseConfig(resKvs []*mvccpb.KeyValue, connCh chan map[strin
 					if labelType == config.EtcTKMysql || labelType == config.EtcTKPostgres || labelType == config.EtcTKClickHouse || labelType == config.EtcTKMongo || labelType == config.EtcTKMgo {
 						sb.WriteString(fmt.Sprintf("DbName: %s\n", pvv.DbName))
 					}
+					if labelType == config.EtcTKRabbitmq {
+						sb.WriteString(fmt.Sprintf("Vhost: %s", pvv.Vhost))
+					}
 					if labelType == config.EtcTKRedis {
 						cluster := "单机"
 						if pvv.Cluster == 1 {
@@ -205,6 +210,9 @@ func (opt *Options) destroyConn(labelType, label string) {
 	case config.EtcTKClickHouse:
 		in := <-zgoclickhouse.InitClickHouse(nil, label)
 		CK = in
+	case config.EtcTKRabbitmq:
+		in := <-zgorabbitmq.InitRabbitmq(nil, label)
+		MQ = in
 	//case config.EtcTKNeo4j:
 	//	in := <-zgoneo4j.InitNeo4j(nil, label)
 	//	Neo4j = in
@@ -359,6 +367,12 @@ func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDeta
 		if len(hsm) > 0 {
 			in := <-zgoclickhouse.InitClickHouse(hsm)
 			CK = in
+		}
+	case config.EtcTKRabbitmq:
+		//init rabbitmq again
+		if len(hsm) > 0 {
+			in := <-zgorabbitmq.InitRabbitmq(hsm)
+			MQ = in
 		}
 	case config.EtcTKNeo4j:
 		//init neo4j again
