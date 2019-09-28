@@ -329,28 +329,18 @@ services:
       - link-network
 
   rabbitmq:
-    image: rabbitmq:3
+    image: rabbitmq:management
     container_name: rabbitmq
     ports:
-      #      - 4369:4369
-      #      - 5671:5671
+      - 4369:4369
+      - 5671:5671
       - 5672:5672
-      - 25672:25672
-    volumes:
-      - ~/docker-data/rabbitmq:/var/lib/rabbitmq
-    networks:
-      - link-network
-
-  rabbitmq-admin:
-    image: rabbitmq:3-management
-    container_name: rabbitmq-admin
-    ports:
-      - 8672:15672  #web port
+      - 8672:15672
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin
-    depends_on:
-      - rabbitmq
+    volumes:
+      - ~/docker-data/rabbitmq:/var/lib/rabbitmq
     networks:
       - link-network
 
