@@ -164,6 +164,8 @@ services:
     networks:
       - link-network
 
+##docker run --network=opt_link-network --link ccd448857c70 yandex/clickhouse-client --host 47.95.20.12 --port=9019 --query="select * from example"
+
   clickhouse-tabix-web-client:
     image: spoonest/clickhouse-tabix-web-client
     container_name: clickhouse-tabix-web-client
