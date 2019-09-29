@@ -856,6 +856,9 @@ docker-compose up -d
 
 27019
 
+####Mongo管理页面
+http://47.95.20.12:8081
+
 ##Redis
 2个redis
 
