@@ -36,6 +36,21 @@ services:
     networks:
       - link-network
 
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
+    restart: always
+    depends_on:
+      - redis-6381
+      - redis-6380
+    environment:
+      - REDIS_HOSTS=dev0:redis6380,dev1:redis6381,cluster7001:47.95.20.12:7001,cluster7002:47.95.20.12:7002,cluster7003:47.95.20.12:7003,cluster7004:47.95.20.12:7004,cluster7005:47.95.20.12:7005,cluster7006:47.95.20.12:7006
+    ports:
+      - "8082:8081"
+    networks:
+      - link-network
+
   mongo-27019:
     image: mongo
     container_name: mongo27019
