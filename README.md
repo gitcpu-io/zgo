@@ -12,7 +12,7 @@ zgo是专门为使用go语言的开发人员所设计和开发的， 它提供�
 [![npm](zgo_engine.png)](http://wiki.zhugefang.com/display/ZGZFRDCENTER/zgo)
 
 
-##zgo的核心功能（共15个，2个数据库，2个缓存，2个消息队列，1个ES，1个Cache, 1个Log存储，1个Http，1个Grpc，1个Map，3个工具类组件）
+##zgo的核心功能（共23个，6个数据库，2个缓存，3个消息队列，1个ES，1个Cache, 1个Log存储，1个Http，1个Grpc，1个Map，1个负载，1个限流，3个工具类组件）
 * 1.zgo Mysql对gorm开发框架提供上层封装，通过channel内建连接池，提供高并发访问mysql，并支持函数调用时自动读写分离，开发人员无需关注主从数据库
 
 * 2.zgo Mongodb对mgo开发框架提供上层封装，改变框架原有session复制连接的使用方法，通过channel内建连接池，提供高并发访问mongodb数据库的增删改查
@@ -28,8 +28,16 @@ zgo是专门为使用go语言的开发人员所设计和开发的， 它提供�
 * 11.zgo Grpc提供了对google grpc上层的封装，通过protobuf定义数据传输格式，方便client和server端的使用
 * 12.zgo Map提供一种并发安全的map读写操作，本质是对go中map加RWmutex的一种实现，使用场景top100，最近100条消息
 * 13.zgo Utils提供了对常见的日期转换，高效Json序列与反序列化，字符编码，ip相关，输入判断，go中map和string转换等
-* 14.zgo Crypto提供了常用的md5,sha1,sha256,aes,rsa,hmac等加解密函数
+* 14.zgo Crypto提供了常用的md5,sha1,sha256,aes,rsa,hmac，对称与非对称等加解密函数
 * 15.zgo File更加方便的一个函数调用get,set,append对文件进行操作
+* 16.zgo Postgres提供对Postgres的连接封装
+* 17.zgo Neo4j提供对Neo4j的连接封装
+* 18.zgo ClickHouse提供对列式数据库clickhouse的连接封装
+* 19.zgo Rabbitmq提供对Rabbitmq的封装
+* 20.zgo Limiter提供bucket的限流
+* 21.zgo LB提供负载均衡
+* 22.zgo Mgo提供对官方mongodb驱动的封装
+* 23.zgo Etcd提供对操作etcd的连接封装
 
 ##zgo engine的依赖
 
@@ -57,22 +65,22 @@ docker-compose up -d
 
 选项一：在zgo_start当前目录下编译mac运行的二进制文件
 
-go build -o zgo_start
+go build -o zgo-start
 
-./zgo_start
+./zgo-start
 
 
 选项二：在当前目录下编译linux运行的二进制文件，因为docker容器里用的是linux环境
 
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o zgo_start
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o zgo-start
 
-用docker制作image(dck.zhuge.test是任意一个标识，如果愿意你可以改为rubinus/zgo_start)
+用docker制作image(dck.zhuge.test是任意一个标识，如果愿意你可以改为rubinus/zgo-start)
 
-docker build -t dck.zhuge.test/zgo_start .
+docker build -t dck.zhuge.test/zgo-start .
 
 把镜像文件push到开发环境的私有仓库
 
-docker push dck.zhuge.test/zgo_start
+docker push dck.zhuge.test/zgo-start
 
 ###如果把zgo start做为一个提供api接口访问的web微服务时的依赖
 我们使用了开源的go web框架iris，仅当你创建web服务时使用下面的框架
