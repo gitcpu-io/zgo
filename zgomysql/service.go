@@ -328,5 +328,5 @@ func (ms *zgoMysql) Exec(ctx context.Context, sql string, values ...interface{})
 	if err != nil {
 		return 0, err
 	}
-	return ms.res.Exec(ctx, db, sql, values)
+	return ms.res.Exec(ctx, db, sql, values...)
 }
