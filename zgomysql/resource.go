@@ -264,12 +264,12 @@ func (mr *mysqlResource) DeleteById(ctx context.Context, gormPool *gorm.DB, tabl
 
 // 新增数据
 func (mr *mysqlResource) Create(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser) error {
-	if gormPool.NewRecord(obj) {
-		err := gormPool.Create(obj).Error
-		return err
-	} else {
-		return errors.New("被创建对象不能有主键")
-	}
+	//if gormPool.NewRecord(obj) {
+	err := gormPool.Create(obj).Error
+	return err
+	//} else {
+	//	return errors.New("被创建对象不能有主键")
+	//}
 }
 
 // UpdateOneByData 根据data修改值

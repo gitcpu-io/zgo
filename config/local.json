@@ -1,5 +1,5 @@
 {
-  "version": "0.5.0",
+  "version": "1.0.0",
   "env": "local",
   "etcdHosts": [
     "0.0.0.0:2381"
@@ -166,6 +166,86 @@
           "port": 4150,
           "connSize": 22,
           "poolSize": 11
+        }
+      ]
+    }
+  ],
+  "rabbitmq": [
+    {
+      "key": "mq_label_bj",
+      "values": [
+        {
+          "c": "北京-----rabbitmq",
+          "host": "47.95.20.12",
+          "port": 5672,
+          "username": "account",
+          "password": "account",
+          "connSize": 5,
+          "poolSize": 550,
+          "vhost": "/account"
+        }
+      ]
+    },
+    {
+      "key": "mq_label_sh",
+      "values": [
+        {
+          "c": "上海=====rabbitmq",
+          "host": "47.95.20.12",
+          "port": 5672,
+          "username": "guest",
+          "password": "guest",
+          "connSize": 33,
+          "poolSize": 90,
+          "vhost": "/"
+        }
+      ]
+    }
+  ],
+  "mgo": [
+    {
+      "key": "mgo_label_bj",
+      "values": [
+        {
+          "c": "北京从库1=====dev mgo",
+          "host": "47.95.20.12",
+          "port": 27018,
+          "username": "",
+          "password": "",
+          "connSize": 5,
+          "poolSize": 789
+        },
+        {
+          "c": "北京从库2=====dev mgo",
+          "host": "47.95.20.12",
+          "port": 27018,
+          "username": "",
+          "password": "",
+          "connSize": 5,
+          "poolSize": 456
+        }
+      ]
+    },
+    {
+      "key": "mgo_label_sh",
+      "values": [
+        {
+          "c": "上海从库1=====dev mgo",
+          "host": "47.95.20.12",
+          "port": 27019,
+          "username": "",
+          "password": "",
+          "connSize": 5,
+          "poolSize": 789
+        },
+        {
+          "c": "上海从库2=====dev mgo",
+          "host": "47.95.20.12",
+          "port": 27019,
+          "username": "",
+          "password": "",
+          "connSize": 5,
+          "poolSize": 456
         }
       ]
     }
@@ -371,6 +451,24 @@
           "maxOpenConn": 10,
           "dbName": "mysql",
           "LogMode": 1
+        }
+      ]
+    }
+  ],
+  "clickhouse": [
+    {
+      "key": "clickhouse",
+      "values": [
+        {
+          "c": "clickhouse实例",
+          "host": "47.95.20.12",
+          "port": 9019,
+          "username": "default",
+          "password": "",
+          "connSize": 10,
+          "poolSize": 100,
+          "dbName": "default",
+          "logMode": 0
         }
       ]
     }

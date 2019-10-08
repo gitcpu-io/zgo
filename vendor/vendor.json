@@ -40,6 +40,12 @@
 			"revisionTime": "2019-04-18T05:08:45Z"
 		},
 		{
+			"checksumSHA1": "pQdQAyva/nOnQXh4sQLui5rvsbQ=",
+			"path": "github.com/cloudflare/golz4",
+			"revision": "ef862a3cdc58a6f1fee4e3af3d44fbe279194cde",
+			"revisionTime": "2015-02-17T21:48:14Z"
+		},
+		{
 			"checksumSHA1": "butr+Orbf1fd1hcLqNXYwUDAjcI=",
 			"origin": "go.etcd.io/etcd/vendor/github.com/coreos/go-semver/semver",
 			"path": "github.com/coreos/go-semver/semver",
@@ -393,6 +399,12 @@
 			"revision": ""
 		},
 		{
+			"checksumSHA1": "QMuAE4pnWZmAb5+mGGwQOK+n/f0=",
+			"path": "github.com/kshvakov/clickhouse",
+			"revision": "9cd15cb01ac9af097f6c770a4acbbe21f9a274f8",
+			"revisionTime": "2019-09-18T16:13:02Z"
+		},
+		{
 			"checksumSHA1": "V17OmM8gfW+VOfuP4nbaHMwugds=",
 			"origin": "go-box/vendor/github.com/labstack/echo",
 			"path": "github.com/labstack/echo",
@@ -469,6 +481,12 @@
 			"path": "github.com/pierrec/lz4/internal/xxh32",
 			"revision": "062282ea0dcff40c9fb8525789eef9644b1fbd6e",
 			"revisionTime": "2019-02-22T15:37:22Z"
+		},
+		{
+			"checksumSHA1": "DTy0iJ2w5C+FDsN9EnzfhNmvS+o=",
+			"path": "github.com/pkg/errors",
+			"revision": "059132a15dd08d6704c67711dae0cf35ab991756",
+			"revisionTime": "2018-10-23T23:59:46Z"
 		},
 		{
 			"checksumSHA1": "LuFv4/jlrmFNnDb/5SCSEPAM9vU=",
@@ -584,6 +602,12 @@
 			"path": "github.com/spf13/pflag",
 			"revision": "24fc2a983ae39b4fe09cef3db434c812fdc97cff",
 			"revisionTime": "2019-02-12T00:16:53Z"
+		},
+		{
+			"checksumSHA1": "GH70ONgz5JvA9NimFl12u16dpEg=",
+			"path": "github.com/streadway/amqp",
+			"revision": "edfb9018d2714e4ec54dbaba37dbfef2bdadf0e4",
+			"revisionTime": "2019-08-27T07:21:41Z"
 		},
 		{
 			"checksumSHA1": "fXgvcI5s/9s35HpJqE38jkekJCk=",
@@ -1136,6 +1160,12 @@
 			"path": "go.etcd.io/etcd/wal/walpb",
 			"revision": "24fc2a983ae39b4fe09cef3db434c812fdc97cff",
 			"revisionTime": "2019-02-12T00:16:53Z"
+		},
+		{
+			"checksumSHA1": "9QKBlDoeb7yZjQZlBWEUXB3kenA=",
+			"path": "go.mongodb.org/mongo-driver/mongo",
+			"revision": "4ce0ae63789cc26fee16f3b52dae7aa1f2751131",
+			"revisionTime": "2019-09-17T09:38:22Z"
 		},
 		{
 			"checksumSHA1": "qFs0grHlbWDk8I7+1+wWvHfmWxA=",

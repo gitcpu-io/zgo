@@ -36,6 +36,21 @@ services:
     networks:
       - link-network
 
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
+    restart: always
+    depends_on:
+      - redis-6381
+      - redis-6380
+    environment:
+      - REDIS_HOSTS=dev0:redis6380,dev1:redis6381,cluster7001:47.95.20.12:7001,cluster7002:47.95.20.12:7002,cluster7003:47.95.20.12:7003,cluster7004:47.95.20.12:7004,cluster7005:47.95.20.12:7005,cluster7006:47.95.20.12:7006
+    ports:
+      - "8082:8081"
+    networks:
+      - link-network
+
   mongo-27019:
     image: mongo
     container_name: mongo27019
@@ -130,6 +145,40 @@ services:
     #      - metrics.prometheus.endpoint=mock.com:2004
     volumes:
       - ~/docker-data/neo4j:/data
+    networks:
+      - link-network
+
+  clickhouse-server:
+    image: yandex/clickhouse-server
+    container_name: clickhouse-server
+    ports:
+      - "8123:8123" ##http
+      - "9019:9000" ##tcp
+      - "9009:9009"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - ~/docker-data/clickhouse:/var/lib/clickhouse
+    networks:
+      - link-network
+
+##docker run --network=opt_link-network --link ccd448857c70 yandex/clickhouse-client --host 47.95.20.12 --port=9019 --query="select * from example"
+
+  clickhouse-tabix-web-client:
+    image: spoonest/clickhouse-tabix-web-client
+    container_name: clickhouse-tabix-web-client
+    ports:
+      - 9020:80  #web port
+    environment:
+      #      USER: admin
+      #      PASSWORD: admin
+      CH_HOST: clickhouse-server
+    #      CH_LOGIN: default
+    #      CH_PASSWORD:
+    depends_on:
+      - clickhouse-server
     networks:
       - link-network
 
@@ -272,11 +321,43 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_BROKER_ID: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_NUM_PARTITIONS: 2
       KAFKA_CREATE_TOPICS: "stream-in:1:1,stream-out:1:1"
     volumes:
       - ~/docker-data/kafka:/kafka
     depends_on:
       - zookeeper
+    networks:
+      - link-network
+
+  kafka-admin:
+    image: sheepkiller/kafka-manager
+    container_name: kafkamanager
+    environment:
+      ZK_HOSTS: zookeeper:2181
+      APPLICATION_SECRET: letmein
+      KM_ARGS: -Djava.net.preferIPv4Stack=true
+    ports:
+      - 9093:9000
+    links:
+      - zookeeper
+      - kafka
+    networks:
+      - link-network
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - 4369:4369
+      - 5671:5671
+      - 5672:5672
+      - 8672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - ~/docker-data/rabbitmq:/var/lib/rabbitmq
     networks:
       - link-network
 

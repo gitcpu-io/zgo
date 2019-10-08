@@ -5,15 +5,18 @@ import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/config"
 	"git.zhugefang.com/gocore/zgo/zgocache"
+	"git.zhugefang.com/gocore/zgo/zgoclickhouse"
 	"git.zhugefang.com/gocore/zgo/zgoes"
 	"git.zhugefang.com/gocore/zgo/zgoetcd"
 	"git.zhugefang.com/gocore/zgo/zgokafka"
 	"git.zhugefang.com/gocore/zgo/zgolog"
+	"git.zhugefang.com/gocore/zgo/zgomgo"
 	"git.zhugefang.com/gocore/zgo/zgomongo"
 	"git.zhugefang.com/gocore/zgo/zgomysql"
 	"git.zhugefang.com/gocore/zgo/zgonsq"
 	"git.zhugefang.com/gocore/zgo/zgopika"
 	"git.zhugefang.com/gocore/zgo/zgopostgres"
+	"git.zhugefang.com/gocore/zgo/zgorabbitmq"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"go.etcd.io/etcd/mvcc/mvccpb"
@@ -21,20 +24,23 @@ import (
 )
 
 type Options struct {
-	Env       string   `json:"env"`
-	Project   string   `json:"project"`
-	EtcdHosts string   `json:"etcdHosts"`
-	Loglevel  string   `json:"loglevel"`
-	Mongo     []string `json:"mongo"`
-	Mysql     []string `json:"mysql"`
-	Postgres  []string `json:"postgres"`
-	Neo4j     []string `json:"neo4j"`
-	Etcd      []string `json:"etcd"`
-	Es        []string `json:"es"`
-	Redis     []string `json:"redis"`
-	Pika      []string `json:"pika"`
-	Kafka     []string `json:"kafka"`
-	Nsq       []string `json:"nsq"`
+	Env        string   `json:"env"`
+	Project    string   `json:"project"`
+	EtcdHosts  string   `json:"etcdHosts"`
+	Loglevel   string   `json:"loglevel"`
+	Mongo      []string `json:"mongo"`
+	Mgo        []string `json:"mgo"`
+	Mysql      []string `json:"mysql"`
+	Postgres   []string `json:"postgres"`
+	ClickHouse []string `json:"clickhouse"`
+	Rabbitmq   []string `json:"rabbitmq"`
+	Neo4j      []string `json:"neo4j"`
+	Etcd       []string `json:"etcd"`
+	Es         []string `json:"es"`
+	Redis      []string `json:"redis"`
+	Pika       []string `json:"pika"`
+	Kafka      []string `json:"kafka"`
+	Nsq        []string `json:"nsq"`
 }
 
 func (opt *Options) Init() error {
@@ -107,15 +113,23 @@ func (opt *Options) parseConfig(resKvs []*mvccpb.KeyValue, connCh chan map[strin
 					tmp = append(tmp, &pvv)
 
 					sb := strings.Builder{}
-					sb.WriteString(fmt.Sprintf("\n**********************资源项: %s **************************\n", labelType))
+					sb.WriteString(fmt.Sprintf("\n********************************资源项: %s ********************************\n", labelType))
 					sb.WriteString(fmt.Sprintf("描述: %s\n", pvv.C))
 					sb.WriteString(fmt.Sprintf("Label: %s\n", label))
 					sb.WriteString(fmt.Sprintf("Host: %s\n", pvv.Host))
 					sb.WriteString(fmt.Sprintf("Port: %d\n", pvv.Port))
-					if labelType == config.EtcTKMysql || labelType == config.EtcTKPostgres || labelType == config.EtcTKMongo {
+					if labelType == config.EtcTKMysql || labelType == config.EtcTKPostgres || labelType == config.EtcTKClickHouse || labelType == config.EtcTKMongo || labelType == config.EtcTKMgo {
 						sb.WriteString(fmt.Sprintf("DbName: %s\n", pvv.DbName))
 					}
+					if labelType == config.EtcTKRabbitmq {
+						sb.WriteString(fmt.Sprintf("Vhost: %s", pvv.Vhost))
+					}
 					if labelType == config.EtcTKRedis {
+						cluster := "单机"
+						if pvv.Cluster == 1 {
+							cluster = "集群"
+						}
+						sb.WriteString(fmt.Sprintf("模式: %s\n", cluster))
 						sb.WriteString(fmt.Sprintf("Db: %d\n", pvv.Db))
 					}
 					fmt.Println(sb.String())
@@ -193,12 +207,21 @@ func (opt *Options) destroyConn(labelType, label string) {
 	case config.EtcTKPostgres:
 		in := <-zgopostgres.InitPostgres(nil, label)
 		Postgres = in
+	case config.EtcTKClickHouse:
+		in := <-zgoclickhouse.InitClickHouse(nil, label)
+		CK = in
+	case config.EtcTKRabbitmq:
+		in := <-zgorabbitmq.InitRabbitmq(nil, label)
+		MQ = in
 	//case config.EtcTKNeo4j:
 	//	in := <-zgoneo4j.InitNeo4j(nil, label)
 	//	Neo4j = in
 	case config.EtcTKMongo:
 		in := <-zgomongo.InitMongo(nil, label)
 		Mongo = in
+	case config.EtcTKMgo:
+		in := <-zgomgo.InitMgo(nil, label)
+		Mgo = in
 	case config.EtcTKRedis:
 		in := <-zgoredis.InitRedis(nil, label)
 		Redis = in
@@ -339,6 +362,18 @@ func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDeta
 			in := <-zgopostgres.InitPostgres(hsm)
 			Postgres = in
 		}
+	case config.EtcTKClickHouse:
+		//init clickhouse again
+		if len(hsm) > 0 {
+			in := <-zgoclickhouse.InitClickHouse(hsm)
+			CK = in
+		}
+	case config.EtcTKRabbitmq:
+		//init rabbitmq again
+		if len(hsm) > 0 {
+			in := <-zgorabbitmq.InitRabbitmq(hsm)
+			MQ = in
+		}
 	case config.EtcTKNeo4j:
 		//init neo4j again
 		//if len(hsm) > 0 {
@@ -350,6 +385,13 @@ func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDeta
 		if len(hsm) > 0 {
 			in := <-zgomongo.InitMongo(hsm)
 			Mongo = in
+		}
+
+	case config.EtcTKMgo:
+		//init mgo again
+		if len(hsm) > 0 {
+			in := <-zgomgo.InitMgo(hsm)
+			Mgo = in
 		}
 
 	case config.EtcTKRedis:

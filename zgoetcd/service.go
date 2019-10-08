@@ -1,4 +1,4 @@
-// zgoetcd是对消息中间件Etcd的封装，提供新建连接，生产数据，消费数据接口
+// zgoetcd是对中间件Etcd的封装，提供新建连接
 package zgoetcd
 
 import (
@@ -40,7 +40,7 @@ type zgoetcd struct {
 	res EtcdResourcer //使用resource另外的一个接口
 }
 
-// InitEtcd 初始化连接postgres，用于使用者zgo.engine时，zgo init
+// InitEtcd 初始化连接，用于使用者zgo.engine时，zgo init
 func InitEtcd(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgoetcd {
 	muLabel.Lock()
 	defer muLabel.Unlock()
@@ -92,7 +92,7 @@ func InitEtcd(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgoe
 
 }
 
-// GetEtcd zgo内部获取一个连接postgres
+// GetEtcd zgo内部获取一个连接
 func GetEtcd(label ...string) (*zgoetcd, error) {
 	l, err := comm.GetCurrentLabel(label, muLabel, currentLabels)
 	if err != nil {

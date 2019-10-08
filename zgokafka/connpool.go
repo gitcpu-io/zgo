@@ -5,6 +5,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/Shopify/sarama"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 )
@@ -112,8 +113,27 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 
 	for i := 0; i < hosts.ConnSize; i++ {
 		//把并发创建的数据库的连接channel，放进channel中
-		hh := []string{
-			fmt.Sprintf("%s:%d", hosts.Host, hosts.Port),
+		var hh []string
+		if strings.Index(hosts.Host, ",") != -1 {
+			hp := strings.Split(hosts.Host, ",")
+			var tmp []string
+			for _, v := range hp {
+				if strings.Index(v, ":") == -1 {
+					v = fmt.Sprintf("%s:%d", v, hosts.Port)
+					tmp = append(tmp, v)
+				} else {
+					tmp = append(tmp, v)
+				}
+			}
+			hh = append(hh, tmp...)
+		} else {
+			if strings.Index(hosts.Host, ":") != -1 {
+
+				hh = append(hh, hosts.Host) //此时有host:port
+
+			} else {
+				hh = append(hh, fmt.Sprintf("%s:%d", hosts.Host, hosts.Port))
+			}
 		}
 		cp.connChanChan <- cp.createClient(hh)
 	}

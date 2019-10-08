@@ -7,6 +7,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/Shopify/sarama"
 	"github.com/bsm/sarama-cluster"
+	"strings"
 	"sync"
 	"time"
 )
@@ -85,7 +86,7 @@ func (n *kafkaResource) Consumer(topic, groupId string) (*cluster.Consumer, erro
 	config.Net.KeepAlive = 30 * time.Minute
 	config.Net.MaxOpenRequests = 20000
 
-	//config.Group.Mode = cluster.ConsumerModePartitions
+	config.Group.Mode = cluster.ConsumerModePartitions
 
 	n.mu.RLock()
 	defer n.mu.RUnlock()
@@ -93,16 +94,37 @@ func (n *kafkaResource) Consumer(topic, groupId string) (*cluster.Consumer, erro
 	if addr, ok := currentLabels[n.label]; ok {
 		for k, v := range addr {
 			if k == 0 && v.Host != "" && v.Port != 0 {
-				address := fmt.Sprintf("%s:%d", v.Host, v.Port)
-				brokers = append(brokers, address)
-				break
+				//address := fmt.Sprintf("%s:%d", v.Host, v.Port)
+				if strings.Index(v.Host, ",") != -1 {
+					hp := strings.Split(v.Host, ",")
+					var tmp []string
+					for _, val := range hp {
+						if strings.Index(val, ":") == -1 {
+							val = fmt.Sprintf("%s:%d", val, v.Port)
+							tmp = append(tmp, val)
+						} else {
+							tmp = append(tmp, val)
+						}
+					}
+					brokers = append(brokers, tmp...)
+				} else {
+					if strings.Index(v.Host, ":") != -1 {
+
+						brokers = append(brokers, v.Host) //此时有host:port
+
+					} else {
+						brokers = append(brokers, fmt.Sprintf("%s:%d", v.Host, v.Port))
+					}
+				}
+				//brokers = append(brokers, address)
+				continue
 			}
 		}
 	}
-
 	consumer, err := cluster.NewConsumer(brokers, groupId, []string{topic}, config)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return nil, err
 	}
 
 	// consume errors
