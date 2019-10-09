@@ -52,12 +52,12 @@ type Rabbitmqer interface {
 	 queueName: 队列的名字
 	 body: 发送的消息体 []byte
 	*/
-	// ProducerByQueue 生产一条消息到Rabbitmq
+	// ProducerByQueue 生产一条消息到Rabbitmq，使用队列模式
 	ProducerByQueue(ctx context.Context, queueName string, body []byte) (chan uint8, error)
 	/*
 	 queueName: 队列的名字
 	*/
-	// Consumer 消费者使用
+	// ConsumerByQueue 消费者使用队列模式
 	ConsumerByQueue(queueName string) (<-chan amqp.Delivery, error)
 }
 
