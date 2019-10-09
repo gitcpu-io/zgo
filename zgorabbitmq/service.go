@@ -46,6 +46,19 @@ type Rabbitmqer interface {
 	*/
 	// Consumer 消费者使用
 	Consumer(exchangeName, exchangeType, routingKey, queueName string) (<-chan amqp.Delivery, error)
+
+	/*
+	 ctx:是上下文参数，由使用者传入，用于控制这个函数是否超时
+	 queueName: 队列的名字
+	 body: 发送的消息体 []byte
+	*/
+	// ProducerByQueue 生产一条消息到Rabbitmq
+	ProducerByQueue(ctx context.Context, queueName string, body []byte) (chan uint8, error)
+	/*
+	 queueName: 队列的名字
+	*/
+	// Consumer 消费者使用
+	ConsumerByQueue(queueName string) (<-chan amqp.Delivery, error)
 }
 
 // Rabbitmq用于对zgo.Rabbitmq这个全局变量赋值
@@ -145,4 +158,14 @@ func (n *zgorabbitmq) Producer(ctx context.Context, exchangeName, exchangeType, 
 // Consumer 消费者
 func (n *zgorabbitmq) Consumer(exchangeName, exchangeType, routingKey, queueName string) (<-chan amqp.Delivery, error) {
 	return n.res.Consumer(exchangeName, exchangeType, routingKey, queueName)
+}
+
+// ProducerByQueue 生产一条消息
+func (n *zgorabbitmq) ProducerByQueue(ctx context.Context, queueName string, body []byte) (chan uint8, error) {
+	return n.res.ProducerByQueue(ctx, queueName, body)
+}
+
+// ConsumerByQueue 消费者
+func (n *zgorabbitmq) ConsumerByQueue(queueName string) (<-chan amqp.Delivery, error) {
+	return n.res.ConsumerByQueue(queueName)
 }
