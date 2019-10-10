@@ -102,7 +102,8 @@ func (ls *logStore) dealLogStore(v *logBody, topic string, ctx context.Context, 
 			}
 			f := zgofile.New(ls.Label)
 			input := strings.NewReader(string(body) + "\r\n")
-			_, err = f.Append("/"+zgoutils.Utils.FormatFromUnixTimeShort(-1)+"/"+topic+".log", input)
+			//_, err = f.Append("/"+zgoutils.Utils.FormatFromUnixTimeShort(-1)+"/"+topic+".log", input)
+			_, err = f.Append("/"+topic+".log", input)
 			if err != nil {
 				fmt.Println(ls.Label, "==file==", err)
 			}
