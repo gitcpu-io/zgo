@@ -1162,6 +1162,18 @@
 			"revisionTime": "2019-02-12T00:16:53Z"
 		},
 		{
+			"checksumSHA1": "GqhvFydNzXnxRyznxGxM8/xwEv8=",
+			"path": "go.mongodb.org/mongo-driver/bson",
+			"revision": "4ce0ae63789cc26fee16f3b52dae7aa1f2751131",
+			"revisionTime": "2019-09-17T09:38:22Z"
+		},
+		{
+			"checksumSHA1": "QxuZvNnzVcEgM5z5tvZKU5vMoXg=",
+			"path": "go.mongodb.org/mongo-driver/event",
+			"revision": "4ce0ae63789cc26fee16f3b52dae7aa1f2751131",
+			"revisionTime": "2019-09-17T09:38:22Z"
+		},
+		{
 			"checksumSHA1": "9QKBlDoeb7yZjQZlBWEUXB3kenA=",
 			"path": "go.mongodb.org/mongo-driver/mongo",
 			"revision": "4ce0ae63789cc26fee16f3b52dae7aa1f2751131",
