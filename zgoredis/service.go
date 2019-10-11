@@ -351,6 +351,9 @@ func (r *zgoredis) Scard(ctx context.Context, key string) (int, error) {
 func (r *zgoredis) Smembers(ctx context.Context, key string) (interface{}, error) {
 	return r.res.Smembers(ctx, key)
 }
+func (r *zgoredis) Sunion(ctx context.Context, key string, key1 ...string) (interface{}, error) {
+	return r.res.Sunion(ctx, key, key1...)
+}
 
 func (r *zgoredis) Sismember(ctx context.Context, key string, value interface{}) (int, error) {
 	return r.res.Sismember(ctx, key, value)
