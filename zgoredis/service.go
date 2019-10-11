@@ -53,7 +53,7 @@ type Rediser interface {
 	Lpop(ctx context.Context, key string) (interface{}, error)
 	Rpop(ctx context.Context, key string) (interface{}, error)
 	Scard(ctx context.Context, key string) (int, error)
-	Sunion(ctx context.Context, key string, key1 ...string) (interface{}, error)
+	Sunion(ctx context.Context, key string, key1 ...interface{}) (interface{}, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
 	Zrank(ctx context.Context, key string, member interface{}) (int, error)
@@ -352,7 +352,7 @@ func (r *zgoredis) Scard(ctx context.Context, key string) (int, error) {
 func (r *zgoredis) Smembers(ctx context.Context, key string) (interface{}, error) {
 	return r.res.Smembers(ctx, key)
 }
-func (r *zgoredis) Sunion(ctx context.Context, key string, key1 ...string) (interface{}, error) {
+func (r *zgoredis) Sunion(ctx context.Context, key string, key1 ...interface{}) (interface{}, error) {
 	return r.res.Sunion(ctx, key, key1...)
 }
 

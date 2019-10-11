@@ -50,7 +50,7 @@ type RedisResourcer interface {
 	Rpop(ctx context.Context, key string) (interface{}, error)
 
 	Scard(ctx context.Context, key string) (int, error)
-	Sunion(ctx context.Context, key string, key1 ...string) (interface{}, error)
+	Sunion(ctx context.Context, key string, key1 ...interface{}) (interface{}, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
 
@@ -337,9 +337,9 @@ func (r *redisResource) Scard(ctx context.Context, key string) (int, error) {
 	err := r.deal(flatCmd)
 	return result, err
 }
-func (r *redisResource) Sunion(ctx context.Context, key string, key1 ...string) (interface{}, error) {
+func (r *redisResource) Sunion(ctx context.Context, key string, key1 ...interface{}) (interface{}, error) {
 	var result []string
-	flatCmd := radix.FlatCmd(&result, "Sunion", key, key1)
+	flatCmd := radix.FlatCmd(&result, "Sunion", key, key1...)
 	err := r.deal(flatCmd)
 	return result, err
 }
