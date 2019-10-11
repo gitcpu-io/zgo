@@ -53,6 +53,7 @@ type Rediser interface {
 	Lpop(ctx context.Context, key string) (interface{}, error)
 	Rpop(ctx context.Context, key string) (interface{}, error)
 	Scard(ctx context.Context, key string) (int, error)
+	Sunion(ctx context.Context, key string, key1 ...string) (interface{}, error)
 	Smembers(ctx context.Context, key string) (interface{}, error)
 	Sismember(ctx context.Context, key string, value interface{}) (int, error)
 	Zrank(ctx context.Context, key string, member interface{}) (int, error)
