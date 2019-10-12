@@ -28,45 +28,44 @@ import (
 */
 
 type Payer interface {
-
 	//统一收单交易支付接口
-	TradePay(body zgoutils.BodyMap) (tradeRes *TradePayResponse, err error)
+	OrderPay(body zgoutils.BodyMap) (tradeRes *TradePayResponse, err error)
 
 	//统一收单线下交易查询
-	TradeQuery(body zgoutils.BodyMap) (tradeRes *TradeQueryResponse, err error)
+	OrderQuery(body zgoutils.BodyMap) (tradeRes *TradeQueryResponse, err error)
 
 	//统一收单交易结算接口
-	TradeOrderSettle(body zgoutils.BodyMap) (tradeRes *TradeOrderSettleResponse, err error)
+	OrderSettle(body zgoutils.BodyMap) (tradeRes *TradeOrderSettleResponse, err error)
 
 	//统一收单线下交易预创建
-	TradePrecreate(body zgoutils.BodyMap) (tradeRes *TradePrecreateResponse, err error)
+	Order(body zgoutils.BodyMap) (tradeRes *TradePrecreateResponse, err error)
 
 	//统一收单交易创建接口
-	TradeCreate(body zgoutils.BodyMap) (tradeRes *TradeCreateResponse, err error)
+	OrderCreate(body zgoutils.BodyMap) (tradeRes *TradeCreateResponse, err error)
 
 	//统一收单交易关闭接口
-	TradeClose(body zgoutils.BodyMap) (tradeRes *TradeCloseResponse, err error)
+	OrderClose(body zgoutils.BodyMap) (tradeRes *TradeCloseResponse, err error)
 
 	//统一收单交易撤销接口
-	TradeCancel(body zgoutils.BodyMap) (tradeRes *TradeCancelResponse, err error)
+	OrderCancel(body zgoutils.BodyMap) (tradeRes *TradeCancelResponse, err error)
 
 	//统一收单交易退款接口
-	TradeRefund(body zgoutils.BodyMap) (tradeRes *TradeRefundResponse, err error)
+	OrderRefund(body zgoutils.BodyMap) (tradeRes *TradeRefundResponse, err error)
 
 	//统一收单退款页面接口
-	TradePageRefund(body zgoutils.BodyMap) (tradeRes *TradePageRefundResponse, err error)
+	OrderPageRefund(body zgoutils.BodyMap) (tradeRes *TradePageRefundResponse, err error)
 
 	//统一收单交易退款查询
-	TradeFastPayRefundQuery(body zgoutils.BodyMap) (tradeRes *TradeFastpayRefundQueryResponse, err error)
+	OrderFastPayRefundQuery(body zgoutils.BodyMap) (tradeRes *TradeFastpayRefundQueryResponse, err error)
 
 	//统一收单下单并支付页面接口
-	TradePagePay(body zgoutils.BodyMap) (payUrl string, err error)
+	OrderPagePay(body zgoutils.BodyMap) (payUrl string, err error)
 
 	//app支付接口2.0
-	TradeAppPay(body zgoutils.BodyMap) (payParam string, err error)
+	OrderAppPay(body zgoutils.BodyMap) (payParam string, err error)
 
 	//手机网站支付接口2.0
-	TradeWapPay(body zgoutils.BodyMap) (payUrl string, err error)
+	OrderWapPay(body zgoutils.BodyMap) (payUrl string, err error)
 
 	//单笔转账到支付宝账户接口
 	FundTransToaccountTransfer(body zgoutils.BodyMap) (tradeRes *FundTransToaccountTransferResponse, err error)
@@ -88,28 +87,28 @@ type Payer interface {
 
 	//************
 	//设置 应用公钥证书SN
-	SetAppCertSN(appCertSN string) (client *PayClient)
+	SetAppCertSN(appCertSN string)
 
 	//设置 支付宝根证书SN
-	SetRootCertSN(rootCertSN string) (client *PayClient)
+	SetRootCertSN(rootCertSN string)
 
 	//设置支付后的ReturnUrl
-	SetReturnUrl(url string) (client *PayClient)
+	SetReturnUrl(url string)
 
 	//设置支付宝服务器主动通知商户服务器里指定的页面http/https路径。
-	SetNotifyUrl(url string) (client *PayClient)
+	SetNotifyUrl(url string)
 
 	//设置编码格式，如utf-8,gbk,gb2312等，默认推荐使用 utf-8
-	SetCharset(charset string) (client *PayClient)
+	SetCharset(charset string)
 
 	//设置签名算法类型，目前支持RSA2和RSA，默认推荐使用 RSA2
-	SetSignType(signType string) (client *PayClient)
+	SetSignType(signType string)
 
 	//设置应用授权
-	SetAppAuthToken(appAuthToken string) (client *PayClient)
+	SetAppAuthToken(appAuthToken string)
 
 	//设置用户信息授权
-	SetAuthToken(authToken string) (client *PayClient)
+	SetAuthToken(authToken string)
 
 	//************************
 
@@ -146,7 +145,7 @@ func NewPayClient(appId, privateKey string, isProd bool) (client *PayClient) {
 
 //alipay.trade.fastpay.refund.query(统一收单交易退款查询)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.fastpay.refund.query
-func (a *PayClient) TradeFastPayRefundQuery(body zgoutils.BodyMap) (tradeRes *TradeFastpayRefundQueryResponse, err error) {
+func (a *PayClient) OrderFastPayRefundQuery(body zgoutils.BodyMap) (tradeRes *TradeFastpayRefundQueryResponse, err error) {
 	var (
 		p1, p2 string
 		bs     []byte
@@ -173,7 +172,7 @@ func (a *PayClient) TradeFastPayRefundQuery(body zgoutils.BodyMap) (tradeRes *Tr
 
 //alipay.trade.order.settle(统一收单交易结算接口)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.order.settle
-func (a *PayClient) TradeOrderSettle(body zgoutils.BodyMap) (tradeRes *TradeOrderSettleResponse, err error) {
+func (a *PayClient) OrderSettle(body zgoutils.BodyMap) (tradeRes *TradeOrderSettleResponse, err error) {
 	var (
 		p1, p2 string
 		bs     []byte
@@ -200,7 +199,7 @@ func (a *PayClient) TradeOrderSettle(body zgoutils.BodyMap) (tradeRes *TradeOrde
 
 //alipay.trade.create(统一收单交易创建接口)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.create
-func (a *PayClient) TradeCreate(body zgoutils.BodyMap) (tradeRes *TradeCreateResponse, err error) {
+func (a *PayClient) OrderCreate(body zgoutils.BodyMap) (tradeRes *TradeCreateResponse, err error) {
 	var (
 		p1, p2 string
 		bs     []byte
@@ -227,7 +226,7 @@ func (a *PayClient) TradeCreate(body zgoutils.BodyMap) (tradeRes *TradeCreateRes
 
 //alipay.trade.close(统一收单交易关闭接口)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.close
-func (a *PayClient) TradeClose(body zgoutils.BodyMap) (tradeRes *TradeCloseResponse, err error) {
+func (a *PayClient) OrderClose(body zgoutils.BodyMap) (tradeRes *TradeCloseResponse, err error) {
 	var (
 		p1, p2 string
 		bs     []byte
@@ -254,7 +253,7 @@ func (a *PayClient) TradeClose(body zgoutils.BodyMap) (tradeRes *TradeCloseRespo
 
 //alipay.trade.cancel(统一收单交易撤销接口)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.cancel
-func (a *PayClient) TradeCancel(body zgoutils.BodyMap) (tradeRes *TradeCancelResponse, err error) {
+func (a *PayClient) OrderCancel(body zgoutils.BodyMap) (tradeRes *TradeCancelResponse, err error) {
 	var (
 		p1, p2 string
 		bs     []byte
@@ -281,7 +280,7 @@ func (a *PayClient) TradeCancel(body zgoutils.BodyMap) (tradeRes *TradeCancelRes
 
 //alipay.trade.refund(统一收单交易退款接口)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.refund
-func (a *PayClient) TradeRefund(body zgoutils.BodyMap) (tradeRes *TradeRefundResponse, err error) {
+func (a *PayClient) OrderRefund(body zgoutils.BodyMap) (tradeRes *TradeRefundResponse, err error) {
 	var (
 		p1, p2 string
 		bs     []byte
@@ -308,7 +307,7 @@ func (a *PayClient) TradeRefund(body zgoutils.BodyMap) (tradeRes *TradeRefundRes
 
 //alipay.trade.refund(统一收单退款页面接口)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.page.refund
-func (a *PayClient) TradePageRefund(body zgoutils.BodyMap) (tradeRes *TradePageRefundResponse, err error) {
+func (a *PayClient) OrderPageRefund(body zgoutils.BodyMap) (tradeRes *TradePageRefundResponse, err error) {
 	var (
 		p1, p2 string
 		bs     []byte
@@ -335,7 +334,7 @@ func (a *PayClient) TradePageRefund(body zgoutils.BodyMap) (tradeRes *TradePageR
 
 //alipay.trade.precreate(统一收单线下交易预创建)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.precreate
-func (a *PayClient) TradePrecreate(body zgoutils.BodyMap) (tradeRes *TradePrecreateResponse, err error) {
+func (a *PayClient) Order(body zgoutils.BodyMap) (tradeRes *TradePrecreateResponse, err error) {
 	var bs []byte
 	p := body.Get("out_trade_no")
 	if p == null {
@@ -358,7 +357,7 @@ func (a *PayClient) TradePrecreate(body zgoutils.BodyMap) (tradeRes *TradePrecre
 
 //alipay.trade.pay(统一收单交易支付接口)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.pay
-func (a *PayClient) TradePay(body zgoutils.BodyMap) (tradeRes *TradePayResponse, err error) {
+func (a *PayClient) OrderPay(body zgoutils.BodyMap) (tradeRes *TradePayResponse, err error) {
 	var bs []byte
 	p := body.Get("out_trade_no")
 	if p == null {
@@ -381,7 +380,7 @@ func (a *PayClient) TradePay(body zgoutils.BodyMap) (tradeRes *TradePayResponse,
 
 //alipay.trade.query(统一收单线下交易查询)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.query
-func (a *PayClient) TradeQuery(body zgoutils.BodyMap) (tradeRes *TradeQueryResponse, err error) {
+func (a *PayClient) OrderQuery(body zgoutils.BodyMap) (tradeRes *TradeQueryResponse, err error) {
 	var (
 		p1, p2 string
 		bs     []byte
@@ -408,7 +407,7 @@ func (a *PayClient) TradeQuery(body zgoutils.BodyMap) (tradeRes *TradeQueryRespo
 
 //alipay.trade.app.pay(app支付接口2.0)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.app.pay
-func (a *PayClient) TradeAppPay(body zgoutils.BodyMap) (payParam string, err error) {
+func (a *PayClient) OrderAppPay(body zgoutils.BodyMap) (payParam string, err error) {
 	var bs []byte
 	trade := body.Get("out_trade_no")
 	if trade == null {
@@ -423,7 +422,7 @@ func (a *PayClient) TradeAppPay(body zgoutils.BodyMap) (payParam string, err err
 
 //alipay.trade.wap.pay(手机网站支付接口2.0)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.wap.pay
-func (a *PayClient) TradeWapPay(body zgoutils.BodyMap) (payUrl string, err error) {
+func (a *PayClient) OrderWapPay(body zgoutils.BodyMap) (payUrl string, err error) {
 	var bs []byte
 	trade := body.Get("out_trade_no")
 	if trade == null {
@@ -439,7 +438,7 @@ func (a *PayClient) TradeWapPay(body zgoutils.BodyMap) (payUrl string, err error
 
 //alipay.trade.page.pay(统一收单下单并支付页面接口)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.page.pay
-func (a *PayClient) TradePagePay(body zgoutils.BodyMap) (payUrl string, err error) {
+func (a *PayClient) OrderPagePay(body zgoutils.BodyMap) (payUrl string, err error) {
 	var bs []byte
 	trade := body.Get("out_trade_no")
 	if trade == null {
@@ -478,7 +477,7 @@ func (a *PayClient) FundTransToaccountTransfer(body zgoutils.BodyMap) (tradeRes 
 
 //alipay.trade.orderinfo.sync(支付宝订单信息同步接口)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.orderinfo.sync
-func (a *PayClient) TradeOrderinfoSync(body zgoutils.BodyMap) {
+func (a *PayClient) OrderOrderinfoSync(body zgoutils.BodyMap) {
 
 }
 
@@ -727,60 +726,52 @@ type OpenApiRoyaltyDetailInfoPojo struct {
 
 //设置 应用公钥证书SN
 //    appCertSN：应用公钥证书SN，通过 gopay.GetCertSN() 获取
-func (a *PayClient) SetAppCertSN(appCertSN string) (client *PayClient) {
+func (a *PayClient) SetAppCertSN(appCertSN string) {
 	a.AppCertSN = appCertSN
-	return a
 }
 
 //设置 支付宝根证书SN
 //    alipayRootCertSN：支付宝根证书SN，通过 gopay.GetCertSN() 获取
-func (a *PayClient) SetRootCertSN(rootCertSN string) (client *PayClient) {
+func (a *PayClient) SetRootCertSN(rootCertSN string) {
 	a.AlipayRootCertSN = rootCertSN
-	return a
 }
 
 //设置支付后的ReturnUrl
-func (a *PayClient) SetReturnUrl(url string) (client *PayClient) {
+func (a *PayClient) SetReturnUrl(url string) {
 	a.ReturnUrl = url
-	return a
 }
 
 //设置支付宝服务器主动通知商户服务器里指定的页面http/https路径。
-func (a *PayClient) SetNotifyUrl(url string) (client *PayClient) {
+func (a *PayClient) SetNotifyUrl(url string) {
 	a.NotifyUrl = url
-	return a
 }
 
 //设置编码格式，如utf-8,gbk,gb2312等，默认推荐使用 utf-8
-func (a *PayClient) SetCharset(charset string) (client *PayClient) {
+func (a *PayClient) SetCharset(charset string) {
 	if charset == null {
 		a.Charset = "utf-8"
 	} else {
 		a.Charset = charset
 	}
-	return a
 }
 
 //设置签名算法类型，目前支持RSA2和RSA，默认推荐使用 RSA2
-func (a *PayClient) SetSignType(signType string) (client *PayClient) {
+func (a *PayClient) SetSignType(signType string) {
 	if signType == null {
 		a.SignType = "RSA2"
 	} else {
 		a.SignType = signType
 	}
-	return a
 }
 
 //设置应用授权
-func (a *PayClient) SetAppAuthToken(appAuthToken string) (client *PayClient) {
+func (a *PayClient) SetAppAuthToken(appAuthToken string) {
 	a.AppAuthToken = appAuthToken
-	return a
 }
 
 //设置用户信息授权
-func (a *PayClient) SetAuthToken(authToken string) (client *PayClient) {
+func (a *PayClient) SetAuthToken(authToken string) {
 	a.AuthToken = authToken
-	return a
 }
 
 //获取参数签名

@@ -26,21 +26,20 @@ import (
 */
 
 type Payer interface {
-
 	//统一下单
-	TradeOrder(body zgoutils.BodyMap) (wxRes *UnifiedOrderResponse, err error)
+	Order(body zgoutils.BodyMap) (wxRes *UnifiedOrderResponse, err error)
 
 	//查询订单
-	TradeQuery(body zgoutils.BodyMap) (wxRes *QueryOrderResponse, err error)
+	OrderQuery(body zgoutils.BodyMap) (wxRes *QueryOrderResponse, err error)
 
 	//关闭订单
-	TradeClose(body zgoutils.BodyMap) (wxRes *CloseOrderResponse, err error)
+	OrderClose(body zgoutils.BodyMap) (wxRes *CloseOrderResponse, err error)
 
 	//撤销订单
-	TradeCancel(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *ReverseResponse, err error)
+	OrderCancel(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *ReverseResponse, err error)
 
 	//申请退款
-	TradeRefund(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *RefundResponse, err error)
+	OrderRefund(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *RefundResponse, err error)
 
 	//查询退款
 	QueryRefund(body zgoutils.BodyMap) (wxRes *QueryRefundResponse, err error)
@@ -61,7 +60,10 @@ type Payer interface {
 	BatchQueryComment(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes string, err error)
 
 	//设置支付国家
-	SetCountry(country int) (client *PayClient)
+	SetCountry(country int)
+
+	//设置微信服务器主动通知指定的页面http/https路径。
+	SetNotifyUrl(url string)
 
 	//获取微信支付所需参数里的Sign值
 	GetParamSign(appId, mchId, apiKey string, bm zgoutils.BodyMap) (sign string)
@@ -94,11 +96,12 @@ type Payer interface {
 type Country int
 
 type PayClient struct {
-	AppId   string
-	MchId   string
-	ApiKey  string
-	BaseURL string
-	IsProd  bool
+	AppId     string
+	MchId     string
+	ApiKey    string
+	BaseURL   string
+	IsProd    bool
+	NotifyUrl string
 }
 
 //初始化微信客户端 ok
@@ -111,7 +114,8 @@ func NewPayClient(appId, mchId, apiKey string, isProd bool) (client *PayClient) 
 		AppId:  appId,
 		MchId:  mchId,
 		ApiKey: apiKey,
-		IsProd: isProd}
+		IsProd: isProd,
+	}
 }
 
 //提交付款码支付 ok
@@ -135,7 +139,7 @@ func (w *PayClient) MicroPay(body zgoutils.BodyMap) (wxRes *MicropayResponse, er
 
 //统一下单 ok
 //    文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1
-func (w *PayClient) TradeOrder(body zgoutils.BodyMap) (wxRes *UnifiedOrderResponse, err error) {
+func (w *PayClient) Order(body zgoutils.BodyMap) (wxRes *UnifiedOrderResponse, err error) {
 	var bs []byte
 	if w.IsProd {
 		bs, err = w.do(body, wxUnifiedorder)
@@ -155,7 +159,7 @@ func (w *PayClient) TradeOrder(body zgoutils.BodyMap) (wxRes *UnifiedOrderRespon
 
 //查询订单 ok
 //    文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_2
-func (w *PayClient) TradeQuery(body zgoutils.BodyMap) (wxRes *QueryOrderResponse, err error) {
+func (w *PayClient) OrderQuery(body zgoutils.BodyMap) (wxRes *QueryOrderResponse, err error) {
 	var bs []byte
 	if w.IsProd {
 		bs, err = w.do(body, wxOrderquery)
@@ -174,7 +178,7 @@ func (w *PayClient) TradeQuery(body zgoutils.BodyMap) (wxRes *QueryOrderResponse
 
 //关闭订单 ok
 //    文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_3
-func (w *PayClient) TradeClose(body zgoutils.BodyMap) (wxRes *CloseOrderResponse, err error) {
+func (w *PayClient) OrderClose(body zgoutils.BodyMap) (wxRes *CloseOrderResponse, err error) {
 	var bs []byte
 	if w.IsProd {
 		bs, err = w.do(body, wxCloseorder)
@@ -193,7 +197,7 @@ func (w *PayClient) TradeClose(body zgoutils.BodyMap) (wxRes *CloseOrderResponse
 
 //撤销订单 ok
 //    文档地址：https://pay.weixin.qq.com/wiki/doc/api/micropay.php?chapter=9_11&index=3
-func (w *PayClient) TradeCancel(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *ReverseResponse, err error) {
+func (w *PayClient) OrderCancel(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *ReverseResponse, err error) {
 	var (
 		bs, pkcs    []byte
 		pkcsPool    *x509.CertPool
@@ -212,7 +216,8 @@ func (w *PayClient) TradeCancel(body zgoutils.BodyMap, certFilePath, keyFilePath
 		tlsConfig = &tls.Config{
 			Certificates:       []tls.Certificate{certificate},
 			RootCAs:            pkcsPool,
-			InsecureSkipVerify: true}
+			InsecureSkipVerify: true,
+		}
 		bs, err = w.do(body, wxReverse, tlsConfig)
 	} else {
 		bs, err = w.do(body, wxSandboxReverse)
@@ -229,7 +234,7 @@ func (w *PayClient) TradeCancel(body zgoutils.BodyMap, certFilePath, keyFilePath
 
 //申请退款 ok
 //    文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_4
-func (w *PayClient) TradeRefund(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *RefundResponse, err error) {
+func (w *PayClient) OrderRefund(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *RefundResponse, err error) {
 	var (
 		bs, pkcs    []byte
 		pkcsPool    *x509.CertPool
@@ -248,7 +253,8 @@ func (w *PayClient) TradeRefund(body zgoutils.BodyMap, certFilePath, keyFilePath
 		tlsConfig = &tls.Config{
 			Certificates:       []tls.Certificate{certificate},
 			RootCAs:            pkcsPool,
-			InsecureSkipVerify: true}
+			InsecureSkipVerify: true,
+		}
 		bs, err = w.do(body, wxRefund, tlsConfig)
 	} else {
 		bs, err = w.do(body, wxSandboxRefund)
@@ -355,7 +361,8 @@ func (w *PayClient) BatchQueryComment(body zgoutils.BodyMap, certFilePath, keyFi
 		tlsConfig = &tls.Config{
 			Certificates:       []tls.Certificate{certificate},
 			RootCAs:            pkcsPool,
-			InsecureSkipVerify: true}
+			InsecureSkipVerify: true,
+		}
 		bs, err = w.do(body, wxBatchquerycomment, tlsConfig)
 	} else {
 		bs, err = w.do(body, wxSandboxBatchquerycomment)
@@ -423,6 +430,11 @@ func (w *PayClient) do(body zgoutils.BodyMap, path string, tlsConfig ...*tls.Con
 		errs []error
 		res  gorequest.Response
 	)
+	if w.NotifyUrl != null {
+		if path == wxUnifiedorder || path == wxRefund { //只在统一下单 和 退款时才用到notify_url
+			body.Set("notify_url", w.NotifyUrl)
+		}
+	}
 	if body.Get("sign") != null {
 		goto GoRequest
 	}
@@ -460,7 +472,7 @@ GoRequest:
 //设置支付国家（默认：中国国内）
 //    根据支付地区情况设置国家
 //    country：<China：中国国内，China2：中国国内（冗灾方案），SoutheastAsia：东南亚，Other：其他国家>
-func (w *PayClient) SetCountry(country int) (client *PayClient) {
+func (w *PayClient) SetCountry(country int) {
 	switch country {
 	case 1:
 		w.BaseURL = wxBaseUrlCh
@@ -473,7 +485,11 @@ func (w *PayClient) SetCountry(country int) (client *PayClient) {
 	default:
 		w.BaseURL = wxBaseUrlCh
 	}
-	return w
+}
+
+//设置微信服务器主动通知指定的页面http/https路径。
+func (w *PayClient) SetNotifyUrl(url string) {
+	w.NotifyUrl = url
 }
 
 //获取微信支付正式环境Sign值

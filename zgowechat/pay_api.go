@@ -258,7 +258,7 @@ func (w *PayClient) GetOpenIdByAuthCode(appId, mchId, apiKey, authCode, nonceStr
 		bs   []byte
 		errs []error
 	)
-	url = "https://api.mch.weixin.qq.com/tools/authcodetoopenid"
+	url = wxBaseUrlCh + "tools/authcodetoopenid"
 	bm = make(zgoutils.BodyMap)
 	bm.Set("appid", appId)
 	bm.Set("mch_id", mchId)
