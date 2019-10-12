@@ -140,7 +140,7 @@ Verify:
 //    timeStamp：时间
 //    ApiKey：API秘钥值
 //    微信小程序支付API：https://developers.weixin.qq.com/miniprogram/dev/api/open-api/payment/wx.requestPayment.html
-func (w *PayClient) GetMiniPaySign(appId, nonceStr, prepayId, signType, timeStamp, apiKey string) (paySign string) {
+func (w *PayClient) GetMiniPaySign(appId, nonceStr, prepayid, signType, timeStamp, apiKey string) (paySign string) {
 	var (
 		buffer strings.Builder
 		h      hash.Hash
@@ -151,8 +151,8 @@ func (w *PayClient) GetMiniPaySign(appId, nonceStr, prepayId, signType, timeStam
 	buffer.WriteString(appId)
 	buffer.WriteString("&nonceStr=")
 	buffer.WriteString(nonceStr)
-	buffer.WriteString("&package=")
-	buffer.WriteString(prepayId)
+	buffer.WriteString("&package=prepay_id=")
+	buffer.WriteString(prepayid) //微信app团队 prepayid这个字段搞的真是无语 bla bla ...
 	buffer.WriteString("&signType=")
 	buffer.WriteString(signType)
 	buffer.WriteString("&timeStamp=")
@@ -176,7 +176,7 @@ func (w *PayClient) GetMiniPaySign(appId, nonceStr, prepayId, signType, timeStam
 //    timeStamp：时间
 //    ApiKey：API秘钥值
 //    微信内H5支付官方文档：https://pay.weixin.qq.com/wiki/doc/api/external/jsapi.php?chapter=7_7&index=6
-func (w *PayClient) GetH5PaySign(appId, nonceStr, packages, signType, timeStamp, apiKey string) (paySign string) {
+func (w *PayClient) GetH5PaySign(appId, nonceStr, prepayid, signType, timeStamp, apiKey string) (paySign string) {
 	var (
 		buffer strings.Builder
 		h      hash.Hash
@@ -187,8 +187,8 @@ func (w *PayClient) GetH5PaySign(appId, nonceStr, packages, signType, timeStamp,
 	buffer.WriteString(appId)
 	buffer.WriteString("&nonceStr=")
 	buffer.WriteString(nonceStr)
-	buffer.WriteString("&package=")
-	buffer.WriteString(packages)
+	buffer.WriteString("&package=prepay_id=")
+	buffer.WriteString(prepayid) //微信app团队 prepayid这个字段搞的真是无语 bla bla ...
 	buffer.WriteString("&signType=")
 	buffer.WriteString(signType)
 	buffer.WriteString("&timeStamp=")
@@ -207,7 +207,7 @@ func (w *PayClient) GetH5PaySign(appId, nonceStr, packages, signType, timeStamp,
 
 //APP支付，统一下单获取支付参数后，再次计算APP支付所需要的的sign
 //    appId：APPID
-//    partnerid：partnerid
+//    partnerid：就是商户号
 //    nonceStr：随即字符串
 //    prepayId：统一下单成功后得到的值
 //    signType：此处签名方式，务必与统一下单时用的签名方式一致
@@ -227,9 +227,9 @@ func (w *PayClient) GetAppPaySign(appid, partnerid, noncestr, prepayid, signType
 	buffer.WriteString(noncestr)
 	buffer.WriteString("&package=Sign=WXPay")
 	buffer.WriteString("&partnerid=")
-	buffer.WriteString(partnerid)
+	buffer.WriteString(partnerid) //就是商户号
 	buffer.WriteString("&prepayid=")
-	buffer.WriteString(prepayid)
+	buffer.WriteString(prepayid) //微信app团队 prepayid这个字段搞的真是无语 bla bla ...
 	buffer.WriteString("&timestamp=")
 	buffer.WriteString(timestamp)
 	buffer.WriteString("&key=")
