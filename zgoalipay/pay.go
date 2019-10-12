@@ -28,11 +28,18 @@ import (
 */
 
 type Payer interface {
-	//统一收单交易退款查询
-	TradeFastPayRefundQuery(body zgoutils.BodyMap) (tradeRes *TradeFastpayRefundQueryResponse, err error)
+
+	//统一收单交易支付接口
+	TradePay(body zgoutils.BodyMap) (tradeRes *TradePayResponse, err error)
+
+	//统一收单线下交易查询
+	TradeQuery(body zgoutils.BodyMap) (tradeRes *TradeQueryResponse, err error)
 
 	//统一收单交易结算接口
 	TradeOrderSettle(body zgoutils.BodyMap) (tradeRes *TradeOrderSettleResponse, err error)
+
+	//统一收单线下交易预创建
+	TradePrecreate(body zgoutils.BodyMap) (tradeRes *TradePrecreateResponse, err error)
 
 	//统一收单交易创建接口
 	TradeCreate(body zgoutils.BodyMap) (tradeRes *TradeCreateResponse, err error)
@@ -49,14 +56,8 @@ type Payer interface {
 	//统一收单退款页面接口
 	TradePageRefund(body zgoutils.BodyMap) (tradeRes *TradePageRefundResponse, err error)
 
-	//统一收单线下交易预创建
-	TradePrecreate(body zgoutils.BodyMap) (tradeRes *TradePrecreateResponse, err error)
-
-	//统一收单交易支付接口
-	TradePay(body zgoutils.BodyMap) (tradeRes *TradePayResponse, err error)
-
-	//统一收单线下交易查询
-	TradeQuery(body zgoutils.BodyMap) (tradeRes *TradeQueryResponse, err error)
+	//统一收单交易退款查询
+	TradeFastPayRefundQuery(body zgoutils.BodyMap) (tradeRes *TradeFastpayRefundQueryResponse, err error)
 
 	//统一收单下单并支付页面接口
 	TradePagePay(body zgoutils.BodyMap) (payUrl string, err error)

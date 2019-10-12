@@ -42,7 +42,7 @@ func (w *PayClient) GetParamSign(appId, mchId, apiKey string, bm zgoutils.BodyMa
 	} else {
 		h = md5.New()
 	}
-	h.Write([]byte(bm.EncodeSignParams(apiKey)))
+	h.Write([]byte(bm.EncodeWechatSignParams(apiKey)))
 	sign = strings.ToUpper(hex.EncodeToString(h.Sum(nil)))
 	return
 }
@@ -65,7 +65,7 @@ func (w *PayClient) GetSanBoxParamSign(appId, mchId, apiKey string, bm zgoutils.
 		return
 	}
 	hashMd5 = md5.New()
-	hashMd5.Write([]byte(bm.EncodeSignParams(sandBoxApiKey)))
+	hashMd5.Write([]byte(bm.EncodeWechatSignParams(sandBoxApiKey)))
 	sign = strings.ToUpper(hex.EncodeToString(hashMd5.Sum(nil)))
 	return
 }

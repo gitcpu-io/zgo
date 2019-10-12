@@ -26,26 +26,30 @@ import (
 */
 
 type Payer interface {
-	//提交付款码支付
-	Micropay(body zgoutils.BodyMap) (wxRes *MicropayResponse, err error)
 
 	//统一下单
-	UnifiedOrder(body zgoutils.BodyMap) (wxRes *UnifiedOrderResponse, err error)
+	TradeOrder(body zgoutils.BodyMap) (wxRes *UnifiedOrderResponse, err error)
 
 	//查询订单
-	QueryOrder(body zgoutils.BodyMap) (wxRes *QueryOrderResponse, err error)
+	TradeQuery(body zgoutils.BodyMap) (wxRes *QueryOrderResponse, err error)
 
 	//关闭订单
-	CloseOrder(body zgoutils.BodyMap) (wxRes *CloseOrderResponse, err error)
+	TradeClose(body zgoutils.BodyMap) (wxRes *CloseOrderResponse, err error)
 
 	//撤销订单
-	Reverse(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *ReverseResponse, err error)
+	TradeCancel(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *ReverseResponse, err error)
 
 	//申请退款
-	Refund(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *RefundResponse, err error)
+	TradeRefund(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *RefundResponse, err error)
 
 	//查询退款
 	QueryRefund(body zgoutils.BodyMap) (wxRes *QueryRefundResponse, err error)
+
+	//提交付款码支付
+	MicroPay(body zgoutils.BodyMap) (wxRes *MicropayResponse, err error)
+
+	//企业向微信用户个人付款
+	Transfer(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *TransfersResponse, err error)
 
 	//下载对账单
 	DownloadBill(body zgoutils.BodyMap) (wxRes string, err error)
@@ -55,9 +59,6 @@ type Payer interface {
 
 	//拉取订单评价数据
 	BatchQueryComment(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes string, err error)
-
-	//企业向微信用户个人付款
-	Transfer(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *TransfersResponse, err error)
 
 	//设置支付国家
 	SetCountry(country int) (client *PayClient)
@@ -115,7 +116,7 @@ func NewPayClient(appId, mchId, apiKey string, isProd bool) (client *PayClient) 
 
 //提交付款码支付 ok
 //    文档地址：https://pay.weixin.qq.com/wiki/doc/api/micropay.php?chapter=9_10&index=1
-func (w *PayClient) Micropay(body zgoutils.BodyMap) (wxRes *MicropayResponse, err error) {
+func (w *PayClient) MicroPay(body zgoutils.BodyMap) (wxRes *MicropayResponse, err error) {
 	var bs []byte
 	if w.IsProd {
 		bs, err = w.do(body, wxMicropay)
@@ -134,7 +135,7 @@ func (w *PayClient) Micropay(body zgoutils.BodyMap) (wxRes *MicropayResponse, er
 
 //统一下单 ok
 //    文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1
-func (w *PayClient) UnifiedOrder(body zgoutils.BodyMap) (wxRes *UnifiedOrderResponse, err error) {
+func (w *PayClient) TradeOrder(body zgoutils.BodyMap) (wxRes *UnifiedOrderResponse, err error) {
 	var bs []byte
 	if w.IsProd {
 		bs, err = w.do(body, wxUnifiedorder)
@@ -154,7 +155,7 @@ func (w *PayClient) UnifiedOrder(body zgoutils.BodyMap) (wxRes *UnifiedOrderResp
 
 //查询订单 ok
 //    文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_2
-func (w *PayClient) QueryOrder(body zgoutils.BodyMap) (wxRes *QueryOrderResponse, err error) {
+func (w *PayClient) TradeQuery(body zgoutils.BodyMap) (wxRes *QueryOrderResponse, err error) {
 	var bs []byte
 	if w.IsProd {
 		bs, err = w.do(body, wxOrderquery)
@@ -173,7 +174,7 @@ func (w *PayClient) QueryOrder(body zgoutils.BodyMap) (wxRes *QueryOrderResponse
 
 //关闭订单 ok
 //    文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_3
-func (w *PayClient) CloseOrder(body zgoutils.BodyMap) (wxRes *CloseOrderResponse, err error) {
+func (w *PayClient) TradeClose(body zgoutils.BodyMap) (wxRes *CloseOrderResponse, err error) {
 	var bs []byte
 	if w.IsProd {
 		bs, err = w.do(body, wxCloseorder)
@@ -192,7 +193,7 @@ func (w *PayClient) CloseOrder(body zgoutils.BodyMap) (wxRes *CloseOrderResponse
 
 //撤销订单 ok
 //    文档地址：https://pay.weixin.qq.com/wiki/doc/api/micropay.php?chapter=9_11&index=3
-func (w *PayClient) Reverse(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *ReverseResponse, err error) {
+func (w *PayClient) TradeCancel(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *ReverseResponse, err error) {
 	var (
 		bs, pkcs    []byte
 		pkcsPool    *x509.CertPool
@@ -228,7 +229,7 @@ func (w *PayClient) Reverse(body zgoutils.BodyMap, certFilePath, keyFilePath, pk
 
 //申请退款 ok
 //    文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_4
-func (w *PayClient) Refund(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *RefundResponse, err error) {
+func (w *PayClient) TradeRefund(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *RefundResponse, err error) {
 	var (
 		bs, pkcs    []byte
 		pkcsPool    *x509.CertPool
@@ -426,7 +427,7 @@ func (w *PayClient) do(body zgoutils.BodyMap, path string, tlsConfig ...*tls.Con
 		goto GoRequest
 	}
 	if !w.IsProd {
-		body.Set("sign_type", SignType_MD5)
+		//body.Set("sign_type", SignType_MD5)
 		if sign, err = getSignBoxSign(w.MchId, w.ApiKey, body); err != nil {
 			return
 		}
@@ -483,7 +484,7 @@ func getReleaseSign(apiKey string, signType string, bm zgoutils.BodyMap) (sign s
 	} else {
 		h = md5.New()
 	}
-	h.Write([]byte(bm.EncodeSignParams(apiKey)))
+	h.Write([]byte(bm.EncodeWechatSignParams(apiKey)))
 	sign = strings.ToUpper(hex.EncodeToString(h.Sum(nil)))
 	return
 }
@@ -498,7 +499,7 @@ func getSignBoxSign(mchId, apiKey string, bm zgoutils.BodyMap) (sign string, err
 		return
 	}
 	h = md5.New()
-	h.Write([]byte(bm.EncodeSignParams(sandBoxApiKey)))
+	h.Write([]byte(bm.EncodeWechatSignParams(sandBoxApiKey)))
 	sign = strings.ToUpper(hex.EncodeToString(h.Sum(nil)))
 	return
 }
