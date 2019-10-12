@@ -97,13 +97,13 @@ func TestEngine(t *testing.T) {
 			}
 
 			//****************************************test neo4j
-			neo4jch, err := Neo4j.GetConnChan()
-			if err != nil {
-				fmt.Println("---error", err)
-			}
-			if neo, ok := <-neo4jch; ok {
-				fmt.Println("zgo engine is niubility from neo4j", neo)
-			}
+			//neo4jch, err := Neo4j.GetConnChan()
+			//if err != nil {
+			//	fmt.Println("---error", err)
+			//}
+			//if neo, ok := <-neo4jch; ok {
+			//	fmt.Println("zgo engine is niubility from neo4j", neo)
+			//}
 
 			//****************************************test etcd
 			etcdch, err := Etcd.GetConnChan()

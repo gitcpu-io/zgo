@@ -2,6 +2,7 @@ package zgo
 
 import (
 	"git.zhugefang.com/gocore/zgo/config"
+	"git.zhugefang.com/gocore/zgo/zgoalipay"
 	"git.zhugefang.com/gocore/zgo/zgocache"
 	"git.zhugefang.com/gocore/zgo/zgoclickhouse"
 	"git.zhugefang.com/gocore/zgo/zgocrypto"
@@ -24,6 +25,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgorabbitmq"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
+	"git.zhugefang.com/gocore/zgo/zgowechat"
 	kafkaCluter "github.com/bsm/sarama-cluster"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
@@ -211,7 +213,15 @@ type (
 	NsqMessage         = *nsq.Message
 	PartitionConsumer  = kafkaCluter.PartitionConsumer
 	Bucketer           = zgolimiter.SimpleBucketer //zgo 自定义的bucket
-	WR2er              = zgolb.WR2er
+
+	//负载均衡类型声明
+	WR2er = zgolb.WR2er
+
+	//支付传送Body类型声明
+	BodyMap     = zgoutils.BodyMap
+	AliPayer    = zgoalipay.Payer //支付宝 支付接口类型声明
+	WechatPayer = zgowechat.Payer //微信 支付接口类型声明
+
 	//postgres声明给使用者
 	PostgresDB                 = pg.DB
 	PostgresCreateTableOptions = orm.CreateTableOptions
@@ -335,6 +345,9 @@ var (
 
 	Limiter = zgolimiter.New()
 	LB      = zgolb.NewLB()
+
+	Wechat = zgowechat.New()
+	AliPay = zgoalipay.New()
 
 	MgoBulkWriteOperation_InsertOne  = config.InsertOne
 	MgoBulkWriteOperation_UpdateOne  = config.UpdateOne

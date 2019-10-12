@@ -471,6 +471,12 @@
 			"revisionTime": "2018-10-28T19:52:56Z"
 		},
 		{
+			"checksumSHA1": "MAA8GdWBUD79FgxfUEWmFuTb5Ms=",
+			"path": "github.com/parnurzeal/gorequest",
+			"revision": "b735e503d8bf955a72baf89723cdb50ab0bd668c",
+			"revisionTime": "2019-09-25T09:44:54Z"
+		},
+		{
 			"checksumSHA1": "eUQ5LpPgbXtTHoNH/jeSLBH6BRs=",
 			"path": "github.com/pierrec/lz4",
 			"revision": "062282ea0dcff40c9fb8525789eef9644b1fbd6e",
