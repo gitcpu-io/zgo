@@ -427,7 +427,7 @@ func (w *PayClient) do(body zgoutils.BodyMap, path string, tlsConfig ...*tls.Con
 		goto GoRequest
 	}
 	if !w.IsProd {
-		//body.Set("sign_type", SignType_MD5)
+		body.Set("sign_type", SignType_MD5)
 		if sign, err = getSignBoxSign(w.MchId, w.ApiKey, body); err != nil {
 			return
 		}
