@@ -59,13 +59,13 @@ type Payer interface {
 	OrderFastPayRefundQuery(body zgoutils.BodyMap) (tradeRes *TradeFastpayRefundQueryResponse, err error)
 
 	//统一收单下单并支付页面接口
-	OrderPagePay(body zgoutils.BodyMap) (tradeRes *TradeAppPayResponse, err error)
+	OrderPagePay(body zgoutils.BodyMap) (payUrl string, err error)
 
 	//app支付接口2.0
-	OrderAppPay(body zgoutils.BodyMap) (tradeRes *TradeAppPayResponse, err error)
+	OrderAppPay(body zgoutils.BodyMap) (payUrl string, err error)
 
 	//手机网站支付接口2.0
-	OrderWapPay(body zgoutils.BodyMap) (tradeRes *TradeAppPayResponse, err error)
+	OrderWapPay(body zgoutils.BodyMap) (payUrl string, err error)
 
 	//单笔转账到支付宝账户接口
 	FundTransToaccountTransfer(body zgoutils.BodyMap) (tradeRes *FundTransToaccountTransferResponse, err error)
@@ -407,72 +407,48 @@ func (a *PayClient) OrderQuery(body zgoutils.BodyMap) (tradeRes *TradeQueryRespo
 
 //alipay.trade.app.pay(app支付接口2.0)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.app.pay
-func (a *PayClient) OrderAppPay(body zgoutils.BodyMap) (tradeRes *TradeAppPayResponse, err error) {
+func (a *PayClient) OrderAppPay(body zgoutils.BodyMap) (payUrl string, err error) {
 	var bs []byte
 	trade := body.Get("out_trade_no")
 	if trade == null {
-		return nil, errors.New("out_trade_no is not allowed to be null")
+		return null, errors.New("out_trade_no is not allowed to be null")
 	}
 	if bs, err = a.do(body, "alipay.trade.app.pay"); err != nil {
-		return nil, err
+		return null, err
 	}
-	tradeRes = new(TradeAppPayResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
-		return nil, err
-	}
-	if tradeRes.AlipayTradeAppPayResponse.Code != "10000" {
-		info := tradeRes.AlipayTradeAppPayResponse
-		return nil, fmt.Errorf(`{"code":"%v","msg":"%v","sub_code":"%v","sub_msg":"%v"}`, info.Code, info.Msg, info.SubCode, info.SubMsg)
-	}
-	tradeRes.SignData = getSignData(bs)
+	payUrl = string(bs)
 	return
 }
 
 //alipay.trade.wap.pay(手机网站支付接口2.0)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.wap.pay
-func (a *PayClient) OrderWapPay(body zgoutils.BodyMap) (tradeRes *TradeAppPayResponse, err error) {
+func (a *PayClient) OrderWapPay(body zgoutils.BodyMap) (payUrl string, err error) {
 	var bs []byte
 	trade := body.Get("out_trade_no")
 	if trade == null {
-		return nil, errors.New("out_trade_no is not allowed to be null")
+		return null, errors.New("out_trade_no is not allowed to be null")
 	}
 	body.Set("product_code", "QUICK_WAP_WAY")
 	if bs, err = a.do(body, "alipay.trade.wap.pay"); err != nil {
-		return nil, err
+		return null, err
 	}
-	tradeRes = new(TradeAppPayResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
-		return nil, err
-	}
-	if tradeRes.AlipayTradeAppPayResponse.Code != "10000" {
-		info := tradeRes.AlipayTradeAppPayResponse
-		return nil, fmt.Errorf(`{"code":"%v","msg":"%v","sub_code":"%v","sub_msg":"%v"}`, info.Code, info.Msg, info.SubCode, info.SubMsg)
-	}
-	tradeRes.SignData = getSignData(bs)
+	payUrl = string(bs)
 	return
 }
 
 //alipay.trade.page.pay(统一收单下单并支付页面接口)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.page.pay
-func (a *PayClient) OrderPagePay(body zgoutils.BodyMap) (tradeRes *TradeAppPayResponse, err error) {
+func (a *PayClient) OrderPagePay(body zgoutils.BodyMap) (payUrl string, err error) {
 	var bs []byte
 	trade := body.Get("out_trade_no")
 	if trade == null {
-		return nil, errors.New("out_trade_no is not allowed to be null")
+		return null, errors.New("out_trade_no is not allowed to be null")
 	}
 	body.Set("product_code", "FAST_INSTANT_TRADE_PAY")
 	if bs, err = a.do(body, "alipay.trade.page.pay"); err != nil {
-		return nil, err
+		return null, err
 	}
-	tradeRes = new(TradeAppPayResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
-		return nil, err
-	}
-	if tradeRes.AlipayTradeAppPayResponse.Code != "10000" {
-		info := tradeRes.AlipayTradeAppPayResponse
-		return nil, fmt.Errorf(`{"code":"%v","msg":"%v","sub_code":"%v","sub_msg":"%v"}`, info.Code, info.Msg, info.SubCode, info.SubMsg)
-	}
-	tradeRes.SignData = getSignData(bs)
+	payUrl = string(bs)
 	return
 }
 

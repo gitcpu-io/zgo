@@ -209,25 +209,6 @@ type createResponse struct {
 }
 
 //===================================================
-type TradeAppPayResponse struct {
-	AlipayTradeAppPayResponse createAppPayResponse `json:"alipay_trade_app_pay_response,omitempty"`
-	SignData                  string               `json:"-"`
-	Sign                      string               `json:"sign"`
-}
-
-type createAppPayResponse struct {
-	Code            string `json:"code,omitempty"`
-	Msg             string `json:"msg,omitempty"`
-	SubCode         string `json:"sub_code,omitempty"`
-	SubMsg          string `json:"sub_msg,omitempty"`
-	TradeNo         string `json:"trade_no,omitempty"`
-	OutTradeNo      string `json:"out_trade_no,omitempty"`
-	TotalAmount     string `json:"total_amount,omitempty"`
-	SellerId        string `json:"seller_id,omitempty"`
-	MerchantOrderNo string `json:"merchant_order_no,omitempty"`
-}
-
-//===================================================
 type TradeCloseResponse struct {
 	AlipayTradeCloseResponse closeResponse `json:"alipay_trade_close_response,omitempty"`
 	SignData                 string        `json:"-"`
