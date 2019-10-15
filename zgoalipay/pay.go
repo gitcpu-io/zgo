@@ -15,6 +15,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"github.com/parnurzeal/gorequest"
 	"hash"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -58,13 +59,13 @@ type Payer interface {
 	//统一收单交易退款查询
 	OrderFastPayRefundQuery(body zgoutils.BodyMap) (tradeRes *TradeFastpayRefundQueryResponse, err error)
 
-	//统一收单下单并支付页面接口
+	//统一收单下单并支付页面接口 -- pc出现二维码，手机支付宝扫一扫
 	OrderPagePay(body zgoutils.BodyMap) (payUrl string, err error)
 
 	//app支付接口2.0
 	OrderAppPay(body zgoutils.BodyMap) (payUrl string, err error)
 
-	//手机网站支付接口2.0
+	//手机网站支付接口2.0 -- h5页面
 	OrderWapPay(body zgoutils.BodyMap) (payUrl string, err error)
 
 	//单笔转账到支付宝账户接口
@@ -111,6 +112,9 @@ type Payer interface {
 	SetAuthToken(authToken string)
 
 	//************************
+
+	//解析支付宝支付完成后的Notify信息
+	ParseNotifyResult(req *http.Request) (notifyReq *NotifyRequest, err error)
 
 	//支付宝同步返回验签或异步通知验签
 	VerifySign(aliPayPublicKey string, bean interface{}, syncSign ...string) (ok bool, err error)

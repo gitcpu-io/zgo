@@ -23,7 +23,7 @@ import (
 )
 
 //解析支付宝支付完成后的Notify信息
-func ParseNotifyResult(req *http.Request) (notifyReq *NotifyRequest, err error) {
+func (a *PayClient) ParseNotifyResult(req *http.Request) (notifyReq *NotifyRequest, err error) {
 	notifyReq = new(NotifyRequest)
 	notifyReq.NotifyTime = req.FormValue("notify_time")
 	notifyReq.NotifyType = req.FormValue("notify_type")
