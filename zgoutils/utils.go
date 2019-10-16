@@ -13,6 +13,7 @@ import (
 	"github.com/bwmarrin/snowflake"
 	"github.com/fatih/structs"
 	"github.com/json-iterator/go"
+	"github.com/kataras/iris"
 	"github.com/satori/go.uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/text/encoding/simplifiedchinese"
@@ -168,6 +169,7 @@ type Utilser interface {
 	GetStringFromMap(dm map[string]interface{}, key string, dft string) string
 	GetStringFromStringMap(dm map[string]string, key string, dft string) string
 	MarshalMap(mm map[string]interface{}) (string, error)
+	RemoteIp(ctx iris.Context) string
 }
 
 var loadLocationFromTZData func(name string, data []byte) (*time.Location, error) = nil
@@ -1016,3 +1018,21 @@ func (u *utils) MarshalMap(mm map[string]interface{}) (string, error) {
 
 // map根据key排序放入list并排序
 //func (u *utils)
+// RemoteIp 返回远程客户端的 IP，如 192.168.1.1
+func (u *utils) RemoteIp(ctx iris.Context) string {
+	req := ctx.Request()
+	remoteAddr := req.RemoteAddr
+	if ip := req.Header.Get("X-Real-IP"); ip != "" {
+		remoteAddr = ip
+	} else if ip = req.Header.Get("X-Forwarded-For"); ip != "" {
+		remoteAddr = ip
+	} else {
+		remoteAddr, _, _ = net.SplitHostPort(remoteAddr)
+	}
+
+	if remoteAddr == "::1" {
+		remoteAddr = "127.0.0.1"
+	}
+
+	return remoteAddr
+}
