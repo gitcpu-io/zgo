@@ -431,6 +431,62 @@ type transToaccountTransferResponse struct {
 }
 
 //===================================================
+type FundTransOrderQueryResponse struct {
+	AlipayFundTransOrderQueryResponse transOrderQueryResponse `json:"alipay_fund_trans_order_query_response,omitempty"`
+	SignData                          string                  `json:"-"`
+	Sign                              string                  `json:"sign"`
+}
+
+type transOrderQueryResponse struct {
+	Code           string `json:"code,omitempty"`
+	Msg            string `json:"msg,omitempty"`
+	SubCode        string `json:"sub_code,omitempty"`
+	SubMsg         string `json:"sub_msg,omitempty"`
+	OrderId        string `json:"order_id,omitempty"`
+	OutBizNo       string `json:"out_biz_no,omitempty"`
+	Status         string `json:"status,omitempty"`
+	ArrivalTimeEnd string `json:"arrival_time_end,omitempty"`
+	OrderFee       string `json:"order_fee,omitempty"`
+	FailReason     string `json:"fail_reason,omitempty"`
+	ErrorCode      string `json:"error_code,omitempty"`
+}
+
+//===================================================
+type FundAccountQueryResponse struct {
+	AlipayFundAccountQueryResponse accountQueryResponse `json:"alipay_fund_account_query_response,omitempty"`
+	SignData                       string               `json:"-"`
+	Sign                           string               `json:"sign"`
+}
+
+type accountQueryResponse struct {
+	Code            string `json:"code,omitempty"`
+	Msg             string `json:"msg,omitempty"`
+	SubCode         string `json:"sub_code,omitempty"`
+	SubMsg          string `json:"sub_msg,omitempty"`
+	AvailableAmount string `json:"available_amount,omitempty"`
+}
+
+//===================================================
+type FundTansRefundResponse struct {
+	AlipayFundTansRefundResponse tansRefundResponse `json:"alipay_fund_trans_refund_response,omitempty"`
+	SignData                     string             `json:"-"`
+	Sign                         string             `json:"sign"`
+}
+
+type tansRefundResponse struct {
+	Code          string `json:"code,omitempty"`
+	Msg           string `json:"msg,omitempty"`
+	SubCode       string `json:"sub_code,omitempty"`
+	SubMsg        string `json:"sub_msg,omitempty"`
+	RefundOrderId string `json:"refund_order_id,omitempty"`
+	OrderId       string `json:"order_id,omitempty"`
+	OutRequestNo  string `json:"out_request_no,omitempty"`
+	Status        string `json:"status,omitempty"`
+	RefundAmount  string `json:"refund_amount,omitempty"`
+	RefundDate    string `json:"refund_date,omitempty"`
+}
+
+//===================================================
 type ZhimaCreditScoreGetResponse struct {
 	ZhimaCreditScoreGetResponse scoreGetResponse `json:"zhima_credit_score_get_response,omitempty"`
 	SignData                    string           `json:"-"`

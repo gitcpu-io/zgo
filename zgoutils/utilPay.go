@@ -2,7 +2,6 @@ package zgoutils
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"encoding/xml"
 	"io"
 	"math/rand"
@@ -256,7 +255,7 @@ func jsonToString(v interface{}) (str string) {
 		bs  []byte
 		err error
 	)
-	if bs, err = json.Marshal(v); err != nil {
+	if bs, err = Utils.Marshal(v); err != nil {
 		return ""
 	}
 

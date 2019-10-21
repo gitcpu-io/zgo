@@ -129,6 +129,8 @@ type Utilser interface {
 	GetTimeInFormatRFC2616() string
 	//从一个map中返回a=123&b=456
 	GetUrlFormedMap(map[string]string) string
+	//把a=123&b=456转成map[a:123,b:456]
+	ParseUrlEscapeToMap(params string) (map[string]string, error)
 	InitStructWithDefaultTag(interface{})
 
 	//获取当前时间时间戳，n= 10/13/19 位时间戳
@@ -355,6 +357,31 @@ func (u *utils) NewDecoder(reader io.Reader) *jsoniter.Decoder {
 
 func (u *utils) NewEncoder(writer io.Writer) *jsoniter.Encoder {
 	return jsoniter.NewEncoder(writer)
+}
+
+//ParseUrlEscapeToMap解析 a=123&b=456  到 map[a:123,b:456]
+func (u *utils) ParseUrlEscapeToMap(params string) (map[string]string, error) {
+	res, err := url.QueryUnescape(params)
+	if err != nil {
+		return nil, err
+	}
+	m := make(map[string]string)
+	split := strings.Split(res, "&")
+	for _, value := range split {
+		sps := strings.Split(value, "=")
+		m[sps[0]] = sps[1]
+	}
+	return m, nil
+}
+
+//GetUrlFormedMap 从一个map中返回a=123&b=456
+func (u *utils) GetUrlFormedMap(source map[string]string) (urlEncoded string) {
+	urlEncoder := url.Values{}
+	for key, value := range source {
+		urlEncoder.Add(key, value)
+	}
+	urlEncoded = urlEncoder.Encode()
+	return
 }
 
 // StringToMap 字符串类型的json转成map
@@ -646,16 +673,6 @@ func (u *utils) GetTimeInFormatRFC2616() (timeStr string) {
 		panic(err)
 	}
 	return time.Now().In(gmt).Format("Mon, 02 Jan 2006 15:04:05 GMT")
-}
-
-//GetUrlFormedMap 从一个map中返回a=123&b=456
-func (u *utils) GetUrlFormedMap(source map[string]string) (urlEncoded string) {
-	urlEncoder := url.Values{}
-	for key, value := range source {
-		urlEncoder.Add(key, value)
-	}
-	urlEncoded = urlEncoder.Encode()
-	return
 }
 
 func (u *utils) InitStructWithDefaultTag(bean interface{}) {

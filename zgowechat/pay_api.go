@@ -8,7 +8,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
-	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -119,12 +118,12 @@ func (w *PayClient) VerifySign(apiKey, signType string, bean interface{}) (ok bo
 		bm = bean.(zgoutils.BodyMap)
 		goto Verify
 	}
-	if bs, err = json.Marshal(bean); err != nil {
-		return false, fmt.Errorf("json.Marshal：%v", err.Error())
+	if bs, err = zgoutils.Utils.Marshal(bean); err != nil {
+		return false, fmt.Errorf("zgoutils.Utils.Marshal：%v", err.Error())
 	}
 	bm = make(zgoutils.BodyMap)
-	if err = json.Unmarshal(bs, &bm); err != nil {
-		return false, fmt.Errorf("json.Unmarshal：%v", err.Error())
+	if err = zgoutils.Utils.Unmarshal(bs, &bm); err != nil {
+		return false, fmt.Errorf("zgoutils.Utils.Unmarshal：%v", err.Error())
 	}
 Verify:
 	bodySign = bm.Get("sign")
@@ -311,8 +310,8 @@ func DecryptOpenDataToStruct(encryptedData, iv, sessionKey string, beanPtr inter
 	if len(plainText) > 0 {
 		plainText = zgoutils.PKCS7UnPadding(plainText)
 	}
-	if err = json.Unmarshal(plainText, beanPtr); err != nil {
-		return fmt.Errorf("json.Unmarshal：%v", err.Error())
+	if err = zgoutils.Utils.Unmarshal(plainText, beanPtr); err != nil {
+		return fmt.Errorf("zgoutils.Utils.Unmarshal：%v", err.Error())
 	}
 	return
 }
@@ -344,8 +343,8 @@ func DecryptOpenDataToBodyMap(encryptedData, iv, sessionKey string) (bm zgoutils
 			plainText = zgoutils.PKCS7UnPadding(plainText)
 		}
 		bm = make(zgoutils.BodyMap)
-		if err = json.Unmarshal(plainText, &bm); err != nil {
-			return nil, fmt.Errorf("json.Unmarshal：%v", err.Error())
+		if err = zgoutils.Utils.Unmarshal(plainText, &bm); err != nil {
+			return nil, fmt.Errorf("zgoutils.Utils.Unmarshal：%v", err.Error())
 		}
 		return
 	}

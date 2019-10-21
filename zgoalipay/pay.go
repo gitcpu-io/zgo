@@ -8,7 +8,6 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
-	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -70,6 +69,15 @@ type Payer interface {
 
 	//单笔转账到支付宝账户接口
 	FundTransToaccountTransfer(body zgoutils.BodyMap) (tradeRes *FundTransToaccountTransferResponse, err error)
+
+	//查询转账订单接口
+	FundTransOrderQuery(body zgoutils.BodyMap) (tradeRes *FundTransOrderQueryResponse, err error)
+
+	//支付宝资金账户资产查询接口
+	FundAccountQuery(body zgoutils.BodyMap) (tradeRes *FundAccountQueryResponse, err error)
+
+	//资金退回接口
+	FundTransRefund(body zgoutils.BodyMap) (tradeRes *FundTansRefundResponse, err error)
 
 	//支付宝订单信息同步接口
 	//waiting
@@ -163,7 +171,8 @@ func (a *PayClient) OrderFastPayRefundQuery(body zgoutils.BodyMap) (tradeRes *Tr
 		return
 	}
 	tradeRes = new(TradeFastpayRefundQueryResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.AlipayTradeFastpayRefundQueryResponse.Code != "10000" {
@@ -190,7 +199,7 @@ func (a *PayClient) OrderSettle(body zgoutils.BodyMap) (tradeRes *TradeOrderSett
 		return
 	}
 	tradeRes = new(TradeOrderSettleResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.AlipayTradeOrderSettleResponse.Code != "10000" {
@@ -217,7 +226,7 @@ func (a *PayClient) OrderCreate(body zgoutils.BodyMap) (tradeRes *TradeCreateRes
 		return
 	}
 	tradeRes = new(TradeCreateResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.AlipayTradeCreateResponse.Code != "10000" {
@@ -244,7 +253,7 @@ func (a *PayClient) OrderClose(body zgoutils.BodyMap) (tradeRes *TradeCloseRespo
 		return
 	}
 	tradeRes = new(TradeCloseResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.AlipayTradeCloseResponse.Code != "10000" {
@@ -271,7 +280,7 @@ func (a *PayClient) OrderCancel(body zgoutils.BodyMap) (tradeRes *TradeCancelRes
 		return
 	}
 	tradeRes = new(TradeCancelResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.AlipayTradeCancelResponse.Code != "10000" {
@@ -298,7 +307,7 @@ func (a *PayClient) OrderRefund(body zgoutils.BodyMap) (tradeRes *TradeRefundRes
 		return nil, err
 	}
 	tradeRes = new(TradeRefundResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.AlipayTradeRefundResponse.Code != "10000" {
@@ -325,7 +334,7 @@ func (a *PayClient) OrderPageRefund(body zgoutils.BodyMap) (tradeRes *TradePageR
 		return
 	}
 	tradeRes = new(TradePageRefundResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.AlipayTradePageRefundResponse.Code != "10000" {
@@ -348,7 +357,7 @@ func (a *PayClient) Order(body zgoutils.BodyMap) (tradeRes *TradePrecreateRespon
 		return
 	}
 	tradeRes = new(TradePrecreateResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.AlipayTradePrecreateResponse.Code != "10000" {
@@ -371,7 +380,7 @@ func (a *PayClient) OrderPay(body zgoutils.BodyMap) (tradeRes *TradePayResponse,
 		return
 	}
 	tradeRes = new(TradePayResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.AlipayTradePayResponse.Code != "10000" {
@@ -398,7 +407,7 @@ func (a *PayClient) OrderQuery(body zgoutils.BodyMap) (tradeRes *TradeQueryRespo
 		return
 	}
 	tradeRes = new(TradeQueryResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.AlipayTradeQueryResponse.Code != "10000" {
@@ -456,29 +465,6 @@ func (a *PayClient) OrderPagePay(body zgoutils.BodyMap) (payUrl string, err erro
 	return
 }
 
-//alipay.fund.trans.toaccount.transfer(单笔转账到支付宝账户接口)
-//    文档地址：https://docs.open.alipay.com/api_28/alipay.fund.trans.toaccount.transfer
-func (a *PayClient) FundTransToaccountTransfer(body zgoutils.BodyMap) (tradeRes *FundTransToaccountTransferResponse, err error) {
-	var bs []byte
-	trade1 := body.Get("out_biz_no")
-	if trade1 == null {
-		return nil, errors.New("out_biz_no is not allowed to be null")
-	}
-	if bs, err = a.do(body, "alipay.fund.trans.toaccount.transfer"); err != nil {
-		return
-	}
-	tradeRes = new(FundTransToaccountTransferResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
-		return nil, err
-	}
-	if tradeRes.AlipayFundTransToaccountTransferResponse.Code != "10000" {
-		info := tradeRes.AlipayFundTransToaccountTransferResponse
-		return nil, fmt.Errorf(`{"code":"%v","msg":"%v","sub_code":"%v","sub_msg":"%v"}`, info.Code, info.Msg, info.SubCode, info.SubMsg)
-	}
-	tradeRes.SignData = getSignData(bs)
-	return
-}
-
 //alipay.trade.orderinfo.sync(支付宝订单信息同步接口)
 //    文档地址：https://docs.open.alipay.com/api_1/alipay.trade.orderinfo.sync
 func (a *PayClient) OrderOrderinfoSync(body zgoutils.BodyMap) {
@@ -502,7 +488,7 @@ func (a *PayClient) SystemOauthToken(body zgoutils.BodyMap) (tradeRes *SystemOau
 		return
 	}
 	tradeRes = new(SystemOauthTokenResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.AlipaySystemOauthTokenResponse.AccessToken == null {
@@ -552,7 +538,7 @@ func (a *PayClient) UserInfoShare() (tradeRes *UserInfoShareResponse, err error)
 		return nil, err
 	}
 	tradeRes = new(UserInfoShareResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.AlipayUserInfoShareResponse.Code != "10000" {
@@ -580,7 +566,7 @@ func (a *PayClient) OpenAuthTokenApp(body zgoutils.BodyMap) (tradeRes *OpenAuthT
 		return
 	}
 	tradeRes = new(OpenAuthTokenAppResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.AlipayOpenAuthTokenAppResponse.Code != "10000" {
@@ -608,7 +594,7 @@ func (a *PayClient) ZhimaCreditScoreGet(body zgoutils.BodyMap) (tradeRes *ZhimaC
 		return
 	}
 	tradeRes = new(ZhimaCreditScoreGetResponse)
-	if err = json.Unmarshal(bs, tradeRes); err != nil {
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
 		return nil, err
 	}
 	if tradeRes.ZhimaCreditScoreGetResponse.Code != "10000" {
@@ -628,8 +614,8 @@ func (a *PayClient) do(body zgoutils.BodyMap, method string) (bytes []byte, err 
 		errs                             []error
 	)
 	if body != nil {
-		if bodyBs, err = json.Marshal(body); err != nil {
-			return nil, fmt.Errorf("json.Marshal：%v", err.Error())
+		if bodyBs, err = zgoutils.Utils.Marshal(body); err != nil {
+			return nil, fmt.Errorf("zgoutils.Utils.Marshal：%v", err.Error())
 		}
 		bodyStr = string(bodyBs)
 	}

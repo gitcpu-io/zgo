@@ -9,7 +9,6 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
-	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -57,7 +56,7 @@ func (a *PayClient) ParseNotifyResult(req *http.Request) (notifyReq *NotifyReque
 	billList := req.FormValue("fund_bill_list")
 	if billList != null {
 		bills := make([]fundBillListInfo, 0)
-		if err = json.Unmarshal([]byte(billList), &bills); err != nil {
+		if err = zgoutils.Utils.Unmarshal([]byte(billList), &bills); err != nil {
 			return nil, fmt.Errorf("xml.Unmarshal：%v", err.Error())
 		}
 		notifyReq.FundBillList = bills
@@ -68,7 +67,7 @@ func (a *PayClient) ParseNotifyResult(req *http.Request) (notifyReq *NotifyReque
 	detailList := req.FormValue("voucher_detail_list")
 	if detailList != null {
 		details := make([]voucherDetailListInfo, 0)
-		if err = json.Unmarshal([]byte(detailList), &details); err != nil {
+		if err = zgoutils.Utils.Unmarshal([]byte(detailList), &details); err != nil {
 			return nil, fmt.Errorf("xml.Unmarshal：%v", err.Error())
 		}
 		notifyReq.VoucherDetailList = details
@@ -120,12 +119,12 @@ func (a *PayClient) VerifySign(aliPayPublicKey string, bean interface{}, syncSig
 		signData = bean.(string)
 		goto Verify
 	}
-	if bs, err = json.Marshal(bean); err != nil {
-		return false, fmt.Errorf("json.Marshal：%v", err.Error())
+	if bs, err = zgoutils.Utils.Marshal(bean); err != nil {
+		return false, fmt.Errorf("zgoutils.Utils.Marshal：%v", err.Error())
 	}
 	bm = make(zgoutils.BodyMap)
-	if err = json.Unmarshal(bs, &bm); err != nil {
-		return false, fmt.Errorf("json.Unmarshal：%v", err.Error())
+	if err = zgoutils.Utils.Unmarshal(bs, &bm); err != nil {
+		return false, fmt.Errorf("zgoutils.Utils.Unmarshal：%v", err.Error())
 	}
 	bodySign = bm.Get("sign")
 	bodySignType = bm.Get("sign_type")
@@ -302,8 +301,8 @@ func DecryptOpenDataToStruct(encryptedData, secretKey string, beanPtr interface{
 	if len(originData) > 0 {
 		originData = zgoutils.PKCS5UnPadding(originData)
 	}
-	if err = json.Unmarshal(originData, beanPtr); err != nil {
-		return fmt.Errorf("json.Unmarshal：%v", err.Error())
+	if err = zgoutils.Utils.Unmarshal(originData, beanPtr); err != nil {
+		return fmt.Errorf("zgoutils.Utils.Unmarshal：%v", err.Error())
 	}
 	return nil
 }
@@ -335,8 +334,8 @@ func DecryptOpenDataToBodyMap(encryptedData, secretKey string) (bm zgoutils.Body
 		originData = zgoutils.PKCS5UnPadding(originData)
 	}
 	bm = make(zgoutils.BodyMap)
-	if err = json.Unmarshal(originData, &bm); err != nil {
-		return nil, fmt.Errorf("json.Unmarshal：%v", err.Error())
+	if err = zgoutils.Utils.Unmarshal(originData, &bm); err != nil {
+		return nil, fmt.Errorf("zgoutils.Utils.Unmarshal：%v", err.Error())
 	}
 	return
 }
@@ -364,8 +363,8 @@ func SystemOauthToken(appId, privateKey, grantType, codeOrToken string) (rsp *Sy
 		return
 	}
 	rsp = new(SystemOauthTokenResponse)
-	if err = json.Unmarshal(bs, rsp); err != nil {
-		return nil, fmt.Errorf("json.Unmarshal：%v", err.Error())
+	if err = zgoutils.Utils.Unmarshal(bs, rsp); err != nil {
+		return nil, fmt.Errorf("zgoutils.Utils.Unmarshal：%v", err.Error())
 	}
 	if rsp.AlipaySystemOauthTokenResponse.AccessToken == "" {
 		return nil, errors.New("access_token is null")
