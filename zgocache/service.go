@@ -132,10 +132,15 @@ type zgocache struct {
 // 2.expire 超时时间 单位s
 func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
 	return func(ctx context.Context, param map[string]interface{}, obj interface{}) error {
-		if z.start != 1 {
+		cacheModel := ""
+		if v, ok := param["cacheModel"]; ok {
+			cacheModel = v.(string)
+		}
+		// start 是否启动 1 启动，0 停用
+		if z.start != 1 && cacheModel == "" {
 			return fn(ctx, param, obj)
 		}
-		key := z.getKey(fn)
+		key := z.getKey(fn, cacheModel)
 		field, err := zgoutils.Utils.MarshalMap(param)
 		if err != nil {
 			// field转换失败 直接走函数获取数据
@@ -162,8 +167,12 @@ func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
 // 降级缓存装饰器
 func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 	return func(ctx context.Context, param map[string]interface{}, obj interface{}) error {
+		cacheModel := ""
+		if v, ok := param["cacheModel"]; ok {
+			cacheModel = v.(string)
+		}
 		// start 是否启动 1 启动，0 停用
-		if z.start != 1 {
+		if z.start != 1 && cacheModel == "" {
 			return fn(ctx, param, obj)
 		}
 		// 当调用方法后续服务异常时，通过etcd配置修改tcType为2。可转为走正常缓存逻辑，并且没有失效时间。
@@ -182,7 +191,7 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 
 		// 缓存结果
 		field, fieldErr := zgoutils.Utils.MarshalMap(param)
-		key := z.getKey(fn)
+		key := z.getKey(fn, cacheModel)
 
 		select {
 		case <-ctxTimeout.Done():
@@ -261,7 +270,7 @@ func (z *zgocache) setData(ctx context.Context, key string, field string, data i
 	//return
 }
 
-func (z *zgocache) getKey(fn CacheFunc) string {
-	key := "GOCache:" + config.Conf.Project + ":" + runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
+func (z *zgocache) getKey(fn CacheFunc, model string) string {
+	key := "GOCache:" + config.Conf.Project + ":" + model + ":" + runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
 	return key
 }
