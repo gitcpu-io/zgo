@@ -37,7 +37,7 @@ type PikaResourcer interface {
 	Ttl(ctx context.Context, key string) (interface{}, error)
 	Type(ctx context.Context, key string) (interface{}, error)
 	Hlen(ctx context.Context, key string) (int, error)
-	Hdel(ctx context.Context, key string, name interface{}) (int, error)
+	Hdel(ctx context.Context, key string, name string) (int, error)
 	Hgetall(ctx context.Context, key string) (interface{}, error)
 	Hincrby(ctx context.Context, key string, field string, inc int64) (int64, error)
 
@@ -335,7 +335,7 @@ func (p *pikaResource) Hlen(ctx context.Context, key string) (int, error) {
 	}
 }
 
-func (p *pikaResource) Hdel(ctx context.Context, key string, name interface{}) (int, error) {
+func (p *pikaResource) Hdel(ctx context.Context, key string, name string) (int, error) {
 	s := <-p.connpool.GetConnChan(p.label)
 	prefix := p.connpool.GetPrefix(p.label)
 	key = prefix + key

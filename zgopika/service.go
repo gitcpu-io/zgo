@@ -41,7 +41,7 @@ type Pikaer interface {
 	Ttl(ctx context.Context, key string) (interface{}, error)
 	Type(ctx context.Context, key string) (interface{}, error)
 	Hlen(ctx context.Context, key string) (int, error)
-	Hdel(ctx context.Context, key string, name interface{}) (int, error)
+	Hdel(ctx context.Context, key string, name string) (int, error)
 	Hgetall(ctx context.Context, key string) (interface{}, error)
 	Hincrby(ctx context.Context, key string, field string, inc int64) (int64, error)
 
@@ -228,7 +228,7 @@ func (r *zgopika) Hlen(ctx context.Context, key string) (int, error) {
 	return r.res.Hlen(ctx, key)
 }
 
-func (r *zgopika) Hdel(ctx context.Context, key string, name interface{}) (int, error) {
+func (r *zgopika) Hdel(ctx context.Context, key string, name string) (int, error) {
 	return r.res.Hdel(ctx, key, name)
 }
 
@@ -280,7 +280,7 @@ func (r *zgopika) Sismember(ctx context.Context, key string, value interface{}) 
 	return r.res.Sismember(ctx, key, value)
 }
 func (r *zgopika) Srandmember(ctx context.Context, key string, count int) (interface{}, error) {
-	return r.res.Srandmember(ctx, key,count)
+	return r.res.Srandmember(ctx, key, count)
 }
 func (r *zgopika) Zrank(ctx context.Context, key string, member interface{}) (int, error) {
 	return r.res.Zrank(ctx, key, member)

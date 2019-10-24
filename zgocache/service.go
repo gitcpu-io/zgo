@@ -10,8 +10,6 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"github.com/json-iterator/go"
 	"log"
-	"reflect"
-	"runtime"
 	"time"
 )
 
@@ -47,6 +45,7 @@ func InitCache() chan Cacher {
 type dbServicer interface {
 	Hget(ctx context.Context, key string, field string) (interface{}, error)
 	Hset(ctx context.Context, key string, field string, value interface{}) (int, error)
+	Hdel(ctx context.Context, key string, field string) (int, error)
 }
 
 /*
@@ -100,6 +99,7 @@ func GetCache(start int, dbtype string, label string, rate int, tcType int) Cach
 type Cacher interface {
 	//NewPikaCacheService(label string, expire int, tcType int) Cacher
 	Decorate(fn CacheFunc, expire int) CacheFunc
+	DelCache(ctx context.Context, key, field string) (int, error)
 	TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc
 }
 
@@ -133,21 +133,27 @@ type zgocache struct {
 func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
 	return func(ctx context.Context, param map[string]interface{}, obj interface{}) error {
 		cacheModel := ""
-		if v, ok := param["cacheModel"]; ok {
+		if v, ok := param["cacheModel"]; ok && v.(string) != "" {
 			cacheModel = v.(string)
 		}
 		// start 是否启动 1 启动，0 停用
-		if z.start != 1 && cacheModel == "" {
+		if z.start != 1 || cacheModel == "" {
 			return fn(ctx, param, obj)
 		}
-		key := z.getKey(fn, cacheModel)
-		field, err := zgoutils.Utils.MarshalMap(param)
-		if err != nil {
-			// field转换失败 直接走函数获取数据
-			fmt.Println(err.Error())
-			return fn(ctx, param, obj)
-		}
+		key := z.getKey(cacheModel)
+		field := ""
+		var err error
+		if v, ok := param["cacheField"]; ok && v.(string) != "" {
+			field = v.(string)
+		} else {
+			field, err = zgoutils.Utils.MarshalMap(param)
+			if err != nil {
+				// field转换失败 直接走函数获取数据
+				fmt.Println(err.Error())
+				return fn(ctx, param, obj)
+			}
 
+		}
 		// 获取缓存
 		err = z.getData(ctx, key, field, expire, obj)
 		if err != nil { // 有异常 或者 没有缓存
@@ -162,6 +168,13 @@ func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
 		}
 		return err
 	}
+}
+
+func (z *zgocache) DelDecorate(ctx context.Context, cacheModel, cacheField string) (int, error) {
+	if z.start != 1 {
+		return 0, nil
+	}
+	return z.service.Hdel(ctx, cacheModel, cacheField)
 }
 
 // 降级缓存装饰器
@@ -191,7 +204,7 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 
 		// 缓存结果
 		field, fieldErr := zgoutils.Utils.MarshalMap(param)
-		key := z.getKey(fn, cacheModel)
+		key := z.getKey(cacheModel)
 
 		select {
 		case <-ctxTimeout.Done():
@@ -260,7 +273,12 @@ func (z *zgocache) setData(ctx context.Context, key string, field string, data i
 	value, err := jsoniter.MarshalToString(d)
 
 	go func(ctx context.Context) {
-
+		defer func() {
+			err := recover()
+			if err != nil {
+				fmt.Println("添加缓存 gorouitne panic Error")
+			}
+		}()
 		if err != nil {
 			fmt.Println(err.Error())
 		} else {
@@ -270,7 +288,7 @@ func (z *zgocache) setData(ctx context.Context, key string, field string, data i
 	//return
 }
 
-func (z *zgocache) getKey(fn CacheFunc, model string) string {
-	key := "GOCache:" + config.Conf.Project + ":" + model + ":" + runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
+func (z *zgocache) getKey(model string) string {
+	key := ":cache:" + config.Conf.Project + ":" + model //+ ":" + runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
 	return key
 }
