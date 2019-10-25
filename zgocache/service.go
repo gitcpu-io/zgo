@@ -170,7 +170,7 @@ func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
 	}
 }
 
-func (z *zgocache) DelDecorate(ctx context.Context, cacheModel, cacheField string) (int, error) {
+func (z *zgocache) DelCache(ctx context.Context, cacheModel, cacheField string) (int, error) {
 	if z.start != 1 {
 		return 0, nil
 	}
