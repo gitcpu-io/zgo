@@ -43,7 +43,9 @@ type Httper interface {
 	//钉钉机器人
 	Ding(token string, msg string)
 	GetByProxy(httpUrl string, proxyAddr string, params map[string]interface{}) ([]byte, error)
+	PostJsonByParam(url string, jsonData []byte, param map[string]interface{}, handler ...map[string]string) ([]byte, error) //param--> timeout
 }
+
 type zgohttp struct {
 }
 
@@ -212,6 +214,10 @@ func (zh *zgohttp) Post(url string, play url.Values, handler ...map[string]strin
 }
 
 func (zh *zgohttp) PostJson(url string, jsonData []byte, handler ...map[string]string) ([]byte, error) {
+	return zh.PostJsonByParam(url, jsonData, map[string]interface{}{}, handler...)
+}
+
+func (zh *zgohttp) PostJsonByParam(url string, jsonData []byte, param map[string]interface{}, handler ...map[string]string) ([]byte, error) {
 
 	reader := bytes.NewReader([]byte(jsonData))
 	request, err := http.NewRequest("POST", url, reader)
@@ -228,6 +234,9 @@ func (zh *zgohttp) PostJson(url string, jsonData []byte, handler ...map[string]s
 		}
 	}
 	client := http.Client{}
+	if v, ok := param["timeout"]; ok {
+		client.Timeout = time.Duration(v.(int)) * time.Second
+	}
 	resp, err := client.Do(request)
 	if err != nil {
 		fmt.Println(err.Error())
