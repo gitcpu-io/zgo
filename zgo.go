@@ -24,6 +24,7 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgopostgres"
 	"git.zhugefang.com/gocore/zgo/zgorabbitmq"
 	"git.zhugefang.com/gocore/zgo/zgoredis"
+	"git.zhugefang.com/gocore/zgo/zgoservice"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"git.zhugefang.com/gocore/zgo/zgowechat"
 	kafkaCluter "github.com/bsm/sarama-cluster"
@@ -337,17 +338,27 @@ var (
 
 	Http = zgohttp.New()
 
-	Log    zgolog.Logger
+	//先声明在engine中初始化
+	Log zgolog.Logger
+
 	Utils  = zgoutils.New()
 	Crypto zgocrypto.Cryptoer
-	Map    = zgomap.GetMap()
-	File   zgofile.Filer
+	//并发map
+	Map  = zgomap.GetMap()
+	File zgofile.Filer
 
+	//限流
 	Limiter = zgolimiter.New()
-	LB      = zgolb.NewLB()
+	//负载均衡
+	LB = zgolb.NewLB()
 
+	//微信
 	Wechat = zgowechat.New()
+	//支付宝
 	AliPay = zgoalipay.New()
+
+	//服务注册与发现
+	Service = zgoservice.New()
 
 	MgoBulkWriteOperation_InsertOne  = config.InsertOne
 	MgoBulkWriteOperation_UpdateOne  = config.UpdateOne
