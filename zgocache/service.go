@@ -174,7 +174,8 @@ func (z *zgocache) DelCache(ctx context.Context, cacheModel, cacheField string) 
 	if z.start != 1 {
 		return 0, nil
 	}
-	return z.service.Hdel(ctx, cacheModel, cacheField)
+	key := z.getKey(cacheModel)
+	return z.service.Hdel(ctx, key, cacheField)
 }
 
 // 降级缓存装饰器
