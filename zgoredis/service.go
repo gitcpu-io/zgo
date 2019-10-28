@@ -65,6 +65,7 @@ type Rediser interface {
 	ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error)
 	Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error)
 	Zrem(ctx context.Context, key string, member ...interface{}) (int, error)
+	Zremrangebyscore(ctx context.Context, key string, start int, stop int) (int, error)
 
 	// Publish 发布
 	Publish(ctx context.Context, key string, value string) (int, error)
@@ -394,6 +395,9 @@ func (r *zgoredis) Zadd(ctx context.Context, key string, score interface{}, memb
 
 func (r *zgoredis) Zrem(ctx context.Context, key string, member ...interface{}) (int, error) {
 	return r.res.Zrem(ctx, key, member)
+}
+func (r *zgoredis) Zremrangebyscore(ctx context.Context, key string, start int, stop int) (int, error) {
+	return r.res.Zremrangebyscore(ctx, key, start, stop)
 }
 
 func (r *zgoredis) Publish(ctx context.Context, key string, value string) (int, error) {
