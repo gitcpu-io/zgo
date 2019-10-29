@@ -63,6 +63,7 @@ type RedisResourcer interface {
 	ZINCRBY(ctx context.Context, key string, increment int, member interface{}) (string, error)
 	Zadd(ctx context.Context, key string, score interface{}, member interface{}) (int, error)
 	Zrem(ctx context.Context, key string, member ...interface{}) (int, error)
+	Zremrangebyscore(ctx context.Context, key string, start int, stop int) (int, error)
 
 	Publish(ctx context.Context, key string, value string) (int, error)
 	Subscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error)
@@ -444,9 +445,15 @@ func (r *redisResource) Zadd(ctx context.Context, key string, score interface{},
 }
 
 func (r *redisResource) Zrem(ctx context.Context, key string, member ...interface{}) (int, error) {
-
 	var result int
 	flatCmd := radix.FlatCmd(&result, "Zrem", key, member...)
+	err := r.deal(flatCmd)
+	return result, err
+}
+
+func (r *redisResource) Zremrangebyscore(ctx context.Context, key string, start int, stop int) (int, error) {
+	var result int
+	flatCmd := radix.FlatCmd(&result, "Zremrangebyscore", key, start, stop)
 	err := r.deal(flatCmd)
 	return result, err
 }
