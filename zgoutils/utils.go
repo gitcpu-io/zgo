@@ -33,7 +33,8 @@ import (
 )
 
 var (
-	ip_cache = ""
+	ip_cache  = ""
+	ip_byName = ""
 )
 
 var (
@@ -115,6 +116,8 @@ type Utilser interface {
 	Extract(addr string) (string, error)
 	//获取内网ip
 	GetIntranetIP() string
+	//通过网关名来获取内网或外网ip，name=eth0或eth1
+	GetIntranetIPByName(name string) string
 	//数字转ip地址
 	UInt32ToIP(intIP uint32) net.IP
 	//ip地址转数字
@@ -578,6 +581,31 @@ func (u *utils) GetIntranetIP() string {
 	}
 
 	return ip_cache
+}
+
+//GetIntranetIPByName
+func (u *utils) GetIntranetIPByName(name string) string {
+	if ip_byName != "" {
+		return ip_byName
+	}
+
+	iface, err := net.InterfaceByName(name)
+	if err != nil {
+		return ""
+	}
+
+	addrs, err := iface.Addrs()
+	if err != nil {
+		return ""
+	}
+
+	for _, a := range addrs {
+		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
+			ip_byName = ipnet.IP.String()
+			break
+		}
+	}
+	return ip_byName
 }
 
 // IPToUInt32
