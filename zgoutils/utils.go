@@ -33,11 +33,6 @@ import (
 )
 
 var (
-	ip_cache  = ""
-	ip_byName = ""
-)
-
-var (
 	privateBlocks []*net.IPNet
 )
 
@@ -115,9 +110,9 @@ type Utilser interface {
 	IsPrivateIP(ipAddr string) bool
 	Extract(addr string) (string, error)
 	//获取内网ip
-	GetIntranetIP() string
+	GetIntranetIP(name ...string) string
 	//通过网关名来获取内网或外网ip，name=eth0或eth1
-	GetIntranetIPByName(name string) string
+	GetIPAddressByName(name string) string
 	//数字转ip地址
 	UInt32ToIP(intIP uint32) net.IP
 	//ip地址转数字
@@ -555,40 +550,44 @@ func (u *utils) IPs() []string {
 }
 
 //GetIntranetIP
-func (u *utils) GetIntranetIP() string {
-	if ip_cache != "" {
-		return ip_cache
+func (u *utils) GetIntranetIP(names ...string) string {
+	var ipCache string
+	var name string
+	if len(names) > 0 {
+		name = names[0]
+	} else {
+		name = "eth0" //默认取eth0的ip
 	}
+	ipCache = u.GetIPAddressByName(name)
 
-	netInterfaces, err := net.Interfaces()
-	if err != nil {
-		fmt.Println("net.Interfaces failed, err:", err.Error())
-		return "127.0.0.1"
-	}
+	if ipCache == "" {
+		netInterfaces, err := net.Interfaces()
+		if err != nil {
+			fmt.Println("net.Interfaces failed, err:", err.Error())
+			return "127.0.0.1"
+		}
 
-	for i := 0; i < len(netInterfaces); i++ {
-		if (netInterfaces[i].Flags & net.FlagUp) != 0 {
-			addrs, _ := netInterfaces[i].Addrs()
-			for _, address := range addrs {
-				if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-					if ipnet.IP.To4() != nil {
-						ip_cache = ipnet.IP.String()
-						break
+		for i := 0; i < len(netInterfaces); i++ {
+			if (netInterfaces[i].Flags & net.FlagUp) != 0 {
+				addrs, _ := netInterfaces[i].Addrs()
+				for _, address := range addrs {
+					if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+						if ipnet.IP.To4() != nil {
+							ipCache = ipnet.IP.String()
+							break
+						}
 					}
 				}
 			}
 		}
 	}
 
-	return ip_cache
+	return ipCache
 }
 
-//GetIntranetIPByName
-func (u *utils) GetIntranetIPByName(name string) string {
-	if ip_byName != "" {
-		return ip_byName
-	}
-
+//GetIPAddressByName
+func (u *utils) GetIPAddressByName(name string) string {
+	var ipCache string
 	iface, err := net.InterfaceByName(name)
 	if err != nil {
 		return ""
@@ -601,11 +600,11 @@ func (u *utils) GetIntranetIPByName(name string) string {
 
 	for _, a := range addrs {
 		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
-			ip_byName = ipnet.IP.String()
+			ipCache = ipnet.IP.String()
 			break
 		}
 	}
-	return ip_byName
+	return ipCache
 }
 
 // IPToUInt32
