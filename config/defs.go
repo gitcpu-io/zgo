@@ -27,6 +27,7 @@ const (
 	Qa            = "qa"          //QA测试环境标识
 	Pro           = "pro"         //生产环境标识
 	Pro2          = "pro2"        //生产环境标识
+	K8s           = "k8s"         //k8s生产环境标识
 
 	//********************************以下是 etcd监听常量********************************
 	EtcTKCache      = "cache"
@@ -225,6 +226,16 @@ func LoadConfig(e, project, etcdHosts string) {
 			},
 		}
 	case Pro2:
+		Conf = &allConfig{
+			Env:       e,
+			Project:   project,
+			EtcdHosts: ProEtcHosts,
+			File: FileStore{
+				Type: FileStoreType, //以后生产环境可以存到aws s3，在这里直接更改
+				Home: FileStoreHome,
+			},
+		}
+	case K8s:
 		Conf = &allConfig{
 			Env:       e,
 			Project:   project,
