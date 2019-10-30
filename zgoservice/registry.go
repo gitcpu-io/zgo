@@ -123,9 +123,9 @@ func (service *Service) ListenLeaseRespChan() {
 				//key := fmt.Sprintf("%s/%s/%s", zgoServiceFrefix, service.name, ek)
 				//service.delServiceList(service.name, key, val)
 
-				fmt.Printf("\n%s，Service is Terminated\n", service.name)
+				//fmt.Printf("\n%s，Service is Terminated\n", service.name)
 
-				return
+				//return
 
 			} else {
 				//fmt.Printf("续租成功\n")
