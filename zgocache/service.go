@@ -245,22 +245,17 @@ func (z *zgocache) getData(ctx context.Context, key string, field string, expire
 	//project := config.Project
 	//fn := runtime.FuncForPC(reflect.ValueOf(a).Pointer()).Name()
 	//path := reflect.TypeOf(a).PkgPath()
-
-	fmt.Println("取", key, ":", field)
 	value, err := z.service.Hget(ctx, key, field)
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
 	} else if value == nil || value == "" {
-		fmt.Println("没有缓存")
 		return errors.New("缓存数据为空")
 	} else {
-		fmt.Println("有缓存-------------")
 		data := cacheResult{Result: obj}
 		jsoniter.UnmarshalFromString(value.(string), &data)
 		if expire != 0 {
 			if data.Time < time.Now().Unix()-int64(expire)*int64(z.rate) {
-				fmt.Println("缓存已失效-------------")
 				return errors.New("缓存已失效")
 			}
 		}
