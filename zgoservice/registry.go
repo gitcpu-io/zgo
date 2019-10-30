@@ -28,9 +28,10 @@ var serviceList = make(map[string]zgolb.WR2er)
 var mu = &sync.RWMutex{}
 
 type LBResponse struct {
-	SvcHost     string
-	SvcHttpPort string
-	SvcGrpcPort string
+	SimpleHttpHost string
+	SvcHost        string
+	SvcHttpPort    string
+	SvcGrpcPort    string
 }
 
 type RegistryAndDiscover interface {
@@ -54,7 +55,7 @@ type Service struct {
 	key           string
 }
 
-func NewService(heartbeat int64, addr []string) (RegistryAndDiscover, error) {
+func NewService(ttl int64, addr []string) (RegistryAndDiscover, error) {
 	conf := clientv3.Config{
 		Endpoints:   addr,
 		DialTimeout: 5 * time.Second,
@@ -74,7 +75,7 @@ func NewService(heartbeat int64, addr []string) (RegistryAndDiscover, error) {
 		client: client,
 	}
 
-	if err := service.setLease(heartbeat); err != nil {
+	if err := service.setLease(ttl); err != nil {
 		return nil, err
 	}
 	go service.ListenLeaseRespChan()
@@ -87,11 +88,11 @@ func (service *Service) Watch() chan string {
 }
 
 //设置租约
-func (service *Service) setLease(heartbeat int64) error {
+func (service *Service) setLease(ttl int64) error {
 	lease := clientv3.NewLease(service.client)
 
 	//设置租约时间
-	leaseResp, err := lease.Grant(context.TODO(), heartbeat)
+	leaseResp, err := lease.Grant(context.TODO(), ttl)
 	if err != nil {
 		return err
 	}
@@ -117,13 +118,11 @@ func (service *Service) ListenLeaseRespChan() {
 		select {
 		case leaseKeepResp := <-service.keepAliveChan:
 			if leaseKeepResp == nil {
-				val := fmt.Sprintf("%s:%s:%s", service.SvcHost, service.SvcHttpPort, service.SvcGrpcPort)
-				ek := zgocrypto.New().Md5(val)
-				key := fmt.Sprintf("%s/%s/%s", zgoServiceFrefix, service.name, ek)
-				service.delServiceList(service.name, key, val)
-
+				//val := fmt.Sprintf("%s:%s:%s", service.SvcHost, service.SvcHttpPort, service.SvcGrpcPort)
+				//ek := zgocrypto.New().Md5(val)
+				//key := fmt.Sprintf("%s/%s/%s", zgoServiceFrefix, service.name, ek)
+				//service.delServiceList(service.name, key, val)
 				fmt.Printf("\n%s，Service is Terminated\n", service.name)
-
 				return
 			} else {
 				//fmt.Printf("续租成功\n")
@@ -143,6 +142,10 @@ func (service *Service) Registry(serviceName, svcHost, httpPort, grpcPort string
 	service.SvcHost = svcHost
 	service.SvcHttpPort = httpPort
 	service.SvcGrpcPort = grpcPort
+	//go func() {
+	//	time.Sleep(60 * time.Second)	//1分钟后再次注册，如果程序还活着的话
+	//	service.Registry(serviceName,svcHost,httpPort,grpcPort)
+	//}()
 	return err
 }
 
@@ -171,13 +174,15 @@ func (service *Service) LB(serviceName string) (lbRes *LBResponse, err error) {
 	}
 	split := strings.Split(res, ":")
 	lbRes = &LBResponse{}
+	lbRes.SvcHost = split[0]
+	lbRes.SimpleHttpHost = fmt.Sprintf("http://%s", lbRes.SvcHost)
 	if len(split) > 0 {
 		lbRes.SvcHttpPort = split[1]
+		lbRes.SimpleHttpHost = fmt.Sprintf("%s:%s", lbRes.SimpleHttpHost, lbRes.SvcHttpPort)
 	}
 	if len(split) > 1 {
 		lbRes.SvcGrpcPort = split[2]
 	}
-	lbRes.SvcHost = split[0]
 
 	return lbRes, nil
 
