@@ -58,7 +58,7 @@ type Service struct {
 func NewService(ttl int64, addr []string) (RegistryAndDiscover, error) {
 	conf := clientv3.Config{
 		Endpoints:   addr,
-		DialTimeout: 5 * time.Second,
+		DialTimeout: 20 * time.Second,
 	}
 
 	var (
@@ -122,6 +122,7 @@ func (service *Service) ListenLeaseRespChan() {
 				//ek := zgocrypto.New().Md5(val)
 				//key := fmt.Sprintf("%s/%s/%s", zgoServiceFrefix, service.name, ek)
 				//service.delServiceList(service.name, key, val)
+
 				fmt.Printf("\n%s，Service is Terminated\n", service.name)
 				return
 			} else {
@@ -142,10 +143,6 @@ func (service *Service) Registry(serviceName, svcHost, httpPort, grpcPort string
 	service.SvcHost = svcHost
 	service.SvcHttpPort = httpPort
 	service.SvcGrpcPort = grpcPort
-	//go func() {
-	//	time.Sleep(60 * time.Second)	//1分钟后再次注册，如果程序还活着的话
-	//	service.Registry(serviceName,svcHost,httpPort,grpcPort)
-	//}()
 	return err
 }
 
