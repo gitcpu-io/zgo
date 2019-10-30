@@ -48,11 +48,11 @@ func (opt *Options) Init() error {
 	if opt.Env == "" {
 		opt.Env = config.Local
 	} else {
-		if opt.Env != config.Local && opt.Env != config.Dev && opt.Env != config.Qa && opt.Env != config.Pro && opt.Env != config.Pro2 {
-			return errors.New("error env,must be local/dev/qa/pro/pro2 !")
+		if opt.Env != config.Local && opt.Env != config.Dev && opt.Env != config.Qa && opt.Env != config.Pro && opt.Env != config.Pro2 && opt.Env != config.K8s {
+			return errors.New("error env,must be local/dev/qa/pro/pro2/k8s !")
 		}
 		if opt.Project == "" {
-			return errors.New("u msut input your Project name to zgo.Engine func .")
+			return errors.New("u must input your Project name to zgo.Engine func .")
 		}
 	}
 
