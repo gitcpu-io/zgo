@@ -124,7 +124,9 @@ func (service *Service) ListenLeaseRespChan() {
 				//service.delServiceList(service.name, key, val)
 
 				fmt.Printf("\n%s，Service is Terminated\n", service.name)
+
 				return
+
 			} else {
 				//fmt.Printf("续租成功\n")
 			}
