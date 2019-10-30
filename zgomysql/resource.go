@@ -32,6 +32,7 @@ type MysqlResourcer interface {
 	UpdateByObj(ctx context.Context, gormPool *gorm.DB, obj MysqlBaser) (int, error)
 	UpdateMany(ctx context.Context, gormPool *gorm.DB, tableName string, query string, args []interface{}, data map[string]interface{}) (int, error)
 	Exec(ctx context.Context, gormPool *gorm.DB, sql string, values ...interface{}) (int, error)
+	Raw(ctx context.Context, gormPool *gorm.DB, result interface{}, sql string, values ...interface{}) error
 }
 
 //内部结构体
@@ -327,6 +328,17 @@ func (mr *mysqlResource) Exec(ctx context.Context, gormPool *gorm.DB, sql string
 	count := gormPool.RowsAffected
 	err := gormPool.Error
 	return int(count), err
+}
+
+// Exec 执行sql语句
+func (mr *mysqlResource) Raw(ctx context.Context, gormPool *gorm.DB, result interface{}, sql string, values ...interface{}) error {
+	gormPool = gormPool.Raw(sql, values...)
+	gormPool.Scan(result)
+	err := gormPool.Error
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	return err
 }
 
 // 校验参数是否齐全

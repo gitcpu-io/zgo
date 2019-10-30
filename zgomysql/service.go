@@ -45,6 +45,7 @@ type Mysqler interface {
 	// --- 增删改方法 结束
 
 	Exec(ctx context.Context, sql string, values ...interface{}) (int, error)
+	Raw(ctx context.Context, result interface{}, sql string, values ...interface{}) error
 }
 
 // 内部就结构体
@@ -329,4 +330,13 @@ func (ms *zgoMysql) Exec(ctx context.Context, sql string, values ...interface{})
 		return 0, err
 	}
 	return ms.res.Exec(ctx, db, sql, values...)
+}
+
+// Exec 执行原生sql
+func (ms *zgoMysql) Raw(ctx context.Context, result interface{}, sql string, values ...interface{}) error {
+	db, err := ms.GetPool("r")
+	if err != nil {
+		return err
+	}
+	return ms.res.Raw(ctx, db, result, sql, values...)
 }
