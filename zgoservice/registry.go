@@ -99,6 +99,7 @@ func (service *Service) setLease(ttl int64) error {
 
 	//设置续租
 	ctx, cancelFunc := context.WithCancel(context.TODO())
+
 	leaseRespChan, err := lease.KeepAlive(ctx, leaseResp.ID)
 
 	if err != nil {
@@ -129,6 +130,7 @@ func (service *Service) ListenLeaseRespChan() {
 
 			} else {
 				//fmt.Printf("续租成功\n")
+				time.Sleep(500 * time.Millisecond)
 			}
 		}
 	}
