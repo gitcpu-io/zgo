@@ -37,6 +37,7 @@ var (
 )
 
 const SysTimeform = "2006-01-02 15:04:05"
+const SysTime14 = "20060102150405"
 const SysTimeformShort = "2006-01-02"
 const TimeformYm = "200601"
 
@@ -139,6 +140,8 @@ type Utilser interface {
 	FormatUnixTime(year int, month int, day int) string
 	FormatUnixTimeShort(year int, month int, day int) string
 	FormatUnixTimeYm(year int, month int, day int) string
+	//将10位 unix时间戳 转化14位字符时间为标准时间格式 20190724151558
+	FormatUnixTimeToString14(t int64) string
 	//转化14位字符时间为标准时间格式
 	FormatStringToStandTimeString(str string) string
 	//转化任意格式字符串为标准时间
@@ -763,6 +766,15 @@ func (u *utils) FormatUnixTimeShort(year int, month int, day int) string {
 // 转化为yyyymm格式字符串
 func (u *utils) FormatUnixTimeYm(year int, month int, day int) string {
 	return time.Now().AddDate(year, month, day).Format(TimeformYm)
+}
+
+// 将10位 unix时间戳 转化14位字符时间为标准时间格式 20190724151558
+func (u *utils) FormatUnixTimeToString14(t int64) string {
+	if t > 0 {
+		return time.Unix(t, 0).Format(SysTime14)
+	} else {
+		return time.Now().Format(SysTime14)
+	}
 }
 
 // 转化14位字符时间为标准时间格式 20190724151558 -> 2019-07-24 15:15:58
