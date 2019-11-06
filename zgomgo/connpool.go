@@ -120,7 +120,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 			address = fmt.Sprintf("mongodb://%s:%d", hosts.Host, hosts.Port)
 
 		}
-		cp.connChanChan <- cp.createClient(address, hosts.PoolSize)
+		cp.connChanChan <- cp.createClient(address, hosts.Username, hosts.Password, hosts.DbName, hosts.PoolSize)
 	}
 
 	go func() {
@@ -152,7 +152,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 }
 
 //createClient 创建客户端连接
-func (cp *connPool) createClient(address string, poolSize int) chan *mongo.Client {
+func (cp *connPool) createClient(address, username, password, dbname string, poolSize int) chan *mongo.Client {
 	out := make(chan *mongo.Client)
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -162,6 +162,11 @@ func (cp *connPool) createClient(address string, poolSize int) chan *mongo.Clien
 			//	"47.95.20.12:27018",
 			//	"47.95.20.12:27019",
 			//},
+			Auth: &options.Credential{
+				AuthSource: dbname,
+				Username:   username,
+				Password:   password,
+			},
 		}
 		opts.SetMaxPoolSize(uint64(poolSize))
 		c, err := mongo.Connect(ctx, options.Client().ApplyURI(address), opts)
