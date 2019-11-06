@@ -1066,9 +1066,9 @@ func (u *utils) MarshalMap(mm map[string]interface{}) (string, error) {
 func (u *utils) RemoteIp(ctx iris.Context) string {
 	req := ctx.Request()
 	remoteAddr := req.RemoteAddr
-	if ip := req.Header.Get("X-Real-IP"); ip != "" {
+	if ip := req.Header.Get("X-Forwarded-For"); ip != "" {
 		remoteAddr = ip
-	} else if ip = req.Header.Get("X-Forwarded-For"); ip != "" {
+	} else if ip = req.Header.Get("X-Real-IP"); ip != "" {
 		remoteAddr = ip
 	} else {
 		remoteAddr, _, _ = net.SplitHostPort(remoteAddr)
