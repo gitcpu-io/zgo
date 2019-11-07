@@ -43,6 +43,8 @@ type Httper interface {
 	//钉钉机器人
 	Ding(token string, msg string)
 	GetByProxy(httpUrl string, proxyAddr string, params map[string]interface{}) ([]byte, error)
+	GetByProxyNew(httpUrl string, proxyAddr string, params map[string]interface{}) (*http.Response, []byte, error)
+	GetByParam(url string, params map[string]interface{}) (*http.Response, []byte, error)
 	PostJsonByParam(url string, jsonData []byte, param map[string]interface{}, handler ...map[string]string) ([]byte, error) //param--> timeout
 }
 
@@ -195,6 +197,26 @@ func (zh *zgohttp) Get(url string) ([]byte, error) {
 	return body, err
 }
 
+func (zh *zgohttp) GetByParam(url string, params map[string]interface{}) (*http.Response, []byte, error) {
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer resp.Body.Close()
+	if v, ok := params["header"]; ok {
+		for k, item := range v.(map[string]string) {
+			resp.Header.Set(k, item)
+		}
+	}
+	body, err := ioutil.ReadAll(bufio.NewReader(resp.Body))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return resp, body, err
+}
+
 func (zh *zgohttp) Post(url string, play url.Values, handler ...map[string]string) ([]byte, error) {
 	resp, err := http.PostForm(url, play)
 	if err != nil {
@@ -309,6 +331,11 @@ func (zh *zgohttp) GetByProxy(httpUrl string, proxyAddr string, params map[strin
 	if err != nil {
 		return nil, err
 	}
+	if v, ok := params["header"]; ok {
+		for k, item := range v.(map[string]string) {
+			resp.Header.Set(k, item)
+		}
+	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(bufio.NewReader(resp.Body))
@@ -316,4 +343,33 @@ func (zh *zgohttp) GetByProxy(httpUrl string, proxyAddr string, params map[strin
 		return nil, err
 	}
 	return body, err
+}
+func (zh *zgohttp) GetByProxyNew(httpUrl string, proxyAddr string, params map[string]interface{}) (*http.Response, []byte, error) {
+	proxy, err := url.Parse("http://" + proxyAddr)
+	if err != nil {
+		return nil, nil, err
+	}
+	netTransport := &http.Transport{
+		Proxy:               http.ProxyURL(proxy),
+		MaxIdleConnsPerHost: 10,
+	}
+	httpClient := &http.Client{
+		Transport: netTransport,
+	}
+	resp, err := httpClient.Get(httpUrl)
+	if err != nil {
+		return nil, nil, err
+	}
+	if v, ok := params["header"]; ok {
+		for k, item := range v.(map[string]string) {
+			resp.Header.Set(k, item)
+		}
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(bufio.NewReader(resp.Body))
+	if err != nil {
+		return nil, nil, err
+	}
+	return resp, body, err
 }
