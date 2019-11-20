@@ -149,6 +149,8 @@ type Utilser interface {
 
 	IsYesToday(t int64) bool
 	IsYesTodayByTime(t1, t2 int64) bool
+	//打乱字符串
+	RandomRandom(strings []string) string
 	//生成最大数是max的一个随机数
 	Random(max int) int
 	//生成num个随机数0--9
@@ -846,6 +848,20 @@ func (u *utils) GetAnyDayZeroUnixTimestamp(t int) int64 {
 	timeStr := time.Now().Format(SysTimeformShort)
 	t2, _ := time.ParseInLocation(SysTimeformShort, timeStr, time.Local)
 	return t2.AddDate(0, 0, t).Unix()
+}
+
+func (u *utils) RandomRandom(strings []string) string {
+
+	for i := len(strings) - 1; i > 0; i-- {
+		num := rand.Intn(i + 1)
+		strings[i], strings[num] = strings[num], strings[i]
+	}
+
+	str := ""
+	for i := 0; i < len(strings); i++ {
+		str += strings[i]
+	}
+	return str
 }
 
 // 得到指定最大值的一个随机数
