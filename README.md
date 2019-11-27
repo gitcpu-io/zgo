@@ -12,11 +12,9 @@ zgo是专门为使用go语言的开发人员所设计和开发的， 它提供�
 [![npm](zgo_engine.png)](http://wiki.zhugefang.com/display/ZGZFRDCENTER/zgo)
 
 
-##zgo的核心功能（共23个，6个数据库，2个缓存，3个消息队列，1个ES，1个Cache, 1个Log存储，1个Http，1个Grpc，1个Map，1个负载，1个限流，3个工具类组件）
+##zgo的核心功能（共25个，6个数据库，2个缓存，3个消息队列，1个ES，1个Cache, 1个Log存储，1个Http，1个Grpc，1个Map，1个负载，1个限流，3个工具类组件）
 * 1.zgo Mysql对gorm开发框架提供上层封装，通过channel内建连接池，提供高并发访问mysql，并支持函数调用时自动读写分离，开发人员无需关注主从数据库
-
 * 2.zgo Mongodb对mgo开发框架提供上层封装，改变框架原有session复制连接的使用方法，通过channel内建连接池，提供高并发访问mongodb数据库的增删改查
-
 * 3.zgo Pika通过channel内建连接池，支持string,hash,set,sort set,list操作
 * 4.zgo Redis通过channel内建连接池，支持string,hash,set,sort set,list操作
 * 5.zgo Nsq对go-nsq开发框架提供上层封装，通过channel内建连接池，一步调用即可向Nsq中生产消息，通过一个goroutine来消费消息
