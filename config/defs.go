@@ -1,13 +1,10 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"io/ioutil"
-	"path/filepath"
-	"runtime"
 	"strings"
 )
 
@@ -155,9 +152,9 @@ type Labelconns struct {
 
 var Conf *allConfig
 
-func InitConfig(env, project, etcdHosts string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan map[string]*CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
+func InitConfig(cpath, env, project, etcdHosts string) ([]*mvccpb.KeyValue, chan map[string][]*ConnDetail, chan map[string]*CacheConfig, chan map[string][]*ConnDetail, chan map[string]*CacheConfig) {
 
-	LoadConfig(env, project, etcdHosts)
+	LoadConfig(cpath, env, project, etcdHosts)
 
 	if env != Local {
 		//用etcd的配置
@@ -170,15 +167,11 @@ func InitConfig(env, project, etcdHosts string) ([]*mvccpb.KeyValue, chan map[st
 	return nil, nil, nil, nil, nil
 }
 
-func LoadConfig(e, project, etcdHosts string) {
+func LoadConfig(cpath, env, project, etcdHosts string) {
 	var cf string
-	switch e {
+	switch env {
 	case Local:
-		_, f, _, ok := runtime.Caller(1)
-		if !ok {
-			panic(errors.New("Can not get current file info"))
-		}
-		cf = fmt.Sprintf("%s/%s.json", filepath.Dir(f), e)
+		cf = fmt.Sprintf("%s/%s.json", cpath, env)
 
 		bf, err := ioutil.ReadFile(cf)
 		if err != nil {
@@ -191,11 +184,9 @@ func LoadConfig(e, project, etcdHosts string) {
 			panic(err)
 		}
 
-		//Conf = LoadConfig(cf)
-
 	case Dev:
 		Conf = &allConfig{
-			Env:       e,
+			Env:       env,
 			Project:   project,
 			EtcdHosts: DevEtcHosts,
 			File: FileStore{
@@ -206,7 +197,7 @@ func LoadConfig(e, project, etcdHosts string) {
 
 	case Qa:
 		Conf = &allConfig{
-			Env:       e,
+			Env:       env,
 			Project:   project,
 			EtcdHosts: QaEtcHosts,
 			File: FileStore{
@@ -217,7 +208,7 @@ func LoadConfig(e, project, etcdHosts string) {
 
 	case Pro:
 		Conf = &allConfig{
-			Env:       e,
+			Env:       env,
 			Project:   project,
 			EtcdHosts: ProEtcHosts,
 			File: FileStore{
@@ -227,7 +218,7 @@ func LoadConfig(e, project, etcdHosts string) {
 		}
 	case Pro2:
 		Conf = &allConfig{
-			Env:       e,
+			Env:       env,
 			Project:   project,
 			EtcdHosts: ProEtcHosts,
 			File: FileStore{
@@ -237,7 +228,7 @@ func LoadConfig(e, project, etcdHosts string) {
 		}
 	case K8s:
 		Conf = &allConfig{
-			Env:       e,
+			Env:       env,
 			Project:   project,
 			EtcdHosts: ProEtcHosts,
 			File: FileStore{
