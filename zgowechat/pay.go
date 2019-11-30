@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"crypto/sha256"
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/hex"
 	"encoding/xml"
 	"errors"
@@ -13,9 +12,9 @@ import (
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"github.com/parnurzeal/gorequest"
 	"hash"
-	"io/ioutil"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 /*
@@ -77,6 +76,12 @@ type Payer interface {
 	//解析微信支付异步通知的参数
 	ParseNotifyResult(req *http.Request) (notifyReq *NotifyRequest, err error)
 
+	//解析微信退款异步通知的参数
+	ParseRefundNotifyResult(req *http.Request) (notifyReq *RefundNotifyRequest, err error)
+
+	//解密微信退款异步通知的加密数据
+	DecryptRefundNotifyReqInfo(reqInfo, apiKey string) (refundNotify *RefundNotify, err error)
+
 	//微信同步返回参数验签或异步通知参数验签
 	VerifySign(apiKey, signType string, bean interface{}) (ok bool, err error)
 
@@ -91,17 +96,27 @@ type Payer interface {
 
 	//授权码查询openid(AccessToken:157字符)
 	GetOpenIdByAuthCode(appId, mchId, apiKey, authCode, nonceStr string) (openIdRsp *OpenIdByAuthCodeRsp, err error)
+
+	//添加微信证书 Byte 数组
+	AddCertFileByte(certFile, keyFile, pkcs12File []byte)
+
+	//添加微信证书 Path 路径
+	AddCertFilePath(certFilePath, keyFilePath, pkcs12FilePath string) (err error)
 }
 
 type Country int
 
 type PayClient struct {
-	AppId     string
-	MchId     string
-	ApiKey    string
-	BaseURL   string
-	IsProd    bool
-	NotifyUrl string
+	AppId      string
+	MchId      string
+	ApiKey     string
+	BaseURL    string
+	IsProd     bool
+	NotifyUrl  string
+	CertFile   []byte
+	KeyFile    []byte
+	Pkcs12File []byte
+	mu         sync.RWMutex
 }
 
 //初始化微信客户端 ok
@@ -199,24 +214,12 @@ func (w *PayClient) OrderClose(body zgoutils.BodyMap) (wxRes *CloseOrderResponse
 //    文档地址：https://pay.weixin.qq.com/wiki/doc/api/micropay.php?chapter=9_11&index=3
 func (w *PayClient) OrderCancel(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *ReverseResponse, err error) {
 	var (
-		bs, pkcs    []byte
-		pkcsPool    *x509.CertPool
-		certificate tls.Certificate
-		tlsConfig   *tls.Config
+		bs        []byte
+		tlsConfig *tls.Config
 	)
 	if w.IsProd {
-		pkcsPool = x509.NewCertPool()
-		if pkcs, err = ioutil.ReadFile(pkcs12FilePath); err != nil {
-			return nil, fmt.Errorf("ioutil.ReadFile：%v", err.Error())
-		}
-		pkcsPool.AppendCertsFromPEM(pkcs)
-		if certificate, err = tls.LoadX509KeyPair(certFilePath, keyFilePath); err != nil {
-			return nil, fmt.Errorf("tls.LoadX509KeyPair：%v", err.Error())
-		}
-		tlsConfig = &tls.Config{
-			Certificates:       []tls.Certificate{certificate},
-			RootCAs:            pkcsPool,
-			InsecureSkipVerify: true,
+		if tlsConfig, err = w.addCertConfig(certFilePath, keyFilePath, pkcs12FilePath); err != nil {
+			return nil, err
 		}
 		bs, err = w.do(body, wxReverse, tlsConfig)
 	} else {
@@ -233,27 +236,16 @@ func (w *PayClient) OrderCancel(body zgoutils.BodyMap, certFilePath, keyFilePath
 }
 
 //申请退款 ok
+//    注意：如已使用client.AddCertFilePath()或client.AddCertFileByte()添加过证书，参数certFilePath、keyFilePath、pkcs12FilePath全传空字符串 ""，如方法需单独使用证书，则传证书Path
 //    文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_4
 func (w *PayClient) OrderRefund(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes *RefundResponse, err error) {
 	var (
-		bs, pkcs    []byte
-		pkcsPool    *x509.CertPool
-		certificate tls.Certificate
-		tlsConfig   *tls.Config
+		bs        []byte
+		tlsConfig *tls.Config
 	)
 	if w.IsProd {
-		pkcsPool = x509.NewCertPool()
-		if pkcs, err = ioutil.ReadFile(pkcs12FilePath); err != nil {
-			return nil, fmt.Errorf("ioutil.ReadFile：%v", err.Error())
-		}
-		pkcsPool.AppendCertsFromPEM(pkcs)
-		if certificate, err = tls.LoadX509KeyPair(certFilePath, keyFilePath); err != nil {
-			return nil, fmt.Errorf("tls.LoadX509KeyPair：%v", err.Error())
-		}
-		tlsConfig = &tls.Config{
-			Certificates:       []tls.Certificate{certificate},
-			RootCAs:            pkcsPool,
-			InsecureSkipVerify: true,
+		if tlsConfig, err = w.addCertConfig(certFilePath, keyFilePath, pkcs12FilePath); err != nil {
+			return nil, err
 		}
 		bs, err = w.do(body, wxRefund, tlsConfig)
 	} else {
@@ -309,24 +301,13 @@ func (w *PayClient) DownloadBill(body zgoutils.BodyMap) (wxRes string, err error
 //    好像不支持沙箱环境，因为沙箱环境默认需要用MD5签名，但是此接口仅支持HMAC-SHA256签名
 func (w *PayClient) DownloadFundFlow(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes string, err error) {
 	var (
-		bs, pkcs    []byte
-		pkcsPool    *x509.CertPool
-		certificate tls.Certificate
-		tlsConfig   *tls.Config
+		bs        []byte
+		tlsConfig *tls.Config
 	)
 	if w.IsProd {
-		pkcsPool = x509.NewCertPool()
-		if pkcs, err = ioutil.ReadFile(pkcs12FilePath); err != nil {
-			return null, fmt.Errorf("ioutil.ReadFile：%v", err.Error())
+		if tlsConfig, err = w.addCertConfig(certFilePath, keyFilePath, pkcs12FilePath); err != nil {
+			return null, err
 		}
-		pkcsPool.AppendCertsFromPEM(pkcs)
-		if certificate, err = tls.LoadX509KeyPair(certFilePath, keyFilePath); err != nil {
-			return null, fmt.Errorf("tls.LoadX509KeyPair：%v", err.Error())
-		}
-		tlsConfig = &tls.Config{
-			Certificates:       []tls.Certificate{certificate},
-			RootCAs:            pkcsPool,
-			InsecureSkipVerify: true}
 		bs, err = w.do(body, wxDownloadfundflow, tlsConfig)
 	} else {
 		bs, err = w.do(body, wxSandboxDownloadfundflow)
@@ -343,25 +324,13 @@ func (w *PayClient) DownloadFundFlow(body zgoutils.BodyMap, certFilePath, keyFil
 //    好像不支持沙箱环境，因为沙箱环境默认需要用MD5签名，但是此接口仅支持HMAC-SHA256签名
 func (w *PayClient) BatchQueryComment(body zgoutils.BodyMap, certFilePath, keyFilePath, pkcs12FilePath string) (wxRes string, err error) {
 	var (
-		bs, pkcs    []byte
-		pkcsPool    *x509.CertPool
-		certificate tls.Certificate
-		tlsConfig   *tls.Config
+		bs        []byte
+		tlsConfig *tls.Config
 	)
 	if w.IsProd {
 		body.Set("sign_type", SignType_HMAC_SHA256)
-		pkcsPool = x509.NewCertPool()
-		if pkcs, err = ioutil.ReadFile(pkcs12FilePath); err != nil {
-			return null, fmt.Errorf("ioutil.ReadFile：%v", err.Error())
-		}
-		pkcsPool.AppendCertsFromPEM(pkcs)
-		if certificate, err = tls.LoadX509KeyPair(certFilePath, keyFilePath); err != nil {
-			return null, fmt.Errorf("tls.LoadX509KeyPair：%v", err.Error())
-		}
-		tlsConfig = &tls.Config{
-			Certificates:       []tls.Certificate{certificate},
-			RootCAs:            pkcsPool,
-			InsecureSkipVerify: true,
+		if tlsConfig, err = w.addCertConfig(certFilePath, keyFilePath, pkcs12FilePath); err != nil {
+			return null, err
 		}
 		bs, err = w.do(body, wxBatchquerycomment, tlsConfig)
 	} else {
@@ -381,26 +350,15 @@ func (w *PayClient) Transfer(body zgoutils.BodyMap, certFilePath, keyFilePath, p
 	body.Set("mch_appid", w.AppId)
 	body.Set("mchid", w.MchId)
 	var (
-		bs, pkcs    []byte
-		pkcsPool    *x509.CertPool
-		certificate tls.Certificate
-		tlsConfig   *tls.Config
-		agent       *gorequest.SuperAgent
-		errs        []error
-		res         gorequest.Response
+		bs        []byte
+		tlsConfig *tls.Config
+		agent     *gorequest.SuperAgent
+		errs      []error
+		res       gorequest.Response
 	)
-	pkcsPool = x509.NewCertPool()
-	if pkcs, err = ioutil.ReadFile(pkcs12FilePath); err != nil {
-		return nil, fmt.Errorf("ioutil.ReadFile：%v", err.Error())
+	if tlsConfig, err = w.addCertConfig(certFilePath, keyFilePath, pkcs12FilePath); err != nil {
+		return nil, err
 	}
-	pkcsPool.AppendCertsFromPEM(pkcs)
-	if certificate, err = tls.LoadX509KeyPair(certFilePath, keyFilePath); err != nil {
-		return nil, fmt.Errorf("tls.LoadX509KeyPair：%v", err.Error())
-	}
-	tlsConfig = &tls.Config{
-		Certificates:       []tls.Certificate{certificate},
-		RootCAs:            pkcsPool,
-		InsecureSkipVerify: true}
 	body.Set("sign", getReleaseSign(w.ApiKey, SignType_MD5, body))
 	agent = zgoutils.HttpAgent().TLSClientConfig(tlsConfig)
 	if w.BaseURL != null {

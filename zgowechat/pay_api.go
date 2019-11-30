@@ -6,6 +6,8 @@ import (
 	"crypto/hmac"
 	"crypto/md5"
 	"crypto/sha256"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/xml"
@@ -18,6 +20,76 @@ import (
 	"reflect"
 	"strings"
 )
+
+// 添加微信证书 Byte 数组
+//    certFile：apiclient_cert.pem byte数组
+//    keyFile：apiclient_key.pem byte数组
+//    pkcs12File：apiclient_cert.p12 byte数组
+func (w *PayClient) AddCertFileByte(certFile, keyFile, pkcs12File []byte) {
+	w.mu.Lock()
+	w.CertFile = certFile
+	w.KeyFile = keyFile
+	w.Pkcs12File = pkcs12File
+	w.mu.Unlock()
+}
+
+// 添加微信证书 Path 路径
+//    certFilePath：apiclient_cert.pem 路径
+//    keyFilePath：apiclient_key.pem 路径
+//    pkcs12FilePath：apiclient_cert.p12 路径
+//    返回err
+func (w *PayClient) AddCertFilePath(certFilePath, keyFilePath, pkcs12FilePath string) (err error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	var (
+		cert, key, pkcs []byte
+	)
+	if cert, err = ioutil.ReadFile(certFilePath); err != nil {
+		return
+	}
+	if key, err = ioutil.ReadFile(keyFilePath); err != nil {
+		return
+	}
+	if pkcs, err = ioutil.ReadFile(pkcs12FilePath); err != nil {
+		return
+	}
+	w.CertFile = cert
+	w.KeyFile = key
+	w.Pkcs12File = pkcs
+	return
+}
+
+func (w *PayClient) addCertConfig(certFilePath, keyFilePath, pkcs12FilePath string) (tlsConfig *tls.Config, err error) {
+	var (
+		pkcs        []byte
+		certificate tls.Certificate
+		pkcsPool    = x509.NewCertPool()
+	)
+	if certFilePath != null && keyFilePath != null && pkcs12FilePath != null {
+		if pkcs, err = ioutil.ReadFile(pkcs12FilePath); err != nil {
+			return nil, fmt.Errorf("ioutil.ReadFile：%s", err.Error())
+		}
+		pkcsPool.AppendCertsFromPEM(pkcs)
+		if certificate, err = tls.LoadX509KeyPair(certFilePath, keyFilePath); err != nil {
+			return nil, fmt.Errorf("tls.LoadX509KeyPair：%s", err.Error())
+		}
+		tlsConfig = &tls.Config{
+			Certificates:       []tls.Certificate{certificate},
+			RootCAs:            pkcsPool,
+			InsecureSkipVerify: true}
+		return
+	}
+
+	pkcsPool.AppendCertsFromPEM(w.Pkcs12File)
+	if certificate, err = tls.X509KeyPair(w.CertFile, w.KeyFile); err != nil {
+		return nil, fmt.Errorf("tls.X509KeyPair：%s", err.Error())
+	}
+	tlsConfig = &tls.Config{
+		Certificates:       []tls.Certificate{certificate},
+		RootCAs:            pkcsPool,
+		InsecureSkipVerify: true}
+	return
+}
 
 //获取微信支付所需参数里的Sign值（通过支付参数计算Sign值）
 //    注意：zgoutils.BodyMap中如无 sign_type 参数，默认赋值 sign_type 为 MD5
@@ -93,6 +165,64 @@ func (w *PayClient) ParseNotifyResult(req *http.Request) (notifyReq *NotifyReque
 	notifyReq = new(NotifyRequest)
 	if err = xml.NewDecoder(req.Body).Decode(notifyReq); err != nil {
 		return nil, fmt.Errorf("xml.NewDecoder：%v", err.Error())
+	}
+	return
+}
+
+// 解析微信退款异步通知的参数
+//    req：*http.Request
+//    返回参数notifyReq：Notify请求的参数
+//    返回参数err：错误信息
+func (w *PayClient) ParseRefundNotifyResult(req *http.Request) (notifyReq *RefundNotifyRequest, err error) {
+	notifyReq = new(RefundNotifyRequest)
+	if err = xml.NewDecoder(req.Body).Decode(notifyReq); err != nil {
+		return nil, fmt.Errorf("xml.NewDecoder：%s", err.Error())
+	}
+	return
+}
+
+// 解密微信退款异步通知的加密数据
+//    reqInfo：ParseRefundNotifyResult() 方法获取的加密数据 req_info
+//    apiKey：API秘钥值
+//    返回参数refundNotify：RefundNotify请求的加密数据
+//    返回参数err：错误信息
+//    文档：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_16&index=10
+func (w *PayClient) DecryptRefundNotifyReqInfo(reqInfo, apiKey string) (refundNotify *RefundNotify, err error) {
+	var (
+		encryptionB, bs []byte
+		block           cipher.Block
+		blockSize       int
+	)
+	if encryptionB, err = base64.StdEncoding.DecodeString(reqInfo); err != nil {
+		return nil, err
+	}
+	h := md5.New()
+	h.Write([]byte(apiKey))
+	key := strings.ToLower(hex.EncodeToString(h.Sum(nil)))
+	if len(encryptionB)%aes.BlockSize != 0 {
+		return nil, errors.New("encryptedData is error")
+	}
+	if block, err = aes.NewCipher([]byte(key)); err != nil {
+		return nil, err
+	}
+	blockSize = block.BlockSize()
+	func(dst, src []byte) {
+		if len(src)%blockSize != 0 {
+			panic("crypto/cipher: input not full blocks")
+		}
+		if len(dst) < len(src) {
+			panic("crypto/cipher: output smaller than input")
+		}
+		for len(src) > 0 {
+			block.Decrypt(dst, src[:blockSize])
+			src = src[blockSize:]
+			dst = dst[blockSize:]
+		}
+	}(encryptionB, encryptionB)
+	bs = zgoutils.PKCS7UnPadding(encryptionB)
+	refundNotify = new(RefundNotify)
+	if err = xml.Unmarshal(bs, refundNotify); err != nil {
+		return nil, fmt.Errorf("xml.Unmarshal：%s", err.Error())
 	}
 	return
 }
