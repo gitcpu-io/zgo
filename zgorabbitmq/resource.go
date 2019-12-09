@@ -58,7 +58,11 @@ func (n *rabbitmqResource) Producer(ctx context.Context, exchangeName, exchangeT
 		return out, errors.New("conn is nil")
 	}
 
+getConnByChan:
 	if conn, ok := <-connChan; ok {
+		if conn.IsClosed() {
+			goto getConnByChan
+		}
 		c, err := conn.Channel()
 		if err != nil {
 			out <- 0
@@ -102,7 +106,11 @@ func (n *rabbitmqResource) Consumer(exchangeName, exchangeType, routingKey, queu
 	if len(connChan) == 0 {
 		return out, errors.New("conn is nil")
 	}
+getConnByChan:
 	if conn, ok := <-connChan; ok {
+		if conn.IsClosed() {
+			goto getConnByChan
+		}
 		c, err := conn.Channel()
 		if err != nil {
 			return out, errors.New(fmt.Sprintf("channel.open: %s", err))
@@ -150,7 +158,11 @@ func (n *rabbitmqResource) ProducerByQueue(ctx context.Context, queueName string
 		return out, errors.New("conn is nil")
 	}
 
+getConnByChan:
 	if conn, ok := <-connChan; ok {
+		if conn.IsClosed() {
+			goto getConnByChan
+		}
 		c, err := conn.Channel()
 		if err != nil {
 			out <- 0
@@ -188,7 +200,11 @@ func (n *rabbitmqResource) ConsumerByQueue(queueName string) (<-chan amqp.Delive
 	if len(connChan) == 0 {
 		return out, errors.New("conn is nil")
 	}
+getConnByChan:
 	if conn, ok := <-connChan; ok {
+		if conn.IsClosed() {
+			goto getConnByChan
+		}
 		c, err := conn.Channel()
 		if err != nil {
 			return out, errors.New(fmt.Sprintf("channel.open: %s", err))

@@ -372,7 +372,9 @@ func (u *utils) ParseUrlEscapeToMap(params string) (map[string]string, error) {
 	split := strings.Split(res, "&")
 	for _, value := range split {
 		sps := strings.Split(value, "=")
-		m[sps[0]] = sps[1]
+		if len(sps) > 0 {
+			m[sps[0]] = sps[1]
+		}
 	}
 	return m, nil
 }
