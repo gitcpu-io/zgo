@@ -21,7 +21,9 @@
           "connSize": 10,
           "poolSize": 5000,
           "username": "",
-          "password": ""
+          "password": "",
+          "db": 0,
+          "cluster": 0
         },
         {
           "c": "北京主库2-----etcd redis",
@@ -30,7 +32,9 @@
           "connSize": 10,
           "poolSize": 5000,
           "username": "",
-          "password": ""
+          "password": "",
+          "db": 0,
+          "cluster": 0
         }
       ]
     },
@@ -44,7 +48,9 @@
           "connSize": 1,
           "poolSize": 100,
           "username": "",
-          "password": ""
+          "password": "",
+          "db": 0,
+          "cluster": 0
         },
         {
           "c": "北京从库3=====redis",
@@ -53,7 +59,9 @@
           "connSize": 50,
           "poolSize": 222,
           "username": "",
-          "password": ""
+          "password": "",
+          "db": 0,
+          "cluster": 0
         }
       ]
     }
