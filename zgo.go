@@ -237,6 +237,7 @@ type (
 	EtcdGetResponse = clientv3.GetResponse
 
 	MgoObjectId           = primitive.ObjectID           //mongo bson id
+	MgoBinbary            = primitive.Binary             //mongo bson id
 	MgoBulkWriteOperation = zgomgo.MgoBulkWriteOperation //多个并行计算
 	MgoArgs               = zgomgo.MgoArgs               //CRUD->mongodb时的传入参数，具体参数由以下选择，>>>>>请使用前详细阅读>>>>>
 	/*	Document     []interface{}    //保存时用到的结构体的指针
