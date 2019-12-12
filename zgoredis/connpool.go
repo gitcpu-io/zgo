@@ -214,7 +214,7 @@ func (cp *connPool) createClient(host string, port int, db int, poolsize int, pa
 	go func() {
 		customConnFunc := func(network, addr string) (radix.Conn, error) {
 			return radix.Dial(network, addr,
-				radix.DialTimeout(30*time.Second), radix.DialSelectDB(db), radix.DialAuthPass(password),
+				radix.DialTimeout(5*time.Second), radix.DialSelectDB(db), radix.DialAuthPass(password),
 			)
 		}
 

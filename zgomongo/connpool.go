@@ -152,14 +152,13 @@ func (cp *connPool) createClient(address string, dbname, username, password stri
 			Database: dbname,
 			Username: username,
 			Password: password,
-			//PoolLimit: 50000,
-			Timeout: time.Duration(60 * time.Second),
+			//Timeout: time.Duration(5 * time.Second),
 		}
 
 		session, err := mgo.DialWithInfo(&dialInfo)
 
 		if err != nil || session == nil {
-			fmt.Println(session, err)
+			fmt.Println("mongodb...error...", session, err)
 			out <- nil
 			return
 		}

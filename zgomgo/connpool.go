@@ -155,7 +155,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 func (cp *connPool) createClient(address, username, password, dbname string, poolSize int) chan *mongo.Client {
 	out := make(chan *mongo.Client)
 	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		opts := &options.ClientOptions{
 			//Hosts: []string{
