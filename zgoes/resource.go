@@ -22,6 +22,7 @@ type EsResourcer interface {
 	ExistsIndices(ctx context.Context, index, table string) (bool, error)
 	CreateIndices(ctx context.Context, index, table string) (bool, error)
 	AddOneDataAutoId(ctx context.Context, index, table, dataJson string) (interface{}, error)
+	QueryDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) ([]byte, error)
 }
 
 var mu sync.RWMutex
@@ -281,4 +282,35 @@ func (e *esResource) AddOneDataAutoId(ctx context.Context, index, table, dataJso
 	}
 
 	return result, err
+}
+
+//根据dsl语句执行查询
+func (e *esResource) QueryDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) ([]byte, error) {
+	//定义es结果集返回结构体
+	uri := e.uri + "/" + index + "/" + table + "/" + "_search?pretty"
+	if ignoreUnavailable, ok := args["ignoreUnavailable"]; ok {
+		uri = uri + "&ignore_unavailable=" + ignoreUnavailable.(string)
+	}
+	//拼接es请求uti[索引+文档+_search]
+	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl)) //post请求
+	if err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json") //设置json协议解析头
+	resp, err := e.GetConChan().Do(req)                //获取绑定的地址执行请求
+	if err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	byts, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+
+	return byts, err
 }
