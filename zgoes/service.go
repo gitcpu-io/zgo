@@ -103,6 +103,7 @@ type Eser interface {
 	UpDateByQuery(ctx context.Context, index, table, dsl string) (interface{}, error)
 	ExistsIndices(ctx context.Context, index, table string) (bool, error)
 	CreateIndices(ctx context.Context, index, table string) (bool, error)
+	AddOneDataAutoId(ctx context.Context, index, table, dataJson string) (interface{}, error)
 }
 
 func (e *zgoes) New(label ...string) (*zgoes, error) {
@@ -133,6 +134,10 @@ func (e *zgoes) ExistsIndices(ctx context.Context, index, table string) (bool, e
 }
 func (e *zgoes) CreateIndices(ctx context.Context, index, table string) (bool, error) {
 	return e.res.CreateIndices(ctx, index, table)
+}
+
+func (e *zgoes) AddOneDataAutoId(ctx context.Context, index, table, dataJson string) (interface{}, error) {
+	return e.res.AddOneDataAutoId(ctx, index, table, dataJson)
 }
 
 //func (e *zgoes)NewDsl() *mode.DSL {
