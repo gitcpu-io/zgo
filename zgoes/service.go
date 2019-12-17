@@ -103,8 +103,9 @@ type Eser interface {
 	UpDateByQuery(ctx context.Context, index, table, dsl string) (interface{}, error)
 	ExistsIndices(ctx context.Context, index, table string) (bool, error)
 	CreateIndices(ctx context.Context, index, table string) (bool, error)
-	AddOneDataAutoId(ctx context.Context, index, table, dataJson string) (interface{}, error)
+	AddOneDataAutoId(ctx context.Context, index, table, dataJson string) ([]byte, error)
 	QueryDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) ([]byte, error)
+	UpdateByQuery(ctx context.Context, index, table, dsl string) ([]byte, error)
 }
 
 func (e *zgoes) New(label ...string) (*zgoes, error) {
@@ -137,12 +138,16 @@ func (e *zgoes) CreateIndices(ctx context.Context, index, table string) (bool, e
 	return e.res.CreateIndices(ctx, index, table)
 }
 
-func (e *zgoes) AddOneDataAutoId(ctx context.Context, index, table, dataJson string) (interface{}, error) {
+func (e *zgoes) AddOneDataAutoId(ctx context.Context, index, table, dataJson string) ([]byte, error) {
 	return e.res.AddOneDataAutoId(ctx, index, table, dataJson)
 }
 
 func (e *zgoes) QueryDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) ([]byte, error) {
 	return e.res.QueryDsl(ctx, index, table, dsl, args)
+}
+
+func (e *zgoes) UpdateByQuery(ctx context.Context, index, table, dsl string) ([]byte, error) {
+	return e.res.UpdateByQuery(ctx, index, table, dsl)
 }
 
 //func (e *zgoes)NewDsl() *mode.DSL {

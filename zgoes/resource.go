@@ -21,8 +21,9 @@ type EsResourcer interface {
 	UpDateByQuery(ctx context.Context, index, table, dsl string) (interface{}, error)
 	ExistsIndices(ctx context.Context, index, table string) (bool, error)
 	CreateIndices(ctx context.Context, index, table string) (bool, error)
-	AddOneDataAutoId(ctx context.Context, index, table, dataJson string) (interface{}, error)
+	AddOneDataAutoId(ctx context.Context, index, table, dataJson string) ([]byte, error)
 	QueryDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) ([]byte, error)
+	UpdateByQuery(ctx context.Context, index, table, dsl string) ([]byte, error)
 }
 
 var mu sync.RWMutex
@@ -257,7 +258,7 @@ func (e *esResource) CreateIndices(ctx context.Context, index, table string) (bo
 	return false, nil
 }
 
-func (e *esResource) AddOneDataAutoId(ctx context.Context, index, table, dataJson string) (interface{}, error) {
+func (e *esResource) AddOneDataAutoId(ctx context.Context, index, table, dataJson string) ([]byte, error) {
 	uri := e.uri + "/" + index + "/" + table
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dataJson)) //post请求
 	if err != nil {
@@ -275,13 +276,8 @@ func (e *esResource) AddOneDataAutoId(ctx context.Context, index, table, dataJso
 	if err != nil {
 		return nil, fmt.Errorf("es add data read body error: %v", err)
 	}
-	var result interface{}
 
-	if err := zgoutils.Utils.Unmarshal(be, &result); err != nil {
-		return nil, fmt.Errorf("es add data umarshal error: %v", err)
-	}
-
-	return result, err
+	return be, nil
 }
 
 //根据dsl语句执行查询
@@ -313,4 +309,25 @@ func (e *esResource) QueryDsl(ctx context.Context, index, table, dsl string, arg
 	}
 
 	return byts, err
+}
+
+func (e *esResource) UpdateByQuery(ctx context.Context, index, table, dsl string) ([]byte, error) {
+	uri := e.uri + "/" + index + "/" + table + "/" + "_update_by_query"
+	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl)) //post请求
+	if err != nil {
+		return nil, fmt.Errorf("es Up data create request error: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := e.GetConChan().Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("es Up data post error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	be, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("es Up data read body error: %v", err)
+	}
+
+	return be, nil
 }
