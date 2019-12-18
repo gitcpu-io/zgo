@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"io/ioutil"
+	"net/url"
 	"strings"
 
 	//jsoniter "github.com/json-iterator/go"
@@ -127,6 +128,8 @@ func (e *esResource) DeleteDsl(ctx context.Context, index, table, dsl string) (i
 }
 
 func (e *esResource) AddOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error) {
+
+	id = url.QueryEscape(id)
 	uri := e.uri + "/" + index + "/" + table + "/" + id
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dataJson)) //post请求
 	if err != nil {
@@ -154,6 +157,7 @@ func (e *esResource) AddOneData(ctx context.Context, index, table, id, dataJson 
 }
 
 func (e *esResource) UpOneData(ctx context.Context, index, table, id, dataJson string) (interface{}, error) {
+	id = url.QueryEscape(id)
 	uri := e.uri + "/" + index + "/" + table + "/" + id + "/" + "_update"
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dataJson)) //post请求
 	if err != nil {
@@ -334,6 +338,7 @@ func (e *esResource) UpdateByQuery(ctx context.Context, index, table, dsl string
 }
 
 func (e *esResource) CreateOneData(ctx context.Context, index, table, id, dataJson string) ([]byte, error) {
+	id = url.QueryEscape(id)
 	uri := e.uri + "/" + index + "/" + table + "/" + id
 	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dataJson)) //post请求
 	if err != nil {
