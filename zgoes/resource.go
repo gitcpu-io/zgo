@@ -24,6 +24,7 @@ type EsResourcer interface {
 	AddOneDataAutoId(ctx context.Context, index, table, dataJson string) ([]byte, error)
 	QueryDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) ([]byte, error)
 	UpdateByQuery(ctx context.Context, index, table, dsl string) ([]byte, error)
+	CreateOneData(ctx context.Context, index, table, id, dataJson string) ([]byte, error)
 }
 
 var mu sync.RWMutex
@@ -327,6 +328,28 @@ func (e *esResource) UpdateByQuery(ctx context.Context, index, table, dsl string
 	be, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("es Up data read body error: %v", err)
+	}
+
+	return be, nil
+}
+
+func (e *esResource) CreateOneData(ctx context.Context, index, table, id, dataJson string) ([]byte, error) {
+	uri := e.uri + "/" + index + "/" + table + "/" + id
+	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dataJson)) //post请求
+	if err != nil {
+		return nil, fmt.Errorf("es add data create request error: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := e.GetConChan().Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("es add data post error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	be, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("es add data read body error: %v", err)
 	}
 
 	return be, nil

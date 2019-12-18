@@ -106,6 +106,7 @@ type Eser interface {
 	AddOneDataAutoId(ctx context.Context, index, table, dataJson string) ([]byte, error)
 	QueryDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) ([]byte, error)
 	UpdateByQuery(ctx context.Context, index, table, dsl string) ([]byte, error)
+	CreateOneData(ctx context.Context, index, table, id, dataJson string) ([]byte, error)
 }
 
 func (e *zgoes) New(label ...string) (*zgoes, error) {
@@ -148,6 +149,10 @@ func (e *zgoes) QueryDsl(ctx context.Context, index, table, dsl string, args map
 
 func (e *zgoes) UpdateByQuery(ctx context.Context, index, table, dsl string) ([]byte, error) {
 	return e.res.UpdateByQuery(ctx, index, table, dsl)
+}
+
+func (e *zgoes) CreateOneData(ctx context.Context, index, table, id, dsl string) ([]byte, error) {
+	return e.res.CreateOneData(ctx, index, table, id, dsl)
 }
 
 //func (e *zgoes)NewDsl() *mode.DSL {
