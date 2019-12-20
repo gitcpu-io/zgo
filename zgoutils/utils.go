@@ -166,6 +166,7 @@ type Utilser interface {
 	Addslashes(str string) string
 	Stripslashes(str string) string
 	Ip4toInt(ip string) int64
+	InttoIp4(ip int64) string
 	NextDayDuration() time.Duration
 	GetInt64(i interface{}, d int64) int64
 	GetString(str interface{}, d string) string
@@ -961,9 +962,9 @@ func (u *utils) Ip4toInt(ip string) int64 {
 	bits := strings.Split(ip, ".")
 	if len(bits) == 4 {
 		b0, _ := strconv.Atoi(bits[0])
-		b1, _ := strconv.Atoi(bits[0])
-		b2, _ := strconv.Atoi(bits[0])
-		b3, _ := strconv.Atoi(bits[0])
+		b1, _ := strconv.Atoi(bits[1])
+		b2, _ := strconv.Atoi(bits[2])
+		b3, _ := strconv.Atoi(bits[3])
 		var sum int64
 		sum += int64(b0) << 24
 		sum += int64(b1) << 16
@@ -973,6 +974,13 @@ func (u *utils) Ip4toInt(ip string) int64 {
 	} else {
 		return 0
 	}
+	//ret := big.NewInt(0)
+	//ret.SetBytes(net.ParseIP(ip).To4())
+	//return ret.Int64()
+}
+func (u *utils) InttoIp4(ip int64) string {
+	return fmt.Sprintf("%d.%d.%d.%d",
+		byte(ip>>24), byte(ip>>16), byte(ip>>8), byte(ip))
 }
 
 // 得到当前时间到下一天零点的延时
