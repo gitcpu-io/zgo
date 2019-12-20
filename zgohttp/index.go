@@ -163,7 +163,7 @@ func (zh *zgohttp) UseBefore(ctx iris.Context) {
 		}
 	}()
 	ctx.Header("Access-Control-Allow-Origin", "*")
-	ctx.Header("Access-Control-Allow-Headers", "Content-Type,Authorization,x-token")
+	ctx.Header("Access-Control-Allow-Headers", "Content-Type,Authorization,x-access-token")
 	ctx.Header("content-type", "application/json")
 	start := time.Now().UnixNano()
 	ctx.Values().Set("startTime", start)
