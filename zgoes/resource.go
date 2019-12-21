@@ -2,6 +2,7 @@ package zgoes
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"io/ioutil"
@@ -26,6 +27,7 @@ type EsResourcer interface {
 	QueryDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) ([]byte, error)
 	UpdateByQuery(ctx context.Context, index, table, dsl string) ([]byte, error)
 	CreateOneData(ctx context.Context, index, table, id, dataJson string) ([]byte, error)
+	ScrollSearch(ctx context.Context, index, table, dsl string, scrollId string) ([]byte, error)
 }
 
 var mu sync.RWMutex
@@ -358,4 +360,43 @@ func (e *esResource) CreateOneData(ctx context.Context, index, table, id, dataJs
 	}
 
 	return be, nil
+}
+
+//根据dsl语句执行查询
+func (e *esResource) ScrollSearch(ctx context.Context, index, table, dsl string, scrollId string) ([]byte, error) {
+	//定义es结果集返回结构体
+	if dsl == "" && scrollId == "" {
+		return nil, errors.New("dsl和scroll_id不能同时为空")
+	}
+
+	var uri string
+	if scrollId == "" {
+		uri = e.uri + "/" + index + "/" + table + "/_search?pretty&scroll=1m"
+	} else {
+		uri = e.uri + "/_search/scroll"
+		dsl = fmt.Sprintf(`{"scroll":"1m", "scroll_id": "%s"}`, scrollId)
+	}
+
+	//拼接es请求uti[索引+文档+_search]
+	req, err := http.NewRequest(http.MethodPost, uri, strings.NewReader(dsl)) //post请求
+	if err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json") //设置json协议解析头
+	resp, err := e.GetConChan().Do(req)                //获取绑定的地址执行请求
+	if err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	byts, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+
+	return byts, err
 }

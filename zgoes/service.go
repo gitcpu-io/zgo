@@ -107,6 +107,7 @@ type Eser interface {
 	QueryDsl(ctx context.Context, index, table, dsl string, args map[string]interface{}) ([]byte, error)
 	UpdateByQuery(ctx context.Context, index, table, dsl string) ([]byte, error)
 	CreateOneData(ctx context.Context, index, table, id, dataJson string) ([]byte, error)
+	ScrollSearch(ctx context.Context, index, table, dsl string, scrollId string) ([]byte, error)
 }
 
 func (e *zgoes) New(label ...string) (*zgoes, error) {
@@ -153,6 +154,10 @@ func (e *zgoes) UpdateByQuery(ctx context.Context, index, table, dsl string) ([]
 
 func (e *zgoes) CreateOneData(ctx context.Context, index, table, id, dsl string) ([]byte, error) {
 	return e.res.CreateOneData(ctx, index, table, id, dsl)
+}
+
+func (e *zgoes) ScrollSearch(ctx context.Context, index, table, dsl string, scrollId string) ([]byte, error) {
+	return e.res.ScrollSearch(ctx, index, table, dsl, scrollId)
 }
 
 //func (e *zgoes)NewDsl() *mode.DSL {
