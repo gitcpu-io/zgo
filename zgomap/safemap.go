@@ -100,7 +100,7 @@ func (m *safeMap) Size() int {
 func (m *safeMap) IsEmpty() bool {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
-	return len(m.sm) > 0
+	return len(m.sm) == 0
 }
 
 type Sma struct {
