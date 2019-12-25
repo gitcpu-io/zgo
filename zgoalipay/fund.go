@@ -13,12 +13,61 @@ import (
 @project: zgo
 */
 
+//alipay.fund.trans.uni.transfer(统一转账到支付宝账户接口)
+//    文档地址：https://docs.open.alipay.com/api_28/alipay.fund.trans.uni.transfer/
+func (a *PayClient) FundTransUniTransfer(body zgoutils.BodyMap) (tradeRes *FundTransUniTransferResponse, err error) {
+	var bs []byte
+	var p1, p2 string
+	p1 = body.Get("out_biz_no")
+	p2 = body.Get("trans_amount")
+	if p1 == null && p2 == null {
+		return nil, errors.New("out_biz_no and trans_amount are not allowed to be null at the same time")
+	}
+	if bs, err = a.do(body, "alipay.fund.trans.uni.transfer"); err != nil {
+		return
+	}
+	tradeRes = new(FundTransUniTransferResponse)
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
+		return nil, err
+	}
+	if tradeRes.AlipayFundTransUniTransferResponse.Code != "10000" {
+		info := tradeRes.AlipayFundTransUniTransferResponse
+		return nil, fmt.Errorf(`{"code":"%v","msg":"%v","sub_code":"%v","sub_msg":"%v"}`, info.Code, info.Msg, info.SubCode, info.SubMsg)
+	}
+	tradeRes.SignData = getSignData(bs)
+	return
+}
+
+//alipay.fund.trans.common.query(查询转账订单接口)
+//	文档地址：https://docs.open.alipay.com/api_28/alipay.fund.trans.common.query
+func (a *PayClient) FundTransCommonQuery(body zgoutils.BodyMap) (tradeRes *FundTransCommonQueryResponse, err error) {
+	var bs []byte
+	var p1 string
+	p1 = body.Get("out_biz_no")
+	if p1 == null {
+		return nil, errors.New("out_biz_no are not allowed to be null at the same time")
+	}
+	if bs, err = a.do(body, "alipay.fund.trans.common.query"); err != nil {
+		return
+	}
+	tradeRes = &FundTransCommonQueryResponse{}
+	if err = zgoutils.Utils.Unmarshal(bs, tradeRes); err != nil {
+		return nil, err
+	}
+	if tradeRes.AlipayFundTransCommonQueryResponse.Code != "10000" {
+		info := tradeRes.AlipayFundTransCommonQueryResponse
+		return nil, fmt.Errorf(`{"code":"%v","msg":"%v","sub_code":"%v","sub_msg":"%v"}`, info.Code, info.Msg, info.SubCode, info.SubMsg)
+	}
+	tradeRes.SignData = getSignData(bs)
+	return
+}
+
 //alipay.fund.trans.toaccount.transfer(单笔转账到支付宝账户接口)
 //    文档地址：https://docs.open.alipay.com/api_28/alipay.fund.trans.toaccount.transfer
 func (a *PayClient) FundTransToaccountTransfer(body zgoutils.BodyMap) (tradeRes *FundTransToaccountTransferResponse, err error) {
 	var bs []byte
-	trade1 := body.Get("out_biz_no")
-	if trade1 == null {
+	trade := body.Get("out_biz_no")
+	if trade == null {
 		return nil, errors.New("out_biz_no is not allowed to be null")
 	}
 	if bs, err = a.do(body, "alipay.fund.trans.toaccount.transfer"); err != nil {

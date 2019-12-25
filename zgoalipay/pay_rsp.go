@@ -414,6 +414,51 @@ type pageRefundResponse struct {
 }
 
 //===================================================
+type FundTransUniTransferResponse struct {
+	AlipayFundTransUniTransferResponse transUniTransferResponse `json:"alipay_fund_trans_uni_transfer_response,omitempty"`
+	SignData                           string                   `json:"-"`
+	Sign                               string                   `json:"sign"`
+}
+
+type transUniTransferResponse struct {
+	Code           string `json:"code,omitempty"`
+	Msg            string `json:"msg,omitempty"`
+	SubCode        string `json:"sub_code,omitempty"`
+	SubMsg         string `json:"sub_msg,omitempty"`
+	OutBizNo       string `json:"out_biz_no,omitempty"`
+	OrderId        string `json:"order_id,omitempty"`
+	PayFundOrderId string `json:"pay_fund_order_id,omitempty"`
+	Status         string `json:"status,omitempty"`
+	TransDate      string `json:"trans_date,omitempty"`
+}
+
+//===================================================
+type FundTransCommonQueryResponse struct {
+	AlipayFundTransCommonQueryResponse transCommonQueryResponse `json:"alipay_fund_trans_common_query_response,omitempty"`
+	SignData                           string                   `json:"-"`
+	Sign                               string                   `json:"sign"`
+}
+
+type transCommonQueryResponse struct {
+	Code             string `json:"code,omitempty"`
+	Msg              string `json:"msg,omitempty"`
+	SubCode          string `json:"sub_code,omitempty"`
+	SubMsg           string `json:"sub_msg,omitempty"`
+	OrderId          string `json:"order_id,omitempty"`
+	PayFundOrderId   string `json:"pay_fund_order_id,omitempty"`
+	OutBizNo         string `json:"out_biz_no,omitempty"`
+	TransAmount      string `json:"trans_amount,omitempty"`
+	Status           string `json:"status,omitempty"`
+	PayDate          string `json:"pay_date,omitempty"`           //2013-01-01 08:08:08
+	ArrivalTimeEnd   string `json:"arrival_time_end,omitempty"`   //2013-01-01 08:08:08
+	OrderFee         string `json:"order_fee,omitempty"`          //0.02
+	ErrorCode        string `json:"error_code,omitempty"`         //PAYEE_CARD_INFO_ERROR
+	FailReason       string `json:"fail_reason,omitempty"`        //收款方银行卡信息有误
+	DeductBillInfo   string `json:"deduct_bill_info,omitempty"`   //0.02
+	TransferBillInfo string `json:"transfer_bill_info,omitempty"` //0.02
+}
+
+//===================================================
 type FundTransToaccountTransferResponse struct {
 	AlipayFundTransToaccountTransferResponse transToaccountTransferResponse `json:"alipay_fund_trans_toaccount_transfer_response,omitempty"`
 	SignData                                 string                         `json:"-"`

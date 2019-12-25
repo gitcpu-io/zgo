@@ -67,6 +67,12 @@ type Payer interface {
 	//手机网站支付接口2.0 -- h5页面
 	OrderWapPay(body zgoutils.BodyMap) (payUrl string, err error)
 
+	//统一转账到支付宝账户接口
+	FundTransUniTransfer(body zgoutils.BodyMap) (tradeRes *FundTransUniTransferResponse, err error)
+
+	//统一转账查询接口
+	FundTransCommonQuery(body zgoutils.BodyMap) (tradeRes *FundTransCommonQueryResponse, err error)
+
 	//单笔转账到支付宝账户接口
 	FundTransToaccountTransfer(body zgoutils.BodyMap) (tradeRes *FundTransToaccountTransferResponse, err error)
 
