@@ -3,9 +3,9 @@ package zgomongo
 import (
 	"context"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/globalsign/mgo/bson"
 	"github.com/json-iterator/go"
+	"github.com/rubinus/zgo/config"
 	"math/rand"
 	"testing"
 	"time"
@@ -62,7 +62,7 @@ func TestMongoGet(t *testing.T) {
 	}
 	//----------------------
 
-	InitMongo(hsm) //测试时表示使用mongo，在zgo_start中使用一次
+	InitMongo(hsm) //测试时表示使用mongo，在origin中使用一次
 
 	//测试读取nsq数据，wait for sdk init connection
 	//time.Sleep(2 * time.Second)

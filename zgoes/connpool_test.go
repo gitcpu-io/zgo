@@ -3,8 +3,8 @@ package zgoes
 import (
 	"context"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
-	"git.zhugefang.com/gocore/zgo/zgoutils"
+	"github.com/rubinus/zgo/config"
+	"github.com/rubinus/zgo/zgoutils"
 	"testing"
 	"time"
 )
@@ -155,6 +155,7 @@ func search(label string, client *zgoes, i int) chan int {
 	return out
 
 }
+
 //func TestGetById(t *testing.T) {
 //	hsm := make(map[string][]*config.ConnDetail)
 //	cd_bj := config.ConnDetail{

@@ -2,9 +2,9 @@ package zgomongo
 
 import (
 	"context"
-	"git.zhugefang.com/gocore/zgo/comm"
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/globalsign/mgo"
+	"github.com/rubinus/zgo/comm"
+	"github.com/rubinus/zgo/config"
 	"sync"
 )
 

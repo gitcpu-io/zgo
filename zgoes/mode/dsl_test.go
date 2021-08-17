@@ -2,7 +2,7 @@ package mode
 
 import (
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/zgoes"
+	"github.com/rubinus/zgo/zgoes"
 	"reflect"
 	"testing"
 )

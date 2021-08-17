@@ -2,8 +2,8 @@ package zgomongo
 
 import (
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/globalsign/mgo"
+	"github.com/rubinus/zgo/config"
 	"math/rand"
 	"sync"
 	"time"

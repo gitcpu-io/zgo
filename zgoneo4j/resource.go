@@ -1,8 +1,8 @@
 package zgoneo4j
 
 import (
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/rubinus/zgo/config"
 	"sync"
 )
 

@@ -3,23 +3,23 @@ package zgo
 import (
 	"errors"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
-	"git.zhugefang.com/gocore/zgo/zgocache"
-	"git.zhugefang.com/gocore/zgo/zgoclickhouse"
-	"git.zhugefang.com/gocore/zgo/zgoes"
-	"git.zhugefang.com/gocore/zgo/zgoetcd"
-	"git.zhugefang.com/gocore/zgo/zgokafka"
-	"git.zhugefang.com/gocore/zgo/zgolog"
-	"git.zhugefang.com/gocore/zgo/zgomgo"
-	"git.zhugefang.com/gocore/zgo/zgomongo"
-	"git.zhugefang.com/gocore/zgo/zgomysql"
-	"git.zhugefang.com/gocore/zgo/zgonsq"
-	"git.zhugefang.com/gocore/zgo/zgopika"
-	"git.zhugefang.com/gocore/zgo/zgopostgres"
-	"git.zhugefang.com/gocore/zgo/zgorabbitmq"
-	"git.zhugefang.com/gocore/zgo/zgoredis"
-	"git.zhugefang.com/gocore/zgo/zgoutils"
-	"go.etcd.io/etcd/mvcc/mvccpb"
+	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/rubinus/zgo/config"
+	"github.com/rubinus/zgo/zgocache"
+	"github.com/rubinus/zgo/zgoclickhouse"
+	"github.com/rubinus/zgo/zgoes"
+	"github.com/rubinus/zgo/zgoetcd"
+	"github.com/rubinus/zgo/zgokafka"
+	"github.com/rubinus/zgo/zgolog"
+	"github.com/rubinus/zgo/zgomgo"
+	"github.com/rubinus/zgo/zgomongo"
+	"github.com/rubinus/zgo/zgomysql"
+	"github.com/rubinus/zgo/zgonsq"
+	"github.com/rubinus/zgo/zgopika"
+	"github.com/rubinus/zgo/zgopostgres"
+	"github.com/rubinus/zgo/zgorabbitmq"
+	"github.com/rubinus/zgo/zgoredis"
+	"github.com/rubinus/zgo/zgoutils"
 	"strings"
 )
 
@@ -49,8 +49,8 @@ func (opt *Options) Init() error {
 	if opt.Env == "" {
 		opt.Env = config.Local
 	} else {
-		if opt.Env != config.Local && opt.Env != config.Dev && opt.Env != config.Qa && opt.Env != config.Pro && opt.Env != config.Pro2 && opt.Env != config.K8s {
-			return errors.New("error env,must be local/dev/qa/pro/pro2/k8s !")
+		if opt.Env != config.Local && opt.Env != config.Container && opt.Env != config.Dev && opt.Env != config.Qa && opt.Env != config.Pro && opt.Env != config.K8s {
+			return errors.New("error env,must be local/dev/qa/pro/k8s/container !")
 		}
 		if opt.Project == "" {
 			return errors.New("u must input your Project name to zgo.Engine func .")

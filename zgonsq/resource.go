@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/nsqio/go-nsq"
+	"github.com/rubinus/zgo/config"
 	"sync"
 	"time"
 )

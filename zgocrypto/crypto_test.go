@@ -3,7 +3,7 @@ package zgocrypto
 import (
 	"encoding/hex"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/zgoutils"
+	"github.com/rubinus/zgo/zgoutils"
 	"testing"
 )
 

@@ -2,8 +2,8 @@ package config
 
 import (
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/zgoutils"
-	"go.etcd.io/etcd/mvcc/mvccpb"
+	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/rubinus/zgo/zgoutils"
 	"io/ioutil"
 	"strings"
 )
@@ -15,7 +15,7 @@ const (
 	Warn         //2
 	Error        //3
 
-	Version       = "1.2.1"       //zgo版本号
+	Version       = "v1.2.2"       //zgo版本号
 	ProjectPrefix = "zgo/project" //读取ETCD配置时prefix
 	FileStoreType = "local"       //文件存储类型
 	FileStoreHome = "/tmp"        //文件存储目录
@@ -23,7 +23,7 @@ const (
 	Dev           = "dev"         //开发联调环境标识
 	Qa            = "qa"          //QA测试环境标识
 	Pro           = "pro"         //生产环境标识
-	Pro2          = "pro2"        //生产环境标识
+	Container     = "container"   //k8s生产环境标识
 	K8s           = "k8s"         //k8s生产环境标识
 
 	//********************************以下是 etcd监听常量********************************
@@ -56,18 +56,13 @@ var Levels = []string{"debug", "info", "warn", "error"}
 
 var (
 	DevEtcHosts = []string{ //开发联调ETCD地
-		//"10.45.146.41:2380", //测试时使用内网ip
-		"47.95.20.12:2381", //如果本机联调，想用测试机的etcd可以使用公网ip
-		//"localhost:2381",
+		"localhost:2379", //如果本机联调，想用测试机的etcd可以使用公网ip
 	}
 	QaEtcHosts = []string{ //QA环境ETCD地址，同正式
-		//"47.95.20.12:2381",
-		"10.24.188.182:2381",
+		"localhost:2379",
 	}
 	ProEtcHosts = []string{ //生产环境ETCD地址，需要使用内部dns解析，在k8s的worker节点配置/etc/hosts下面的域名和真实的etcd的ip
-		"10.25.96.1:2379",
-		"10.26.100.217:2379",
-		"10.26.162.67:2379",
+		"localhost:2379",
 	}
 	cityDbConfig = map[string]map[string]string{
 		"sell": {
@@ -156,7 +151,7 @@ func InitConfig(cpath, env, project, etcdHosts string) ([]*mvccpb.KeyValue, chan
 
 	LoadConfig(cpath, env, project, etcdHosts)
 
-	if env != Local {
+	if env != Local && env != Container {
 		//用etcd的配置
 		ec := EtcConfig{
 			Key:       fmt.Sprintf("%s/%s", ProjectPrefix, project),
@@ -170,9 +165,20 @@ func InitConfig(cpath, env, project, etcdHosts string) ([]*mvccpb.KeyValue, chan
 func LoadConfig(cpath, env, project, etcdHosts string) {
 	var cf string
 	switch env {
+	case Container:
+		cf = fmt.Sprintf("%s/%s.json", cpath, env)
+		bf, err := ioutil.ReadFile(cf)
+		if err != nil {
+			panic(err)
+		}
+
+		Conf = &allConfig{}
+		err = zgoutils.Utils.Unmarshal(bf, Conf)
+		if err != nil {
+			panic(err)
+		}
 	case Local:
 		cf = fmt.Sprintf("%s/%s.json", cpath, env)
-
 		bf, err := ioutil.ReadFile(cf)
 		if err != nil {
 			panic(err)
@@ -207,16 +213,6 @@ func LoadConfig(cpath, env, project, etcdHosts string) {
 		}
 
 	case Pro:
-		Conf = &allConfig{
-			Env:       env,
-			Project:   project,
-			EtcdHosts: ProEtcHosts,
-			File: FileStore{
-				Type: FileStoreType, //以后生产环境可以存到aws s3，在这里直接更改
-				Home: FileStoreHome,
-			},
-		}
-	case Pro2:
 		Conf = &allConfig{
 			Env:       env,
 			Project:   project,

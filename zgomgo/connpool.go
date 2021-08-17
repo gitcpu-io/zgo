@@ -3,7 +3,7 @@ package zgomgo
 import (
 	"context"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
+	"github.com/rubinus/zgo/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"math/rand"

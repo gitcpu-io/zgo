@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"git.zhugefang.com/gocore/zgo"
-	"git.zhugefang.com/gocore/zgo/config"
+	"github.com/rubinus/zgo"
+	"github.com/rubinus/zgo/config"
 
 	"time"
 
@@ -11,7 +11,7 @@ import (
 
 	"context"
 
-	"go.etcd.io/etcd/clientv3"
+	"github.com/coreos/etcd/clientv3"
 )
 
 type A struct {
@@ -32,7 +32,7 @@ func main() {
 
 	err = zgo.Engine(&zgo.Options{
 		Env:     "local",
-		Project: "zgo_start",
+		Project: "origin",
 	})
 	if err != nil {
 		panic(err)
@@ -41,7 +41,7 @@ func main() {
 	for _, v := range config.Conf.Nsq {
 		k := v.Key
 		value := v.Values
-		key := "zgo/project/zgo_start/nsq/" + k
+		key := "zgo/project/origin/nsq/" + k
 		val, _ := json.Marshal(value)
 		res, err := cli.KV.Put(context.TODO(), key, string(val), clientv3.WithPrevKV())
 		if err != nil {
@@ -53,7 +53,7 @@ func main() {
 	for _, v := range config.Conf.Mongo {
 		k := v.Key
 		value := v.Values
-		key := "zgo/project/zgo_start/mongo/" + k
+		key := "zgo/project/origin/mongo/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
@@ -61,21 +61,21 @@ func main() {
 	for _, v := range config.Conf.Es {
 		k := v.Key
 		value := v.Values
-		key := "zgo/project/zgo_start/es/" + k
+		key := "zgo/project/origin/es/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
 	for _, v := range config.Conf.Mysql {
 		k := v.Key
 		value := v.Values
-		key := "zgo/project/zgo_start/mysql/" + k
+		key := "zgo/project/origin/mysql/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
 	for _, v := range config.Conf.Etcd {
 		k := v.Key
 		value := v.Values
-		key := "zgo/project/zgo_start/etcd/" + k
+		key := "zgo/project/origin/etcd/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
@@ -83,7 +83,7 @@ func main() {
 	for _, v := range config.Conf.Kafka {
 		k := v.Key
 		value := v.Values
-		key := "zgo/project/zgo_start/kafka/" + k
+		key := "zgo/project/origin/kafka/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
@@ -91,7 +91,7 @@ func main() {
 	for _, v := range config.Conf.Redis {
 		k := v.Key
 		value := v.Values
-		key := "zgo/project/zgo_start/redis/" + k
+		key := "zgo/project/origin/redis/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
@@ -99,7 +99,7 @@ func main() {
 	for _, v := range config.Conf.Postgres {
 		k := v.Key
 		value := v.Values
-		key := "zgo/project/zgo_start/postgres/" + k
+		key := "zgo/project/origin/postgres/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
@@ -107,7 +107,7 @@ func main() {
 	for _, v := range config.Conf.Neo4j {
 		k := v.Key
 		value := v.Values
-		key := "zgo/project/zgo_start/neo4j/" + k
+		key := "zgo/project/origin/neo4j/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
@@ -115,7 +115,7 @@ func main() {
 	for _, v := range config.Conf.Etcd {
 		k := v.Key
 		value := v.Values
-		key := "zgo/project/zgo_start/etcd/" + k
+		key := "zgo/project/origin/etcd/" + k
 		val, _ := json.Marshal(value)
 		cli.KV.Put(context.TODO(), key, string(val))
 	}
@@ -123,17 +123,17 @@ func main() {
 	//for _, v := range config.Conf.Pika {
 	//	k := v.Key
 	//	value := v.Values
-	//	key := "zgo/project/zgo_start/pika/" + k
+	//	key := "zgo/project/origin/pika/" + k
 	//	val, _ := json.Marshal(value)
 	//	cli.KV.Put(context.TODO(), key, string(val))
 	//}
 	//
 
-	key := "zgo/project/zgo_start/cache"
+	key := "zgo/project/origin/cache"
 	val, _ := json.Marshal(config.Conf.Cache)
 	cli.KV.Put(context.TODO(), key, string(val))
 
-	key_log := "zgo/project/zgo_start/log"
+	key_log := "zgo/project/origin/log"
 	//val_log, _ := json.Marshal(config.Log)
 	val_log := "{\"c\": \"日志存储12222\",\"start\": 1,\"dbType\": \"nsq\",\"label\":\"nsq_label_bj\"}"
 	res, err := cli.KV.Put(context.TODO(), key_log, string(val_log))

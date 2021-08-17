@@ -2,8 +2,8 @@ package zgonsq
 
 import (
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/nsqio/go-nsq"
+	"github.com/rubinus/zgo/config"
 	"math/rand"
 	"sync"
 	"time"

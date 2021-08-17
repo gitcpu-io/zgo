@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"github.com/rubinus/zgo/config"
 	"reflect"
 	"sync"
 )
@@ -254,7 +254,7 @@ func judgeMongo(args map[string]interface{}) error {
 //map转化成bson 内置函数
 //func map2Bson(arg map[string]interface{}) bson.M {
 func map2Bson(arg interface{}) bson.M {
-	switch arg.(type){
+	switch arg.(type) {
 	case bson.M:
 		return arg.(bson.M)
 	case map[string]interface{}:

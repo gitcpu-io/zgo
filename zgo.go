@@ -1,38 +1,38 @@
 package zgo
 
 import (
-	"git.zhugefang.com/gocore/zgo/config"
-	"git.zhugefang.com/gocore/zgo/zgoalipay"
-	"git.zhugefang.com/gocore/zgo/zgocache"
-	"git.zhugefang.com/gocore/zgo/zgoclickhouse"
-	"git.zhugefang.com/gocore/zgo/zgocrypto"
-	"git.zhugefang.com/gocore/zgo/zgoes"
-	"git.zhugefang.com/gocore/zgo/zgoetcd"
-	"git.zhugefang.com/gocore/zgo/zgofile"
-	"git.zhugefang.com/gocore/zgo/zgogrpc"
-	"git.zhugefang.com/gocore/zgo/zgohttp"
-	"git.zhugefang.com/gocore/zgo/zgokafka"
-	"git.zhugefang.com/gocore/zgo/zgolb"
-	"git.zhugefang.com/gocore/zgo/zgolimiter"
-	"git.zhugefang.com/gocore/zgo/zgolog"
-	"git.zhugefang.com/gocore/zgo/zgomap"
-	"git.zhugefang.com/gocore/zgo/zgomgo"
-	"git.zhugefang.com/gocore/zgo/zgomongo"
-	"git.zhugefang.com/gocore/zgo/zgomysql"
-	"git.zhugefang.com/gocore/zgo/zgonsq"
-	"git.zhugefang.com/gocore/zgo/zgopika"
-	"git.zhugefang.com/gocore/zgo/zgopostgres"
-	"git.zhugefang.com/gocore/zgo/zgorabbitmq"
-	"git.zhugefang.com/gocore/zgo/zgoredis"
-	"git.zhugefang.com/gocore/zgo/zgoservice"
-	"git.zhugefang.com/gocore/zgo/zgoutils"
-	"git.zhugefang.com/gocore/zgo/zgowechat"
 	kafkaCluter "github.com/bsm/sarama-cluster"
+	"github.com/coreos/etcd/clientv3"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
 	"github.com/nsqio/go-nsq"
+	"github.com/rubinus/zgo/config"
+	"github.com/rubinus/zgo/zgoalipay"
+	"github.com/rubinus/zgo/zgocache"
+	"github.com/rubinus/zgo/zgoclickhouse"
+	"github.com/rubinus/zgo/zgocrypto"
+	"github.com/rubinus/zgo/zgoes"
+	"github.com/rubinus/zgo/zgoetcd"
+	"github.com/rubinus/zgo/zgofile"
+	"github.com/rubinus/zgo/zgogrpc"
+	"github.com/rubinus/zgo/zgohttp"
+	"github.com/rubinus/zgo/zgokafka"
+	"github.com/rubinus/zgo/zgolb"
+	"github.com/rubinus/zgo/zgolimiter"
+	"github.com/rubinus/zgo/zgolog"
+	"github.com/rubinus/zgo/zgomap"
+	"github.com/rubinus/zgo/zgomgo"
+	"github.com/rubinus/zgo/zgomongo"
+	"github.com/rubinus/zgo/zgomysql"
+	"github.com/rubinus/zgo/zgonsq"
+	"github.com/rubinus/zgo/zgopika"
+	"github.com/rubinus/zgo/zgopostgres"
+	"github.com/rubinus/zgo/zgorabbitmq"
+	"github.com/rubinus/zgo/zgoredis"
+	"github.com/rubinus/zgo/zgoservice"
+	"github.com/rubinus/zgo/zgoutils"
+	"github.com/rubinus/zgo/zgowechat"
 	"github.com/streadway/amqp"
-	"go.etcd.io/etcd/clientv3"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -40,13 +40,13 @@ type engine struct {
 	opt *Options
 }
 
-//New init zgo engine
+// Engine New init zgo engine
 func Engine(opt *Options) error {
 	engine := &engine{
 		opt: opt,
 	}
 
-	err := opt.Init() //把zgo_start中用户定义的，映射到zgo的内存变量上
+	err := opt.Init() //把origin中用户定义的，映射到zgo的内存变量上
 
 	if err != nil {
 		return err
@@ -71,7 +71,7 @@ func Engine(opt *Options) error {
 
 	go zgolog.LogStore.StartQueue()
 
-	if opt.Env == config.Local {
+	if opt.Env == config.Local || opt.Env == config.Container {
 		if len(opt.Mongo) > 0 {
 			//todo someting
 			hsm := engine.getConfigByOption(config.Conf.Mongo, opt.Mongo)
@@ -189,7 +189,7 @@ func Engine(opt *Options) error {
 	return nil
 }
 
-//getConfigByOption 把zgo_start中的[]和config中的map进行match并取到关系
+//getConfigByOption 把origin中的[]和config中的map进行match并取到关系
 func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[string][]*config.ConnDetail {
 	m := make(map[string][]*config.ConnDetail)
 	for _, label := range us {
@@ -333,6 +333,8 @@ var (
 	MQ                zgorabbitmq.Rabbitmqer
 	PostgresErrNoRows = pg.ErrNoRows
 
+	Version = config.Version
+
 	//Neo4j    zgoneo4j.Neo4jer
 	Etcd  zgoetcd.Etcder
 	Cache zgocache.Cacher
@@ -355,10 +357,10 @@ var (
 
 	//微信
 	Wechat = zgowechat.New()
-	//支付宝
+	// 支付宝
 	AliPay = zgoalipay.New()
 
-	//服务注册与发现
+	// Service 服务注册与发现
 	Service = zgoservice.New()
 
 	MgoBulkWriteOperation_InsertOne  = config.InsertOne
@@ -367,4 +369,5 @@ var (
 	MgoBulkWriteOperation_DeleteOne  = config.DeleteOne
 	MgoBulkWriteOperation_UpdateMany = config.UpdateMany
 	MgoBulkWriteOperation_DeleteMany = config.DeleteMany
+
 )

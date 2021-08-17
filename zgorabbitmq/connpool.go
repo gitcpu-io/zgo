@@ -2,7 +2,7 @@ package zgorabbitmq
 
 import (
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
+	"github.com/rubinus/zgo/config"
 	"github.com/streadway/amqp"
 	"math/rand"
 	"sync"

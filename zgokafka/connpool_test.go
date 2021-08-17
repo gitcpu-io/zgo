@@ -3,7 +3,7 @@ package zgokafka
 import (
 	"context"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
+	"github.com/rubinus/zgo/config"
 	"testing"
 	"time"
 )
@@ -46,7 +46,7 @@ func TestProducer(t *testing.T) {
 		label_sh: s2,
 	}
 
-	InitKafka(hsm) //测试时表示使用kafka，在zgo_start中使用一次
+	InitKafka(hsm) //测试时表示使用kafka，在origin中使用一次
 
 	//测试读取kafka数据，wait for sdk init connection
 	time.Sleep(2 * time.Second)
@@ -138,7 +138,7 @@ func producer(label string, client *zgokafka, i int, b bool) chan int {
 		//rch, err = client.Producer(ctx, label, bodyMutil)
 
 	} else {
-		rch, err = client.Producer(ctx, "zgo_start", body)
+		rch, err = client.Producer(ctx, "origin", body)
 
 	}
 	if err != nil {

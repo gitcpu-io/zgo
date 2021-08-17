@@ -1,8 +1,8 @@
 package zgoetcd
 
 import (
-	"git.zhugefang.com/gocore/zgo/config"
-	"go.etcd.io/etcd/clientv3"
+	"github.com/coreos/etcd/clientv3"
+	"github.com/rubinus/zgo/config"
 	"sync"
 )
 

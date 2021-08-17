@@ -2,8 +2,8 @@ package zgokafka
 
 import (
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/Shopify/sarama"
+	"github.com/rubinus/zgo/config"
 	"math/rand"
 	"strings"
 	"sync"

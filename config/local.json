@@ -72,7 +72,7 @@
       "values": [
         {
           "c": "主库1-----pika from etcd",
-          "host": "101.201.110.130",
+          "host": "localhost",
           "port": 49221,
           "connSize": 100,
           "poolSize": 234,
@@ -87,7 +87,7 @@
       "values": [
         {
           "c": "从库1=====pika",
-          "host": "101.201.110.130",
+          "host": "localhost",
           "port": 49221,
           "connSize": 50,
           "poolSize": 111,
@@ -184,7 +184,7 @@
       "values": [
         {
           "c": "北京-----rabbitmq",
-          "host": "47.95.20.12",
+          "host": "localhost",
           "port": 5672,
           "username": "account",
           "password": "account",
@@ -199,7 +199,7 @@
       "values": [
         {
           "c": "上海=====rabbitmq",
-          "host": "47.95.20.12",
+          "host": "localhost",
           "port": 5672,
           "username": "guest",
           "password": "guest",
@@ -216,7 +216,7 @@
       "values": [
         {
           "c": "北京从库1=====dev mgo",
-          "host": "47.95.20.12",
+          "host": "localhost",
           "port": 27018,
           "username": "",
           "password": "",
@@ -225,7 +225,7 @@
         },
         {
           "c": "北京从库2=====dev mgo",
-          "host": "47.95.20.12",
+          "host": "localhost",
           "port": 27018,
           "username": "",
           "password": "",
@@ -239,7 +239,7 @@
       "values": [
         {
           "c": "上海从库1=====dev mgo",
-          "host": "47.95.20.12",
+          "host": "localhost",
           "port": 27019,
           "username": "",
           "password": "",
@@ -248,7 +248,7 @@
         },
         {
           "c": "上海从库2=====dev mgo",
-          "host": "47.95.20.12",
+          "host": "localhost",
           "port": 27019,
           "username": "",
           "password": "",
@@ -264,10 +264,10 @@
       "values": [
         {
           "c": "北京主库1-----etcd mongo",
-          "host": "123.56.173.28",
+          "host": "localhost",
           "port": 27017,
           "username": "root",
-          "password": "Au3jIwERA34y",
+          "password": "root",
           "connSize": 10,
           "poolSize": 20
         }
@@ -382,7 +382,7 @@
       "values": [
         {
           "c": "新房s集群",
-          "host": "101.201.119.240",
+          "host": "localhost",
           "port": 9900,
           "connSize": 10,
           "poolSize": 100
@@ -406,7 +406,7 @@
       "values": [
         {
           "c": "租房集群",
-          "uri": "http://101.201.28.195:9200",
+          "uri": "http://localhost:9200",
           "host": "localhost",
           "port": 9200,
           "connSize": 51,
@@ -422,13 +422,13 @@
         {
           "c": "北京二手房库 mysql-旧实例w",
           "t": "w",
-          "host": "101.201.119.240",
+          "host": "localhost",
           "port": 3306,
-          "username": "afe-rw",
-          "password": "HMugq0Fjz3bK67tHdSFottW2ORwSKpcJ",
+          "username": "root",
+          "password": "root",
           "maxIdleSize": 5,
           "maxOpenConn": 5,
-          "dbName": "spider",
+          "dbName": "mysql",
           "LogMode": 0
         }
       ]
@@ -469,7 +469,7 @@
       "values": [
         {
           "c": "clickhouse实例",
-          "host": "47.95.20.12",
+          "host": "localhost",
           "port": 9019,
           "username": "default",
           "password": "",

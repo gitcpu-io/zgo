@@ -3,7 +3,7 @@ package mode
 import (
 	"fmt"
 
-	"git.zhugefang.com/gocore/zgo/zgoutils"
+	"github.com/rubinus/zgo/zgoutils"
 )
 
 var DSLtyp = map[string]string{
@@ -284,7 +284,7 @@ var GeoBoxMap = func(location map[string]interface{}) interface{} {
 
 //
 var GeoBoxField = func(field string, left_lat, left_lon,
-right_lat, right_lon float64) interface{} {
+	right_lat, right_lon float64) interface{} {
 
 	term := map[string]interface{}{}
 	term["geo_bounding_box"] = map[string]interface{}{

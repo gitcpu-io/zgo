@@ -9,11 +9,11 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/zgoutils/dateparse"
 	"github.com/bwmarrin/snowflake"
 	"github.com/fatih/structs"
 	"github.com/json-iterator/go"
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
+	"github.com/rubinus/zgo/zgoutils/dateparse"
 	"github.com/satori/go.uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/text/encoding/simplifiedchinese"
@@ -663,7 +663,7 @@ func (u *utils) ParseDns(strDns string) bool {
 //-------------
 
 func (u *utils) GetUUIDV4() (uuidHex string) {
-	uuidV4, _ := uuid.NewV4()
+	uuidV4 := uuid.NewV4()
 	uuidHex = hex.EncodeToString(uuidV4.Bytes())
 	return
 }

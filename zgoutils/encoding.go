@@ -13,7 +13,7 @@ type bytesBox struct {
 	box  *bytes.Buffer
 }
 
-func newBytesBoxForSlice() *bytesBox{
+func newBytesBoxForSlice() *bytesBox {
 	return &bytesBox{
 		sort: nil,
 		box:  new(bytes.Buffer),
@@ -45,14 +45,14 @@ func MarshalSlice(ms []interface{}) (string, error) {
 	return sliceEncoder(ms)
 }
 
-func sliceEncoder(se []interface{}) (string, error){
+func sliceEncoder(se []interface{}) (string, error) {
 	bb := newBytesBoxForSlice()
 	//var k string
 	//var v interface{}
 	var e error
 	var js string
 	bb.write("[")
-	for i,v := range se {
+	for i, v := range se {
 		switch v.(type) {
 		case bool:
 			boolEncoder(bb, v.(bool))
@@ -91,9 +91,9 @@ func sliceEncoder(se []interface{}) (string, error){
 			} else {
 				return "", e
 			}
-		case []interface{} :
+		case []interface{}:
 			js, e = sliceEncoder(v.([]interface{}))
-			if e == nil{
+			if e == nil {
 				bb.write(js)
 			} else {
 				return "", e
@@ -106,7 +106,7 @@ func sliceEncoder(se []interface{}) (string, error){
 				return "", fmt.Errorf("Json not support this type %v", reflect.TypeOf(v))
 			}
 		}
-		if i != len(se)-1{
+		if i != len(se)-1 {
 			bb.write(",")
 		}
 	}
@@ -168,9 +168,9 @@ func mapEncoder(mm map[string]interface{}) (string, error) {
 				return "", e
 			}
 
-		case []interface{} :
+		case []interface{}:
 			js, e = sliceEncoder(v.([]interface{}))
-			if e == nil{
+			if e == nil {
 				bb.write(js)
 			} else {
 				return "", e

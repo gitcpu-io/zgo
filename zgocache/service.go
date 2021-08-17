@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
-	"git.zhugefang.com/gocore/zgo/zgopika"
-	"git.zhugefang.com/gocore/zgo/zgoredis"
-	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"github.com/json-iterator/go"
+	"github.com/rubinus/zgo/config"
+	"github.com/rubinus/zgo/zgopika"
+	"github.com/rubinus/zgo/zgoredis"
+	"github.com/rubinus/zgo/zgoutils"
 	"log"
 	"time"
 )
@@ -16,7 +16,7 @@ import (
 func InitCacheByEtcd(v *config.CacheConfig) chan Cacher {
 	out := make(chan Cacher)
 	go func() { //接收到etcd变化后，触发label和expire的值
-		fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v; -----etcd tiger cache value----\n", v.Label, v.Rate, v.DbType, v.TcType, v.Start)
+		//fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v; -----etcd tiger cache value----\n", v.Label, v.Rate, v.DbType, v.TcType, v.Start)
 		rate := v.Rate
 		dbtype := v.DbType
 		tcType := v.TcType
@@ -31,7 +31,7 @@ func InitCache() chan Cacher {
 	out := make(chan Cacher)
 	go func() {
 		hm := config.Conf.Cache
-		fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v; -----etcd tiger cache value----\n", hm.Label, hm.Rate, hm.DbType, hm.TcType, hm.Start)
+		//fmt.Printf("Label:%v; Rate:%v; DbType:%v; TcType:%v; Start:%v; -----etcd tiger cache value----\n", hm.Label, hm.Rate, hm.DbType, hm.TcType, hm.Start)
 		rate := hm.Rate
 		dbtype := hm.DbType
 		tcType := hm.TcType
@@ -81,7 +81,7 @@ func GetCache(start int, dbtype string, label string, rate int, tcType int) Cach
 			}
 		}
 	} else {
-		fmt.Println("未配置缓存")
+		//fmt.Println("未配置缓存")
 		return &zgocache{
 			0,
 			label,
@@ -127,7 +127,7 @@ type zgocache struct {
 	rate    int // 失效时间 倍率
 }
 
-// 缓存装饰器
+// Decorate 缓存装饰器
 // 1.fn 真正执行的方法，必须符合CacheFunc类型
 // 2.expire 超时时间 单位s
 func (z *zgocache) Decorate(fn CacheFunc, expire int) CacheFunc {
@@ -178,7 +178,7 @@ func (z *zgocache) DelCache(ctx context.Context, cacheModel, cacheField string) 
 	return z.service.Hdel(ctx, key, cacheField)
 }
 
-// 降级缓存装饰器
+// TimeOutDecorate 降级缓存装饰器
 func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 	return func(ctx context.Context, param map[string]interface{}, obj interface{}) error {
 		cacheModel := ""
@@ -235,7 +235,7 @@ func (z *zgocache) TimeOutDecorate(fn CacheFunc, timeout int) CacheFunc {
 	}
 }
 
-// 创建新的缓存
+// NewPikaCacheService 创建新的缓存
 //func (z *zgocache) NewPikaCacheService(label string, expire int, tcType int) Cacher {
 //	return GetCache(z.start, "pika", label, expire, tcType)
 //}
@@ -281,7 +281,6 @@ func (z *zgocache) setData(ctx context.Context, key string, field string, data i
 			z.service.Hset(ctx, key, field, value)
 		}
 	}(ctx)
-	//return
 }
 
 func (z *zgocache) getKey(model string) string {

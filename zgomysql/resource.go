@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/jinzhu/gorm"
+	"github.com/rubinus/zgo/config"
 	"reflect"
 )
 

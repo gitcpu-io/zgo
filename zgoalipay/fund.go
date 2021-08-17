@@ -3,7 +3,7 @@ package zgoalipay
 import (
 	"errors"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/zgoutils"
+	"github.com/rubinus/zgo/zgoutils"
 )
 
 /*

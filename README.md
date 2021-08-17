@@ -46,12 +46,12 @@ zgo是专门为使用go语言的开发人员所设计和开发的， 它提供�
 * 微服务项目建立时从zgo engine admin平台申请项目id，并配置所用资源，你可能会使用mongo,redis或nsq，并开启日志存储到nsq，这样的一个服务
 
 ##快速开启zgo start项目
-###zgo_start项目是使用zgo engine的模板项目
-git clone https://git.zhugefang.com/gocore/zgo_start
+###origin项目是使用zgo engine的模板项目
+git clone https://github.com/rubinus/origin
 
 git clone这个项目后，改名成自己开发的项目名字，然后删除掉.git目录，这是一个模板，内含有samples目录，其中的代码可以直接copy使用
 
-安装docker,在zgo_start目录下,有docker-compose.yml文件，本地一次性跑起es,redis,mongodb,mysql,nsq,kafka等组件（如果你愿意可以注释掉其中不用的）
+安装docker,在origin目录下,有docker-compose.yml文件，本地一次性跑起es,redis,mongodb,mysql,nsq,kafka等组件（如果你愿意可以注释掉其中不用的）
 
 前台执行
 
@@ -61,29 +61,29 @@ docker-compose up
 
 docker-compose up -d
 
-选项一：在zgo_start当前目录下编译mac运行的二进制文件
+选项一：在origin当前目录下编译mac运行的二进制文件
 
-go build -o zgo-start
+go build -o origin
 
-./zgo-start
+./origin
 
 
 选项二：在当前目录下编译linux运行的二进制文件，因为docker容器里用的是linux环境
 
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o zgo-start
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o origin
 
-用docker制作image(dck.zhuge.test是任意一个标识，如果愿意你可以改为rubinus/zgo-start)
+用docker制作image(dck.zhuge.test是任意一个标识，如果愿意你可以改为rubinus/origin)
 
-docker build -t dck.zhuge.test/zgo-start .
+docker build -t dck.zhuge.test/origin .
 
 把镜像文件push到开发环境的私有仓库
 
-docker push dck.zhuge.test/zgo-start
+docker push dck.zhuge.test/origin
 
 ###如果把zgo start做为一个提供api接口访问的web微服务时的依赖
 我们使用了开源的go web框架iris，仅当你创建web服务时使用下面的框架
 
-import github.com/kataras/iris
+import github.com/kataras/iris/v12
 
 
 ##快速开始使用zgo engine
@@ -94,7 +94,7 @@ import github.com/kataras/iris
     err := zgo.Engine(&zgo.Options{
 		Env:      "local", //表示你在本机上开发， dev/qa/pro都表示非本机开发
 		Loglevel: "debug", //本机开发采用debug的日志模式
-		Project:  "zgo_start", //项目id: zgo_start是从zgo engine admin平台申请得到的，正式上可能是一串数字
+		Project:  "origin", //项目id: origin是从zgo engine admin平台申请得到的，正式上可能是一串数字
 
 		//如果是在本地开发可以对下面的组件开启使用，如果非local开发，不需要填写，使用的配置是etcd
 		Redis: []string{
@@ -134,7 +134,7 @@ import github.com/kataras/iris
 ```
 
 ##详解zgo engine组件使用
-我们在zgo_start/samples目录中提供了大量的demo实例，可以直接copy到实际的开发中
+我们在origin/samples目录中提供了大量的demo实例，可以直接copy到实际的开发中
 
 ###zgo Mysql组件使用
 如果你想用zgo.Mysql来向mysql数据库中插入一条数据，你可以这么做，首先你要声明一个类型是House的结构体，
@@ -273,10 +273,10 @@ func Hello(ctx iris.Context) {
 	}
 
 	//发送到nsq
-	zgo.Nsq.Producer(cotx, "zgo_start", []byte(s))
+	zgo.Nsq.Producer(cotx, "origin", []byte(s))
 
 	//发送到kafka
-	zgo.Kafka.Producer(cotx, "zgo_start", []byte(s))
+	zgo.Kafka.Producer(cotx, "origin", []byte(s))
 
 	select {
 	case <-cotx.Done():
@@ -610,11 +610,11 @@ zgo engine会替你把这些日志，输出到文件系统，或者是Nsq中，�
 
 
 ##开发环境联调
-你需要在zgo_start/config/dev.json中，指定Env的值是"dev" 和 Project的值（来自zgo engine admin配置中心）
+你需要在origin/config/dev.json中，指定Env的值是"dev" 和 Project的值（来自zgo engine admin配置中心）
 如果你愿意你可以继续为LogLevel和Version指定值
 
 ##生产环境部署
-在项目的zgo_start/deploy目录中分别有k8s和istio的子目录
+在项目的origin/deploy目录中分别有k8s和istio的子目录
 ###yaml文件编写
 
 ####k8s yaml的编写
@@ -623,12 +623,12 @@ svc.yaml是一个k8s的Service Kind
 kind: Service
 apiVersion: v1
 metadata:
-  name: zgo-start
+  name: origin
   labels:
-    app: zgo-start
+    app: origin
 spec:
   selector:
-    app: zgo-start
+    app: origin
   ports:
     - name: http
       port: 80
@@ -639,19 +639,19 @@ v1.yaml文件是个Deployment
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: zgo-start-v1
+  name: origin-v1
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: zgo-start
+        app: origin
         version: v1
     spec:
       restartPolicy: Always
       containers:
-        - name: zgo-start
-          image: registry.cn-beijing.aliyuncs.com/zhuge/zgo-start:v1.0.0
+        - name: origin
+          image: registry.cn-beijing.aliyuncs.com/zhuge/origin:v1.0.0
           ports:
             - containerPort: 80
           livenessProbe:
@@ -675,19 +675,19 @@ v2.yaml文件仅有Deployment Kind就可以了，为什么要做v2.yaml，当更
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: zgo-start-v2
+  name: origin-v2
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: zgo-start
+        app: origin
         version: v2
     spec:
       restartPolicy: Always
       containers:
-        - name: zgo-start
-          image: registry.cn-beijing.aliyuncs.com/zhuge/zgo-start:v1.0.1
+        - name: origin
+          image: registry.cn-beijing.aliyuncs.com/zhuge/origin:v1.0.1
           ports:
             - containerPort: 80
           livenessProbe:
@@ -716,7 +716,7 @@ gateway.yaml如下
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: zgo-start-gateway
+  name: origin-gateway
 spec:
   selector:
     istio: ingressgateway
@@ -735,9 +735,9 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: zgo-start
+  name: origin
 spec:
-  host: zgo-start
+  host: origin
   subsets:
     - name: v2
       labels:
@@ -752,20 +752,20 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: zgo-start
+  name: origin
 spec:
   hosts:
     - "*"
   gateways:
-    - zgo-start-gateway
+    - origin-gateway
   http:
     - route:
         - destination:
-            host: zgo-start
+            host: origin
             subset: v2
           weight: 100
         - destination:
-            host: zgo-start
+            host: origin
             subset: v1
           weight: 0
 ```

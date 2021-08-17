@@ -2,9 +2,9 @@ package zgolog
 
 import (
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
-	"git.zhugefang.com/gocore/zgo/zgoutils"
 	"github.com/go-stack/stack"
+	"github.com/rubinus/zgo/config"
+	"github.com/rubinus/zgo/zgoutils"
 	log "github.com/sirupsen/logrus"
 )
 

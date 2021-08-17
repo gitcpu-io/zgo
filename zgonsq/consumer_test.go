@@ -2,7 +2,7 @@ package zgonsq
 
 import (
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
+	"github.com/rubinus/zgo/config"
 	"testing"
 	"time"
 )
@@ -39,7 +39,7 @@ func TestConsumer(t *testing.T) {
 		label_bj: s1,
 		label_sh: s2,
 	}
-	InitNsq(hsm) //测试时表示使用nsq，在zgo_start中使用一次
+	InitNsq(hsm) //测试时表示使用nsq，在origin中使用一次
 
 	time.Sleep(2 * time.Second)
 
@@ -50,7 +50,7 @@ func TestConsumer(t *testing.T) {
 		panic(err)
 	}
 	c := chat{
-		Topic:   "zgo_start",
+		Topic:   "origin",
 		Channel: label_bj,
 		Nsq:     labelBj,
 	}

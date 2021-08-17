@@ -3,10 +3,10 @@ package zgokafka
 
 import (
 	"context"
-	"git.zhugefang.com/gocore/zgo/comm"
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/Shopify/sarama"
 	"github.com/bsm/sarama-cluster"
+	"github.com/rubinus/zgo/comm"
+	"github.com/rubinus/zgo/config"
 	"sync"
 )
 

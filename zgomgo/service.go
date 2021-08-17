@@ -5,8 +5,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/comm"
-	"git.zhugefang.com/gocore/zgo/config"
+	"github.com/rubinus/zgo/comm"
+	"github.com/rubinus/zgo/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -197,12 +197,12 @@ type Mgoer interface {
 	// 3: append(第2步的结构体指针)到声明的[]中
 	// 4: order 如果为true就是按第一步中[]的顺序执行，如果为false那么不管顺序，相当于并行计算
 	// 使用实例请参考：
-	// https://git.zhugefang.com/gocore/zgo_start/blob/master/samples/demo_mgo/demo.go
+	// https://github.com/rubinus/origin/blob/master/samples/demo_mgo/demo.go
 	BulkWrite(ctx context.Context, coll *mongo.Collection, bulkWrites []*MgoBulkWriteOperation, order bool) (*mongo.BulkWriteResult, error)
 
 	// Aggregate 聚合查询
 	// 使用实例请参考：
-	// https://git.zhugefang.com/gocore/zgo_start/blob/master/samples/demo_mgo/demo.go
+	// https://github.com/rubinus/origin/blob/master/samples/demo_mgo/demo.go
 	Aggregate(ctx context.Context, coll *mongo.Collection, pipeline interface{}) ([][]byte, error)
 
 	// Watch 监听

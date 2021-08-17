@@ -2,7 +2,7 @@ package zgokafka
 
 import (
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
+	"github.com/rubinus/zgo/config"
 	"testing"
 	"time"
 )
@@ -38,7 +38,7 @@ func TestConsumer(t *testing.T) {
 		label_bj: s1,
 		label_sh: s2,
 	}
-	InitKafka(hsm) //测试时表示使用kafka，在zgo_start中使用一次
+	InitKafka(hsm) //测试时表示使用kafka，在origin中使用一次
 
 	labelBj, err := GetKafka(label_bj)
 

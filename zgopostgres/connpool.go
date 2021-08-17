@@ -2,8 +2,8 @@ package zgopostgres
 
 import (
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/go-pg/pg"
+	"github.com/rubinus/zgo/config"
 	"math/rand"
 	"sync"
 	"time"

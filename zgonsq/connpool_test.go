@@ -3,7 +3,7 @@ package zgonsq
 import (
 	"context"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
+	"github.com/rubinus/zgo/config"
 	"testing"
 	"time"
 )
@@ -46,7 +46,7 @@ func TestProducer(t *testing.T) {
 		label_sh: s2,
 	}
 
-	InitNsq(hsm) //测试时表示使用nsq，在zgo_start中使用一次
+	InitNsq(hsm) //测试时表示使用nsq，在origin中使用一次
 
 	//测试读取nsq数据，wait for sdk init connection
 	time.Sleep(4 * time.Second)

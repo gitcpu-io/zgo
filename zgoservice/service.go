@@ -1,7 +1,7 @@
 package zgoservice
 
 import (
-	"git.zhugefang.com/gocore/zgo/config"
+	"github.com/rubinus/zgo/config"
 	"strings"
 )
 

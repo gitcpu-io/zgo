@@ -3,8 +3,8 @@ package zgoclickhouse
 import (
 	"database/sql"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
-	_ "github.com/kshvakov/clickhouse" //必须导入这个，_
+	_ "github.com/ClickHouse/clickhouse-go" //必须导入这个，_
+	"github.com/rubinus/zgo/config"
 	"math/rand"
 	"sync"
 	"time"

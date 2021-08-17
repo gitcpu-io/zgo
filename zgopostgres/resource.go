@@ -1,9 +1,9 @@
 package zgopostgres
 
 import (
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
+	"github.com/rubinus/zgo/config"
 	"sync"
 )
 

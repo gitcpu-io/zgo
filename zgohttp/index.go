@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/zgoutils"
-	"github.com/kataras/iris"
-	"github.com/kataras/iris/context"
+	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/context"
+	"github.com/rubinus/zgo/zgoutils"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -157,7 +157,7 @@ func (zh *zgohttp) UseBefore(ctx iris.Context) {
 			logMessage += fmt.Sprintf("At Request: %s\n", getRequestLogs(ctx))
 			logMessage += fmt.Sprintf("Trace: %s\n", err)
 			logMessage += fmt.Sprintf("\n%s", stacktrace)
-			ctx.Application().Logger().Warn(logMessage)
+			//ctx.Application().Logger()
 			//ctx.StatusCode(500)
 			ctx.StopExecution()
 		}

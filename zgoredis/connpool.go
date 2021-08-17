@@ -1,10 +1,10 @@
 package zgoredis
 
 import (
+	"errors"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
-	"github.com/kataras/iris/core/errors"
-	"github.com/mediocregopher/radix"
+	"github.com/mediocregopher/radix/v3"
+	"github.com/rubinus/zgo/config"
 	"math/rand"
 	"strings"
 	"sync"

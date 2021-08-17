@@ -3,8 +3,8 @@ package zgoclickhouse
 
 import (
 	"database/sql"
-	"git.zhugefang.com/gocore/zgo/comm"
-	"git.zhugefang.com/gocore/zgo/config"
+	"github.com/rubinus/zgo/comm"
+	"github.com/rubinus/zgo/config"
 	"sync"
 )
 

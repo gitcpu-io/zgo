@@ -12,8 +12,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/zgoutils"
-	"github.com/tjfoc/gmsm/sm2"
+	"github.com/rubinus/zgo/zgoutils"
 	"hash"
 	"io/ioutil"
 	"net/http"
@@ -21,7 +20,7 @@ import (
 	"strings"
 )
 
-//解析支付宝支付完成后的Notify信息
+// ParseNotifyResult 解析支付宝支付完成后的Notify信息
 func (a *PayClient) ParseNotifyResult(req *http.Request) (notifyReq *NotifyRequest, err error) {
 	notifyReq = new(NotifyRequest)
 	notifyReq.NotifyTime = req.FormValue("notify_time")
@@ -93,7 +92,7 @@ A：开发者上传自己的应用公钥证书后，开放平台会为开发者�
 基于该机制可实现支付宝公钥证书变更时开发者无感知，当前开放平台提供的SDK已基于该机制实现对应功能。若开发者未通过SDK接入，须自行实现该功能。
 */
 
-//支付宝同步返回验签或异步通知验签
+// VerifySign 支付宝同步返回验签或异步通知验签
 //    注意：APP支付，手机网站支付，电脑网站支付 暂不支持同步返回验签
 //    aliPayPublicKey：支付宝公钥
 //    bean： 同步返回验签时，此参数为 tradeRes.SignData ；异步通知验签时，此参数为异步通知解析的结构体 notifyReq
@@ -171,7 +170,7 @@ func verifySign(signData, sign, signType, aliPayPublicKey string) (err error) {
 	return rsa.VerifyPKCS1v15(publicKey, hashs, h.Sum(nil), signBytes)
 }
 
-//格式化 普通应用秘钥
+// FormatPrivateKey 格式化 普通应用秘钥
 func FormatPrivateKey(privateKey string) (pKey string) {
 	var buffer strings.Builder
 	buffer.WriteString("-----BEGIN RSA PRIVATE KEY-----\n")
@@ -199,7 +198,7 @@ func FormatPrivateKey(privateKey string) (pKey string) {
 	return
 }
 
-//格式化 普通支付宝公钥
+// FormatPublicKey 格式化 普通支付宝公钥
 func FormatPublicKey(publicKey string) (pKey string) {
 	var buffer strings.Builder
 	buffer.WriteString("-----BEGIN PUBLIC KEY-----\n")
@@ -227,47 +226,43 @@ func FormatPublicKey(publicKey string) (pKey string) {
 	return
 }
 
-//获取证书序列号SN
-//    certPath：X.509证书文件路径(appCertPublicKey.crt、alipayRootCert.crt、alipayCertPublicKey_RSA2)
-//    返回 sn：证书序列号(app_cert_sn、alipay_root_cert_sn、alipay_cert_sn)
-//    返回 err：error 信息
-func GetCertSN(certPath string) (sn string, err error) {
-	var (
-		certData           []byte
-		block              *pem.Block
-		certs              []*x509.Certificate
-		sm2Certs           []*sm2.Certificate
-		name, serialNumber string
-		h                  hash.Hash
-	)
-	if certData, err = ioutil.ReadFile(certPath); err != nil {
-		return null, fmt.Errorf("ioutil.ReadFile：%v", err.Error())
+// GetCertSN 获取证书序列号SN
+//	certPathOrData.509证书文件路径(appCertPublicKey.crt、alipayCertPublicKey_RSA2.crt) 或证书 buffer
+//	返回 sn：证书序列号(app_cert_sn、alipay_cert_sn)
+//	返回 err：error 信息
+func GetCertSN(certPathOrData interface{}) (sn string, err error) {
+	var certData []byte
+	switch certPathOrData.(type) {
+	case string:
+		certData, err = ioutil.ReadFile(certPathOrData.(string))
+	case []byte:
+		certData = certPathOrData.([]byte)
+	default:
+		return "", errors.New("certPathOrData 证书类型断言错误")
 	}
-	if block, _ = pem.Decode(certData); block == nil {
-		return null, errors.New("pem.Decode：pem Decode error,block is null")
+	if err != nil {
+		return "", err
 	}
-	if certs, err = x509.ParseCertificates(block.Bytes); err != nil {
-		if sm2Certs, err = sm2.ParseCertificates(block.Bytes); err != nil {
-			return null, fmt.Errorf("sm2.ParseCertificates：%v", err.Error())
+
+	if block, _ := pem.Decode(certData); block != nil {
+		cert, err := x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			return "", err
 		}
-		name = sm2Certs[0].Issuer.String()
-		serialNumber = sm2Certs[0].SerialNumber.String()
-		goto Sign
+		name := cert.Issuer.String()
+		serialNumber := cert.SerialNumber.String()
+		h := md5.New()
+		h.Write([]byte(name))
+		h.Write([]byte(serialNumber))
+		sn = hex.EncodeToString(h.Sum(nil))
 	}
-	if certs == nil {
-		return null, fmt.Errorf("x509.ParseCertificates：certs is null")
+	if sn == "" {
+		return "", errors.New("failed to get sn,please check your cert")
 	}
-	name = certs[0].Issuer.String()
-	serialNumber = certs[0].SerialNumber.String()
-Sign:
-	h = md5.New()
-	h.Write([]byte(name))
-	h.Write([]byte(serialNumber))
-	sn = hex.EncodeToString(h.Sum(nil))
 	return sn, nil
 }
 
-//解密支付宝开放数据到 结构体
+// DecryptOpenDataToStruct 解密支付宝开放数据到 结构体
 //    encryptedData:包括敏感数据在内的完整用户信息的加密数据
 //    secretKey:AES密钥，支付宝管理平台配置
 //    beanPtr:需要解析到的结构体指针
@@ -307,7 +302,7 @@ func DecryptOpenDataToStruct(encryptedData, secretKey string, beanPtr interface{
 	return nil
 }
 
-//解密支付宝开放数据到 zgoutils.BodyMap
+// DecryptOpenDataToBodyMap 解密支付宝开放数据到 zgoutils.BodyMap
 //    encryptedData:包括敏感数据在内的完整用户信息的加密数据
 //    secretKey:AES密钥，支付宝管理平台配置
 //    文档：https://docs.alipay.com/mini/introduce/aes
@@ -340,7 +335,7 @@ func DecryptOpenDataToBodyMap(encryptedData, secretKey string) (bm zgoutils.Body
 	return
 }
 
-//换取授权访问令牌（默认使用utf-8，RSA2）
+// SystemOauthToken 换取授权访问令牌（默认使用utf-8，RSA2）
 //    appId：应用ID
 //    PrivateKey：应用私钥
 //    grantType：值为 authorization_code 时，代表用code换取；值为 refresh_token 时，代表用refresh_token换取，传空默认code换取

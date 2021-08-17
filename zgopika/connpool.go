@@ -3,8 +3,8 @@ package zgopika
 
 import (
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
-	"github.com/mediocregopher/radix"
+	"github.com/mediocregopher/radix/v3"
+	"github.com/rubinus/zgo/config"
 	"math/rand"
 	"sync"
 	"time"

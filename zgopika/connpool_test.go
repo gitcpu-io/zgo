@@ -3,8 +3,8 @@ package zgopika
 import (
 	"context"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/json-iterator/go"
+	"github.com/rubinus/zgo/config"
 	"testing"
 	"time"
 )
@@ -69,7 +69,7 @@ func TestPikaGet(t *testing.T) {
 		bj_r:  s2,
 	}
 
-	InitPika(hsm) //测试时表示使用redis，在zgo_start中使用一次
+	InitPika(hsm) //测试时表示使用redis，在origin中使用一次
 
 	//测试读取nsq数据，wait for sdk init connection
 	//time.Sleep(2 * time.Second)

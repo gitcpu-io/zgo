@@ -3,11 +3,11 @@ package zgolog
 import (
 	"context"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
-	"git.zhugefang.com/gocore/zgo/zgofile"
-	"git.zhugefang.com/gocore/zgo/zgokafka"
-	"git.zhugefang.com/gocore/zgo/zgonsq"
-	"git.zhugefang.com/gocore/zgo/zgoutils"
+	"github.com/rubinus/zgo/config"
+	"github.com/rubinus/zgo/zgofile"
+	"github.com/rubinus/zgo/zgokafka"
+	"github.com/rubinus/zgo/zgonsq"
+	"github.com/rubinus/zgo/zgoutils"
 	"strings"
 	"time"
 )

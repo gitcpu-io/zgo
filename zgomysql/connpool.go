@@ -3,9 +3,9 @@ package zgomysql
 import (
 	"errors"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/rubinus/zgo/config"
 	"log"
 	"math/rand"
 )

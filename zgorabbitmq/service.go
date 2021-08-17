@@ -3,8 +3,8 @@ package zgorabbitmq
 
 import (
 	"context"
-	"git.zhugefang.com/gocore/zgo/comm"
-	"git.zhugefang.com/gocore/zgo/config"
+	"github.com/rubinus/zgo/comm"
+	"github.com/rubinus/zgo/config"
 	"github.com/streadway/amqp"
 	"sync"
 )

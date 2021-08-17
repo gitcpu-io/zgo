@@ -3,9 +3,9 @@ package zgoredis
 import (
 	"context"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/config"
 	"github.com/json-iterator/go"
-	"github.com/mediocregopher/radix"
+	"github.com/mediocregopher/radix/v3"
+	"github.com/rubinus/zgo/config"
 	"testing"
 	"time"
 )
@@ -58,7 +58,7 @@ func TestRedisGet(t *testing.T) {
 		label_sh: s2,
 	}
 
-	InitRedis(hsm) //测试时表示使用redis，在zgo_start中使用一次
+	InitRedis(hsm) //测试时表示使用redis，在origin中使用一次
 
 	clientLocal, err := GetRedis(label_bj)
 	clientSpider, err := GetRedis(label_sh)

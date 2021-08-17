@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"git.zhugefang.com/gocore/zgo/zgoutils"
+	"github.com/rubinus/zgo/zgoutils"
 	"hash"
 	"io/ioutil"
 	"net/http"

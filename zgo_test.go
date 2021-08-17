@@ -16,7 +16,7 @@ func TestEngine(t *testing.T) {
 
 	err := Engine(&Options{
 		Env:     "local",
-		Project: "zgo_start",
+		Project: "origin",
 		//Project: "1552641690",
 
 		//如果是在本地开发可以对下面的组件开启使用(local.json)，如果是线上，不需要填写，走的配置是etcd
@@ -119,14 +119,14 @@ func TestEngine(t *testing.T) {
 			//if err != nil {
 			//	fmt.Println("---error", err)
 			//}
-			//nq.Producer(context.TODO(), "zgo_start", []byte("zgo engine is niubility from nsq"))
+			//nq.Producer(context.TODO(), "origin", []byte("zgo engine is niubility from nsq"))
 
 			//****************************************test kafka
 			//kq, err := Kafka.New("kafka_label_bj")
 			//if err != nil {
 			//	fmt.Println("---error", err)
 			//}
-			//kq.Producer(context.TODO(), "zgo_start", []byte("zgo engine is niubility from kafka"))
+			//kq.Producer(context.TODO(), "origin", []byte("zgo engine is niubility from kafka"))
 
 		}
 	}
