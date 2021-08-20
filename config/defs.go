@@ -241,6 +241,22 @@ func LoadConfig(cpath, env, project, etcdHosts string) {
 	//default init city db config
 	Conf.CityDbConfig = cityDbConfig
 
-	fmt.Printf("zgo engine %s is started on the ... %s %s\n", Version, Conf.Env, Conf.EtcdHosts)
+	info := fmt.Sprintf("zgo engine %s is started on the ... %s %s\n", Version, Conf.Env, Conf.EtcdHosts)
 
+	welcome(info)
+}
+
+func welcome(info string) {
+	welcome :=
+		`______________________________
+\                             \           _         ______ |
+ \                             \        /   \___-=O'/|O'/__|
+  \  zgo engine, Here we go !!  \_______\          / | /    )
+  /                             /        '/-==__ _/__|/__=-|  -GM
+ /          @2021              /         *             \ | |
+/                             /                        (o)
+------------------------------
+`
+	startMsg := "if you have any problem, please visit https://github.com/rubinus/zgo"
+	fmt.Println(fmt.Sprintf("\n%s\n%s\n%s\n", welcome, info, startMsg))
 }
