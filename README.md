@@ -9,7 +9,7 @@ zgo是专门为使用go语言的开发人员所设计和开发的， 它提供�
 
 ##zgo的架构图
 
-[![npm](zgo_engine.png)](http://wiki.zhugefang.com/display/ZGZFRDCENTER/zgo)
+[![npm](zgo_engine.png)](http://wiki.examplefang.com/display/ZGZFRDCENTER/zgo)
 
 
 ##zgo的核心功能（共25个，6个数据库，2个缓存，3个消息队列，1个ES，1个Cache, 1个Log存储，1个Http，1个Grpc，1个Map，1个负载，1个限流，3个工具类组件）
@@ -45,7 +45,7 @@ zgo是专门为使用go语言的开发人员所设计和开发的， 它提供�
 
 * 微服务项目建立时从zgo engine admin平台申请项目id，并配置所用资源，你可能会使用mongo,redis或nsq，并开启日志存储到nsq，这样的一个服务
 
-##快速开启zgo start项目
+##快速开启zgo origin项目
 ###origin项目是使用zgo engine的模板项目
 git clone https://github.com/rubinus/origin
 
@@ -72,15 +72,15 @@ go build -o origin
 
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o origin
 
-用docker制作image(dck.zhuge.test是任意一个标识，如果愿意你可以改为rubinus/origin)
+用docker制作image(dck.example.test是任意一个标识，如果愿意你可以改为rubinus/origin)
 
-docker build -t dck.zhuge.test/origin .
+docker build -t dck.example.test/origin .
 
 把镜像文件push到开发环境的私有仓库
 
-docker push dck.zhuge.test/origin
+docker push dck.example.test/origin
 
-###如果把zgo start做为一个提供api接口访问的web微服务时的依赖
+###如果把zgo origin做为一个提供api接口访问的web微服务时的依赖
 我们使用了开源的go web框架iris，仅当你创建web服务时使用下面的框架
 
 import github.com/kataras/iris/v12
@@ -92,7 +92,8 @@ import github.com/kataras/iris/v12
 * 启动zgo engine，可以在你项目的main.go中直接调用下面的函数，这样zgo engine将会启动
 ```gotemplate
     err := zgo.Engine(&zgo.Options{
-		Env:      "local", //表示你在本机上开发， dev/qa/pro都表示非本机开发
+        CPath:     config.Conf.CPath,
+        Env:      "local", //表示你在本机上开发， dev/qa/pro都表示非本机开发
 		Loglevel: "debug", //本机开发采用debug的日志模式
 		Project:  "origin", //项目id: origin是从zgo engine admin平台申请得到的，正式上可能是一串数字
 
@@ -100,6 +101,9 @@ import github.com/kataras/iris/v12
 		Redis: []string{
 			"redis_label_bj",
 		},
+        Mgo: []string{
+            "mgo_label_bj",	//测试时可以放开注释，通过配置文件来调试连接中间件mongodb
+        },
 		Mysql: []string{
 			"mysql_sell_1",
 			"mysql_sell_2",
@@ -138,7 +142,7 @@ import github.com/kataras/iris/v12
 
 ###zgo Mysql组件使用
 如果你想用zgo.Mysql来向mysql数据库中插入一条数据，你可以这么做，首先你要声明一个类型是House的结构体，
-然后再实例化这个结构体，为此我创建了一个id是123,name是zhugefang的，这样一个实例，接下来我调用了一个AddHouse的函数，
+然后再实例化这个结构体，为此我创建了一个id是123,name是examplefang的，这样一个实例，接下来我调用了一个AddHouse的函数，
 并传入了三个参数，第一个是上下文context.TODO()表示什么也不做，只是传递上下文而已，第二个参数是刚刚实例化的House的指针，第三个是string类型的bj
 
 ```gotemplate
@@ -149,7 +153,7 @@ type House struct {
 
 h := House{
     Id: 123,
-    Name: "zhugefang",
+    Name: "examplefang",
 }
 
 err := AddHouse(context.TODO(), &h ,"bj")
@@ -173,51 +177,114 @@ func AddHouse(ctx context.Context, h *House, city string) error {
 ```
 
 ###zgo Mongo组件使用
-如果你想从mongo中查询一条记录的话，你可以像下面这样做
+如果你想从mongo中查询一条记录的话，你可以像下面这样做，先插入测试数据
+mongo
+use admin
+db.auth('admin','admin')
+
+### 插入测试数据
+use profile
+~~~
+for(var i=100;i<=200;i++){
+    db.bj.insert({
+        username: 'zhangsan',
+        age:Math.round(Math.random() * 100),
+        address:Math.round(Math.random() * 100),
+    });
+}
+~~~
+
 ```gotemplate
-type User struct {  //声明一个类型是User的结构体
-	Name string `json:"name"`
-	Age   int    `json:"age"`
+type User struct {
+    Id       zgo.MgoObjectId `json:"id,omitempty" bson:"_id,omitempty"`
+    Username string          `json:"username" bson:"username" `
+    Age      int             `json:"age" bson:"age"`
+    Address  int             `json:"address" bson:"address"`
 }
 
 func GetUser()  {   //查询函数
-	u := User{}
-	//输入参数：上下文ctx，args具体的查询操作参数
-	args := make(map[string]interface{})
-	query := make(map[string]interface{})
-	query["name"] = "abc"
+    // 第一：定义错误返回变量，请求上下文，通过defer来最后响应
+    var errStr string
+    
+    cotx, cancel := context.WithTimeout(context.Background(), 5*time.Second) //you can change this time number
+    defer cancel()
+    
+    defer func() {
+        if errStr != "" {
+            zgo.Http.JsonpErr(ctx, errStr)
+        }
+    }()
+    
+    // 第二：解析请求参数
+    name := ctx.URLParam("name")
+    if name == "" {
+        errStr = "必须输入query参数name"
+        return
+    }
+    
+    // 第三：调用zgo engine来处理业务逻辑
+    result, err := Find(cotx, name)
+    if err != nil {
+        errStr = err.Error()
+        zgo.Log.Error(err)
+        return
+    }
+    
+    // 第四：使用select来响应处理结果与超时
+    select {
+        case <-cotx.Done():
+            errStr = "call mongo list string timeout"
+            zgo.Log.Error(errStr) //通过zgo.Log统计日志
+        default:
+            zgo.Http.JsonpOK(ctx, result)
+    }
 
-	args["db"] = "test"
-	args["table"] = "user"
-	args["query"] = query
-	
-	res,err := getUser(&u,args)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(res)
 }
 
-func getUser(u *User, args map[string]interface{}) (*User, error){
-	//还需要一个上下文用来控制开出去的goroutine是否超时
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	defer cancel()
-	
-
-	result, err := zgo.Mongo.FindOne(ctx, args)
-
-	if err != nil {
-		zgo.Log.Error("取mongo中的数据失败" + err.Error())
-		return nil,err
-	}
-
-	select {
-	case <-ctx.Done():
-		return nil,errors.New("超时")
-	default:
-		zgo.Utils.MapToStruct(result, u)    //用返回的map转成user结构体
-	}
-	return u,nil
+func Find(ctx context.Context, username string) ([]*User, error) {
+    var collection = zgo.Mgo.GetCollection("profile", "bj", "mgo_label_bj")
+    
+    filter := make(map[string]interface{}) //查询username是且age >= 30的
+    filter["username"] = username
+    filter["age"] = map[string]interface{}{
+        "$gte": 10,
+    }
+    
+    sort := make(map[string]interface{})
+    sort["_id"] = -1
+    
+    //返回错误：Projection cannot have a mix of inclusion and exclusion; 要么是1，要么是0
+    fields := make(map[string]interface{})
+    fields["age"] = 1
+    fields["address"] = 1 //要么全是1，要么全是0
+    fields["username"] = 1
+    
+    //组织args
+    args := &zgo.MgoArgs{
+        Filter: filter, //查询条件
+        Fields: fields, //对查询出的结果项，筛选字段
+        Sort:   sort,   //排序
+        Limit:  10,     //查询结果数量
+        Skip:   0,      //从哪一条开始跳过 开区间，不包括skip的值
+    }
+    
+    results, err := zgo.Mgo.Find(ctx, collection, args)
+    if err != nil {
+        return nil, err
+    }
+    
+    users := make([]*User,0)
+    for _, v := range results {
+        u := User{}
+        err := zgo.Utils.BsonUnmarshal(v, &u) //对每一条数据进行 bsonUnmarshal 转为go结构体
+        if err != nil {
+            fmt.Println(err)
+            continue
+        }
+        users = append(users, &u)
+    }
+    
+    return users, nil
 }
 ```
 
@@ -651,7 +718,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: origin
-          image: registry.cn-beijing.aliyuncs.com/zhuge/origin:v1.0.0
+          image: registry.cn-beijing.aliyuncs.com/example/origin:v1.0.0
           ports:
             - containerPort: 80
           livenessProbe:
@@ -687,7 +754,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: origin
-          image: registry.cn-beijing.aliyuncs.com/zhuge/origin:v1.0.1
+          image: registry.cn-beijing.aliyuncs.com/example/origin:v1.0.1
           ports:
             - containerPort: 80
           livenessProbe:
@@ -786,7 +853,7 @@ spec:
 ```
 
 ##压力测试
-[核心包压测]http://wiki.zhugefang.com/pages/viewpage.action?pageId=11830049
+[核心包压测]http://wiki.examplefang.com/pages/viewpage.action?pageId=11830049
 
 ##zgo engine突击队成员
 * 指挥官：杨丽娟
@@ -801,7 +868,7 @@ spec:
 * 张东磊
 * 张树振
 
-copyright@2019 by zhuge.com
+copyright@2019 by example.com
 
 
 ###zgo engine测试方法使用：进入到比如zgonsq目录下执行，生成相应的.out，并通过go tool pprof查看
