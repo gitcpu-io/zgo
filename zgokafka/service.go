@@ -5,8 +5,8 @@ import (
 	"context"
 	"github.com/Shopify/sarama"
 	"github.com/bsm/sarama-cluster"
-	"github.com/rubinus/zgo/comm"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/comm"
+	"github.com/gitcpu-io/zgo/config"
 	"sync"
 )
 

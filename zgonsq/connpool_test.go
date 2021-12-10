@@ -3,7 +3,7 @@ package zgonsq
 import (
 	"context"
 	"fmt"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"testing"
 	"time"
 )

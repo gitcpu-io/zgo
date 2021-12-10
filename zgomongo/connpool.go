@@ -3,7 +3,7 @@ package zgomongo
 import (
 	"fmt"
 	"github.com/globalsign/mgo"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"math/rand"
 	"sync"
 	"time"

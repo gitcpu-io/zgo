@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/rubinus/zgo"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo"
+	"github.com/gitcpu-io/zgo/config"
 
 	"time"
 

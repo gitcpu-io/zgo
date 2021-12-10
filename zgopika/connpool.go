@@ -4,7 +4,7 @@ package zgopika
 import (
 	"fmt"
 	"github.com/mediocregopher/radix/v3"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"math/rand"
 	"sync"
 	"time"

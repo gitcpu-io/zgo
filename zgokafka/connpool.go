@@ -3,7 +3,7 @@ package zgokafka
 import (
 	"fmt"
 	"github.com/Shopify/sarama"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"math/rand"
 	"strings"
 	"sync"

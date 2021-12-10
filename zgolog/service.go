@@ -3,8 +3,8 @@ package zgolog
 import (
 	"fmt"
 	"github.com/go-stack/stack"
-	"github.com/rubinus/zgo/config"
-	"github.com/rubinus/zgo/zgoutils"
+	"github.com/gitcpu-io/zgo/config"
+	"github.com/gitcpu-io/zgo/zgoutils"
 	log "github.com/sirupsen/logrus"
 )
 

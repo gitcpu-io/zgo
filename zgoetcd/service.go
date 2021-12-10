@@ -3,8 +3,8 @@ package zgoetcd
 
 import (
 	"github.com/coreos/etcd/clientv3"
-	"github.com/rubinus/zgo/comm"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/comm"
+	"github.com/gitcpu-io/zgo/config"
 	"sync"
 )
 

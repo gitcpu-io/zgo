@@ -1,4 +1,4 @@
-module github.com/rubinus/zgo
+module github.com/gitcpu-io/zgo
 
 go 1.16
 

@@ -12,7 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/parnurzeal/gorequest"
-	"github.com/rubinus/zgo/zgoutils"
+	"github.com/gitcpu-io/zgo/zgoutils"
 	"hash"
 	"net/http"
 	"net/url"

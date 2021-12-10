@@ -1,7 +1,7 @@
 package zgoservice
 
 import (
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"strings"
 )
 

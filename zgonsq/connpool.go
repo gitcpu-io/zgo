@@ -3,7 +3,7 @@ package zgonsq
 import (
 	"fmt"
 	"github.com/nsqio/go-nsq"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"math/rand"
 	"sync"
 	"time"

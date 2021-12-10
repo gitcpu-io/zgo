@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/rubinus/zgo/zgoutils"
+	"github.com/gitcpu-io/zgo/zgoutils"
 	"io/ioutil"
 	"strings"
 )
@@ -257,6 +257,6 @@ func welcome(info string) {
 /                             /                        (o)
 ------------------------------
 `
-	startMsg := "if you have any problem, please visit https://github.com/rubinus/zgo"
+	startMsg := "if you have any problem, please visit https://github.com/gitcpu-io/zgo"
 	fmt.Println(fmt.Sprintf("\n%s\n%s\n%s\n", welcome, info, startMsg))
 }

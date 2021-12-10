@@ -1,7 +1,7 @@
 package zgofile
 
 import (
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"io"
 )
 
