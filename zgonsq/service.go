@@ -4,8 +4,8 @@ package zgonsq
 import (
 	"context"
 	"github.com/nsqio/go-nsq"
-	"github.com/rubinus/zgo/comm"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/comm"
+	"github.com/gitcpu-io/zgo/config"
 	"sync"
 )
 

@@ -2,7 +2,7 @@ package comm
 
 import (
 	"errors"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"sync"
 )
 

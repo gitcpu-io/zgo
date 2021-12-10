@@ -2,7 +2,7 @@ package zgoneo4j
 
 import (
 	"github.com/neo4j/neo4j-go-driver/neo4j"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"sync"
 )
 

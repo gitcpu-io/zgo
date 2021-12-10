@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/json-iterator/go"
 	"github.com/mediocregopher/radix/v3"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"testing"
 	"time"
 )

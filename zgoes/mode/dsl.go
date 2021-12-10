@@ -3,7 +3,7 @@ package mode
 import (
 	"fmt"
 
-	"github.com/rubinus/zgo/zgoutils"
+	"github.com/gitcpu-io/zgo/zgoutils"
 )
 
 var DSLtyp = map[string]string{

@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/rubinus/zgo/zgoutils"
+	"github.com/gitcpu-io/zgo/zgoutils"
 	"io/ioutil"
 	"net/http"
 	"reflect"

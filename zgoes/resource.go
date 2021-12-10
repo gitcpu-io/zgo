@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/rubinus/zgo/zgoutils"
+	"github.com/gitcpu-io/zgo/zgoutils"
 	"io/ioutil"
 	"net/url"
 	"strings"

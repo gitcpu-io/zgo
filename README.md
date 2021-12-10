@@ -47,7 +47,7 @@ zgo是专门为使用go语言的开发人员所设计和开发的， 它提供�
 
 ##快速开启zgo origin项目
 ###origin项目是使用zgo engine的模板项目
-git clone https://github.com/rubinus/origin
+git clone https://github.com/gitcpu-io/origin
 
 git clone这个项目后，改名成自己开发的项目名字，然后删除掉.git目录，这是一个模板，内含有samples目录，其中的代码可以直接copy使用
 
@@ -116,24 +116,24 @@ import github.com/kataras/iris/v12
 如果你启用了例如上面这样的redis组件，仅仅用到了一个redis的话，那么在程序中你可以直接像下面这样操作
 ```gotemplate
     val, err := zgo.Redis.Get(context.TODO(), "key:123")
-    
+
     result := zgo.Utils.StringToMap(val.(string)) //把redis中的string转为go对象map
-    
+
     if err != nil {
     zgo.Log.Error(err)  //把错误日志存储起来，你不用关心如何存储，只需要调用一下这个函数zgo.Log.Error()
         return
-    } 
+    }
     fmt.Println(result)
 ```
 
 如果你启用了比如mysql这个组件，同时又用到了1个以上的label，那么在程序中使用时你必须要这样
 ```gotemplate
     ms, err := zgo.Mysql.New("mysql_sell_1") //首先通过New一个实例出来，并填写label的名字，这个mysql_sell_1实际上来自于etcd中的配置资源key
-    
+
     if err != nil {
         zgo.Log.Error(err) //你无需要关注如何存储，etcd中的配置会帮你定义是存储到什么地方去
     }
-    
+
     ms.Get() //输入查询参数，返回数据
 ```
 
@@ -205,23 +205,23 @@ type User struct {
 func GetUser()  {   //查询函数
     // 第一：定义错误返回变量，请求上下文，通过defer来最后响应
     var errStr string
-    
+
     cotx, cancel := context.WithTimeout(context.Background(), 5*time.Second) //you can change this time number
     defer cancel()
-    
+
     defer func() {
         if errStr != "" {
             zgo.Http.JsonpErr(ctx, errStr)
         }
     }()
-    
+
     // 第二：解析请求参数
     name := ctx.URLParam("name")
     if name == "" {
         errStr = "必须输入query参数name"
         return
     }
-    
+
     // 第三：调用zgo engine来处理业务逻辑
     result, err := Find(cotx, name)
     if err != nil {
@@ -229,7 +229,7 @@ func GetUser()  {   //查询函数
         zgo.Log.Error(err)
         return
     }
-    
+
     // 第四：使用select来响应处理结果与超时
     select {
         case <-cotx.Done():
@@ -243,22 +243,22 @@ func GetUser()  {   //查询函数
 
 func Find(ctx context.Context, username string) ([]*User, error) {
     var collection = zgo.Mgo.GetCollection("profile", "bj", "mgo_label_bj")
-    
+
     filter := make(map[string]interface{}) //查询username是且age >= 30的
     filter["username"] = username
     filter["age"] = map[string]interface{}{
         "$gte": 10,
     }
-    
+
     sort := make(map[string]interface{})
     sort["_id"] = -1
-    
+
     //返回错误：Projection cannot have a mix of inclusion and exclusion; 要么是1，要么是0
     fields := make(map[string]interface{})
     fields["age"] = 1
     fields["address"] = 1 //要么全是1，要么全是0
     fields["username"] = 1
-    
+
     //组织args
     args := &zgo.MgoArgs{
         Filter: filter, //查询条件
@@ -267,12 +267,12 @@ func Find(ctx context.Context, username string) ([]*User, error) {
         Limit:  10,     //查询结果数量
         Skip:   0,      //从哪一条开始跳过 开区间，不包括skip的值
     }
-    
+
     results, err := zgo.Mgo.Find(ctx, collection, args)
     if err != nil {
         return nil, err
     }
-    
+
     users := make([]*User,0)
     for _, v := range results {
         u := User{}
@@ -283,7 +283,7 @@ func Find(ctx context.Context, username string) ([]*User, error) {
         }
         users = append(users, &u)
     }
-    
+
     return users, nil
 }
 ```
@@ -298,7 +298,7 @@ pika的使用比较简单，下面是一个向pika中存放的hash，key是key10
 	if err != nil {
 		zgo.Log.Error(err)
 	}
-	
+
 	select {
 	case <-ctx.Done():
 	    zgo.Log.Error(err)
@@ -350,11 +350,11 @@ func Hello(ctx iris.Context) {
 		errStr = "call redis hgetall timeout"
 		zgo.Log.Error(errStr) //通过zgo.Log统计日志
 		//ctx.JSONP(iris.Map{"status": 201, "msg": errStr}) //返回jsonp格式
-		
+
 		zgo.Http.JsonpErr(ctx, errStr)
 	default:
 		//ctx.JSONP(iris.Map{"status": 200, "data": result})
-		
+
 		zgo.Http.JsonpOK(ctx, result) //最终通过zgo.Http组件把数据以object的形式返回
 
 	}
@@ -367,7 +367,7 @@ es的操作我们做了二层封装，第一个是dsl查询语句的封装，第
 
 ```gotemplate
     ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-    
+
     //第一步：申明dsl查询语句
 	dsl := zgo.Es.NewDsl()
 
@@ -383,12 +383,12 @@ es的操作我们做了二层封装，第一个是dsl查询语句的封装，第
 	dsl.SetSize(20)
 	//第四步：生成dsl查询语句为string
 	dslstr := dsl.QueryDsl()
-	
+
 	//创建es查询实例，些时使用了1个以上的label
     es, err := zgo.Es.New(config.Conf.EsLabelSell)
 	if err != nil {
 		return nil, false
-	}	
+	}
 	//开始call zgo engine的ES封装函数
 	data, err := es.SearchDsl(ctx, "app_guessword", "app_guessword", dslstr, nil)
 	if err != nil {
@@ -402,25 +402,25 @@ es的操作我们做了二层封装，第一个是dsl查询语句的封装，第
     //还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	
+
 	topic := "nsq_label_bj"
-	
+
 	body := []byte(fmt.Sprintf("msg is--%s--%d", "test", 1))
-	
+
 	//发送单条消息到Nsq,rch是一个带有buffer的channel,如果<-rch的值是1表示成功
 	rch, err = zgo.Nsq.Producer(ctx, topic, body)
-	
-	
+
+
 	bodyMutil := [][]byte{
 		body,
 		body,
 		body,
 		body,
 		body,
-	}	
+	}
 	//一次发送多条消息到Nsq,rch是一个带有buffer的channel,如果<-rch的值是1表示成功
 	rch, err = zgo.Nsq.ProducerMulti(ctx, topic, bodyMutil)
-	
+
 	out := make(chan int, 1)
 	select {
 	case <-ctx.Done():
@@ -446,23 +446,23 @@ es的操作我们做了二层封装，第一个是dsl查询语句的封装，第
         Topic   string
         Channel string
     }
-    
+
     func (c *chat) Consumer() {
         zgo.Nsq.Consumer(c.Topic, c.Channel, c.Deal) //这里使用了一个go语言的闭包的功能
     }
-    
+
     //处理消息
     func (c *chat) Deal(msg zgo.NsqMessage) error { //这里需要指定一个zgo engine中定义的类型NsqMessage
-    
+
         fmt.Println("接收到NSQ", msg.NSQDAddress, ",message:", string(msg.Body))
-        
+
         //to do something for u work
-    
+
         return nil
     }
-    
+
     接下来是如何调用这个struct的函数
-    
+
     c := chat{
         Topic:   "nsq_label_bj",
         Channel: "custom-chan-101",
@@ -486,25 +486,25 @@ es的操作我们做了二层封装，第一个是dsl查询语句的封装，第
     //还需要一个上下文用来控制开出去的goroutine是否超时
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	
+
 	topic := "kafka_label_bj"
-	
+
 	body := []byte(fmt.Sprintf("msg is--%s--%d", "test", 1))
-	
+
 	//发送单条消息到Kafka,rch是一个带有buffer的channel,如果<-rch的值是1表示成功
 	rch, err = zgo.Kafka.Producer(ctx, topic, body)
-	
-	
+
+
 	bodyMutil := [][]byte{
 		body,
 		body,
 		body,
 		body,
 		body,
-	}	
+	}
 	//一次发送多条消息到Kafka,rch是一个带有buffer的channel,如果<-rch的值是1表示成功
 	rch, err = zgo.Kafka.ProducerMulti(ctx, topic, bodyMutil)
-	
+
 	out := make(chan int, 1)
 	select {
 	case <-ctx.Done():
@@ -530,38 +530,38 @@ es的操作我们做了二层封装，第一个是dsl查询语句的封装，第
         Topic   string
         GroupId string
     }
-    
+
     func (c *chat) Consumer(label string) {
         consumer, _ := zgo.Kafka.Consumer(c.Topic, c.GroupId)   //开始消费
         for {
             select {
             case part, ok := <-consumer.Partitions():   //从带有分区的kafka集群上消费数据
-    
+
                 if !ok {
                     return
                 }
                 go func(pc cluster.PartitionConsumer) {
                     for msg := range pc.Messages() {
-    
+
                         fmt.Printf("==message===%d %s\n", msg.Offset, msg.Value)
-                        
+
                         //to do something for u work
-                        
+
                     }
                 }(part)
-                
+
             //case <-signals:
             //	fmt.Println("activity no signals ...")
             //	return
-    
+
             case msg, ok := <-consumer.Messages():  //从不分区的kafka消费数据
                 if ok {
                     //fmt.Printf("==message===%d %s\n", msg.Offset, msg.Value)
-    
+
                     //to do something for u work
-    
+
                 }
-    
+
             }
         }
     }
@@ -572,7 +572,7 @@ es的操作我们做了二层封装，第一个是dsl查询语句的封装，第
 		GroupId: "groupId-101",
 	}
 	c.Consumer(label_bj)
-	
+
     最后一点小建议，这个消费者在程序运行时是一直在消费着，而不是只调用一次，所以你应该把些消费的内容运行在一个goroutine里，同时加上一行
     for {
         select {
@@ -777,7 +777,7 @@ spec:
 
 ####istio yaml的编写，这是用来控制流量，实现访问与蓝绿发布所用的
 关于gateway的部分，主要是使用istio的ingressgateway来让外部流量，流入k8s集群;同时VirtualService连接k8s集群的service的label，通过service再关联到k8s集群中Pod的label上
-而pod就是上面使用Deployment声明后部署的 
+而pod就是上面使用Deployment声明后部署的
 gateway.yaml如下
 ```yaml
 apiVersion: networking.istio.io/v1alpha3

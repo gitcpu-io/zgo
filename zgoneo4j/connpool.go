@@ -3,7 +3,7 @@ package zgoneo4j
 import (
 	"fmt"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"math/rand"
 	"sync"
 	"time"

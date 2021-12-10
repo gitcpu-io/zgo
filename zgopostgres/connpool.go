@@ -3,7 +3,7 @@ package zgopostgres
 import (
 	"fmt"
 	"github.com/go-pg/pg"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"math/rand"
 	"sync"
 	"time"

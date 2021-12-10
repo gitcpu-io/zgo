@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/ClickHouse/clickhouse-go" //必须导入这个，_
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"math/rand"
 	"sync"
 	"time"

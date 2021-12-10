@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/json-iterator/go"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"math/rand"
 	"testing"
 	"time"

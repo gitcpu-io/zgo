@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/json-iterator/go"
-	"github.com/rubinus/zgo/config"
+	"github.com/gitcpu-io/zgo/config"
 	"testing"
 	"time"
 )

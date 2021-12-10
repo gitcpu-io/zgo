@@ -1,7 +1,7 @@
 package zgoes
 
 import (
-	"github.com/rubinus/zgo/zgoutils"
+	"github.com/gitcpu-io/zgo/zgoutils"
 )
 
 type DSL struct {

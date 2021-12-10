@@ -3,8 +3,8 @@ package zgoes
 import (
 	"context"
 	"fmt"
-	"github.com/rubinus/zgo/config"
-	"github.com/rubinus/zgo/zgoutils"
+	"github.com/gitcpu-io/zgo/config"
+	"github.com/gitcpu-io/zgo/zgoutils"
 	"testing"
 	"time"
 )
