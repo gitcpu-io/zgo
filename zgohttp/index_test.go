@@ -1,8 +1,8 @@
 package zgohttp
 
 import (
-	"fmt"
-	"testing"
+  "fmt"
+  "testing"
 )
 
 /*
@@ -13,10 +13,10 @@ import (
 */
 
 func TestZgohttp_Get(t *testing.T) {
-	zh := zgohttp{}
-	bytes, err := zh.Get("http://www.zhuge.com")
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Printf("%s", bytes)
+  zh := zgohttp{}
+  bytes, err := zh.Get("http://www.zhuge.com")
+  if err != nil {
+    fmt.Println(err)
+  }
+  fmt.Printf("%s", bytes)
 }

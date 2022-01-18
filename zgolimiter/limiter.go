@@ -8,16 +8,16 @@ package zgolimiter
 */
 
 type Bucketer interface {
-	NewBucket(int32) SimpleBucketer
+  NewBucket(int32) SimpleBucketer
 }
 
 type bucket struct {
 }
 
 func (b *bucket) NewBucket(c int32) SimpleBucketer {
-	return NewBucket(c)
+  return NewBucket(c)
 }
 
 func New() Bucketer {
-	return &bucket{}
+  return &bucket{}
 }

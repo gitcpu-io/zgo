@@ -164,7 +164,7 @@ services:
     networks:
       - link-network
 
-##docker run --network=opt_link-network --link ccd448857c70 yandex/clickhouse-client --host 47.95.20.12 --port=9019 --query="select * from example"
+  ##docker run --network=opt_link-network --link ccd448857c70 yandex/clickhouse-client --host 47.95.20.12 --port=9019 --query="select * from example"
 
   clickhouse-tabix-web-client:
     image: spoonest/clickhouse-tabix-web-client
@@ -379,7 +379,7 @@ services:
     restart: always
     ports:
       - 3000:3000
-    environment:  #安装其它panel
+    environment: #安装其它panel
       GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-piechart-panel,satellogic-3d-globe-panel,grafana-worldmap-panel,grafana-simple-json-datasource
     volumes:
       - ~/docker-data/grafana:/var/lib/grafana
