@@ -8,16 +8,16 @@ package zgolb
 */
 
 type Lber interface {
-	WR2(childs ...string) WR2er
+  WR2(childs ...string) WR2er
 }
 
 type lb struct {
 }
 
 func (b *lb) WR2(childs ...string) WR2er {
-	return NewWR2(childs...)
+  return NewWR2(childs...)
 }
 
 func NewLB() Lber {
-	return &lb{}
+  return &lb{}
 }

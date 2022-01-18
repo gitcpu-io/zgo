@@ -1,35 +1,35 @@
 package zgoetcd
 
 import (
-	"github.com/coreos/etcd/clientv3"
-	"github.com/gitcpu-io/zgo/config"
-	"sync"
+  "github.com/coreos/etcd/clientv3"
+  "github.com/gitcpu-io/zgo/config"
+  "sync"
 )
 
 //EtcdResourcer 给service使用
 type EtcdResourcer interface {
-	GetConnChan(label string) chan *clientv3.Client
+  GetConnChan(label string) chan *clientv3.Client
 }
 
 //内部结构体
 type EtcdResource struct {
-	label    string
-	mu       sync.RWMutex
-	connpool ConnPooler
+  label    string
+  mu       sync.RWMutex
+  connpool ConnPooler
 }
 
 func NewEtcdResourcer(label string) EtcdResourcer {
-	return &EtcdResource{
-		label:    label,
-		connpool: NewConnPool(label), //使用connpool
-	}
+  return &EtcdResource{
+    label:    label,
+    connpool: NewConnPool(label), //使用connpool
+  }
 }
 
 func InitEtcdResource(hsm map[string][]*config.ConnDetail) {
-	InitConnPool(hsm)
+  InitConnPool(hsm)
 }
 
 //GetConnChan 返回存放连接的chan
 func (n *EtcdResource) GetConnChan(label string) chan *clientv3.Client {
-	return n.connpool.GetConnChan(label)
+  return n.connpool.GetConnChan(label)
 }

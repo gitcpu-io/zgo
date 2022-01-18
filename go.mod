@@ -64,6 +64,7 @@ require (
 	golang.org/x/text v0.3.7
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	google.golang.org/grpc v1.33.1
+	k8s.io/klog v1.0.0 // indirect
 	mellium.im/sasl v0.2.1 // indirect
 	moul.io/http2curl v1.0.0 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
