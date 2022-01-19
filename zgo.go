@@ -13,6 +13,7 @@ import (
   "github.com/gitcpu-io/zgo/zgofile"
   "github.com/gitcpu-io/zgo/zgogrpc"
   "github.com/gitcpu-io/zgo/zgohttp"
+  "github.com/gitcpu-io/zgo/zgok8s"
   "github.com/gitcpu-io/zgo/zgokafka"
   "github.com/gitcpu-io/zgo/zgolb"
   "github.com/gitcpu-io/zgo/zgolimiter"
@@ -190,7 +191,7 @@ func Engine(opt *Options) error {
   return nil
 }
 
-//getConfigByOption 把origin中的[]和config中的map进行match并取到关系
+// getConfigByOption 把origin中的[]和config中的map进行match并取到关系
 func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[string][]*config.ConnDetail {
   m := make(map[string][]*config.ConnDetail)
   for _, label := range us {
@@ -216,18 +217,18 @@ type (
   PartitionConsumer  = kafkaCluter.PartitionConsumer
   Bucketer           = zgolimiter.SimpleBucketer //zgo 自定义的bucket
 
-  //负载均衡类型声明
+  //WR2er 负载均衡类型声明
   WR2er = zgolb.WR2er
 
-  //追踪类型声明
+  //Tracer 追踪类型声明
   Tracer = zgotrace.ZgoTracer
 
-  //支付传送Body类型声明
+  //BodyMap 支付传送Body类型声明
   BodyMap     = zgoutils.BodyMap
   AliPayer    = zgoalipay.Payer //支付宝 支付接口类型声明
   WechatPayer = zgowechat.Payer //微信 支付接口类型声明
 
-  //postgres声明给使用者
+  //PostgresDB postgres声明给使用者
   PostgresDB                 = pg.DB
   PostgresCreateTableOptions = orm.CreateTableOptions
 
@@ -236,7 +237,7 @@ type (
   //Neo4jTransaction = neo4j.Transaction
   //Neo4jResult      = neo4j.Result
 
-  //etcd声明给使用者
+  //EtcdClientV3 etcd声明给使用者
   EtcdClientV3    = clientv3.Client
   EtcdGetResponse = clientv3.GetResponse
 
@@ -339,7 +340,6 @@ var (
 
   Version = config.Version
 
-  //Neo4j    zgoneo4j.Neo4jer
   Etcd  zgoetcd.Etcder
   Cache zgocache.Cacher
 
@@ -347,29 +347,32 @@ var (
 
   Http = zgohttp.New()
 
-  //先声明在engine中初始化
+  //Log 先声明在engine中初始化
   Log zgolog.Logger
 
   Utils  = zgoutils.New()
   Crypto zgocrypto.Cryptoer
-  //并发map
+  //Map 并发map
   Map  = zgomap.GetMap()
   File zgofile.Filer
 
-  //追踪
+  //Trace 追踪
   Trace = zgotrace.New()
 
-  //限流
+  //K8s client
+  K8s = zgok8s.New()
+
+  //Limiter 限流
   Limiter = zgolimiter.New()
-  //负载均衡
+  //LB 负载均衡
   LB = zgolb.NewLB()
 
-  //微信
+  //Wechat 微信
   Wechat = zgowechat.New()
-  // 支付宝
+  //AliPay 支付宝
   AliPay = zgoalipay.New()
 
-  // Service 服务注册与发现
+  //Service Service 服务注册与发现
   Service = zgoservice.New()
 
   MgoBulkWriteOperation_InsertOne  = config.InsertOne
