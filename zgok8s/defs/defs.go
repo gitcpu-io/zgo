@@ -18,9 +18,7 @@ type K8sInfo struct {
   ClientSet *kubernetes.Clientset
 }
 
-type K8s struct {
-  host string
-}
+type K8s struct {}
 
 func New() *K8s {
   return &K8s{}

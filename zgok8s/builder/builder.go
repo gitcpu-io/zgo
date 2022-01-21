@@ -20,7 +20,7 @@ type BuildClient struct {
   K8s *defs.K8s
 }
 
-func NewBuilder() Builder {
+func New() Builder {
   return &BuildClient{
     K8s: defs.New(),
   }

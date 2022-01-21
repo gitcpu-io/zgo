@@ -21,7 +21,7 @@ type K8sContexter interface {
   // Builder create client and config to zgo.K8s
   Builder() builder.Builder
 
-  // Deployment func
+  // Deployment define
   Deployment() deployment.Deploymenter
 }
 
@@ -55,7 +55,7 @@ func (k *K8sContext) ConfigOption() configoption.ConfigOptioner {
 
 // Builder 创建config 和 clientset
 func (k *K8sContext) Builder() builder.Builder {
-  return builder.NewBuilder()
+  return builder.New()
 }
 
 // Deployment 开始build其它接口

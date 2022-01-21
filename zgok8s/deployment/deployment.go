@@ -8,7 +8,7 @@ import (
 )
 
 type Deploymenter interface {
-  List() (*appv1.DeploymentList, error)
+  List(ctx context.Context, ns, ls, fs string, limit int64, watch bool) (*appv1.DeploymentList, error)
 }
 
 type deployment struct {
@@ -21,6 +21,12 @@ func New() Deploymenter {
   }
 }
 
-func (d *deployment) List() (*appv1.DeploymentList, error) {
-  return d.K8s.GetClientSet().AppsV1().Deployments("").List(context.TODO(), metav1.ListOptions{})
+func (d *deployment) List(ctx context.Context, ns, ls, fs string, limit int64, watch bool) (*appv1.DeploymentList, error) {
+  opts := metav1.ListOptions{
+    LabelSelector: ls,
+    FieldSelector: fs,
+    Watch:         watch,
+    Limit:         limit,
+  }
+  return d.K8s.GetClientSet().AppsV1().Deployments(ns).List(ctx, opts)
 }
