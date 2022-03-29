@@ -1,11 +1,13 @@
 package zgoredis
 
 import (
+  "context"
   "errors"
   "fmt"
   "github.com/gitcpu-io/zgo/config"
-  "github.com/mediocregopher/radix/v3"
+  "github.com/mediocregopher/radix/v4"
   "math/rand"
+  "strconv"
   "strings"
   "sync"
   "time"
@@ -18,7 +20,7 @@ const (
 )
 
 var (
-  connChanMap = make(map[string]chan interface{})
+  connChanMap = make(map[string]chan *radix.Client)
   mu          sync.RWMutex //用于锁定connChanMap
   hsmu        sync.RWMutex
 
@@ -29,9 +31,9 @@ var (
 type connPool struct {
   label        string
   m            sync.RWMutex
-  connChan     chan interface{}
-  clients      []interface{}
-  connChanChan chan chan interface{}
+  connChan     chan *radix.Client
+  clients      []*radix.Client
+  connChanChan chan chan *radix.Client
   cChan        chan *radix.Conn
   ccs          []*radix.Conn
   cChanChan    chan chan *radix.Conn
@@ -45,7 +47,7 @@ func NewConnPool(label string) *connPool {
 
 //连接对外的接口
 type ConnPooler interface {
-  GetConnChan(label string) chan interface{}
+  GetConnChan(label string) chan *radix.Client
   GetCChan(label string) chan *radix.Conn
 }
 
@@ -68,9 +70,9 @@ func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
         index := fmt.Sprintf("%s:%d", label, k)
         c := &connPool{
           label:        label,
-          connChan:     make(chan interface{}, v.PoolSize),
+          connChan:     make(chan *radix.Client, v.PoolSize),
           cChan:        make(chan *radix.Conn, v.PoolSize),
-          connChanChan: make(chan chan interface{}, v.ConnSize),
+          connChanChan: make(chan chan *radix.Client, v.ConnSize),
           cChanChan:    make(chan chan *radix.Conn, v.ConnSize),
         }
         mu.Lock()
@@ -175,7 +177,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
 }
 
 //GetConnChan 通过label并发安全读map
-func (cp *connPool) GetConnChan(label string) chan interface{} {
+func (cp *connPool) GetConnChan(label string) chan *radix.Client {
   cp.m.RLock()
   defer cp.m.RUnlock()
 
@@ -201,8 +203,8 @@ func (cp *connPool) GetCChan(label string) chan *radix.Conn {
 }
 
 //createClient 创建客户端连接
-func (cp *connPool) createClient(host string, port int, db int, poolsize int, password string, cluster int) (chan interface{}, chan *radix.Conn) {
-  out := make(chan interface{})
+func (cp *connPool) createClient(host string, port int, db int, poolsize int, password string, cluster int) (chan *radix.Client, chan *radix.Conn) {
+  out := make(chan *radix.Client)
   out2 := make(chan *radix.Conn)
   if cluster == 1 {
     if db > 0 {
@@ -212,11 +214,12 @@ func (cp *connPool) createClient(host string, port int, db int, poolsize int, pa
     }
   }
   go func() {
-    customConnFunc := func(network, addr string) (radix.Conn, error) {
-      return radix.Dial(network, addr,
-        radix.DialTimeout(5*time.Second), radix.DialSelectDB(db), radix.DialAuthPass(password),
-      )
-    }
+    //customConnFunc := func(network, addr string) (radix.Client, error) {
+    //  return (radix.PoolConfig{}).New(context.TODO(),"tcp",fmt.Sprintf("%s:%s",host,strconv.Itoa(port)))
+    //  //return radix.Dial(context.TODO(),network, addr,
+    //  //  radix.DialTimeout(5*time.Second), radix.DialSelectDB(db), radix.DialAuthPass(password),
+    //  //)
+    //}
 
     if cluster == 0 { //单机
 
@@ -228,40 +231,47 @@ func (cp *connPool) createClient(host string, port int, db int, poolsize int, pa
       }
 
       address := fmt.Sprintf("%s:%d", host, port)
-      c, err := radix.NewPool("tcp", address, 10, radix.PoolConnFunc(customConnFunc))
+      //c, err := radix.NewPool("tcp", address, 10, radix.PoolConnFunc(customConnFunc))
+      c, err := (radix.PoolConfig{
+        Dialer: radix.Dialer{
+          AuthPass: password,
+          SelectDB: strconv.Itoa(db),
+        },
+      }).New(context.TODO(),"tcp",address)
       if err != nil {
         fmt.Println("redis ", err)
         out <- nil
         return
       }
-
-      out <- c
+      out <- &c
 
     } else if cluster == 1 { //集群模式
 
-      var address []string
-      arr := strings.Split(host, ",")
-      for _, v := range arr {
-        tmp := v
-        if strings.Index(tmp, ":") == -1 {
-          tmp = fmt.Sprintf("%s:%d", tmp, port)
-        }
-        address = append(address, tmp)
-      }
-      //fmt.Println("tmp address*************",address)
-
-      clusterPoolFunc := func(network, addr string) (radix.Client, error) {
-        return radix.NewPool(network, addr, 10, radix.PoolConnFunc(customConnFunc))
-      }
-
-      c, err := radix.NewCluster(address,
-        radix.ClusterPoolFunc(clusterPoolFunc), radix.ClusterSyncEvery(3*time.Second))
-      if err != nil {
-        fmt.Println("redis cluster ", err)
-        out <- nil
-        return
-      }
-      out <- c
+    //  var address []string
+    //  arr := strings.Split(host, ",")
+    //  for _, v := range arr {
+    //    tmp := v
+    //    if strings.Index(tmp, ":") == -1 {
+    //      tmp = fmt.Sprintf("%s:%d", tmp, port)
+    //    }
+    //    address = append(address, tmp)
+    //  }
+    //  //fmt.Println("tmp address*************",address)
+    //  cfg := radix.ClusterConfig{
+    //    PoolConfig: radix.PoolConfig{
+    //      Dialer: radix.Dialer{
+    //        AuthPass: password,
+    //      },
+    //    },
+    //  }
+    //
+    //  c, err := cfg.New(context.TODO(), address)
+    //  if err != nil {
+    //    fmt.Println("redis cluster ", err)
+    //    out <- nil
+    //    return
+    //  }
+    //  out <- nil //TODO 建立集群
     }
 
   }()
@@ -289,7 +299,13 @@ func (cp *connPool) createClient(host string, port int, db int, poolsize int, pa
         address = fmt.Sprintf("%s:%d", host, port)
       }
     }
-    c, err := radix.Dial("tcp", address, radix.DialSelectDB(db), radix.DialAuthPass(password))
+    c, err := radix.Dial(context.TODO(),"tcp", address)
+    //c, err := (radix.PoolConfig{
+    //  Dialer: radix.Dialer{
+    //    AuthPass: password,
+    //    SelectDB: strconv.Itoa(db),
+    //  },
+    //}).New(context.TODO(),"tcp",address)
     if err != nil {
       fmt.Println("redis ", err)
       return

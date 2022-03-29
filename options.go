@@ -15,7 +15,6 @@ import (
   "github.com/gitcpu-io/zgo/zgomongo"
   "github.com/gitcpu-io/zgo/zgomysql"
   "github.com/gitcpu-io/zgo/zgonsq"
-  "github.com/gitcpu-io/zgo/zgopika"
   "github.com/gitcpu-io/zgo/zgopostgres"
   "github.com/gitcpu-io/zgo/zgorabbitmq"
   "github.com/gitcpu-io/zgo/zgoredis"
@@ -227,7 +226,7 @@ func (opt *Options) destroyConn(labelType, label string) {
     in := <-zgoredis.InitRedis(nil, label)
     Redis = in
   case config.EtcTKPia:
-    in := <-zgopika.InitPika(nil, label)
+    in := <-zgoredis.InitRedis(nil, label)
     Pika = in
   case config.EtcTKNsq:
     in := <-zgonsq.InitNsq(nil, label)
@@ -405,7 +404,7 @@ func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDeta
   case config.EtcTKPia:
     //init pika again
     if len(hsm) > 0 {
-      in := <-zgopika.InitPika(hsm)
+      in := <-zgoredis.InitRedis(hsm)
       Pika = in
     }
 

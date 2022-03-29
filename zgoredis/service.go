@@ -5,7 +5,6 @@ import (
   "errors"
   "github.com/gitcpu-io/zgo/comm"
   "github.com/gitcpu-io/zgo/config"
-  "github.com/mediocregopher/radix/v3"
   "sync"
 )
 
@@ -71,17 +70,17 @@ type Rediser interface {
   Publish(ctx context.Context, key string, value string) (int, error)
 
   // Subscribe订阅
-  Subscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error)
+  Subscribe(ctx context.Context, chanName string) error
 
   // PSubscribe 模式订阅，模糊匹配channel的名字
   // PSubscribe(context.TODO(), "my*")
-  PSubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error)
+  PSubscribe(ctx context.Context, patterns ...string) error
 
   // Unsubscribe取消订阅
-  Unsubscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error)
+  Unsubscribe(ctx context.Context, chanName string) error
 
   // PUnsubscribe 取消模式订阅，模糊匹配channel的名字
-  PUnsubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error)
+  PUnsubscribe(ctx context.Context, patterns ...string) error
 
   //streams流处理
   //	m := make(map[string]string)
@@ -156,7 +155,7 @@ type Rediser interface {
   		}
   */
   //通过创建stream选项，来创建一个流的reader，然后在for中读到最新写进去的，默认xack为true, block为true
-  NewStreamReader(streams []string, group, consumer string) (radix.StreamReader, error)
+  //NewStreamReader(streams []string, group, consumer string) (radix.StreamReader, error)
 }
 
 func Redis(l string) Rediser {
@@ -404,19 +403,19 @@ func (r *zgoredis) Publish(ctx context.Context, key string, value string) (int, 
   return r.res.Publish(ctx, key, value)
 }
 
-func (r *zgoredis) Subscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error) {
+func (r *zgoredis) Subscribe(ctx context.Context, chanName string) error {
   return r.res.Subscribe(ctx, chanName)
 }
 
-func (r *zgoredis) PSubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error) {
+func (r *zgoredis) PSubscribe(ctx context.Context, patterns ...string) error {
   return r.res.PSubscribe(ctx, patterns...)
 }
 
-func (r *zgoredis) Unsubscribe(ctx context.Context, chanName string) (chan radix.PubSubMessage, error) {
+func (r *zgoredis) Unsubscribe(ctx context.Context, chanName string) error {
   return r.res.Unsubscribe(ctx, chanName)
 }
 
-func (r *zgoredis) PUnsubscribe(ctx context.Context, patterns ...string) (chan radix.PubSubMessage, error) {
+func (r *zgoredis) PUnsubscribe(ctx context.Context, patterns ...string) error {
   return r.res.PUnsubscribe(ctx, patterns...)
 }
 
@@ -458,18 +457,18 @@ func (r *zgoredis) XAck(ctx context.Context, key string, groupName string, ids [
   return r.res.XAck(ctx, key, groupName, ids)
 }
 
-func (r *zgoredis) NewStreamReader(streams []string, group, consumer string) (radix.StreamReader, error) {
-  if len(streams) <= 0 {
-    return nil, errors.New("stream key 至少有一个")
-  }
-  m := make(map[string]*radix.StreamEntryID)
-  for _, v := range streams {
-    m[v] = nil
-  }
-  opts := radix.StreamReaderOpts{
-    Streams:  m,
-    Group:    group,
-    Consumer: consumer,
-  }
-  return r.res.NewStreamReader(opts), nil
-}
+//func (r *zgoredis) NewStreamReader(streams []string, group, consumer string) (radix.StreamReader, error) {
+//  if len(streams) <= 0 {
+//    return nil, errors.New("stream key 至少有一个")
+//  }
+//  m := make(map[string]*radix.StreamEntryID)
+//  for _, v := range streams {
+//    m[v] = nil
+//  }
+//  opts := radix.StreamReaderConfig{
+//    Streams:  m,
+//    Group:    group,
+//    Consumer: consumer,
+//  }
+//  return r.res.NewStreamReader(opts), nil
+//}
