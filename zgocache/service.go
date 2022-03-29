@@ -5,7 +5,6 @@ import (
   "errors"
   "fmt"
   "github.com/gitcpu-io/zgo/config"
-  "github.com/gitcpu-io/zgo/zgopika"
   "github.com/gitcpu-io/zgo/zgoredis"
   "github.com/gitcpu-io/zgo/zgoutils"
   "github.com/json-iterator/go"
@@ -60,7 +59,7 @@ func GetCache(start int, dbtype string, label string, rate int, tcType int) Cach
   if start == 1 {
     if dbtype == "pika" {
       // todo 找不到pika后异常处理
-      var service dbServicer = zgopika.Pika(label)
+      var service dbServicer = zgoredis.Redis(label)
       return &zgocache{
         start,
         label,

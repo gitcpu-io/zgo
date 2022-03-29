@@ -5,7 +5,7 @@ import (
   "fmt"
   "github.com/gitcpu-io/zgo/config"
   "github.com/json-iterator/go"
-  "github.com/mediocregopher/radix/v3"
+  "github.com/mediocregopher/radix/v4"
   "testing"
   "time"
 )
@@ -381,12 +381,10 @@ func LpushCheck(label string, client *zgoredis, i int) chan int {
 }
 
 func TestConnPool_GetConnChan(t *testing.T) {
-  customConnFunc := func(network, addr string) (radix.Conn, error) {
-    return radix.Dial(network, addr,
-      radix.DialTimeout(10*time.Second), radix.DialSelectDB(0), radix.DialAuthPass(""),
-    )
-  }
-  c, err := radix.NewPool("tcp", "127.0.0.1:6380", 10, radix.PoolConnFunc(customConnFunc))
+  c, err := (radix.PoolConfig{
+    Dialer: radix.Dialer{
+    },
+  }).New(context.TODO(),"tcp","127.0.0.1:6380")
   if err != nil {
     fmt.Println("redis ", err)
   }

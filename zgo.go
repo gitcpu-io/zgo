@@ -23,7 +23,6 @@ import (
   "github.com/gitcpu-io/zgo/zgomongo"
   "github.com/gitcpu-io/zgo/zgomysql"
   "github.com/gitcpu-io/zgo/zgonsq"
-  "github.com/gitcpu-io/zgo/zgopika"
   "github.com/gitcpu-io/zgo/zgopostgres"
   "github.com/gitcpu-io/zgo/zgorabbitmq"
   "github.com/gitcpu-io/zgo/zgoredis"
@@ -147,7 +146,7 @@ func Engine(opt *Options) error {
       //todo someting
       hsm := engine.getConfigByOption(config.Conf.Pika, opt.Pika)
       //fmt.Println(hsm)
-      in := <-zgopika.InitPika(hsm)
+      in := <-zgoredis.InitRedis(hsm)
       Pika = in
     }
     if len(opt.Nsq) > 0 { //>0表示用户要求使用nsq
@@ -331,7 +330,7 @@ var (
   Es                zgoes.Eser
   Grpc              zgogrpc.Grpcer
   Redis             zgoredis.Rediser
-  Pika              zgopika.Pikaer
+  Pika              zgoredis.Rediser
   Mysql             zgomysql.Mysqler
   Postgres          zgopostgres.Postgreser
   CK                zgoclickhouse.ClickHouseer

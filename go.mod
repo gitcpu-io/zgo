@@ -34,7 +34,7 @@ require (
 	github.com/jonboulle/clockwork v0.2.2 // indirect
 	github.com/json-iterator/go v1.1.12
 	github.com/kataras/iris/v12 v12.1.8
-	github.com/mediocregopher/radix/v3 v3.7.1
+	github.com/mediocregopher/radix/v4 v4.0.0
 	github.com/moul/http2curl v1.0.0 // indirect
 	github.com/neo4j/neo4j-go-driver v1.8.3
 	github.com/nsqio/go-nsq v1.0.8
@@ -55,7 +55,7 @@ require (
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0 // indirect
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
-	go.mongodb.org/mongo-driver v1.8.2
+	go.mongodb.org/mongo-driver v1.8.4
 	go.uber.org/zap v1.19.0 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
