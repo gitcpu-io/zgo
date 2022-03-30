@@ -2,8 +2,8 @@ package zgoetcd
 
 import (
   "fmt"
-  "github.com/coreos/etcd/clientv3"
   "github.com/gitcpu-io/zgo/config"
+  "go.etcd.io/etcd/client/v3"
   "math/rand"
   "sync"
   "time"

@@ -2,7 +2,6 @@ package zgo
 
 import (
   kafkaCluter "github.com/bsm/sarama-cluster"
-  "github.com/coreos/etcd/clientv3"
   "github.com/gitcpu-io/zgo/config"
   "github.com/gitcpu-io/zgo/zgoalipay"
   "github.com/gitcpu-io/zgo/zgocache"
@@ -34,6 +33,7 @@ import (
   "github.com/go-pg/pg/orm"
   "github.com/nsqio/go-nsq"
   "github.com/streadway/amqp"
+  "go.etcd.io/etcd/client/v3"
   "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -257,67 +257,67 @@ type (
   */
 
   /**
-  ########################其中Filter构造如下########################
-  filter = make(map[string]interface{})
-  //filter["_id"] = "5d81e00bada5f1088cb1d236"
-  filter["username"] = "朱大仙儿"	//可以是某字段或_id
-  filter["houses"] = map[string]interface{}{
-  	"$gte": 130,	//可以是其它$or、$not、$lt
-  }
+    ########################其中Filter构造如下########################
+    filter = make(map[string]interface{})
+    //filter["_id"] = "5d81e00bada5f1088cb1d236"
+    filter["username"] = "朱大仙儿"	//可以是某字段或_id
+    filter["houses"] = map[string]interface{}{
+    	"$gte": 130,	//可以是其它$or、$not、$lt
+    }
 
-  ########################其中ArrayFilters构造如下########################
-  var arrayFilters []map[string]interface{}
-  af := make(map[string]interface{})
-  //af["element"] = map[string]interface{}{
-  //	//这里的element对应下面update中的houses.$[element]，意思是数组中的每一项元素
-  //	"$gte": 134,
-  //}
-  af["elem.grade"] = map[string]interface{}{	//elem.grade和element二选一
-  	"$gte": 70,
-  }
-  af["elem.mean"] = map[string]interface{}{	//但elem中可以有多个elem.xx或elem.yy
-  	"$gte": 60,
-  }
-  arrayFilters = append(arrayFilters, af)
+    ########################其中ArrayFilters构造如下########################
+    var arrayFilters []map[string]interface{}
+    af := make(map[string]interface{})
+    //af["element"] = map[string]interface{}{
+    //	//这里的element对应下面update中的houses.$[element]，意思是数组中的每一项元素
+    //	"$gte": 134,
+    //}
+    af["elem.grade"] = map[string]interface{}{	//elem.grade和element二选一
+    	"$gte": 70,
+    }
+    af["elem.mean"] = map[string]interface{}{	//但elem中可以有多个elem.xx或elem.yy
+    	"$gte": 60,
+    }
+    arrayFilters = append(arrayFilters, af)
 
-  ########################其中Update构造如下########################
-  update := make(map[string]interface{})
-  update["$inc"] = map[string]interface{}{	******$inc******
-  	"age": 100,
-  	"money": -100,
-  	//可以有多个字段k,v;
-  }
-  update["$set"] = map[string]interface{}{	******$set******
-  	"address": "FindOneAndUpdate更新",
-  	"post": "100002",	//更新某字段
-  	//"houses.$[element]": 411001, //如果houses是纯数组:[xx,xx,xx]
-  	//子文档的$[element] 其中这个element可以自定义名字
-  	"grades.$[elem].mean": 100, //如果grades是对象数组:[{k:v,mean:v},{k:v,mean:v}]
-  	//子文档$[elem]
-  	//可以有多个字段k,v;但只能有一个顶级字段，意味着$[element]和$[ele]二选一
-  }
-  type Score struct {
-  	Grade int `json:"grade"`
-  	Mean int `json:"mean"`
-  }
-  update["$push"] = map[string]interface{}{	******$push******
-  	"scores": Score{	//已有一个数组，这里是一个个的push object对象进数组中
-  		Grade: 70,
-  		Mean:65,
-  	},
-  }
+    ########################其中Update构造如下########################
+    update := make(map[string]interface{})
+    update["$inc"] = map[string]interface{}{	******$inc******
+    	"age": 100,
+    	"money": -100,
+    	//可以有多个字段k,v;
+    }
+    update["$set"] = map[string]interface{}{	******$set******
+    	"address": "FindOneAndUpdate更新",
+    	"post": "100002",	//更新某字段
+    	//"houses.$[element]": 411001, //如果houses是纯数组:[xx,xx,xx]
+    	//子文档的$[element] 其中这个element可以自定义名字
+    	"grades.$[elem].mean": 100, //如果grades是对象数组:[{k:v,mean:v},{k:v,mean:v}]
+    	//子文档$[elem]
+    	//可以有多个字段k,v;但只能有一个顶级字段，意味着$[element]和$[ele]二选一
+    }
+    type Score struct {
+    	Grade int `json:"grade"`
+    	Mean int `json:"mean"`
+    }
+    update["$push"] = map[string]interface{}{	******$push******
+    	"scores": Score{	//已有一个数组，这里是一个个的push object对象进数组中
+    		Grade: 70,
+    		Mean:65,
+    	},
+    }
 
-  ########################其中Sort构造如下########################
-  sort := make(map[string]interface{})
-  sort["_id"] = 1 //1升序
-  sort["age] = -1	//-1降序
+    ########################其中Sort构造如下########################
+    sort := make(map[string]interface{})
+    sort["_id"] = 1 //1升序
+    sort["age] = -1	//-1降序
 
-  ########################其中Fields构造如下########################
-  //如果返回错误：Projection cannot have a mix of inclusion and exclusion; //要么全是1，要么全是0
-  fields := make(map[string]interface{})
-  fields["age"] = 1 	//显示返回age字段
-  fields["address"] = 1
-  fields["username"] = 1
+    ########################其中Fields构造如下########################
+    //如果返回错误：Projection cannot have a mix of inclusion and exclusion; //要么全是1，要么全是0
+    fields := make(map[string]interface{})
+    fields["age"] = 1 	//显示返回age字段
+    fields["address"] = 1
+    fields["username"] = 1
   */
 
 )

@@ -3,7 +3,6 @@ package zgo
 import (
   "errors"
   "fmt"
-  "github.com/coreos/etcd/mvcc/mvccpb"
   "github.com/gitcpu-io/zgo/config"
   "github.com/gitcpu-io/zgo/zgocache"
   "github.com/gitcpu-io/zgo/zgoclickhouse"
@@ -19,6 +18,7 @@ import (
   "github.com/gitcpu-io/zgo/zgorabbitmq"
   "github.com/gitcpu-io/zgo/zgoredis"
   "github.com/gitcpu-io/zgo/zgoutils"
+  "go.etcd.io/etcd/api/v3/mvccpb"
   "strings"
 )
 

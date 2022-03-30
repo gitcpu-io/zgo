@@ -2,27 +2,27 @@
 package zgoetcd
 
 import (
-  "github.com/coreos/etcd/clientv3"
   "github.com/gitcpu-io/zgo/comm"
   "github.com/gitcpu-io/zgo/config"
+  "go.etcd.io/etcd/client/v3"
   "sync"
 )
 
 var (
   currentLabels = make(map[string][]*config.ConnDetail) //用于存放label与具体Host:port的map
-  muLabel       = &sync.RWMutex{}                            //用于并发读写上面的map
+  muLabel       = &sync.RWMutex{}                       //用于并发读写上面的map
 )
 
 //Etcd 对外
 type Etcder interface {
   /*
-   label: 可选，如果使用者，用了2个或多个label时，需要调用这个函数，传入label
+     label: 可选，如果使用者，用了2个或多个label时，需要调用这个函数，传入label
   */
   // New 生产一条消息到Etcd
   New(label ...string) (*zgoetcd, error)
 
   /*
-   label: 可选，如果使用者，用了2个或多个label时，需要调用这个函数，传入label
+     label: 可选，如果使用者，用了2个或多个label时，需要调用这个函数，传入label
   */
   // GetConnChan 获取原生的生产者client，返回一个chan，使用者需要接收 <- chan
   GetConnChan(label ...string) (chan *clientv3.Client, error)

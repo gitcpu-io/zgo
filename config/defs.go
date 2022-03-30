@@ -2,8 +2,8 @@ package config
 
 import (
   "fmt"
-  "github.com/coreos/etcd/mvcc/mvccpb"
   "github.com/gitcpu-io/zgo/zgoutils"
+  "go.etcd.io/etcd/api/v3/mvccpb"
   "io/ioutil"
   "strings"
 )
@@ -15,7 +15,7 @@ const (
   Warn         //2
   Error        //3
 
-  Version       = "v1.0.5"      //zgo版本号
+  Version       = "v1.0.6"      //zgo版本号
   ProjectPrefix = "zgo/project" //读取ETCD配置时prefix
   FileStoreType = "local"       //文件存储类型
   FileStoreHome = "/tmp"        //文件存储目录
