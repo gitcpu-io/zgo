@@ -12,9 +12,9 @@ import (
   "context"
   "errors"
   "fmt"
-  "github.com/coreos/etcd/clientv3"
-  "github.com/coreos/etcd/mvcc/mvccpb"
   "github.com/gitcpu-io/zgo/zgoutils"
+  "go.etcd.io/etcd/api/v3/mvccpb"
+  "go.etcd.io/etcd/client/v3"
   "io/ioutil"
   "net/http"
   "reflect"
@@ -190,7 +190,7 @@ func (ec *EtcConfig) watchSecondPut(labelType string, key string, val []byte, pr
       return err
     }
 
-    if !reflect.DeepEqual(cm, preCm)  { //如果有变化
+    if !reflect.DeepEqual(cm, preCm) { //如果有变化
 
       var hsm = make(map[string]*CacheConfig)
 
