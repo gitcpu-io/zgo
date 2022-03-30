@@ -199,7 +199,7 @@ func (e *engine) getConfigByOption(lds []config.LabelDetail, us []string) map[st
     for _, v := range lds {
       if label == v.Key {
         var tmp []*config.ConnDetail
-        for k, _ := range v.Values {
+        for k := range v.Values {
           tmp = append(tmp, &v.Values[k])
         }
         m[v.Key] = tmp

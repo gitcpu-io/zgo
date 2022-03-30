@@ -100,7 +100,10 @@ func (bm BodyMap) MarshalXML(e *xml.Encoder, start xml.StartElement) (err error)
     default:
       value = ""
     }
-    e.Encode(xmlMapEntry{XMLName: xml.Name{Local: k}, Value: value})
+    err := e.Encode(xmlMapEntry{XMLName: xml.Name{Local: k}, Value: value})
+    if err != nil {
+      return err
+    }
   }
   return e.EncodeToken(start.End())
 }

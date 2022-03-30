@@ -6,7 +6,6 @@ import (
   "go.mongodb.org/mongo-driver/bson"
   "go.mongodb.org/mongo-driver/mongo"
   "go.mongodb.org/mongo-driver/mongo/options"
-  "sync"
 )
 
 //MgoResourcer 给service使用
@@ -39,7 +38,7 @@ type MgoResourcer interface {
 //内部结构体
 type MgoResource struct {
   label    string
-  mu       sync.RWMutex
+  //mu       sync.RWMutex
   connpool ConnPooler
 }
 

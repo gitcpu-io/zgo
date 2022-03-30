@@ -4,7 +4,6 @@ import (
   "github.com/gitcpu-io/zgo/config"
   "github.com/go-pg/pg"
   "github.com/go-pg/pg/orm"
-  "sync"
 )
 
 //PostgresResourcer 给service使用
@@ -16,7 +15,7 @@ type PostgresResourcer interface {
 //内部结构体
 type PostgresResource struct {
   label    string
-  mu       sync.RWMutex
+  //mu       sync.RWMutex
   connpool ConnPooler
 }
 

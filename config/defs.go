@@ -258,5 +258,5 @@ func welcome(info string) {
 ------------------------------
 `
   startMsg := "if you have any problem, please visit https://github.com/gitcpu-io/zgo"
-  fmt.Println(fmt.Sprintf("\n%s\n%s\n%s\n", welcome, info, startMsg))
+  fmt.Printf("\n%s\n%s\n%s\n", welcome, info, startMsg)
 }

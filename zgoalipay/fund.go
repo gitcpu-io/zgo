@@ -42,8 +42,7 @@ func (a *PayClient) FundTransUniTransfer(body zgoutils.BodyMap) (tradeRes *FundT
 //	文档地址：https://docs.open.alipay.com/api_28/alipay.fund.trans.common.query
 func (a *PayClient) FundTransCommonQuery(body zgoutils.BodyMap) (tradeRes *FundTransCommonQueryResponse, err error) {
   var bs []byte
-  var p1 string
-  p1 = body.Get("out_biz_no")
+  var p1 = body.Get("out_biz_no")
   if p1 == null {
     return nil, errors.New("out_biz_no are not allowed to be null at the same time")
   }

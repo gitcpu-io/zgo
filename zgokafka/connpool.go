@@ -114,11 +114,11 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
   for i := 0; i < hosts.ConnSize; i++ {
     //把并发创建的数据库的连接channel，放进channel中
     var hh []string
-    if strings.Index(hosts.Host, ",") != -1 {
+    if strings.Contains(hosts.Host, ",") {
       hp := strings.Split(hosts.Host, ",")
       var tmp []string
       for _, v := range hp {
-        if strings.Index(v, ":") == -1 {
+        if strings.Contains(v, ":") {
           v = fmt.Sprintf("%s:%d", v, hosts.Port)
           tmp = append(tmp, v)
         } else {
@@ -127,7 +127,7 @@ func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
       }
       hh = append(hh, tmp...)
     } else {
-      if strings.Index(hosts.Host, ":") != -1 {
+      if strings.Contains(hosts.Host, ":")  {
 
         hh = append(hh, hosts.Host) //此时有host:port
 
@@ -193,13 +193,13 @@ func (cp *connPool) createClient(address []string) chan *sarama.AsyncProducer {
         }
       }
     }(p)
-    go func(p sarama.AsyncProducer) {
-      for _ = range p.Successes() {
-        //val, _ := v.Value.Encode()
-        //fmt.Println(v.Offset, v.Partition, string(val))
-      }
-
-    }(p)
+    //go func(p sarama.AsyncProducer) {
+    //  for _ = range p.Successes() {
+    //    //val, _ := v.Value.Encode()
+    //    //fmt.Println(v.Offset, v.Partition, string(val))
+    //  }
+    //
+    //}(p)
     out <- &p
   }()
   return out

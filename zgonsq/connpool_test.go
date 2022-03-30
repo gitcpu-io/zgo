@@ -14,7 +14,6 @@ const (
 )
 
 func TestProducer(t *testing.T) {
-  hsm := make(map[string][]*config.ConnDetail)
   cd_bj := config.ConnDetail{
     C:        "北京主库-----nsq",
     Host:     "localhost",
@@ -41,7 +40,7 @@ func TestProducer(t *testing.T) {
   s1 = append(s1, &cd_bj, &cd_bj2)
   //s1 = append(s1, &cd_bj2)
   s2 = append(s2, &cd_sh)
-  hsm = map[string][]*config.ConnDetail{
+  hsm := map[string][]*config.ConnDetail{
     label_bj: s1,
     label_sh: s2,
   }
@@ -52,6 +51,9 @@ func TestProducer(t *testing.T) {
   time.Sleep(4 * time.Second)
 
   clientBj, err := GetNsq(label_bj)
+  if err != nil {
+    panic(err)
+  }
   clientSh, err := GetNsq(label_sh)
   if err != nil {
     panic(err)
@@ -103,8 +105,7 @@ func TestProducer(t *testing.T) {
 
   for {
     if len(count) == l {
-      var timeLen time.Duration
-      timeLen = time.Now().Sub(stime)
+      var timeLen = time.Since(stime)
 
       fmt.Printf("总消耗时间：%s, 成功：%d, 总共开出来的goroutine：%d\n", timeLen, len(count), len(total))
       break
@@ -113,6 +114,7 @@ func TestProducer(t *testing.T) {
     select {
     case <-time.Tick(time.Duration(1000 * time.Millisecond)):
       fmt.Println("处理进度每1000毫秒", len(count))
+    default:
 
     }
   }

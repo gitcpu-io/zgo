@@ -7,7 +7,7 @@ import (
 )
 
 // getCurrentLabel 着重判断输入的label与zgo engine 在内存中的用户态的label
-func GetCurrentLabel(label []string, mu sync.RWMutex, cm map[string][]*config.ConnDetail) (string, error) {
+func GetCurrentLabel(label []string, mu *sync.RWMutex, cm map[string][]*config.ConnDetail) (string, error) {
   mu.RLock()
   defer mu.RUnlock()
 
@@ -19,7 +19,7 @@ func GetCurrentLabel(label []string, mu sync.RWMutex, cm map[string][]*config.Co
     if lcl >= 1 {
       //自动返回默认的第一个
       l := ""
-      for k, _ := range cm {
+      for k := range cm {
         l = k
         break
       }
@@ -39,7 +39,7 @@ func GetCurrentLabel(label []string, mu sync.RWMutex, cm map[string][]*config.Co
 }
 
 // DelCurrentLabel 暂时不用
-func DelCurrentLabel(label string, mu sync.RWMutex, cm map[string][]*config.ConnDetail) error {
+func DelCurrentLabel(label string, mu *sync.RWMutex, cm map[string][]*config.ConnDetail) error {
   mu.Lock()
   defer mu.Unlock()
 

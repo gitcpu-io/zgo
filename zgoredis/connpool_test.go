@@ -18,7 +18,6 @@ const (
 )
 
 func TestRedisGet(t *testing.T) {
-  hsm := make(map[string][]*config.ConnDetail)
   cd_bj := config.ConnDetail{
     C:        "北京主库-----redis1",
     Host:     "localhost",
@@ -53,7 +52,7 @@ func TestRedisGet(t *testing.T) {
   var s2 []*config.ConnDetail
   s1 = append(s1, &cd_bj, &cd_bj2)
   s2 = append(s2, &cd_sh)
-  hsm = map[string][]*config.ConnDetail{
+  hsm := map[string][]*config.ConnDetail{
     label_bj: s1,
     label_sh: s2,
   }
@@ -61,6 +60,9 @@ func TestRedisGet(t *testing.T) {
   InitRedis(hsm) //测试时表示使用redis，在origin中使用一次
 
   clientLocal, err := GetRedis(label_bj)
+  if err != nil {
+    panic(err)
+  }
   clientSpider, err := GetRedis(label_sh)
 
   fmt.Println(clientLocal)
@@ -174,7 +176,8 @@ func TestRedisGet(t *testing.T) {
 
   //LpushCheck(label_bj, clientLocal, 0)
   //
-  //getSet(label_sh, clientSpider, 0)
+  getSet(label_sh, clientSpider, 0)
+  hetSet(label_sh, clientSpider, 0)
 
   var replyChan = make(chan int)
   var countChan = make(chan int)
@@ -189,8 +192,8 @@ func TestRedisGet(t *testing.T) {
       countChan <- i //统计开出去的goroutine
       if i%2 == 0 {
         //ch := getSet(label_bj, clientLocal, i)
-        //ch := setSet(label_bj, clientLocal, i)
-        ch := hetSet(label_bj, clientLocal, i)
+        ch := setSet(label_bj, clientLocal, i)
+        //ch := hetSet(label_bj, clientLocal, i)
         reply := <-ch
         replyChan <- reply
 
@@ -226,8 +229,7 @@ func TestRedisGet(t *testing.T) {
 
   for {
     if len(count) == l {
-      var timeLen time.Duration
-      timeLen = time.Now().Sub(stime)
+      var timeLen = time.Since(stime)
 
       fmt.Printf("总消耗时间：%s, 成功：%d, 总共开出来的goroutine：%d\n", timeLen, len(count), len(total))
       break
@@ -236,6 +238,7 @@ func TestRedisGet(t *testing.T) {
     select {
     case <-time.Tick(time.Duration(1000 * time.Millisecond)):
       fmt.Println("处理进度每1000毫秒", len(count))
+    default:
 
     }
   }
@@ -327,32 +330,32 @@ func getSet(label string, client *zgoredis, i int) chan int {
   return out
 }
 
-func hgetSet(label string, client *zgoredis, i int) chan int {
-  //还需要一个上下文用来控制开出去的goroutine是否超时
-  ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-  defer cancel()
-
-  key := "foo_china"
-
-  name := fmt.Sprintf("foo_%d", i)
-
-  result, err := client.Hget(ctx, key, name)
-  if err != nil {
-    panic(err)
-  }
-  out := make(chan int, 1)
-  select {
-  case <-ctx.Done():
-    fmt.Println("超时")
-    out <- 10001
-    return out
-  default:
-    fmt.Println(result)
-    out <- 1
-  }
-
-  return out
-}
+//func hgetSet(label string, client *zgoredis, i int) chan int {
+//  //还需要一个上下文用来控制开出去的goroutine是否超时
+//  ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+//  defer cancel()
+//
+//  key := "foo_china"
+//
+//  name := fmt.Sprintf("foo_%d", i)
+//
+//  result, err := client.Hget(ctx, key, name)
+//  if err != nil {
+//    panic(err)
+//  }
+//  out := make(chan int, 1)
+//  select {
+//  case <-ctx.Done():
+//    fmt.Println("超时")
+//    out <- 10001
+//    return out
+//  default:
+//    fmt.Println(result)
+//    out <- 1
+//  }
+//
+//  return out
+//}
 
 func LpushCheck(label string, client *zgoredis, i int) chan int {
   //还需要一个上下文用来控制开出去的goroutine是否超时

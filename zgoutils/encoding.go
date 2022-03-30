@@ -24,7 +24,7 @@ func newBytesBox(mm map[string]interface{}) *bytesBox {
   keys := make([]string, len(mm))
   var i int
 
-  for k, _ := range mm {
+  for k := range mm {
     keys[i] = k
     i++
   }
@@ -53,35 +53,91 @@ func sliceEncoder(se []interface{}) (string, error) {
   var js string
   bb.write("[")
   for i, v := range se {
-    switch v.(type) {
+    switch value := v.(type) {
     case bool:
-      boolEncoder(bb, v.(bool))
+      val, ok := v.(bool)
+      if !ok {
+        continue
+      }
+      boolEncoder(bb, val)
     case string:
-      stringEncoder(bb, v.(string))
+      val, ok := v.(string)
+      if !ok {
+        continue
+      }
+      stringEncoder(bb, val)
     case int8:
-      intEncoder(bb, int(v.(int8)))
+      val, ok := v.(int8)
+      if !ok {
+        continue
+      }
+      intEncoder(bb, int(val))
     case int32:
-      intEncoder(bb, int(v.(int32)))
+      val, ok := v.(int32)
+      if !ok {
+        continue
+      }
+      intEncoder(bb, int(val))
     case int64:
-      intEncoder(bb, int(v.(int64)))
+      val, ok := v.(int64)
+      if !ok {
+        continue
+      }
+      intEncoder(bb, int(val))
     case int:
-      intEncoder(bb, v.(int))
+      val, ok := v.(int)
+      if !ok {
+        continue
+      }
+      intEncoder(bb, val)
     case float32:
-      floatEncoder(bb, float64(v.(float32)))
+      val, ok := v.(float32)
+      if !ok {
+        continue
+      }
+      floatEncoder(bb, float64(val))
     case float64:
-      floatEncoder(bb, v.(float64))
+      val, ok := v.(float64)
+      if !ok {
+        continue
+      }
+      floatEncoder(bb, float64(val))
     case []string:
-      sliceStringEncoder(bb, v.([]string))
+      val, ok := v.([]string)
+      if !ok {
+        continue
+      }
+      sliceStringEncoder(bb, val)
     case []int:
-      sliceIntEncoder(bb, v.([]int))
+      val, ok := v.([]int)
+      if !ok {
+        continue
+      }
+      sliceIntEncoder(bb, val)
     case []byte:
-      stringEncoder(bb, string(v.([]byte)))
+      val, ok := v.([]byte)
+      if !ok {
+        continue
+      }
+      stringEncoder(bb, string(val))
     case []uint:
-      sliceUintEncoder(bb, v.([]uint))
+      val, ok := v.([]uint)
+      if !ok {
+        continue
+      }
+      sliceUintEncoder(bb, val)
     case []float64:
-      sliceFloat64Encoder(bb, v.([]float64))
+      val, ok := v.([]float64)
+      if !ok {
+        continue
+      }
+      sliceFloat64Encoder(bb, val)
     case []float32:
-      sliceFloat32Encoder(bb, v.([]float32))
+      val, ok := v.([]float32)
+      if !ok {
+        continue
+      }
+      sliceFloat32Encoder(bb, val)
 
     case map[string]interface{}:
       js, e = mapEncoder(v.(map[string]interface{}))
@@ -103,6 +159,7 @@ func sliceEncoder(se []interface{}) (string, error) {
       if v == nil {
         bb.write("null")
       } else {
+        fmt.Println(value)
         return "", fmt.Errorf("Json not support this type %v", reflect.TypeOf(v))
       }
     }
@@ -129,7 +186,7 @@ func mapEncoder(mm map[string]interface{}) (string, error) {
       bb.write(",")
     }
     bb.writeKey(k)
-    switch v.(type) {
+    switch val := v.(type) {
     case bool:
       boolEncoder(bb, v.(bool))
     case string:
@@ -158,16 +215,13 @@ func mapEncoder(mm map[string]interface{}) (string, error) {
       sliceFloat64Encoder(bb, v.([]float64))
     case []float32:
       sliceFloat32Encoder(bb, v.([]float32))
-
     case map[string]interface{}:
       js, e = mapEncoder(v.(map[string]interface{}))
-
       if e == nil {
         bb.write(js)
       } else {
         return "", e
       }
-
     case []interface{}:
       js, e = sliceEncoder(v.([]interface{}))
       if e == nil {
@@ -180,6 +234,7 @@ func mapEncoder(mm map[string]interface{}) (string, error) {
       if v == nil {
         bb.write("null")
       } else {
+        fmt.Println(val)
         return "", fmt.Errorf("Json not support this type %v", reflect.TypeOf(v))
       }
     }
@@ -216,8 +271,8 @@ func floatEncoder(bb *bytesBox, value float64) {
 
 func sliceStringEncoder(bb *bytesBox, value []string) {
   bb.write("[")
-  var i, n = 0, len(value)
-  for i = 0; i < n; i++ {
+  var  n = len(value)
+  for i := 0; i < n; i++ {
     if i > 0 {
       bb.write(",")
     }
@@ -228,8 +283,8 @@ func sliceStringEncoder(bb *bytesBox, value []string) {
 
 func sliceIntEncoder(bb *bytesBox, value []int) {
   bb.write("[")
-  var i, n = 0, len(value)
-  for i = 0; i < n; i++ {
+  var n = len(value)
+  for i := 0; i < n; i++ {
     if i > 0 {
       bb.write(",")
     }
@@ -240,8 +295,8 @@ func sliceIntEncoder(bb *bytesBox, value []int) {
 
 func sliceUintEncoder(bb *bytesBox, value []uint) {
   bb.write("[")
-  var i, n = 0, len(value)
-  for i = 0; i < n; i++ {
+  var n = len(value)
+  for i := 0; i < n; i++ {
     if i > 0 {
       bb.write(",")
     }
@@ -252,8 +307,8 @@ func sliceUintEncoder(bb *bytesBox, value []uint) {
 
 func sliceFloat64Encoder(bb *bytesBox, value []float64) {
   bb.write("[")
-  var i, n = 0, len(value)
-  for i = 0; i < n; i++ {
+  var n = len(value)
+  for i := 0; i < n; i++ {
     if i > 0 {
       bb.write(",")
     }
@@ -264,8 +319,8 @@ func sliceFloat64Encoder(bb *bytesBox, value []float64) {
 
 func sliceFloat32Encoder(bb *bytesBox, value []float32) {
   bb.write("[")
-  var i, n = 0, len(value)
-  for i = 0; i < n; i++ {
+  var n = len(value)
+  for i := 0; i < n; i++ {
     if i > 0 {
       bb.write(",")
     }

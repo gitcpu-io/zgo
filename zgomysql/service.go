@@ -12,7 +12,7 @@ import (
 
 var currentLabels = make(map[string][]*config.ConnDetail)
 
-var muLabel sync.RWMutex
+var muLabel *sync.RWMutex
 
 //Mongo 对外
 type Mysqler interface {
@@ -92,7 +92,7 @@ func InitMysql(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgo
 
   //自动为变量初始化对象
   initLabel := ""
-  for k, _ := range hsm {
+  for k := range hsm {
     if k != "" {
       initLabel = k
       break

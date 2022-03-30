@@ -12,7 +12,7 @@ import (
 
 var (
   currentLabels = make(map[string][]*config.ConnDetail)
-  muLabel       sync.RWMutex
+  muLabel       *sync.RWMutex
 )
 
 //Kafka 对外
@@ -66,7 +66,7 @@ func InitKafka(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgo
 
   //自动为变量初始化对象
   initLabel := ""
-  for k, _ := range hsm {
+  for k := range hsm {
     if k != "" {
       initLabel = k
       break

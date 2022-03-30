@@ -3,7 +3,6 @@ package zgoneo4j
 import (
   "github.com/gitcpu-io/zgo/config"
   "github.com/neo4j/neo4j-go-driver/neo4j"
-  "sync"
 )
 
 //Neo4jResourcer 给service使用
@@ -14,7 +13,7 @@ type Neo4jResourcer interface {
 //内部结构体
 type Neo4jResource struct {
   label    string
-  mu       sync.RWMutex
+  //mu       sync.RWMutex
   connpool ConnPooler
 }
 

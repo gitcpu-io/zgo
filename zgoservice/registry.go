@@ -52,7 +52,7 @@ type Service struct {
   leaseResp     *clientv3.LeaseGrantResponse
   cancelfunc    func()
   keepAliveChan <-chan *clientv3.LeaseKeepAliveResponse
-  key           string
+  //key           string
 }
 
 func NewService(ttl int64, addr []string) (RegistryAndDiscover, error) {
@@ -99,6 +99,7 @@ func (service *Service) setLease(ttl int64) error {
 
   //设置续租
   ctx, cancelFunc := context.WithCancel(context.TODO())
+  defer cancelFunc()
 
   leaseRespChan, err := lease.KeepAlive(ctx, leaseResp.ID)
 
@@ -115,23 +116,20 @@ func (service *Service) setLease(ttl int64) error {
 
 //监听 续租情况
 func (service *Service) ListenLeaseRespChan() {
-  for {
-    select {
-    case leaseKeepResp := <-service.keepAliveChan:
-      if leaseKeepResp == nil {
-        //val := fmt.Sprintf("%s:%s:%s", service.SvcHost, service.SvcHttpPort, service.SvcGrpcPort)
-        //ek := zgocrypto.New().Md5(val)
-        //key := fmt.Sprintf("%s/%s/%s", zgoServiceFrefix, service.name, ek)
-        //service.delServiceList(service.name, key, val)
+  for leaseKeepResp := range service.keepAliveChan {
+    if leaseKeepResp == nil {
+      //val := fmt.Sprintf("%s:%s:%s", service.SvcHost, service.SvcHttpPort, service.SvcGrpcPort)
+      //ek := zgocrypto.New().Md5(val)
+      //key := fmt.Sprintf("%s/%s/%s", zgoServiceFrefix, service.name, ek)
+      //service.delServiceList(service.name, key, val)
 
-        //fmt.Printf("\n%s，Service is Terminated\n", service.name)
+      //fmt.Printf("\n%s，Service is Terminated\n", service.name)
 
-        //return
+      //return
 
-      } else {
-        //fmt.Printf("续租成功\n")
-        time.Sleep(500 * time.Millisecond)
-      }
+    } else {
+      //fmt.Printf("续租成功\n")
+      time.Sleep(500 * time.Millisecond)
     }
   }
 }
@@ -194,7 +192,13 @@ func (service *Service) Discovery(serviceNames []string) error {
   for _, serviceName := range serviceNames {
     wg.Add(1)
     key := fmt.Sprintf("%s/%s", zgoServiceFrefix, serviceName)
-    go service.getService(key, wg)
+    go func() {
+      _, err := service.getService(key, wg)
+      if err != nil {
+        fmt.Println(err)
+        return
+      }
+    }()
   }
   wg.Wait()
   return nil

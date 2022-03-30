@@ -163,7 +163,7 @@ type Utilser interface {
   GetAnyDayZeroUnixTimestamp(t int) int64
 
   CreateSign(str string) string
-  Addslashes(str string) string
+  //Addslashes(str string) string
   Stripslashes(str string) string
   Ip4toInt(ip string) int64
   InttoIp4(ip int64) string
@@ -238,7 +238,7 @@ func (u *utils) ToString(data interface{}) (string, error) {
     data = structs.Map(data)
   }
   var s string
-  switch data.(type) {
+  switch val := data.(type) {
   case string:
     s = data.(string)
   case []string:
@@ -254,6 +254,7 @@ func (u *utils) ToString(data interface{}) (string, error) {
       s += fmt.Sprintf("%v: %v\n", k, v)
     }
   default:
+    fmt.Println(val)
     return "", errors.New("Unsupport data")
   }
   return s, nil
@@ -278,8 +279,7 @@ func (u *utils) IsBankCard(n int64) (ok bool, err error) {
       sum += now
       continue
     }
-    var _i int
-    _i = now * 2
+    var _i = now * 2
     sum += _i / 10
     sum += _i % 10
   }
@@ -304,8 +304,7 @@ func (u *utils) IsChineseID(s string) (ok bool, err error) {
     if err != nil {
       return
     }
-    var w int
-    w = int(math.Pow(2, float64(i+1-1))) % 11
+    var w = int(math.Pow(2, float64(i+1-1))) % 11
     sum += now * w
   }
   v := (12 - (sum % 11)) % 11
@@ -404,14 +403,22 @@ func (u *utils) StringToMap(str string) map[string]interface{} {
 func (u *utils) StructToMap(input interface{}) map[string]interface{} {
   var m map[string]interface{}
   b, _ := jsonIterator.Marshal(input)
-  jsonIterator.Unmarshal(b, &m)
+  err := jsonIterator.Unmarshal(b, &m)
+  if err != nil {
+    fmt.Println(err)
+    return nil
+  }
   return m
 }
 
 //MapToStruct map[string]interface{}转结构体
 func (u *utils) MapToStruct(input interface{}, out interface{}) {
   b, _ := jsonIterator.Marshal(input)
-  jsonIterator.Unmarshal(b, &out)
+  err := jsonIterator.Unmarshal(b, &out)
+  if err != nil {
+    fmt.Println(err)
+    return
+  }
 }
 
 // GrpcServiceMethodConverts converts a gRPC method to a Go method
@@ -928,20 +935,20 @@ func (u *utils) CreateSign(str string) string {
 // 单引号（'）
 // 双引号（"）
 // 反斜杠（\）
-func (u *utils) Addslashes(str string) string {
-  tmpRune := []rune{}
-  strRune := []rune(str)
-  for _, ch := range strRune {
-    switch ch {
-    case []rune{'\\'}[0], []rune{'"'}[0], []rune{'\''}[0]:
-      tmpRune = append(tmpRune, []rune{'\\'}[0])
-      tmpRune = append(tmpRune, ch)
-    default:
-      tmpRune = append(tmpRune, ch)
-    }
-  }
-  return string(tmpRune)
-}
+//func (u *utils) Addslashes(str string) string {
+//  tmpRune := []rune{}
+//  strRune := []rune(str)
+//  for _, ch := range strRune {
+//    switch ch {
+//    case []rune{'\\'}[0], []rune{'"'}[0], []rune{'\''}[0]:
+//      tmpRune = append(tmpRune, []rune{'\\'}[0])
+//      tmpRune = append(tmpRune, ch)
+//    default:
+//      tmpRune = append(tmpRune, ch)
+//    }
+//  }
+//  return string(tmpRune)
+//}
 
 // stripslashes() 函数删除由 addslashes() 函数添加的反斜杠。
 func (u *utils) Stripslashes(str string) string {
@@ -987,7 +994,8 @@ func (u *utils) InttoIp4(ip int64) string {
 func (u *utils) NextDayDuration() time.Duration {
   year, month, day := time.Now().Add(time.Hour * 24).Date()
   next := time.Date(year, month, day, 0, 0, 0, 0, SysTimeLocation)
-  return next.Sub(time.Now())
+  return time.Until(next.Local())
+  //return next.Sub(time.Now())
 }
 
 // 从接口类型安全获取到int64
@@ -995,7 +1003,7 @@ func (u *utils) GetInt64(i interface{}, d int64) int64 {
   if i == nil {
     return d
   }
-  switch i.(type) {
+  switch val := i.(type) {
   case string:
     num, err := strconv.Atoi(i.(string))
     if err != nil {
@@ -1039,6 +1047,9 @@ func (u *utils) GetInt64(i interface{}, d int64) int64 {
     return int64(i.(float32))
   case float64:
     return int64(i.(float64))
+  default:
+    fmt.Println(val)
+    return 0
   }
   return d
 }
@@ -1048,13 +1059,15 @@ func (u *utils) GetString(str interface{}, d string) string {
   if str == nil {
     return d
   }
-  switch str.(type) {
+  switch val := str.(type) {
   case string:
     return str.(string)
   case []byte:
     return string(str.([]byte))
+  default:
+    fmt.Println(val)
+    return ""
   }
-  return fmt.Sprintf("%v", str)
 }
 
 // 从map中得到指定的key

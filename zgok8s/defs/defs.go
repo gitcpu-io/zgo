@@ -31,7 +31,7 @@ func oneOfMap(m map[string]*K8sInfo, keys []string, curhost string) string {
   } else if curhost != "" {
     one = curhost
   } else {
-    for key, _ := range m {
+    for key := range m {
       if key != "" {
         one = key
         break
@@ -63,7 +63,6 @@ func (k *K8s) SetContext(host string, config *rest.Config) {
   }
   K8sContextMap[host].Config = config
   CurrentContext = host //设置当前的host
-  return
 }
 
 func (k *K8s) GetClientSet(host ...string) *kubernetes.Clientset {
@@ -80,7 +79,6 @@ func (k *K8s) SetClientSet(host string, cs *kubernetes.Clientset) {
     K8sContextMap[host] = &K8sInfo{}
   }
   K8sContextMap[host].ClientSet = cs
-  return
 }
 
 func (k *K8s) ServerVersion(host ...string) (*version.Info, error) {

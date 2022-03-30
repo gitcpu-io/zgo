@@ -345,7 +345,7 @@ func (mr *mysqlResource) Raw(ctx context.Context, gormPool *gorm.DB, result inte
 func (mr *mysqlResource) validate(args map[string]interface{}, fields ...string) error {
   for _, v := range fields {
     if _, ok := args[v]; !ok {
-      return errors.New(fmt.Sprintf("参数错误，%s 不存在", v))
+      return fmt.Errorf("参数错误，%s 不存在", v)
     }
   }
   return nil
@@ -353,8 +353,7 @@ func (mr *mysqlResource) validate(args map[string]interface{}, fields ...string)
 func makeResultReceiver(length int) []interface{} {
   result := make([]interface{}, 0, length)
   for i := 0; i < length; i++ {
-    var current interface{}
-    current = struct{}{}
+    var current = struct{}{}
     result = append(result, &current)
   }
   return result

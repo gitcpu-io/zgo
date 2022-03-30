@@ -2,7 +2,6 @@ package zgoredis
 
 import (
   "context"
-  "errors"
   "fmt"
   "github.com/gitcpu-io/zgo/config"
   "github.com/mediocregopher/radix/v4"
@@ -208,9 +207,8 @@ func (cp *connPool) createClient(host string, port int, db int, poolsize int, pa
   out2 := make(chan *radix.Conn)
   if cluster == 1 {
     if db > 0 {
-      err := errors.New(fmt.Sprintf("集群模式下db库不能是%d，只能是0，主机：%s\n", db, host))
+      err := fmt.Errorf("集群模式下db库不能是%d，只能是0，主机：%s\n", db, host)
       panic(err)
-      return out, out2
     }
   }
   go func() {
@@ -223,10 +221,10 @@ func (cp *connPool) createClient(host string, port int, db int, poolsize int, pa
 
     if cluster == 0 { //单机
 
-      if strings.Index(host, ",") != -1 {
+      if strings.Contains(host, ",")  {
         host = strings.Split(host, ",")[0]
       }
-      if strings.Index(host, ":") != -1 {
+      if strings.Contains(host, ":")  {
         host = strings.Split(host, ":")[0]
       }
 
@@ -246,7 +244,7 @@ func (cp *connPool) createClient(host string, port int, db int, poolsize int, pa
       out <- &c
 
     } else if cluster == 1 { //集群模式
-
+      fmt.Println("这是集群模式TODO")
     //  var address []string
     //  arr := strings.Split(host, ",")
     //  for _, v := range arr {
@@ -278,10 +276,10 @@ func (cp *connPool) createClient(host string, port int, db int, poolsize int, pa
   go func() {
     var address string
     if cluster == 0 {
-      if strings.Index(host, ",") != -1 {
+      if strings.Contains(host, ",") {
         host = strings.Split(host, ",")[0]
       }
-      if strings.Index(host, ":") != -1 {
+      if strings.Contains(host, ":") {
         host = strings.Split(host, ":")[0]
       }
       address = fmt.Sprintf("%s:%d", host, port)
@@ -290,12 +288,12 @@ func (cp *connPool) createClient(host string, port int, db int, poolsize int, pa
       arr := strings.Split(host, ",")
       for _, v := range arr {
         tmp := v
-        if strings.Index(tmp, ":") == -1 {
+        if strings.Contains(tmp, ":") {
           tmp = fmt.Sprintf("%s:%d", tmp, port)
         }
         address = tmp
       }
-      if strings.Index(address, ":") == -1 {
+      if strings.Contains(address, ":") {
         address = fmt.Sprintf("%s:%d", host, port)
       }
     }

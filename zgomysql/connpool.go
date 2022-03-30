@@ -62,7 +62,7 @@ func (cp *connPool) setConnPoolToChan(v []*config.ConnDetail) {
       fmt.Println("创建mysql链接池失败：", cp.label)
       log.Fatalf(err.Error())
     } else {
-      key := fmt.Sprintf("%s", cp.label)
+      key := cp.label
       fmt.Printf("init Mysql to Pool ... [%s] Host:%s, Port:%d, MaxOpenConn:%d, MaxIdleSize:%d, T:%s, LogMode:%d, %s\n",
         cp.label, v[i].Host, v[i].Port, v[i].MaxOpenConn, v[i].MaxIdleSize, v[i].T, v[i].LogMode, v[i].C)
       if value, ok := connPoolMap[v[i].T]; ok { // 是否能获取到2级Map

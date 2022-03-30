@@ -10,7 +10,7 @@ import (
 
 var (
   currentLabels = make(map[string][]*config.ConnDetail) //用于存放label与具体Host:port的map
-  muLabel       sync.RWMutex                            //用于并发读写上面的map
+  muLabel       *sync.RWMutex                            //用于并发读写上面的map
 )
 
 //ClickHouse 对外
@@ -71,7 +71,7 @@ func InitClickHouse(hsmIn map[string][]*config.ConnDetail, label ...string) chan
 
   //自动为变量初始化对象
   initLabel := ""
-  for k, _ := range hsm {
+  for k := range hsm {
     if k != "" {
       initLabel = k
       break

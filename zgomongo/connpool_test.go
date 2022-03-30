@@ -5,23 +5,21 @@ import (
   "fmt"
   "github.com/gitcpu-io/zgo/config"
   "github.com/globalsign/mgo/bson"
-  "github.com/json-iterator/go"
   "math/rand"
   "testing"
   "time"
 )
 
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
+//var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
   label_bj = "mongo_label_bj"
-  //label_sh = "mongo_label_sh"
+  label_sh = "mongo_label_sh"
 )
 
 func TestMongoGet(t *testing.T) {
 
   //-------------test for start engine---------
-  hsm := make(map[string][]*config.ConnDetail)
   cd_bj := config.ConnDetail{
     C:        "北京主库-----mongo1",
     Host:     "localhost",
@@ -56,7 +54,7 @@ func TestMongoGet(t *testing.T) {
   //var s2 []*config.ConnDetail
   s1 = append(s1, &cd_bj, &cd_bj2)
   //s2 = append(s2, &cd_sh)
-  hsm = map[string][]*config.ConnDetail{
+  hsm := map[string][]*config.ConnDetail{
     label_bj: s1,
     //label_sh: s2,
   }
@@ -75,34 +73,34 @@ func TestMongoGet(t *testing.T) {
 
   fmt.Println("Before ...")
   insertData(label_bj, clientBj, 0)
-  //findOneData(label_sh, clientSh, 0)
+  findOneData(label_bj, clientBj, 0)
   //CountDocData(label_sh, clientSh, 0)
   fmt.Println("After ...")
-  //var replyChan = make(chan int)
-  //var countChan = make(chan int)
-  //l := 10000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
+  var replyChan = make(chan int)
+  var countChan = make(chan int)
+  l := 10000 //暴力测试50000个消息，时间10秒，本本的并发每秒5000
   //
   //count := []int{}
   //total := []int{}
   //stime := time.Now()
   //
-  //for i := 0; i < l; i++ {
-  //	go func(i int) {
-  //		countChan <- i //统计开出去的goroutine
-  //		if i%2 == 0 {
-  //			ch := getMongo(label_sh, clientBj, i)
-  //			//ch := createMongo(label_sh, clientBj, i)
-  //			reply := <-ch
-  //			replyChan <- reply
-  //
-  //		} else {
-  //			//ch := getMongo(label_bj,clientSh,i)
-  //			ch := createMongo(label_bj, clientSh, i)
-  //			reply := <-ch
-  //			replyChan <- reply
-  //		}
-  //	}(i)
-  //}
+  for i := 0; i < l; i++ {
+  	go func(i int) {
+  		countChan <- i //统计开出去的goroutine
+  		if i%2 == 0 {
+  			ch := getMongo(label_sh, clientBj, i)
+  			//ch := createMongo(label_sh, clientBj, i)
+  			reply := <-ch
+  			replyChan <- reply
+
+  		} else {
+  			//ch := getMongo(label_bj,clientSh,i)
+  			ch := createMongo(label_bj, clientBj, i)
+  			reply := <-ch
+  			replyChan <- reply
+  		}
+  	}(i)
+  }
   //
   //go func() {
   //	for v := range replyChan {

@@ -15,7 +15,6 @@ const (
 )
 
 func TestEsSearch(t *testing.T) {
-  hsm := make(map[string][]*config.ConnDetail)
   cd_bj := config.ConnDetail{
     C:        "北京主库-----es1",
     Host:     "http://101.201.28.195",
@@ -41,7 +40,7 @@ func TestEsSearch(t *testing.T) {
   var s2 []*config.ConnDetail
   s1 = append(s1, &cd_bj, &cd_bj2)
   s2 = append(s2, &cd_sh)
-  hsm = map[string][]*config.ConnDetail{
+  hsm := map[string][]*config.ConnDetail{
     label_sell: s1,
     label_rent: s2,
   }
@@ -99,8 +98,7 @@ func TestEsSearch(t *testing.T) {
 
   for {
     if len(count) == l {
-      var timeLen time.Duration
-      timeLen = time.Now().Sub(stime)
+      var timeLen  = time.Since(stime)
 
       fmt.Printf("总消耗时间：%s, 成功：%d, 总共开出来的goroutine：%d\n", timeLen, len(count), len(total))
       break
@@ -109,6 +107,7 @@ func TestEsSearch(t *testing.T) {
     select {
     case <-time.Tick(time.Duration(1000 * time.Millisecond)):
       fmt.Println("处理进度每1000毫秒", len(count))
+    default:
 
     }
   }

@@ -3,7 +3,6 @@ package zgoclickhouse
 import (
   "database/sql"
   "github.com/gitcpu-io/zgo/config"
-  "sync"
 )
 
 //ClickHouseResourcer 给service使用
@@ -14,7 +13,7 @@ type ClickHouseResourcer interface {
 //内部结构体
 type ClickHouseResource struct {
   label    string
-  mu       sync.RWMutex
+  //mu       sync.RWMutex
   connpool ConnPooler
 }
 

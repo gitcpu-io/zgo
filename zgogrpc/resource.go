@@ -14,7 +14,7 @@ type GrpcResourcer interface {
   Run(ctx context.Context, s *grpc.Server, port string) (string, error)
 }
 type grpcResource struct {
-  res GrpcResourcer //使用resource另外的一个接口
+  //res GrpcResourcer //使用resource另外的一个接口
 }
 
 func NewGrpcResourcer() GrpcResourcer {

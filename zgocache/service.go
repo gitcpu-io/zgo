@@ -252,7 +252,11 @@ func (z *zgocache) getData(ctx context.Context, key string, field string, expire
     return errors.New("缓存数据为空")
   } else {
     data := cacheResult{Result: obj}
-    jsoniter.UnmarshalFromString(value.(string), &data)
+    err := jsoniter.UnmarshalFromString(value.(string), &data)
+    if err != nil {
+      fmt.Println(err.Error())
+      return err
+    }
     if expire != 0 {
       if data.Time < time.Now().Unix()-int64(expire)*int64(z.rate) {
         return errors.New("缓存已失效")
@@ -277,7 +281,10 @@ func (z *zgocache) setData(ctx context.Context, key string, field string, data i
     if err != nil {
       fmt.Println(err.Error())
     } else {
-      z.service.Hset(ctx, key, field, value)
+      _, err := z.service.Hset(ctx, key, field, value)
+      if err != nil {
+        fmt.Println(err)
+      }
     }
   }(ctx)
 }

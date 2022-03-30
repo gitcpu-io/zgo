@@ -12,7 +12,7 @@ import (
 
 var (
   currentLabels = make(map[string][]*config.ConnDetail)
-  muLabel       sync.RWMutex
+  muLabel       *sync.RWMutex
 )
 
 //项目初始化  根据用户选择label 初始化Es实例
@@ -44,7 +44,7 @@ func InitEs(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgoes 
 
   //自动为变量初始化对象
   initLabel := ""
-  for k, _ := range hsm {
+  for k := range hsm {
     if k != "" {
       initLabel = k
       break

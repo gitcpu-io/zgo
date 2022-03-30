@@ -2,6 +2,7 @@ package zgofile
 
 import (
   "bufio"
+  "fmt"
   "io"
   "os"
   "path"
@@ -73,7 +74,11 @@ func (file *Local) Append(name string, input io.Reader) (n int64, err error) {
   if err != nil {
     return 0, err
   }
-  fd.Seek(0, 2)
+  _, err = fd.Seek(0, 2)
+  if err != nil {
+    fmt.Println(err)
+    return 0,nil
+  }
   output := bufio.NewWriter(fd)
   defer func() {
     output.Flush()

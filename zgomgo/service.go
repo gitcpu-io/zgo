@@ -16,11 +16,11 @@ import (
 
 var (
   currentLabels = make(map[string][]*config.ConnDetail) //用于存放label与具体Host:port的map
-  muLabel       sync.RWMutex                            //用于并发读写上面的map
+  muLabel       *sync.RWMutex                            //用于并发读写上面的map
 )
 
 var (
-  errNil = errors.New(fmt.Sprintf("%s", "文档实例不存在"))
+  errNil = fmt.Errorf("%s", "文档实例不存在")
 )
 
 type MgoArgs struct {
@@ -252,7 +252,7 @@ func InitMgo(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgomg
 
   //自动为变量初始化对象
   initLabel := ""
-  for k, _ := range hsm {
+  for k := range hsm {
     if k != "" {
       initLabel = k
       break
@@ -310,7 +310,7 @@ func (m *zgomgo) FindById(ctx context.Context, coll *mongo.Collection, result in
   }
   oid, err := primitive.ObjectIDFromHex(id)
   if err != nil {
-    return errors.New(fmt.Sprintf("%s:%s", "参数id不正确", err.Error()))
+    return fmt.Errorf("%s:%s", "参数id不正确", err.Error())
   }
   bmq := bson.M{"_id": oid}
   err = m.res.FindById(ctx, coll, result, bmq)
@@ -454,7 +454,7 @@ func (m *zgomgo) UpdateById(ctx context.Context, coll *mongo.Collection, update 
   }
   oid, err := primitive.ObjectIDFromHex(id)
   if err != nil {
-    return modc, errors.New(fmt.Sprintf("%s:%s", "参数id不正确", err.Error()))
+    return modc, fmt.Errorf("%s:%s", "参数id不正确", err.Error())
   }
   bmq := bson.M{"_id": oid}
 
@@ -609,7 +609,7 @@ func (m *zgomgo) DeleteById(ctx context.Context, coll *mongo.Collection, id stri
   }
   oid, err := primitive.ObjectIDFromHex(id)
   if err != nil {
-    return result, errors.New(fmt.Sprintf("%s:%s", "参数id不正确", err.Error()))
+    return result, fmt.Errorf("%s:%s", "参数id不正确", err.Error())
   }
   bmq := bson.M{"_id": oid}
 
