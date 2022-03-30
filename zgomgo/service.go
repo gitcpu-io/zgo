@@ -16,7 +16,7 @@ import (
 
 var (
   currentLabels = make(map[string][]*config.ConnDetail) //用于存放label与具体Host:port的map
-  muLabel       *sync.RWMutex                            //用于并发读写上面的map
+  muLabel       = &sync.RWMutex{}                            //用于并发读写上面的map
 )
 
 var (

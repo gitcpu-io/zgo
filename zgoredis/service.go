@@ -10,7 +10,7 @@ import (
 
 var (
   currentLabels = make(map[string][]*config.ConnDetail)
-  muLabel       *sync.RWMutex
+  muLabel       = &sync.RWMutex{}
 )
 
 //Redis 对外
