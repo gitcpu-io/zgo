@@ -64,70 +64,67 @@ func TestEngine(t *testing.T) {
     panic(err)
   }
 
-  for {
-    select {
-    case <-time.Tick(time.Duration(3) * time.Second):
-      //****************************************test log
-      Log.Error("start engine for test")
+  for val := range time.Tick(time.Duration(3) * time.Second) {
+    //****************************************test log
+    Log.Error("start engine for test", val)
 
-      //****************************************test mysql default user table
-      //n, err := Mysql.New("mysql_sell_1")
-      //if err != nil {
-      //	fmt.Println("======error=====",err)
-      //}
-      //args := make(map[string]interface{})
-      //args["table"] = "user"
-      //args["query"] = " user = ? "
-      //args["args"] = []interface{}{string("root")}
-      //args["limit"] = 30
-      //args["offset"] = 0
-      //args["order"] = " host desc "
-      //obj := make([]MysqlUser,100)
-      //args["obj"] = &obj
-      //n.List(context.TODO(), args)
-      //fmt.Println(obj)
+    //****************************************test mysql default user table
+    //n, err := Mysql.New("mysql_sell_1")
+    //if err != nil {
+    //	fmt.Println("======error=====",err)
+    //}
+    //args := make(map[string]interface{})
+    //args["table"] = "user"
+    //args["query"] = " user = ? "
+    //args["args"] = []interface{}{string("root")}
+    //args["limit"] = 30
+    //args["offset"] = 0
+    //args["order"] = " host desc "
+    //obj := make([]MysqlUser,100)
+    //args["obj"] = &obj
+    //n.List(context.TODO(), args)
+    //fmt.Println(obj)
 
-      //****************************************test postgres
-      pgch, err := Postgres.GetConnChan()
-      if err != nil {
-        fmt.Println("---error", err)
-      }
-      if db, ok := <-pgch; ok {
-        fmt.Println("zgo engine is niubility from postgres", db)
-      }
-
-      //****************************************test neo4j
-      //neo4jch, err := Neo4j.GetConnChan()
-      //if err != nil {
-      //	fmt.Println("---error", err)
-      //}
-      //if neo, ok := <-neo4jch; ok {
-      //	fmt.Println("zgo engine is niubility from neo4j", neo)
-      //}
-
-      //****************************************test etcd
-      etcdch, err := Etcd.GetConnChan()
-      if err != nil {
-        fmt.Println("---error", err)
-      }
-      if etc, ok := <-etcdch; ok {
-        fmt.Println("zgo engine is niubility from etcd", etc)
-      }
-
-      //****************************************test nsq
-      //nq, err := Nsq.New()
-      //if err != nil {
-      //	fmt.Println("---error", err)
-      //}
-      //nq.Producer(context.TODO(), "origin", []byte("zgo engine is niubility from nsq"))
-
-      //****************************************test kafka
-      //kq, err := Kafka.New("kafka_label_bj")
-      //if err != nil {
-      //	fmt.Println("---error", err)
-      //}
-      //kq.Producer(context.TODO(), "origin", []byte("zgo engine is niubility from kafka"))
-
+    //****************************************test postgres
+    pgch, err := Postgres.GetConnChan()
+    if err != nil {
+      fmt.Println("---error", err)
     }
+    if db, ok := <-pgch; ok {
+      fmt.Println("zgo engine is niubility from postgres", db)
+    }
+
+    //****************************************test neo4j
+    //neo4jch, err := Neo4j.GetConnChan()
+    //if err != nil {
+    //	fmt.Println("---error", err)
+    //}
+    //if neo, ok := <-neo4jch; ok {
+    //	fmt.Println("zgo engine is niubility from neo4j", neo)
+    //}
+
+    //****************************************test etcd
+    etcdch, err := Etcd.GetConnChan()
+    if err != nil {
+      fmt.Println("---error", err)
+    }
+    if etc, ok := <-etcdch; ok {
+      fmt.Println("zgo engine is niubility from etcd", etc)
+    }
+
+    //****************************************test nsq
+    //nq, err := Nsq.New()
+    //if err != nil {
+    //	fmt.Println("---error", err)
+    //}
+    //nq.Producer(context.TODO(), "origin", []byte("zgo engine is niubility from nsq"))
+
+    //****************************************test kafka
+    //kq, err := Kafka.New("kafka_label_bj")
+    //if err != nil {
+    //	fmt.Println("---error", err)
+    //}
+    //kq.Producer(context.TODO(), "origin", []byte("zgo engine is niubility from kafka"))
+
   }
 }

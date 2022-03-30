@@ -154,7 +154,7 @@ func (opt *Options) watchPutConn(inch chan map[string][]*config.ConnDetail) {
     if inch != nil {
       for h := range inch {
         //KEY: zgo/project/项目名/mysql/label名字
-        for k, _ := range h {
+        for k := range h {
           smk := strings.Split(k, "/")
           labelType := smk[3]
           hsm := make(map[string][]*config.ConnDetail)
@@ -180,7 +180,7 @@ func (opt *Options) watchDeleteConn(ch chan map[string][]*config.ConnDetail) {
     if ch != nil {
       //KEY: zgo/project/项目名/mysql/label名字
       for h := range ch {
-        for k, _ := range h {
+        for k := range h {
           smk := strings.Split(k, "/")
           labelType := smk[3]
           label := smk[4]
@@ -439,16 +439,16 @@ func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDeta
   }
 }
 
-func getMatchConfig(lds map[string][]*config.ConnDetail, us []string) map[string][]*config.ConnDetail {
-  m := make(map[string][]*config.ConnDetail)
-  for _, label := range us {
-    //v == label_bj 用户传来的label，它并不知道具体的连接地址
-    //v == label_sh 用户传来的label，它并不知道具体的连接地址
-    for k, v := range lds {
-      if label == k {
-        m[label] = v
-      }
-    }
-  }
-  return m
-}
+//func getMatchConfig(lds map[string][]*config.ConnDetail, us []string) map[string][]*config.ConnDetail {
+//  m := make(map[string][]*config.ConnDetail)
+//  for _, label := range us {
+//    //v == label_bj 用户传来的label，它并不知道具体的连接地址
+//    //v == label_sh 用户传来的label，它并不知道具体的连接地址
+//    for k, v := range lds {
+//      if label == k {
+//        m[label] = v
+//      }
+//    }
+//  }
+//  return m
+//}

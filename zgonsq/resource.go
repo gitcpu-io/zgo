@@ -15,15 +15,15 @@ type (
   NsqHandlerFunc func(message NsqMessage) error //定义一个对外的handlerfunc
 )
 
-type nsqHandler interface {
-  handleMessage(m *nsq.Message) error
-  HandleMessage(m *nsq.Message) error
-}
+//type nsqHandler interface {
+//  handleMessage(m *nsq.Message) error
+//  HandleMessage(m *nsq.Message) error
+//}
 
 //实现nsq原生的方法
-func (h NsqHandlerFunc) handleMessage(m NsqMessage) error {
-  return h(m)
-}
+//func (h NsqHandlerFunc) handleMessage(m NsqMessage) error {
+//  return h(m)
+//}
 
 //实现nsq原生的方法
 func (h NsqHandlerFunc) HandleMessage(m *nsq.Message) error {

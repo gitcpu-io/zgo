@@ -76,8 +76,10 @@ func (u *zgohttp) Ding(token string, msg string) {
     "text":    map[string]string{"content": msg},
   }
   bytes, _ := zgoutils.Utils.Marshal(mps)
-  u.PostJson(url, bytes)
-  return
+  _, err := u.PostJson(url, bytes)
+  if err != nil {
+    fmt.Println(err)
+  }
 }
 
 func (zh *zgohttp) JsonpOK(ctx iris.Context, r interface{}) (int, error) {
@@ -140,25 +142,27 @@ func (zh *zgohttp) UseBefore(ctx iris.Context) {
   defer func() {
     if err := recover(); err != nil {
       //fmt.Println(err)
-      zh.JsonServiceErr(ctx)
+      _, err = zh.JsonServiceErr(ctx)
+      if err != nil {
+        fmt.Println(err)
+        return
+      }
       if ctx.IsStopped() {
         return
       }
-      var stacktrace string
+      logMessage := fmt.Sprintf("Recovered from a route's Handler('%s')\n", ctx.HandlerName())
+      logMessage += fmt.Sprintf("At Request: %s\n", getRequestLogs(ctx))
+      logMessage += fmt.Sprintf("Trace: %s\n", err)
       for i := 1; ; i++ {
         _, f, l, got := runtime.Caller(i)
         if !got {
           break
         }
-        stacktrace += fmt.Sprintf("%s:%d\n", f, l)
+        logMessage += fmt.Sprintf("%s:%d\n", f, l)
       }
       // when stack finishes
-      logMessage := fmt.Sprintf("Recovered from a route's Handler('%s')\n", ctx.HandlerName())
-      logMessage += fmt.Sprintf("At Request: %s\n", getRequestLogs(ctx))
-      logMessage += fmt.Sprintf("Trace: %s\n", err)
-      logMessage += fmt.Sprintf("\n%s", stacktrace)
-      //ctx.Application().Logger()
-      //ctx.StatusCode(500)
+      ctx.Application().Logger()
+      ctx.StatusCode(500)
       ctx.StopExecution()
     }
   }()
@@ -179,6 +183,8 @@ func (zh *zgohttp) AsyncMid(ctx iris.Context) {
   select {
   case <-ch:
     return
+  default:
+
   }
 }
 

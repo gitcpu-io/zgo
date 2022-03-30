@@ -8,7 +8,6 @@ import (
 )
 
 func TestConsumer(t *testing.T) {
-  hsm := make(map[string][]*config.ConnDetail)
   cd_bj := config.ConnDetail{
     C:        "北京从库1-----nsq",
     Host:     "localhost",
@@ -35,7 +34,7 @@ func TestConsumer(t *testing.T) {
   s1 = append(s1, &cd_bj)
   //s1 = append(s1, &cd_bj, &cd_bj2)
   s2 = append(s2, &cd_sh)
-  hsm = map[string][]*config.ConnDetail{
+  hsm := map[string][]*config.ConnDetail{
     label_bj: s1,
     label_sh: s2,
   }
@@ -44,7 +43,9 @@ func TestConsumer(t *testing.T) {
   time.Sleep(2 * time.Second)
 
   labelBj, err := GetNsq(label_bj)
-
+  if err != nil {
+    panic(err)
+  }
   labelSh, err := GetNsq(label_sh)
   if err != nil {
     panic(err)
@@ -62,12 +63,8 @@ func TestConsumer(t *testing.T) {
     Nsq:     labelSh,
   }
   c2.Consumer()
-
-  for {
-    select {
-    case <-time.Tick(time.Duration(3 * time.Second)):
-      fmt.Println("一直在消费着")
-    }
+  for val := range time.Tick(time.Duration(3 * time.Second)) {
+    fmt.Println("一直在消费着",val)
   }
   //time.Sleep(3 * time.Second)
 

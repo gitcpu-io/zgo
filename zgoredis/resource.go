@@ -5,7 +5,6 @@ import (
   "errors"
   "github.com/gitcpu-io/zgo/config"
   "github.com/mediocregopher/radix/v4"
-  "sync"
 )
 
 //NsqResourcer 给service使用
@@ -85,7 +84,7 @@ type RedisResourcer interface {
 
 type redisResource struct {
   label    string
-  mu       sync.RWMutex
+  //mu       sync.RWMutex
   connpool ConnPooler
 }
 

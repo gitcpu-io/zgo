@@ -35,7 +35,7 @@ var mu sync.RWMutex
 //接口实现
 type esResource struct {
   label string       //配置标签
-  mu    sync.RWMutex //读写锁
+  //mu    sync.RWMutex //读写锁
   uri   string       //绑定地址
 }
 

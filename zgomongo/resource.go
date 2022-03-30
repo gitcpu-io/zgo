@@ -7,8 +7,6 @@ import (
   "github.com/gitcpu-io/zgo/config"
   "github.com/globalsign/mgo"
   "github.com/globalsign/mgo/bson"
-  "reflect"
-  "sync"
 )
 
 //NsqResourcer 给service使用
@@ -33,7 +31,7 @@ type MongoResourcer interface {
 //内部结构体
 type mongoResource struct {
   label    string
-  mu       sync.RWMutex
+  //mu       sync.RWMutex
   connpool ConnPooler
 }
 
@@ -113,7 +111,11 @@ func (m *mongoResource) FindOne(ctx context.Context, args map[string]interface{}
       return err
     }
     preWorkForMongo(args)
-    s.DB(args["db"].(string)).C(args["table"].(string)).Find(args["query"].(bson.M)).Select(args["select"].(bson.M)).Skip(args["from"].(int)).Limit(args["limit"].(int)).Sort(args["sort"].([]string)...).One(res)
+    err = s.DB(args["db"].(string)).C(args["table"].(string)).Find(args["query"].(bson.M)).Select(args["select"].(bson.M)).Skip(args["from"].(int)).Limit(args["limit"].(int)).Sort(args["sort"].([]string)...).One(res)
+    if err != nil {
+      fmt.Println(err)
+      return nil
+    }
     return nil
   }
   return errors.New("未传入赋值对象")
@@ -146,16 +148,24 @@ func (m *mongoResource) FindPage(ctx context.Context, args map[string]interface{
 //修改多条数据，期望参数db table update query参数不传则为最后一条更新
 func (m *mongoResource) UpdateOne(ctx context.Context, args map[string]interface{}) error {
   s := <-m.connpool.GetConnChan(m.label)
-  judgeMongo(args)
+  err := judgeMongo(args)
+  if err != nil {
+    fmt.Println(err)
+    return nil
+  }
   preWorkForMongo(args)
   return s.DB(args["db"].(string)).C(args["table"].(string)).Update(args["query"].(bson.M), args["update"].(bson.M))
 }
 
 func (m *mongoResource) Upsert(ctx context.Context, args map[string]interface{}) error {
   s := <-m.connpool.GetConnChan(m.label)
-  judgeMongo(args)
+  err := judgeMongo(args)
+  if err != nil {
+    fmt.Println(err)
+    return nil
+  }
   preWorkForMongo(args)
-  _, err := s.DB(args["db"].(string)).C(args["table"].(string)).Upsert(args["query"].(bson.M), args["update"].(bson.M))
+  _, err = s.DB(args["db"].(string)).C(args["table"].(string)).Upsert(args["query"].(bson.M), args["update"].(bson.M))
   return err
 }
 
@@ -185,19 +195,23 @@ func (m *mongoResource) UpdateAll(ctx context.Context, args map[string]interface
   if args["query"] == nil {
     return errors.New("query cannot be empty")
   }
-  judgeMongo(args)
+  err := judgeMongo(args)
+  if err != nil {
+    fmt.Println(err)
+    return nil
+  }
   preWorkForMongo(args)
-  _, err := s.DB(args["db"].(string)).C(args["table"].(string)).UpdateAll(args["query"].(bson.M), args["update"].(bson.M))
+  _, err = s.DB(args["db"].(string)).C(args["table"].(string)).UpdateAll(args["query"].(bson.M), args["update"].(bson.M))
   return err
 }
 
 func (m *mongoResource) DeleteOne(ctx context.Context, args map[string]interface{}) error {
   err := judgeMongo(args)
   if err != nil {
-    return err
+    fmt.Println(err)
+    return nil
   }
   s := <-m.connpool.GetConnChan(m.label)
-  judgeMongo(args)
   preWorkForMongo(args)
   return s.DB(args["db"].(string)).C(args["table"].(string)).Remove(args["query"])
 }
@@ -221,7 +235,8 @@ func (m *mongoResource) DeleteById(ctx context.Context, _id interface{}, args ma
 func (m *mongoResource) DeleteAll(ctx context.Context, args map[string]interface{}) error {
   err := judgeMongo(args)
   if err != nil {
-    return err
+    fmt.Println(err)
+    return nil
   }
   s := <-m.connpool.GetConnChan(m.label)
   if args["query"] == nil {
@@ -254,13 +269,13 @@ func judgeMongo(args map[string]interface{}) error {
 //map转化成bson 内置函数
 //func map2Bson(arg map[string]interface{}) bson.M {
 func map2Bson(arg interface{}) bson.M {
-  switch arg.(type) {
+  switch val := arg.(type) {
   case bson.M:
     return arg.(bson.M)
   case map[string]interface{}:
     return (bson.M)(arg.(map[string]interface{}))
   default:
-    panic(fmt.Errorf("arg type is %v not bson.M or map[string]interface{}", reflect.TypeOf(arg)))
+    fmt.Printf("arg type is %v not bson.M or map[string]interface{} \n", val)
     return nil
   }
   //data, err := bson.Marshal(&arg)
@@ -280,7 +295,11 @@ func updateMap2Bson(arg map[string]interface{}) bson.M {
     fmt.Println(err)
   }
   mmap := bson.M{}
-  bson.Unmarshal(data, &mmap)
+  err = bson.Unmarshal(data, &mmap)
+  if err != nil {
+    fmt.Println(err)
+    return nil
+  }
   return mmap
 }
 

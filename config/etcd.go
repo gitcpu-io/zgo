@@ -33,7 +33,6 @@ func (ec *EtcConfig) InitConfigByEtcd() ([]*mvccpb.KeyValue, chan map[string][]*
   c, err := ec.CreateClient() //创建etcd client
   if err != nil || c == nil {
     panic(errors.New("连接ETCD失败:" + err.Error()))
-    return nil, nil, nil, nil, nil
   }
   client = c
 
@@ -191,7 +190,7 @@ func (ec *EtcConfig) watchSecondPut(labelType string, key string, val []byte, pr
       return err
     }
 
-    if reflect.DeepEqual(cm, preCm) != true { //如果有变化
+    if !reflect.DeepEqual(cm, preCm)  { //如果有变化
 
       var hsm = make(map[string]*CacheConfig)
 
@@ -210,7 +209,7 @@ func (ec *EtcConfig) watchSecondPut(labelType string, key string, val []byte, pr
     if err != nil {
       return err
     }
-    if reflect.DeepEqual(m, pred) != true { //如果有变化使用当前的m
+    if !reflect.DeepEqual(m, pred) { //如果有变化使用当前的m
 
       hsm := ec.changeStructToPtr(m, key)
 

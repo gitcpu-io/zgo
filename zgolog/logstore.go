@@ -41,17 +41,11 @@ func NewLogStore() *logStore {
 
 func StartLogStoreWatcher() {
   go func() {
-
-    for {
-      select {
-      case v := <-LogWatch:
-        LogStore.DbType = v.DbType
-        LogStore.Label = v.Label
-        LogStore.Start = v.Start
-      }
-
+    for v := range LogWatch {
+      LogStore.DbType = v.DbType
+      LogStore.Label = v.Label
+      LogStore.Start = v.Start
     }
-
   }()
 }
 

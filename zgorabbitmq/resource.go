@@ -6,7 +6,6 @@ import (
   "fmt"
   "github.com/gitcpu-io/zgo/config"
   "github.com/streadway/amqp"
-  "sync"
   "time"
 )
 
@@ -22,7 +21,7 @@ type RabbitmqResourcer interface {
 //内部结构体
 type rabbitmqResource struct {
   label    string
-  mu       sync.RWMutex
+  //mu       sync.RWMutex
   connpool ConnPooler
 }
 
@@ -66,13 +65,13 @@ getConnByChan:
     c, err := conn.Channel()
     if err != nil {
       out <- 0
-      return out, errors.New(fmt.Sprintf("channel.open: %s", err))
+      return out, fmt.Errorf("channel.open: %s", err)
     }
 
     err = c.ExchangeDeclare(exchangeName, exchangeType, true, false, false, false, nil)
     if err != nil {
       out <- 0
-      return out, errors.New(fmt.Sprintf("exchange.declare: %v", err))
+      return out, fmt.Errorf("exchange.declare: %v", err)
     }
 
     msg := amqp.Publishing{
@@ -85,7 +84,7 @@ getConnByChan:
     err = c.Publish(exchangeName, routingKey, false, false, msg)
     if err != nil {
       out <- 0
-      return out, errors.New(fmt.Sprintf("basic.publish: %v", err))
+      return out, fmt.Errorf("basic.publish: %v", err)
     }
     out <- 1
     return out, nil
@@ -113,26 +112,26 @@ getConnByChan:
     }
     c, err := conn.Channel()
     if err != nil {
-      return out, errors.New(fmt.Sprintf("channel.open: %s", err))
+      return out, fmt.Errorf("channel.open: %s", err)
     }
     err = c.ExchangeDeclare(exchangeName, exchangeType, true, false, false, false, nil)
     if err != nil {
-      return out, errors.New(fmt.Sprintf("exchange.declare: %s", err))
+      return out, fmt.Errorf("exchange.declare: %s", err)
     }
 
     _, err = c.QueueDeclare(queueName, true, false, false, false, nil)
     if err != nil {
-      return out, errors.New(fmt.Sprintf("queue.declare: %v", err))
+      return out, fmt.Errorf("queue.declare: %v", err)
     }
 
     err = c.QueueBind(queueName, routingKey, exchangeName, false, nil)
     if err != nil {
-      return out, errors.New(fmt.Sprintf("queue.bind: %v", err))
+      return out, fmt.Errorf("queue.bind: %v", err)
     }
 
     dev, err := c.Consume(queueName, queueName, true, false, false, false, nil)
     if err != nil {
-      return out, errors.New(fmt.Sprintf("basic.consume: %v", err))
+      return out, fmt.Errorf("basic.consume: %v", err)
     }
 
     return dev, nil
@@ -166,7 +165,7 @@ getConnByChan:
     c, err := conn.Channel()
     if err != nil {
       out <- 0
-      return out, errors.New(fmt.Sprintf("channel.open: %s", err))
+      return out, fmt.Errorf("channel.open: %s", err)
     }
 
     msg := amqp.Publishing{
@@ -179,7 +178,7 @@ getConnByChan:
     err = c.Publish("", queueName, false, false, msg)
     if err != nil {
       out <- 0
-      return out, errors.New(fmt.Sprintf("basic.publish: %v", err))
+      return out, fmt.Errorf("basic.publish: %v", err)
     }
     out <- 1
     return out, nil
@@ -207,16 +206,16 @@ getConnByChan:
     }
     c, err := conn.Channel()
     if err != nil {
-      return out, errors.New(fmt.Sprintf("channel.open: %s", err))
+      return out, fmt.Errorf("channel.open: %s", err)
     }
     _, err = c.QueueDeclare(queueName, true, false, false, false, nil)
     if err != nil {
-      return out, errors.New(fmt.Sprintf("queue.declare: %v", err))
+      return out, fmt.Errorf("queue.declare: %v", err)
     }
 
     dev, err := c.Consume(queueName, queueName, true, false, false, false, nil)
     if err != nil {
-      return out, errors.New(fmt.Sprintf("basic.consume: %v", err))
+      return out, fmt.Errorf("basic.consume: %v", err)
     }
 
     return dev, nil

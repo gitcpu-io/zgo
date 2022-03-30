@@ -232,12 +232,13 @@ func FormatPublicKey(publicKey string) (pKey string) {
 //	返回 err：error 信息
 func GetCertSN(certPathOrData interface{}) (sn string, err error) {
   var certData []byte
-  switch certPathOrData.(type) {
+  switch val := certPathOrData.(type) {
   case string:
     certData, err = ioutil.ReadFile(certPathOrData.(string))
   case []byte:
     certData = certPathOrData.([]byte)
   default:
+    fmt.Println(val)
     return "", errors.New("certPathOrData 证书类型断言错误")
   }
   if err != nil {

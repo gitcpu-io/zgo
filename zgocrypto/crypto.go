@@ -18,7 +18,6 @@ import (
   "fmt"
   "github.com/chentaihan/aesCbc"
   "golang.org/x/crypto/hkdf"
-  "hash"
   "io"
   "strings"
 )
@@ -121,24 +120,29 @@ func (cp *crypto) Md5(s string) string {
 
 // SHA1 encrypt s according to sha1 algorithm
 func (cp *crypto) SHA1(s string) string {
-  var h hash.Hash
-  h = sha1.New()
-  io.WriteString(h, s)
+  var h = sha1.New()
+  _, err := io.WriteString(h, s)
+  if err != nil {
+    fmt.Println(err)
+    return ""
+  }
   return hex.EncodeToString(h.Sum(nil))
 }
 
 // SHA256 encrypt s according to sha256 algorithm
 func (cp *crypto) SHA256String(s string) string {
-  var h hash.Hash
-  h = sha256.New()
-  io.WriteString(h, s)
+  var h = sha256.New()
+  _, err := io.WriteString(h, s)
+  if err != nil {
+    fmt.Println(err)
+    return ""
+  }
   return hex.EncodeToString(h.Sum(nil))
 }
 
 // SHA256 encrypt s according to sha256 algorithm
 func (cp *crypto) SHA256(s []byte) ([]byte, error) {
-  var h hash.Hash
-  h = sha256.New()
+  var h = sha256.New()
   n, err := h.Write(s)
   if err != nil {
     return nil, err
@@ -387,7 +391,11 @@ func (cp *crypto) GenerateRSAKey(bits int) ([]byte, []byte) {
   //构建一个pem.Block结构体对象
   privateBlock := pem.Block{Type: "RSA Private Key", Bytes: X509PrivateKey}
   //将数据保存到文件
-  pem.Encode(priv, &privateBlock)
+  err = pem.Encode(priv, &privateBlock)
+  if err != nil {
+    fmt.Println(err)
+    return nil,nil
+  }
 
   //获取公钥的数据
   publicKey := privateKey.PublicKey
@@ -402,7 +410,11 @@ func (cp *crypto) GenerateRSAKey(bits int) ([]byte, []byte) {
 
   publicBlock := pem.Block{Type: "RSA Public Key", Bytes: X509PublicKey}
   //保存到文件
-  pem.Encode(pubv, &publicBlock)
+  err = pem.Encode(pubv, &publicBlock)
+  if err != nil {
+    fmt.Println(err)
+    return nil,nil
+  }
 
   return pubv.Bytes(), priv.Bytes()
 }

@@ -95,11 +95,11 @@ func (n *kafkaResource) Consumer(topic, groupId string) (*cluster.Consumer, erro
     for k, v := range addr {
       if k == 0 && v.Host != "" && v.Port != 0 {
         //address := fmt.Sprintf("%s:%d", v.Host, v.Port)
-        if strings.Index(v.Host, ",") != -1 {
+        if strings.Contains(v.Host, ",") {
           hp := strings.Split(v.Host, ",")
           var tmp []string
           for _, val := range hp {
-            if strings.Index(val, ":") == -1 {
+            if strings.Contains(val, ":") {
               val = fmt.Sprintf("%s:%d", val, v.Port)
               tmp = append(tmp, val)
             } else {
@@ -108,7 +108,7 @@ func (n *kafkaResource) Consumer(topic, groupId string) (*cluster.Consumer, erro
           }
           brokers = append(brokers, tmp...)
         } else {
-          if strings.Index(v.Host, ":") != -1 {
+          if strings.Contains(v.Host, ":")  {
 
             brokers = append(brokers, v.Host) //此时有host:port
 
@@ -135,11 +135,11 @@ func (n *kafkaResource) Consumer(topic, groupId string) (*cluster.Consumer, erro
   }()
 
   // consume notifications
-  go func() {
-    for _ = range consumer.Notifications() {
-      //fmt.Printf("Kafka connection: %+v\n", ntf)
-    }
-  }()
+  //go func() {
+  //  for _ = range consumer.Notifications() {
+  //    //fmt.Printf("Kafka connection: %+v\n", ntf)
+  //  }
+  //}()
 
   return consumer, err
 
