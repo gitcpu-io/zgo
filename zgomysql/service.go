@@ -12,7 +12,7 @@ import (
 
 var currentLabels = make(map[string][]*config.ConnDetail)
 
-var muLabel *sync.RWMutex
+var muLabel = &sync.RWMutex{}
 
 //Mongo 对外
 type Mysqler interface {
