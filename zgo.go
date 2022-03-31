@@ -372,10 +372,10 @@ var (
   //Service Service 服务注册与发现
   Service = zgoservice.New()
 
-  MgoBulkWriteOperation_InsertOne  = config.InsertOne
-  MgoBulkWriteOperation_UpdateOne  = config.UpdateOne
-  MgoBulkWriteOperation_ReplaceOne = config.ReplaceOne
-  MgoBulkWriteOperation_DeleteOne  = config.DeleteOne
-  MgoBulkWriteOperation_UpdateMany = config.UpdateMany
-  MgoBulkWriteOperation_DeleteMany = config.DeleteMany
+  MongoBWOInsertOne  = config.InsertOne
+  MongoBWOUpdateOne  = config.UpdateOne
+  MongoBWOReplaceOne = config.ReplaceOne
+  MongoBWODeleteOne  = config.DeleteOne
+  MongoBWOUpdateMany = config.UpdateMany
+  MongoBWODeleteMany = config.DeleteMany
 )
