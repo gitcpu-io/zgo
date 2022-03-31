@@ -15,7 +15,7 @@ const (
   Warn         //2
   Error        //3
 
-  Version       = "v1.0.6"      //zgo版本号
+  Version       = "v1.0.7"      //zgo版本号
   ProjectPrefix = "zgo/project" //读取ETCD配置时prefix
   FileStoreType = "local"       //文件存储类型
   FileStoreHome = "/tmp"        //文件存储目录
@@ -34,8 +34,7 @@ const (
   EtcTKClickHouse = "clickhouse"
   EtcTKRabbitmq   = "rabbitmq"
   EtcTKNeo4j      = "neo4j"
-  EtcTKMongo      = "mongo"
-  EtcTKMgo        = "mgo"
+  EtcTKMgo        = "mongo"
   EtcTKRedis      = "redis"
   EtcTKPia        = "pika"
   EtcTKNsq        = "nsq"

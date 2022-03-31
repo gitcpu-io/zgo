@@ -210,54 +210,6 @@
       ]
     }
   ],
-  "mgo": [
-    {
-      "key": "mgo_label_bj",
-      "values": [
-        {
-          "c": "北京从库1=====dev mgo",
-          "host": "localhost",
-          "port": 27018,
-          "username": "",
-          "password": "",
-          "connSize": 5,
-          "poolSize": 789
-        },
-        {
-          "c": "北京从库2=====dev mgo",
-          "host": "localhost",
-          "port": 27018,
-          "username": "",
-          "password": "",
-          "connSize": 5,
-          "poolSize": 456
-        }
-      ]
-    },
-    {
-      "key": "mgo_label_sh",
-      "values": [
-        {
-          "c": "上海从库1=====dev mgo",
-          "host": "localhost",
-          "port": 27019,
-          "username": "",
-          "password": "",
-          "connSize": 5,
-          "poolSize": 789
-        },
-        {
-          "c": "上海从库2=====dev mgo",
-          "host": "localhost",
-          "port": 27019,
-          "username": "",
-          "password": "",
-          "connSize": 5,
-          "poolSize": 456
-        }
-      ]
-    }
-  ],
   "mongo": [
     {
       "key": "mongo_label_borough",

@@ -11,7 +11,6 @@ import (
   "github.com/gitcpu-io/zgo/zgokafka"
   "github.com/gitcpu-io/zgo/zgolog"
   "github.com/gitcpu-io/zgo/zgomgo"
-  "github.com/gitcpu-io/zgo/zgomongo"
   "github.com/gitcpu-io/zgo/zgomysql"
   "github.com/gitcpu-io/zgo/zgonsq"
   "github.com/gitcpu-io/zgo/zgopostgres"
@@ -118,7 +117,7 @@ func (opt *Options) parseConfig(resKvs []*mvccpb.KeyValue, connCh chan map[strin
           sb.WriteString(fmt.Sprintf("Label: %s\n", label))
           sb.WriteString(fmt.Sprintf("Host: %s\n", pvv.Host))
           sb.WriteString(fmt.Sprintf("Port: %d\n", pvv.Port))
-          if labelType == config.EtcTKMysql || labelType == config.EtcTKPostgres || labelType == config.EtcTKClickHouse || labelType == config.EtcTKMongo || labelType == config.EtcTKMgo {
+          if labelType == config.EtcTKMysql || labelType == config.EtcTKPostgres || labelType == config.EtcTKClickHouse || labelType == config.EtcTKMgo {
             sb.WriteString(fmt.Sprintf("DbName: %s\n", pvv.DbName))
           }
           if labelType == config.EtcTKRabbitmq {
@@ -216,12 +215,9 @@ func (opt *Options) destroyConn(labelType, label string) {
   //case config.EtcTKNeo4j:
   //	in := <-zgoneo4j.InitNeo4j(nil, label)
   //	Neo4j = in
-  case config.EtcTKMongo:
-    in := <-zgomongo.InitMongo(nil, label)
-    Mongo = in
   case config.EtcTKMgo:
     in := <-zgomgo.InitMgo(nil, label)
-    Mgo = in
+    Mongo = in
   case config.EtcTKRedis:
     in := <-zgoredis.InitRedis(nil, label)
     Redis = in
@@ -380,18 +376,12 @@ func (opt *Options) initConn(labelType string, hsm map[string][]*config.ConnDeta
     //	in := <-zgoneo4j.InitNeo4j(hsm)
     //	Neo4j = in
     //}
-  case config.EtcTKMongo:
-    //init mongo again
-    if len(hsm) > 0 {
-      in := <-zgomongo.InitMongo(hsm)
-      Mongo = in
-    }
 
   case config.EtcTKMgo:
     //init mgo again
     if len(hsm) > 0 {
       in := <-zgomgo.InitMgo(hsm)
-      Mgo = in
+      Mongo = in
     }
 
   case config.EtcTKRedis:

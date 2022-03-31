@@ -19,7 +19,6 @@ import (
   "github.com/gitcpu-io/zgo/zgolog"
   "github.com/gitcpu-io/zgo/zgomap"
   "github.com/gitcpu-io/zgo/zgomgo"
-  "github.com/gitcpu-io/zgo/zgomongo"
   "github.com/gitcpu-io/zgo/zgomysql"
   "github.com/gitcpu-io/zgo/zgonsq"
   "github.com/gitcpu-io/zgo/zgopostgres"
@@ -77,7 +76,7 @@ func Engine(opt *Options) error {
       //todo someting
       hsm := engine.getConfigByOption(config.Conf.Mongo, opt.Mongo)
       //fmt.Println("--zgo.go--",config.Mongo, opt.Mongo, hsm)
-      in := <-zgomongo.InitMongo(hsm)
+      in := <-zgomgo.InitMgo(hsm)
       Mongo = in
     }
     if len(opt.Mgo) > 0 {
@@ -85,7 +84,7 @@ func Engine(opt *Options) error {
       hsm := engine.getConfigByOption(config.Conf.Mgo, opt.Mgo)
       //fmt.Println("--zgo.go--",config.Conf.Mgo, opt.Mgo, hsm)
       in := <-zgomgo.InitMgo(hsm)
-      Mgo = in
+      Mongo = in
     }
 
     if len(opt.Mysql) > 0 {
@@ -325,8 +324,7 @@ type (
 var (
   Kafka             zgokafka.Kafkaer
   Nsq               zgonsq.Nsqer
-  Mongo             zgomongo.Mongoer
-  Mgo               zgomgo.Mgoer
+  Mongo             zgomgo.Mgoer
   Es                zgoes.Eser
   Grpc              zgogrpc.Grpcer
   Redis             zgoredis.Rediser
