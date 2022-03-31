@@ -23,7 +23,7 @@ var (
   errNil = fmt.Errorf("%s", "文档实例不存在")
 )
 
-type MgoArgs struct {
+type MongoArgs struct {
   Document     interface{}              //保存时用到的结构体的指针
   Result       interface{}              //接受结构体的指针 比如: r := &User{} 这里的result就是r
   Filter       map[string]interface{}   //查询条件
@@ -36,9 +36,9 @@ type MgoArgs struct {
   Upsert       bool                     //当查询不到时，true表示插入一条新的
 }
 
-type MgoBulkWriteOperation = struct {
+type MongoBulkWriteOperation = struct {
   Operation string
-  MgoArgs   *MgoArgs
+  MongoArgs   *MongoArgs
 }
 
 //Mgo 对外
@@ -68,7 +68,7 @@ type Mgoer interface {
   // Sort: 排序 1是升序，-1是降序
   // Skip: 查询的offset，开区间，不包括这个skip的值
   // ]
-  FindOne(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (uint8, error)
+  FindOne(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (uint8, error)
 
   // Find 查询多条,未查到返回空的[]
   // 此时 args 可选如下：[
@@ -78,7 +78,7 @@ type Mgoer interface {
   // Skip: 查询的offset，开区间，不包括这个skip的值
   // Limit: 限限的返回数量
   // ]
-  Find(ctx context.Context, coll *mongo.Collection, args *MgoArgs) ([][]byte, error)
+  Find(ctx context.Context, coll *mongo.Collection, args *MongoArgs) ([][]byte, error)
 
   // Count 查询数量,未查到返回0
   // 此时 args 可选如下：[
@@ -86,7 +86,7 @@ type Mgoer interface {
   // Skip: 查询的offset，开区间，不包括这个skip的值
   // Limit: 限限的返回数量
   // ]
-  Count(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (int64, error)
+  Count(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (int64, error)
 
   // Insert 保存一条,返回objectId的string
   Insert(ctx context.Context, coll *mongo.Collection, document interface{}) (string, error)
@@ -105,7 +105,7 @@ type Mgoer interface {
   // Update: 更新项
   // Upsert: 为true时插入一条
   // ]
-  UpdateOne(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (uint8, uint8, string, error)
+  UpdateOne(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (uint8, uint8, string, error)
 
   // ReplaceOne通过条件 替换一条, 返回第一个uint8表示替换的记录数, 第二个uint8表示插入的记录数,第三个string表示插入的id string
   // 替换与UpdateOne的区别是：ReplaceOne以args.update中的k,v重新为当前记录设置值，如果这条记录以前有其它字段，那么会删除以前的k、v
@@ -115,7 +115,7 @@ type Mgoer interface {
   // Update: 更新项
   // Upsert: 为true时插入一条
   // ]
-  ReplaceOne(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (uint8, uint8, string, error)
+  ReplaceOne(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (uint8, uint8, string, error)
 
   // UpdateMany通过条件 更新多条, 返回第一个int64表示更新的记录数, 第二个int64表示插入的记录数,第三个int64表示查询到的记录数
   // 此时 args 可选如下：[
@@ -124,7 +124,7 @@ type Mgoer interface {
   // Update: 更新项
   // Upsert: 为true时插入一条
   // ]
-  UpdateMany(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (int64, int64, int64, error)
+  UpdateMany(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (int64, int64, int64, error)
 
   // DeleteId 通过查询ID来删除一条
   DeleteById(ctx context.Context, coll *mongo.Collection, id string) (uint8, error)
@@ -133,13 +133,13 @@ type Mgoer interface {
   // 此时 args 可选如下：[
   // Filter: 查询条件
   // ]
-  DeleteOne(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (uint8, error)
+  DeleteOne(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (uint8, error)
 
   // DeleteMany通过条件 删除多条
   // 此时 args 可选如下：[
   // Filter: 查询条件
   // ]
-  DeleteMany(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (int64, error)
+  DeleteMany(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (int64, error)
 
   // FindOneAndUpdate通过条件 查询并更新一条，默认返回最新的更新过的
   // 更新与FindOneAndReplace的区别是：FindOneAndUpdate仅以args.update中的k,v覆盖当前记录的k对应的v值，如果这条记录以前有其它字段，不会更改原有的
@@ -151,7 +151,7 @@ type Mgoer interface {
   // Upsert: 为true时插入一条
   // Sort: 排序 1是升序，-1是降序
   // ]
-  FindOneAndUpdate(ctx context.Context, coll *mongo.Collection, args *MgoArgs) error
+  FindOneAndUpdate(ctx context.Context, coll *mongo.Collection, args *MongoArgs) error
 
   // FindOneAndReplace通过条件 查询并替换一条，默认返回最新的替换过的
   // 替换与FindOneAndUpdate的区别是：FindOneAndReplace以args.update中的k,v重新为当前记录设置值，如果这条记录以前有其它字段，那么会删除以前的k、v
@@ -165,7 +165,7 @@ type Mgoer interface {
   // Upsert: 为true时插入一条
   // Sort: 排序 1是升序，-1是降序
   // ]
-  FindOneAndReplace(ctx context.Context, coll *mongo.Collection, args *MgoArgs) error
+  FindOneAndReplace(ctx context.Context, coll *mongo.Collection, args *MongoArgs) error
 
   // FindOneAndDelete通过条件 查询并删除一条，返回当前删除的这条记录
   // 此时 args 可选如下：[
@@ -174,7 +174,7 @@ type Mgoer interface {
   // Result: 接受结构体的指针
   // Sort: 排序 1是升序，-1是降序
   // ]
-  FindOneAndDelete(ctx context.Context, coll *mongo.Collection, args *MgoArgs) error
+  FindOneAndDelete(ctx context.Context, coll *mongo.Collection, args *MongoArgs) error
 
   //Distinct 去重查询
   // fieldName是对哪个字段进行去重
@@ -182,11 +182,11 @@ type Mgoer interface {
   Distinct(ctx context.Context, coll *mongo.Collection, fieldName string, filter map[string]interface{}) ([]interface{}, error)
 
   // BulkWrite 多个并行计算
-  // 1: 声明[]*MgoBulkWriteOperation
-  // 2: 创建单个 &MgoBulkWriteOperation 结构体指针
+  // 1: 声明[]*MongoBulkWriteOperation
+  // 2: 创建单个 &MongoBulkWriteOperation 结构体指针
   // {
-  // 		Operation:"使用zgo.MgoBulkWriteOperation_xxxxxx" xxxxxx = insertOne/updateOne
-  //      MgoArgs: 此时 args 可选如下：[
+  // 		Operation:"使用zgo.MongoBulkWriteOperation_xxxxxx" xxxxxx = insertOne/updateOne
+  //      MongoArgs: 此时 args 可选如下：[
   // 			Document: 保存时用到的结构体的指针,用于insertOne
   //			Filter: 查询条件				用于updateOne/replaceOne/deleteOne/updateMany/deleteMany
   //			ArrayFilters: 子文档的查询条件 用于updateOne/updateMany
@@ -198,7 +198,7 @@ type Mgoer interface {
   // 4: order 如果为true就是按第一步中[]的顺序执行，如果为false那么不管顺序，相当于并行计算
   // 使用实例请参考：
   // https://github.com/gitcpu-io/origin/blob/master/samples/demo_mgo/demo.go
-  BulkWrite(ctx context.Context, coll *mongo.Collection, bulkWrites []*MgoBulkWriteOperation, order bool) (*mongo.BulkWriteResult, error)
+  BulkWrite(ctx context.Context, coll *mongo.Collection, bulkWrites []*MongoBulkWriteOperation, order bool) (*mongo.BulkWriteResult, error)
 
   // Aggregate 聚合查询
   // 使用实例请参考：
@@ -325,7 +325,7 @@ func (m *zgomgo) FindById(ctx context.Context, coll *mongo.Collection, result in
 }
 
 // FindOne通过条件查询一条
-func (m *zgomgo) FindOne(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (uint8, error) {
+func (m *zgomgo) FindOne(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (uint8, error) {
   if coll == nil {
     return 0, errNil
   }
@@ -353,7 +353,7 @@ func (m *zgomgo) FindOne(ctx context.Context, coll *mongo.Collection, args *MgoA
 }
 
 // Find通过条件查询多条
-func (m *zgomgo) Find(ctx context.Context, coll *mongo.Collection, args *MgoArgs) ([][]byte, error) {
+func (m *zgomgo) Find(ctx context.Context, coll *mongo.Collection, args *MongoArgs) ([][]byte, error) {
   if coll == nil {
     return nil, errNil
   }
@@ -379,7 +379,7 @@ func (m *zgomgo) Find(ctx context.Context, coll *mongo.Collection, args *MgoArgs
 }
 
 // Count通过条件查询数量
-func (m *zgomgo) Count(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (int64, error) {
+func (m *zgomgo) Count(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (int64, error) {
   if coll == nil {
     return 0, errNil
   }
@@ -473,7 +473,7 @@ func (m *zgomgo) UpdateById(ctx context.Context, coll *mongo.Collection, update 
 }
 
 // UpdateOne通过条件 更新一条
-func (m *zgomgo) UpdateOne(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (uint8, uint8, string, error) {
+func (m *zgomgo) UpdateOne(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (uint8, uint8, string, error) {
   var (
     modc uint8
     upsc uint8
@@ -520,7 +520,7 @@ func (m *zgomgo) UpdateOne(ctx context.Context, coll *mongo.Collection, args *Mg
 }
 
 // ReplaceOne通过条件 替换一条
-func (m *zgomgo) ReplaceOne(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (uint8, uint8, string, error) {
+func (m *zgomgo) ReplaceOne(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (uint8, uint8, string, error) {
   var (
     modc uint8
     upsc uint8
@@ -560,7 +560,7 @@ func (m *zgomgo) ReplaceOne(ctx context.Context, coll *mongo.Collection, args *M
 }
 
 // UpdateMany通过条件 更新多条
-func (m *zgomgo) UpdateMany(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (int64, int64, int64, error) {
+func (m *zgomgo) UpdateMany(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (int64, int64, int64, error) {
   var (
     modc int64
     upsc int64
@@ -626,7 +626,7 @@ func (m *zgomgo) DeleteById(ctx context.Context, coll *mongo.Collection, id stri
 }
 
 // DeleteOne通过条件 删除一条
-func (m *zgomgo) DeleteOne(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (uint8, error) {
+func (m *zgomgo) DeleteOne(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (uint8, error) {
   var result uint8
   if coll == nil {
     return result, errNil
@@ -647,7 +647,7 @@ func (m *zgomgo) DeleteOne(ctx context.Context, coll *mongo.Collection, args *Mg
 }
 
 // DeleteMany通过条件 删除多条
-func (m *zgomgo) DeleteMany(ctx context.Context, coll *mongo.Collection, args *MgoArgs) (int64, error) {
+func (m *zgomgo) DeleteMany(ctx context.Context, coll *mongo.Collection, args *MongoArgs) (int64, error) {
   var result int64
 
   if coll == nil {
@@ -669,7 +669,7 @@ func (m *zgomgo) DeleteMany(ctx context.Context, coll *mongo.Collection, args *M
 }
 
 // FindOneAndUpdate通过条件 查询并更新一条
-func (m *zgomgo) FindOneAndUpdate(ctx context.Context, coll *mongo.Collection, args *MgoArgs) error {
+func (m *zgomgo) FindOneAndUpdate(ctx context.Context, coll *mongo.Collection, args *MongoArgs) error {
 
   if coll == nil {
     return errNil
@@ -709,7 +709,7 @@ func (m *zgomgo) FindOneAndUpdate(ctx context.Context, coll *mongo.Collection, a
 }
 
 // FindOneAndReplace通过条件 查询并替换一条
-func (m *zgomgo) FindOneAndReplace(ctx context.Context, coll *mongo.Collection, args *MgoArgs) error {
+func (m *zgomgo) FindOneAndReplace(ctx context.Context, coll *mongo.Collection, args *MongoArgs) error {
 
   if coll == nil {
     return errNil
@@ -740,7 +740,7 @@ func (m *zgomgo) FindOneAndReplace(ctx context.Context, coll *mongo.Collection, 
 }
 
 // FindOneAndDelete通过条件 查询并删除一条，返回当前删除的这条记录
-func (m *zgomgo) FindOneAndDelete(ctx context.Context, coll *mongo.Collection, args *MgoArgs) error {
+func (m *zgomgo) FindOneAndDelete(ctx context.Context, coll *mongo.Collection, args *MongoArgs) error {
 
   if coll == nil {
     return errNil
@@ -772,7 +772,7 @@ func (m *zgomgo) Distinct(ctx context.Context, coll *mongo.Collection, fieldName
 }
 
 // BulkWrite 多个并行计算
-func (m *zgomgo) BulkWrite(ctx context.Context, coll *mongo.Collection, bulkWrites []*MgoBulkWriteOperation, order bool) (*mongo.BulkWriteResult, error) {
+func (m *zgomgo) BulkWrite(ctx context.Context, coll *mongo.Collection, bulkWrites []*MongoBulkWriteOperation, order bool) (*mongo.BulkWriteResult, error) {
   if coll == nil {
     return nil, errNil
   }
@@ -781,66 +781,66 @@ func (m *zgomgo) BulkWrite(ctx context.Context, coll *mongo.Collection, bulkWrit
 
   for _, bukw := range bulkWrites {
 
-    m.dealObjectIdByString(bukw.MgoArgs) //如果args.Filter中有_id就转为ObjectId
+    m.dealObjectIdByString(bukw.MongoArgs) //如果args.Filter中有_id就转为ObjectId
 
     switch bukw.Operation {
     case config.InsertOne:
       model := mongo.NewInsertOneModel()
-      model.SetDocument(bukw.MgoArgs.Document)
+      model.SetDocument(bukw.MongoArgs.Document)
 
       writeModels = append(writeModels, model)
 
     case config.UpdateOne:
       model := mongo.NewUpdateOneModel()
-      if bukw.MgoArgs.ArrayFilters != nil && len(bukw.MgoArgs.ArrayFilters) > 0 {
+      if bukw.MongoArgs.ArrayFilters != nil && len(bukw.MongoArgs.ArrayFilters) > 0 {
         tmp := options.ArrayFilters{}
-        for _, v := range bukw.MgoArgs.ArrayFilters {
+        for _, v := range bukw.MongoArgs.ArrayFilters {
           if len(v) > 0 {
             tmp.Filters = append(tmp.Filters, v)
           }
         }
         model.SetArrayFilters(tmp)
       }
-      model.SetFilter(bson.M(bukw.MgoArgs.Filter))
-      model.SetUpdate(bson.M(bukw.MgoArgs.Update))
-      model.SetUpsert(bukw.MgoArgs.Upsert)
+      model.SetFilter(bson.M(bukw.MongoArgs.Filter))
+      model.SetUpdate(bson.M(bukw.MongoArgs.Update))
+      model.SetUpsert(bukw.MongoArgs.Upsert)
 
       writeModels = append(writeModels, model)
 
     case config.ReplaceOne:
       model := mongo.NewReplaceOneModel()
-      model.SetFilter(bson.M(bukw.MgoArgs.Filter))
-      model.SetReplacement(bson.M(bukw.MgoArgs.Update))
-      model.SetUpsert(bukw.MgoArgs.Upsert)
+      model.SetFilter(bson.M(bukw.MongoArgs.Filter))
+      model.SetReplacement(bson.M(bukw.MongoArgs.Update))
+      model.SetUpsert(bukw.MongoArgs.Upsert)
 
       writeModels = append(writeModels, model)
 
     case config.DeleteOne:
       model := mongo.NewDeleteOneModel()
-      model.SetFilter(bson.M(bukw.MgoArgs.Filter))
+      model.SetFilter(bson.M(bukw.MongoArgs.Filter))
 
       writeModels = append(writeModels, model)
 
     case config.UpdateMany:
       model := mongo.NewUpdateManyModel()
-      if bukw.MgoArgs.ArrayFilters != nil && len(bukw.MgoArgs.ArrayFilters) > 0 {
+      if bukw.MongoArgs.ArrayFilters != nil && len(bukw.MongoArgs.ArrayFilters) > 0 {
         tmp := options.ArrayFilters{}
-        for _, v := range bukw.MgoArgs.ArrayFilters {
+        for _, v := range bukw.MongoArgs.ArrayFilters {
           if len(v) > 0 {
             tmp.Filters = append(tmp.Filters, v)
           }
         }
         model.SetArrayFilters(tmp)
       }
-      model.SetFilter(bson.M(bukw.MgoArgs.Filter))
-      model.SetUpdate(bson.M(bukw.MgoArgs.Update))
-      model.SetUpsert(bukw.MgoArgs.Upsert)
+      model.SetFilter(bson.M(bukw.MongoArgs.Filter))
+      model.SetUpdate(bson.M(bukw.MongoArgs.Update))
+      model.SetUpsert(bukw.MongoArgs.Upsert)
 
       writeModels = append(writeModels, model)
 
     case config.DeleteMany:
       model := mongo.NewDeleteManyModel()
-      model.SetFilter(bson.M(bukw.MgoArgs.Filter))
+      model.SetFilter(bson.M(bukw.MongoArgs.Filter))
 
       writeModels = append(writeModels, model)
 
@@ -873,7 +873,7 @@ func (m *zgomgo) Watch(ctx context.Context, coll *mongo.Collection, pipeline int
   return m.res.Watch(ctx, coll, pipeline, opts)
 }
 
-func (m *zgomgo) dealObjectIdByString(args *MgoArgs) {
+func (m *zgomgo) dealObjectIdByString(args *MongoArgs) {
   if args.Filter == nil {
     return
   }
