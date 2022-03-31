@@ -15,7 +15,7 @@ const (
   Warn         //2
   Error        //3
 
-  Version       = "v1.0.8"      //zgo版本号
+  Version       = "v1.0.9"      //zgo版本号
   ProjectPrefix = "zgo/project" //读取ETCD配置时prefix
   FileStoreType = "local"       //文件存储类型
   FileStoreHome = "/tmp"        //文件存储目录
@@ -252,7 +252,7 @@ func welcome(info string) {
  \                             \        /   \___-=O'/|O'/__|
   \  zgo engine, Here we go !!  \_______\          / | /    )
   /                             /        '/-==__ _/__|/__=-|  -GM
- /          @2021              /         *             \ | |
+ /          @2019~2022              /         *             \ | |
 /                             /                        (o)
 ------------------------------
 `
