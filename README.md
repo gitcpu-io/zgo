@@ -1,4 +1,4 @@
-# zgo engine v1.0.7 <a href="README_ZH.md"></a>
+# zgo engine v1.0.8 <a href="README_ZH.md"></a>
 
 ## 为什么要搞zgo？
 
@@ -12,7 +12,7 @@ zgo是专门为使用go语言的开发人员所设计和开发的， 它提供�
 
 [![npm](zgo.png)](http://wiki.examplefang.com/display/ZGZFRDCENTER/zgo)
 
-## zgo的核心功能（共25个，6个数据库，2个缓存，3个消息队列，1个ES，1个Cache, 1个Log存储，1个Http，1个Grpc，1个Map，1个负载，1个限流，3个工具类组件）
+## zgo的核心功能（共24个，6个数据库，2个缓存，3个消息队列，1个ES，1个Cache, 1个Log存储，1个Http，1个Grpc，1个Map，1个负载，1个限流，3个工具类组件）
 
 * 1.zgo Mysql对gorm开发框架提供上层封装，通过channel内建连接池，提供高并发访问mysql，并支持函数调用时自动读写分离，开发人员无需关注主从数据库
 * 2.zgo Mongo对官方mongodb驱动的封装开发框架提供上层封装，通过channel内建连接池，提供高并发访问mongodb数据库的增删改查
@@ -96,7 +96,7 @@ import github.com/kataras/iris/v12
 
 ```gotemplate
     err := zgo.Engine(&zgo.Options{
-    CPath:     config.Conf.CPath,
+    CPath:     config.Conf.CPath,   //如果是本地开发仍然使用配置文件的方式，需要指定配置文件所在目录
     Env:      "local", //表示你在本机上开发， dev/qa/pro都表示非本机开发
     Loglevel: "debug", //本机开发采用debug的日志模式
     Project:  "origin", //项目id: origin是从zgo engine admin平台申请得到的，正式上可能是一串数字
@@ -105,8 +105,8 @@ import github.com/kataras/iris/v12
     Redis: []string{
     "redis_label_bj",
     },
-    Mgo: []string{
-    "mgo_label_bj",  //测试时可以放开注释，通过配置文件来调试连接中间件mongodb
+    Mongo: []string{
+    "mongo_label_bj",  //测试时可以放开注释，通过配置文件来调试连接中间件mongodb
     },
     Mysql: []string{
     "mysql_sell_1",
@@ -151,7 +151,9 @@ import github.com/kataras/iris/v12
 ### zgo Mysql组件使用
 
 如果你想用zgo.Mysql来向mysql数据库中插入一条数据，你可以这么做，首先你要声明一个类型是House的结构体，
+
 然后再实例化这个结构体，为此我创建了一个id是123,name是examplefang的，这样一个实例，接下来我调用了一个AddHouse的函数， 并传入了三个参数，第一个是上下文context.TODO()
+
 表示什么也不做，只是传递上下文而已，第二个参数是刚刚实例化的House的指针，第三个是string类型的bj
 
 ```gotemplate
@@ -205,7 +207,7 @@ for(var i=100;i<=200;i++){
 
 ```gotemplate
 type User struct {
-Id       zgo.MgoObjectId `json:"id,omitempty" bson:"_id,omitempty"`
+Id       zgo.MongoObjectId `json:"id,omitempty" bson:"_id,omitempty"`
 Username string          `json:"username" bson:"username" `
 Age      int             `json:"age" bson:"age"`
 Address  int             `json:"address" bson:"address"`
@@ -251,7 +253,7 @@ zgo.Http.JsonpOK(ctx, result)
 }
 
 func Find(ctx context.Context, username string) ([]*User, error) {
-var collection = zgo.Mgo.GetCollection("profile", "bj", "mgo_label_bj")
+var collection = zgo.Mongo.GetCollection("profile", "bj", "mgo_label_bj")
 
 filter := make(map[string]interface{}) //查询username是且age >= 30的
 filter["username"] = username
@@ -269,7 +271,7 @@ fields["address"] = 1 //要么全是1，要么全是0
 fields["username"] = 1
 
 //组织args
-args := &zgo.MgoArgs{
+args := &zgo.MongoArgs{
 Filter: filter, //查询条件
 Fields: fields, //对查询出的结果项，筛选字段
 Sort:   sort,   //排序
@@ -277,7 +279,7 @@ Limit:  10,     //查询结果数量
 Skip:   0,      //从哪一条开始跳过 开区间，不包括skip的值
 }
 
-results, err := zgo.Mgo.Find(ctx, collection, args)
+results, err := zgo.Mongo.Find(ctx, collection, args)
 if err != nil {
 return nil, err
 }
@@ -713,240 +715,14 @@ zgo engine会替你把这些日志，输出到文件系统，或者是Nsq中，�
 
 你需要在origin/config/dev.json中，指定Env的值是"dev" 和 Project的值（来自zgo engine admin配置中心） 如果你愿意你可以继续为LogLevel和Version指定值
 
-## 生产环境部署
-
-在项目的origin/deploy目录中分别有k8s和istio的子目录
-
-### yaml文件编写
-
-#### k8s yaml的编写
-
-svc.yaml是一个k8s的Service Kind
-
-```gotemplate
-kind: Service
-apiVersion: v1
-metadata:
-name: origin
-labels:
-app: origin
-spec:
-selector:
-app: origin
-ports:
-- name: http
-port: 80
----
-```
-
-v1.yaml文件是个Deployment
-
-```yaml
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: origin-v1
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: origin
-        version: v1
-    spec:
-      restartPolicy: Always
-      containers:
-        - name: origin
-          image: registry.cn-beijing.aliyuncs.com/example/origin:v1.0.0
-          ports:
-            - containerPort: 80
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 2
-            timeoutSeconds: 10
-            periodSeconds: 3
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 2
-            timeoutSeconds: 5
-            periodSeconds: 3
----
-```
-
-v2.yaml文件仅有Deployment Kind就可以了，为什么要做v2.yaml，当更新时，需要蓝绿发布，除了image不同外，version也不同，并行运行v2
-
-```yaml
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: origin-v2
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: origin
-        version: v2
-    spec:
-      restartPolicy: Always
-      containers:
-        - name: origin
-          image: registry.cn-beijing.aliyuncs.com/example/origin:v1.0.1
-          ports:
-            - containerPort: 80
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 2
-            timeoutSeconds: 10
-            periodSeconds: 3
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 2
-            timeoutSeconds: 5
-            periodSeconds: 3
----
-
-```
-
-#### istio yaml的编写，这是用来控制流量，实现访问与蓝绿发布所用的
-
-关于gateway的部分，主要是使用istio的ingressgateway来让外部流量，流入k8s集群;同时VirtualService连接k8s集群的service的label，通过service再关联到k8s集群中Pod的label上
-而pod就是上面使用Deployment声明后部署的 gateway.yaml如下
-
-```yaml
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: origin-gateway
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-    - port:
-        number: 80
-        name: http
-        protocol: HTTP
-      hosts:
-        - "*"
----
-```
-
-如果你想控制2个版本的流量，需要再建立一个DestinationRule，其中的subsets有2个version的label
-
-```yaml
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: origin
-spec:
-  host: origin
-  subsets:
-    - name: v2
-      labels:
-        version: v2
-    - name: v1
-      labels:
-        version: v1
----
-```
-
-这样你就可以通过route功能实现流量控制新旧2个version的更新
-
-```yaml
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: origin
-spec:
-  hosts:
-    - "*"
-  gateways:
-    - origin-gateway
-  http:
-    - route:
-        - destination:
-            host: origin
-            subset: v2
-          weight: 100
-        - destination:
-            host: origin
-            subset: v1
-          weight: 0
-```
-
-## zgo engine各组件的性能测试
-
-查询与写入数量1048字节约1k
-
-```json
-{
-  "branch": "beta",
-  "change_log": "add the rows{10}",
-  "channel": "fros",
-  "create_time": "2017-06-13 16:39:08",
-  "firmware_list": "",
-  "md5": "80dee2bf7305bcf179582088e29fd7b9",
-  "note": {
-    "CoreServices": {
-      "md5": "d26975c0a8c7369f70ed699f2855cc2e",
-      "package_name": "CoreServices",
-      "version_code": "76",
-      "version_name": "1.0.76"
-    },
-    "FrDaemon": {
-      "md5": "6b1f0626673200bc2157422cd2103f5d",
-      "package_name": "FrDaemon",
-      "version_code": "390",
-      "version_name": "1.0.390"
-    },
-    "FrGallery": {
-      "md5": "90d767f0f31bcd3c1d27281ec979ba65",
-      "package_name": "FrGallery",
-      "version_code": "349",
-      "version_name": "1.0.349"
-    },
-    "FrLocal": {
-      "md5": "f15a215b2c070a80a01f07bde4f219eb",
-      "package_name": "FrLocal",
-      "version_code": "791",
-      "version_name": "1.0.791"
-    }
-  },
-  "pack_region_urls": {
-    "CN": "https://s3.cn-north-1.amazonaws.com.cn/xxx-os/ttt_xxx_android_1.5.3.344.393.zip",
-    "default": "http://192.168.8.78/ttt_xxx_android_1.5.3.344.393.zip",
-    "local": "http://192.168.8.78/ttt_xxx_android_1.5.3.344.393.zip"
-  },
-  "pack_version": "1.5.3.344.393",
-  "pack_version_code": 393,
-  "region": "all",
-  "release_flag": 0,
-  "revision": 62,
-  "size": 38966875,
-  "status": 3
-}
-```
-
-## 压力测试
-
-[核心包压测]http://wiki.example.com/pages/viewpage.action?pageId=11830049
-
 ## zgo engine突击队成员
 
-* 指挥官：杨丽娟
-* 队长：朱大仙儿
-* 队员：张建国
-* 队员：卢泰祥
-* 队员：刘伟
-* 队员：王士宝
+* Commander：杨丽娟
+* Leader：朱大仙儿
+* Zero A：张建国
+* Zero B：卢泰祥
+* Zero C：刘伟
+* Zero D：王士宝
 
 ## zgo 测试小组成员
 

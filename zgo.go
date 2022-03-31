@@ -239,10 +239,10 @@ type (
   EtcdClientV3    = clientv3.Client
   EtcdGetResponse = clientv3.GetResponse
 
-  MgoObjectId           = primitive.ObjectID           //mongo bson id
-  MgoBinbary            = primitive.Binary             //mongo bson id
-  MgoBulkWriteOperation = zgomgo.MgoBulkWriteOperation //多个并行计算
-  MgoArgs               = zgomgo.MgoArgs               //CRUD->mongodb时的传入参数，具体参数由以下选择，>>>>>请使用前详细阅读>>>>>
+  MongoObjectId           = primitive.ObjectID           //mongo bson id
+  MongoBinbary            = primitive.Binary             //mongo bson id
+  MongoBulkWriteOperation = zgomgo.MongoBulkWriteOperation //多个并行计算
+  MongoArgs               = zgomgo.MongoArgs               //CRUD->mongodb时的传入参数，具体参数由以下选择，>>>>>请使用前详细阅读>>>>>
   /*	Document     []interface{}    //保存时用到的结构体的指针
   	Result interface{}            //接受结构体的指针 比如: r := &User{} 这里的result就是r
   	Filter map[string]interface{} //查询条件
