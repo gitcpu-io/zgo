@@ -14,11 +14,6 @@ import (
   "go.etcd.io/etcd/client/v3"
 )
 
-//type A struct {
-//  ABC string `json:"abc"`
-//  DEF string `json:"def"`
-//}
-
 var cli *clientv3.Client
 
 func main() {
@@ -146,15 +141,6 @@ func main() {
       fmt.Println(err)
     }
   }
-
-  //for _, v := range config.Conf.Pika {
-  //	k := v.Key
-  //	value := v.Values
-  //	key := "zgo/project/origin/pika/" + k
-  //	val, _ := json.Marshal(value)
-  //	cli.KV.Put(context.TODO(), key, string(val))
-  //}
-  //
 
   key := "zgo/project/origin/cache"
   val, _ := json.Marshal(config.Conf.Cache)

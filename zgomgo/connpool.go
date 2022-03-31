@@ -158,10 +158,6 @@ func (cp *connPool) createClient(address, username, password, dbname string, poo
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     defer cancel()
     opts := &options.ClientOptions{
-      //Hosts: []string{
-      //	"47.95.20.12:27018",
-      //	"47.95.20.12:27019",
-      //},
       Auth: &options.Credential{
         AuthSource: dbname,
         Username:   username,
@@ -170,7 +166,6 @@ func (cp *connPool) createClient(address, username, password, dbname string, poo
     }
     opts.SetMaxPoolSize(uint64(poolSize))
     c, err := mongo.Connect(ctx, options.Client().ApplyURI(address), opts)
-    //c, err := mongo.Connect(ctx, opts)
     if err != nil {
       fmt.Println("connection Mongo failed :", address, err)
       out <- nil

@@ -1,4 +1,4 @@
-# zgo engine v1.0.6 <a href="README_ZH.md"></a>
+# zgo engine v1.0.7 <a href="README_ZH.md"></a>
 
 ## 为什么要搞zgo？
 
@@ -15,7 +15,7 @@ zgo是专门为使用go语言的开发人员所设计和开发的， 它提供�
 ## zgo的核心功能（共25个，6个数据库，2个缓存，3个消息队列，1个ES，1个Cache, 1个Log存储，1个Http，1个Grpc，1个Map，1个负载，1个限流，3个工具类组件）
 
 * 1.zgo Mysql对gorm开发框架提供上层封装，通过channel内建连接池，提供高并发访问mysql，并支持函数调用时自动读写分离，开发人员无需关注主从数据库
-* 2.zgo Mongodb对mgo开发框架提供上层封装，改变框架原有session复制连接的使用方法，通过channel内建连接池，提供高并发访问mongodb数据库的增删改查
+* 2.zgo Mongo对官方mongodb驱动的封装开发框架提供上层封装，通过channel内建连接池，提供高并发访问mongodb数据库的增删改查
 * 3.zgo Pika通过channel内建连接池，支持string,hash,set,sort set,list操作
 * 4.zgo Redis通过channel内建连接池，支持string,hash,set,sort set,list操作
 * 5.zgo Nsq对go-nsq开发框架提供上层封装，通过channel内建连接池，一步调用即可向Nsq中生产消息，通过一个goroutine来消费消息
@@ -35,7 +35,6 @@ zgo是专门为使用go语言的开发人员所设计和开发的， 它提供�
 * 19.zgo Rabbitmq提供对Rabbitmq的封装
 * 20.zgo Limiter提供bucket的限流
 * 21.zgo LB提供负载均衡
-* 22.zgo Mgo提供对官方mongodb驱动的封装
 * 23.zgo Etcd提供对操作etcd的连接封装
 * 24.zgo Trace提供对某个fun的追踪消耗时间
 
@@ -75,13 +74,13 @@ go build -o origin
 
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o origin
 
-用docker制作image(dck.example.test是任意一个标识，如果愿意你可以改为rubinus/origin)
+用docker制作image(cr.gitcpu.io是任意一个标识，如果愿意你可以改为rubinus/origin)
 
-docker build -t dck.example.test/origin .
+docker build -t cr.gitcpu.io/origin .
 
 把镜像文件push到开发环境的私有仓库
 
-docker push dck.example.test/origin
+docker push cr.gitcpu.io/origin
 
 ### 如果把zgo origin做为一个提供api接口访问的web微服务时的依赖
 
