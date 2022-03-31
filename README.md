@@ -1,4 +1,4 @@
-# zgo engine v1.0.9 <a href="README_ZH.md"></a>
+# zgo engine v1.0.9
 
 ## 为什么要搞zgo？
 
