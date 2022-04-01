@@ -234,7 +234,11 @@ func LoadConfig(cpath, env, project, etcdHosts string) {
   }
 
   if etcdHosts != "" {
-    Conf.EtcdHosts = strings.Split(etcdHosts, ",")
+    if strings.Contains(etcdHosts,",") {
+      Conf.EtcdHosts = strings.Split(etcdHosts, ",")
+    }else{
+      Conf.EtcdHosts = []string{etcdHosts}
+    }
   }
 
   //default init city db config
