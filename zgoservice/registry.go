@@ -7,6 +7,7 @@ import (
   "github.com/gitcpu-io/zgo/zgocrypto"
   "github.com/gitcpu-io/zgo/zgolb"
   "go.etcd.io/etcd/client/v3"
+  "strconv"
   "strings"
   "sync"
   "time"
@@ -30,12 +31,12 @@ var mu = &sync.RWMutex{}
 type LBResponse struct {
   SimpleHttpHost string
   SvcHost        string
-  SvcHttpPort    string
-  SvcGrpcPort    string
+  SvcHttpPort    int
+  SvcGrpcPort    int
 }
 
 type RegistryAndDiscover interface {
-  Registry(serviceName, svcHost, httpPort, grpcPort string) error
+  Registry(serviceName, svcHost string, httpPort, grpcPort int) error
   UnRegistry() error
   //todo 发现当前服务使用的 其它服务名，用哪个就监听哪个
   Discovery(serviceNames []string) error
@@ -43,7 +44,7 @@ type RegistryAndDiscover interface {
   Watch() chan string
 }
 
-//创建租约注册服务
+// Service 创建租约注册服务
 type Service struct {
   LBResponse
   name          string //服务名
@@ -87,7 +88,7 @@ func (service *Service) Watch() chan string {
   return serviceChan
 }
 
-//设置租约
+// setLease 设置租约
 func (service *Service) setLease(ttl int64) error {
   lease := clientv3.NewLease(service.client)
 
@@ -134,10 +135,10 @@ func (service *Service) ListenLeaseRespChan() {
   }
 }
 
-//通过租约 注册服务
-func (service *Service) Registry(serviceName, svcHost, httpPort, grpcPort string) error {
+// Registry 通过租约 注册服务
+func (service *Service) Registry(serviceName, svcHost string, httpPort, grpcPort int) error {
   kv := clientv3.NewKV(service.client)
-  val := fmt.Sprintf("%s:%s:%s", svcHost, httpPort, grpcPort)
+  val := fmt.Sprintf("%s:%d:%d", svcHost, httpPort, grpcPort)
   key := zgocrypto.New().Md5(val)
   newKey := fmt.Sprintf("%s/%s/%s", zgoServiceFrefix, serviceName, key)
   _, err := kv.Put(context.TODO(), newKey, val, clientv3.WithLease(service.leaseResp.ID))
@@ -148,7 +149,7 @@ func (service *Service) Registry(serviceName, svcHost, httpPort, grpcPort string
   return err
 }
 
-//撤销租约
+// UnRegistry 撤销租约
 func (service *Service) UnRegistry() error {
   if service.leaseResp == nil || service.leaseResp.Error != "" {
     return nil
@@ -158,7 +159,7 @@ func (service *Service) UnRegistry() error {
   return err
 }
 
-//内部负载均衡
+// LB 内部负载均衡
 func (service *Service) LB(serviceName string) (lbRes *LBResponse, err error) {
   mu.RLock()
   defer mu.RUnlock()
@@ -176,11 +177,19 @@ func (service *Service) LB(serviceName string) (lbRes *LBResponse, err error) {
   lbRes.SvcHost = split[0]
   lbRes.SimpleHttpHost = fmt.Sprintf("http://%s", lbRes.SvcHost)
   if len(split) > 0 {
-    lbRes.SvcHttpPort = split[1]
-    lbRes.SimpleHttpHost = fmt.Sprintf("%s:%s", lbRes.SimpleHttpHost, lbRes.SvcHttpPort)
+    atoi, err := strconv.Atoi(split[1])
+    if err != nil {
+      atoi = 80
+    }
+    lbRes.SvcHttpPort = atoi
+    lbRes.SimpleHttpHost = fmt.Sprintf("%s:%v", lbRes.SimpleHttpHost, lbRes.SvcHttpPort)
   }
   if len(split) > 1 {
-    lbRes.SvcGrpcPort = split[2]
+    atoi, err := strconv.Atoi(split[2])
+    if err != nil {
+      atoi = 50051
+    }
+    lbRes.SvcGrpcPort = atoi
   }
 
   return lbRes, nil
@@ -255,7 +264,7 @@ func (service *Service) getAddrs(resp *clientv3.GetResponse) []string {
   return addrs
 }
 
-//setServiceList 添加到map 从LB中
+// setServiceList 添加到map 从LB中
 func (service *Service) setServiceList(serviceName, key, val string) {
   if serviceList[key] == nil {
     serviceList[key] = zgolb.NewWR2ByArr([]string{})
@@ -268,7 +277,7 @@ func (service *Service) setServiceList(serviceName, key, val string) {
   serviceChan <- serviceName
 }
 
-//delServiceList 从map中找到key，并从LB中删除
+// delServiceList 从map中找到key，并从LB中删除
 func (service *Service) delServiceList(serviceName, key, val string) {
   if serviceList[key] == nil {
     return
