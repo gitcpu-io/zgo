@@ -239,8 +239,8 @@ type (
   EtcdClientV3    = clientv3.Client
   EtcdGetResponse = clientv3.GetResponse
 
-  MongoObjectId           = primitive.ObjectID           //mongo bson id
-  MongoBinbary            = primitive.Binary             //mongo bson id
+  MongoObjectId           = primitive.ObjectID             //mongo bson id
+  MongoBinbary            = primitive.Binary               //mongo bson id
   MongoBulkWriteOperation = zgomgo.MongoBulkWriteOperation //多个并行计算
   MongoArgs               = zgomgo.MongoArgs               //CRUD->mongodb时的传入参数，具体参数由以下选择，>>>>>请使用前详细阅读>>>>>
   /*	Document     []interface{}    //保存时用到的结构体的指针
@@ -322,18 +322,18 @@ type (
 )
 
 var (
-  Kafka             zgokafka.Kafkaer
-  Nsq               zgonsq.Nsqer
-  Mongo             zgomgo.Mgoer
-  Es                zgoes.Eser
-  Grpc              zgogrpc.Grpcer
-  Redis             zgoredis.Rediser
-  Pika              zgoredis.Rediser
-  Mysql             zgomysql.Mysqler
-  Postgres          zgopostgres.Postgreser
-  CK                zgoclickhouse.ClickHouseer
-  MQ                zgorabbitmq.Rabbitmqer
-  PostgresErrNoRows = pg.ErrNoRows
+  Kafka zgokafka.Kafkaer
+  Nsq   zgonsq.Nsqer
+  Mongo zgomgo.Mgoer
+  Es    zgoes.Eser
+  Grpc  zgogrpc.Grpcer
+  Redis                zgoredis.Rediser
+  Pika                 zgoredis.Rediser
+  Mysql                zgomysql.Mysqler
+  Postgres             zgopostgres.Postgreser
+  CK                   zgoclickhouse.ClickHouseer
+  MQ                   zgorabbitmq.Rabbitmqer
+  PostgresErrNoRows    = pg.ErrNoRows
 
   Version = config.Version
 

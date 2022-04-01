@@ -1,4 +1,4 @@
-# zgo engine v1.1.1
+# zgo engine v1.1.2
 
 ## 为什么要搞zgo？
 
