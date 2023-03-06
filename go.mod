@@ -11,7 +11,6 @@ require (
 	github.com/chentaihan/aesCbc v0.0.0-20201028024852-1c4d1700b583
 	github.com/elazarl/goproxy v0.0.0-20210801061803-8e322dfb79c4 // indirect
 	github.com/fatih/structs v1.1.0
-	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-pg/pg v8.0.7+incompatible
 	github.com/go-stack/stack v1.8.0
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -40,12 +39,9 @@ require (
 	go.etcd.io/etcd/client/v3 v3.5.2
 	go.mongodb.org/mongo-driver v1.8.4
 	go.uber.org/zap v1.19.0 // indirect
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
-	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
+	golang.org/x/crypto v0.1.0
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f // indirect
-	golang.org/x/sys v0.0.0-20210831042530-f4d43177bf5e // indirect
-	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
-	golang.org/x/text v0.3.7
+	golang.org/x/text v0.4.0
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/grpc v1.45.0
 	google.golang.org/protobuf v1.27.1 // indirect
