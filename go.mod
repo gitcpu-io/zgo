@@ -11,7 +11,6 @@ require (
 	github.com/chentaihan/aesCbc v0.0.0-20201028024852-1c4d1700b583
 	github.com/elazarl/goproxy v0.0.0-20210801061803-8e322dfb79c4 // indirect
 	github.com/fatih/structs v1.1.0
-	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-pg/pg v8.0.7+incompatible
 	github.com/go-stack/stack v1.8.0
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -55,6 +54,6 @@ require (
 	k8s.io/klog v1.0.0
 	k8s.io/klog/v2 v2.30.0 // indirect
 	k8s.io/utils v0.0.0-20210930125809-cb0fa318a74b // indirect
-	mellium.im/sasl v0.2.1 // indirect
+	mellium.im/sasl v0.3.1 // indirect
 	moul.io/http2curl v1.0.0 // indirect
 )
