@@ -1,206 +1,207 @@
 package zgokafka
 
-import (
-  "fmt"
-  "github.com/Shopify/sarama"
-  "github.com/gitcpu-io/zgo/config"
-  "math/rand"
-  "strings"
-  "sync"
-  "time"
-)
+// import (
+// 	"fmt"
+// 	"math/rand"
+// 	"strings"
+// 	"sync"
+// 	"time"
 
-const (
-  //limitConn = 50    //如果是连接集群就是每台数据库长连接50个，单机连也是50个
-  //mchSize   = 20000 //mchSize越大，越用不完，会休眠越久，不用长时间塞连接进channel
-  sleepTime = 1000 //goroutine休眠时间为1000毫秒
-)
+// 	"github.com/IBM/sarama"
+// 	"github.com/gitcpu-io/zgo/config"
+// )
 
-var (
-  connChanMap = make(map[string]chan *sarama.AsyncProducer)
-  mu          sync.RWMutex //用于锁定connChanMap
-  hsmu        sync.RWMutex
-)
+// const (
+// 	//limitConn = 50    //如果是连接集群就是每台数据库长连接50个，单机连也是50个
+// 	//mchSize   = 20000 //mchSize越大，越用不完，会休眠越久，不用长时间塞连接进channel
+// 	sleepTime = 1000 //goroutine休眠时间为1000毫秒
+// )
 
-//连接对外的接口
-type ConnPooler interface {
-  GetConnChan(label string) chan *sarama.AsyncProducer
-}
+// var (
+// 	connChanMap = make(map[string]chan *sarama.AsyncProducer)
+// 	mu          sync.RWMutex //用于锁定connChanMap
+// 	hsmu        sync.RWMutex
+// )
 
-type connPool struct {
-  label        string
-  m            sync.RWMutex
-  connChan     chan *sarama.AsyncProducer
-  clients      []*sarama.AsyncProducer
-  connChanChan chan chan *sarama.AsyncProducer
-}
+// // 连接对外的接口
+// type ConnPooler interface {
+// 	GetConnChan(label string) chan *sarama.AsyncProducer
+// }
 
-func NewConnPool(label string) *connPool {
-  return &connPool{
-    label: label,
-  }
-}
+// type connPool struct {
+// 	label        string
+// 	m            sync.RWMutex
+// 	connChan     chan *sarama.AsyncProducer
+// 	clients      []*sarama.AsyncProducer
+// 	connChanChan chan chan *sarama.AsyncProducer
+// }
 
-//InitConnPool 对外暴露
-func InitConnPool(hsm map[string][]*config.ConnDetail) {
-  initConnPool(hsm)
-}
+// func NewConnPool(label string) *connPool {
+// 	return &connPool{
+// 		label: label,
+// 	}
+// }
 
-func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
-  hsmu.RLock()
-  defer hsmu.RUnlock()
+// // InitConnPool 对外暴露
+// func InitConnPool(hsm map[string][]*config.ConnDetail) {
+// 	initConnPool(hsm)
+// }
 
-  ch := make(chan *config.Labelconns)
-  go func() {
-    for lahosts := range ch {
-      label := lahosts.Label
-      hosts := lahosts.Hosts
+// func initConnPool(hsm map[string][]*config.ConnDetail) { //仅跑一次
+// 	hsmu.RLock()
+// 	defer hsmu.RUnlock()
 
-      for k, v := range hosts {
-        index := fmt.Sprintf("%s:%d", label, k)
-        c := &connPool{
-          label:        label,
-          connChan:     make(chan *sarama.AsyncProducer, v.PoolSize),
-          connChanChan: make(chan chan *sarama.AsyncProducer, v.ConnSize),
-        }
-        mu.Lock()
-        connChanMap[index] = c.connChan
-        mu.Unlock()
-        go c.setConnPoolToChan(index, v) //call 创建连接到chan中
-      }
+// 	ch := make(chan *config.Labelconns)
+// 	go func() {
+// 		for lahosts := range ch {
+// 			label := lahosts.Label
+// 			hosts := lahosts.Hosts
 
-      //fmt.Println(label, hosts, "hsm=====",len(hsm), connChanMap)
-    }
-  }()
+// 			for k, v := range hosts {
+// 				index := fmt.Sprintf("%s:%d", label, k)
+// 				c := &connPool{
+// 					label:        label,
+// 					connChan:     make(chan *sarama.AsyncProducer, v.PoolSize),
+// 					connChanChan: make(chan chan *sarama.AsyncProducer, v.ConnSize),
+// 				}
+// 				mu.Lock()
+// 				connChanMap[index] = c.connChan
+// 				mu.Unlock()
+// 				go c.setConnPoolToChan(index, v) //call 创建连接到chan中
+// 			}
 
-  for label, val := range hsm {
-    lcs := &config.Labelconns{
-      Label: label,
-      Hosts: val,
-    }
-    //fmt.Println(lcs,"-----")
-    ch <- lcs
-  }
-  close(ch)
+// 			//fmt.Println(label, hosts, "hsm=====",len(hsm), connChanMap)
+// 		}
+// 	}()
 
-}
+// 	for label, val := range hsm {
+// 		lcs := &config.Labelconns{
+// 			Label: label,
+// 			Hosts: val,
+// 		}
+// 		//fmt.Println(lcs,"-----")
+// 		ch <- lcs
+// 	}
+// 	close(ch)
 
-//GetConnChan 通过label并发安全读map
-func (cp *connPool) GetConnChan(label string) chan *sarama.AsyncProducer {
-  cp.m.RLock()
-  defer cp.m.RUnlock()
+// }
 
-  labLen := 0
-  if v, ok := currentLabels[label]; ok {
-    labLen = len(v)
-  }
-  index := rand.Intn(labLen) //随机取一个相同label下的连接
+// // GetConnChan 通过label并发安全读map
+// func (cp *connPool) GetConnChan(label string) chan *sarama.AsyncProducer {
+// 	cp.m.RLock()
+// 	defer cp.m.RUnlock()
 
-  return connChanMap[fmt.Sprintf("%s:%d", label, index)]
-}
+// 	labLen := 0
+// 	if v, ok := currentLabels[label]; ok {
+// 		labLen = len(v)
+// 	}
+// 	index := rand.Intn(labLen) //随机取一个相同label下的连接
 
-func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
-  //fmt.Sprintf(label, "--", hosts)
-  //每个host:port连接创建50个连接，放入slice中
-  go func() {
-    for sessionCh := range cp.connChanChan {
-      if session, ok := <-sessionCh; ok {
-        //保存channel中的连接到数组中
-        cp.clients = append(cp.clients, session)
-      }
-    }
-  }()
+// 	return connChanMap[fmt.Sprintf("%s:%d", label, index)]
+// }
 
-  for i := 0; i < hosts.ConnSize; i++ {
-    //把并发创建的数据库的连接channel，放进channel中
-    var hh []string
-    if strings.Contains(hosts.Host, ",") {
-      hp := strings.Split(hosts.Host, ",")
-      var tmp []string
-      for _, v := range hp {
-        if strings.Contains(v, ":") {
-          v = fmt.Sprintf("%s:%d", v, hosts.Port)
-          tmp = append(tmp, v)
-        } else {
-          tmp = append(tmp, v)
-        }
-      }
-      hh = append(hh, tmp...)
-    } else {
-      if strings.Contains(hosts.Host, ":")  {
+// func (cp *connPool) setConnPoolToChan(label string, hosts *config.ConnDetail) {
+// 	//fmt.Sprintf(label, "--", hosts)
+// 	//每个host:port连接创建50个连接，放入slice中
+// 	go func() {
+// 		for sessionCh := range cp.connChanChan {
+// 			if session, ok := <-sessionCh; ok {
+// 				//保存channel中的连接到数组中
+// 				cp.clients = append(cp.clients, session)
+// 			}
+// 		}
+// 	}()
 
-        hh = append(hh, hosts.Host) //此时有host:port
+// 	for i := 0; i < hosts.ConnSize; i++ {
+// 		//把并发创建的数据库的连接channel，放进channel中
+// 		var hh []string
+// 		if strings.Contains(hosts.Host, ",") {
+// 			hp := strings.Split(hosts.Host, ",")
+// 			var tmp []string
+// 			for _, v := range hp {
+// 				if strings.Contains(v, ":") {
+// 					v = fmt.Sprintf("%s:%d", v, hosts.Port)
+// 					tmp = append(tmp, v)
+// 				} else {
+// 					tmp = append(tmp, v)
+// 				}
+// 			}
+// 			hh = append(hh, tmp...)
+// 		} else {
+// 			if strings.Contains(hosts.Host, ":") {
 
-      } else {
-        hh = append(hh, fmt.Sprintf("%s:%d", hosts.Host, hosts.Port))
-      }
-    }
-    cp.connChanChan <- cp.createClient(hh)
-  }
+// 				hh = append(hh, hosts.Host) //此时有host:port
 
-  go func() {
-    for {
-      //如果连接全部创建完成，且channel中有了足够的mchSize个连接；循环确保channel中有连接
-      //mchSize越大，越用不完，会休眠越久，不用长时间塞连接进channel
-      if len(cp.connChan) < hosts.PoolSize && len(cp.clients) >= hosts.ConnSize/2 {
-        for _, s := range cp.clients {
-          if s != nil {
-            cp.connChan <- s
-          }
-        }
+// 			} else {
+// 				hh = append(hh, fmt.Sprintf("%s:%d", hosts.Host, hosts.Port))
+// 			}
+// 		}
+// 		cp.connChanChan <- cp.createClient(hh)
+// 	}
 
-      } else {
-        //大多时间是在执行下面一行sleep
-        time.Sleep(sleepTime * time.Millisecond)
-        //fmt.Println(len(cp.connChan), "--connChan--", label, hosts.Host, hosts.Port)
-        //fmt.Println(len(connChanMap), "--connChanMap--", label, hosts.Host, hosts.Port)
-      }
-    }
+// 	go func() {
+// 		for {
+// 			//如果连接全部创建完成，且channel中有了足够的mchSize个连接；循环确保channel中有连接
+// 			//mchSize越大，越用不完，会休眠越久，不用长时间塞连接进channel
+// 			if len(cp.connChan) < hosts.PoolSize && len(cp.clients) >= hosts.ConnSize/2 {
+// 				for _, s := range cp.clients {
+// 					if s != nil {
+// 						cp.connChan <- s
+// 					}
+// 				}
 
-  }()
+// 			} else {
+// 				//大多时间是在执行下面一行sleep
+// 				time.Sleep(sleepTime * time.Millisecond)
+// 				//fmt.Println(len(cp.connChan), "--connChan--", label, hosts.Host, hosts.Port)
+// 				//fmt.Println(len(connChanMap), "--connChanMap--", label, hosts.Host, hosts.Port)
+// 			}
+// 		}
 
-  go func() {
-    time.Sleep(2000 * time.Millisecond) //仅仅为了查看创建的连接数，创建数据库连接时间：90ms
-    fmt.Printf("init Kafka to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
-      len(cp.connChan), label, hosts.Host, hosts.Port, hosts.ConnSize, hosts.PoolSize, hosts.C)
-  }()
-}
+// 	}()
 
-//createClient 创建客户端连接
-func (cp *connPool) createClient(address []string) chan *sarama.AsyncProducer {
-  out := make(chan *sarama.AsyncProducer)
-  go func() {
-    c := sarama.NewConfig()
+// 	go func() {
+// 		time.Sleep(2000 * time.Millisecond) //仅仅为了查看创建的连接数，创建数据库连接时间：90ms
+// 		fmt.Printf("init Kafka to Channel [%d] ... [%s] Host:%s, Port:%d, Conn:%d, Pool:%d, %s\n",
+// 			len(cp.connChan), label, hosts.Host, hosts.Port, hosts.ConnSize, hosts.PoolSize, hosts.C)
+// 	}()
+// }
 
-    c.Producer.Return.Successes = true
-    //c.Producer.Partitioner = sarama.NewRandomPartitioner
-    c.Producer.Flush.Frequency = 500 * time.Millisecond
-    //c.Net.KeepAlive = 30 * time.Minute
-    c.Net.MaxOpenRequests = 20000
+// // createClient 创建客户端连接
+// func (cp *connPool) createClient(address []string) chan *sarama.AsyncProducer {
+// 	out := make(chan *sarama.AsyncProducer)
+// 	go func() {
+// 		c := sarama.NewConfig()
 
-    //fmt.Println(address,"------connection kafka-------")
-    p, err := sarama.NewAsyncProducer(address, c)
-    if err != nil {
-      fmt.Printf("sarama.NewSyncProducer err:%s \n", err)
-      out <- nil
-      return
-    }
+// 		c.Producer.Return.Successes = true
+// 		//c.Producer.Partitioner = sarama.NewRandomPartitioner
+// 		c.Producer.Flush.Frequency = 500 * time.Millisecond
+// 		//c.Net.KeepAlive = 30 * time.Minute
+// 		c.Net.MaxOpenRequests = 20000
 
-    go func(p sarama.AsyncProducer) {
-      for err := range p.Errors() {
-        if err != nil {
-          fmt.Println(err)
-        }
-      }
-    }(p)
-    //go func(p sarama.AsyncProducer) {
-    //  for _ = range p.Successes() {
-    //    //val, _ := v.Value.Encode()
-    //    //fmt.Println(v.Offset, v.Partition, string(val))
-    //  }
-    //
-    //}(p)
-    out <- &p
-  }()
-  return out
-}
+// 		//fmt.Println(address,"------connection kafka-------")
+// 		p, err := sarama.NewAsyncProducer(address, c)
+// 		if err != nil {
+// 			fmt.Printf("sarama.NewSyncProducer err:%s \n", err)
+// 			out <- nil
+// 			return
+// 		}
+
+// 		go func(p sarama.AsyncProducer) {
+// 			for err := range p.Errors() {
+// 				if err != nil {
+// 					fmt.Println(err)
+// 				}
+// 			}
+// 		}(p)
+// 		//go func(p sarama.AsyncProducer) {
+// 		//  for _ = range p.Successes() {
+// 		//    //val, _ := v.Value.Encode()
+// 		//    //fmt.Println(v.Offset, v.Partition, string(val))
+// 		//  }
+// 		//
+// 		//}(p)
+// 		out <- &p
+// 	}()
+// 	return out
+// }

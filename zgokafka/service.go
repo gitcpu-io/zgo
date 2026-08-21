@@ -1,122 +1,122 @@
 // zgokafka是对消息中间件Kafka的封装，提供新建连接，生产数据，消费数据接口
 package zgokafka
 
-import (
-  "context"
-  "github.com/Shopify/sarama"
-  "github.com/bsm/sarama-cluster"
-  "github.com/gitcpu-io/zgo/comm"
-  "github.com/gitcpu-io/zgo/config"
-  "sync"
-)
+// import (
+// 	"context"
+// 	"sync"
 
-var (
-  currentLabels = make(map[string][]*config.ConnDetail)
-  muLabel       = &sync.RWMutex{}
-)
+// 	"github.com/IBM/sarama"
+// 	"github.com/gitcpu-io/zgo/comm"
+// 	"github.com/gitcpu-io/zgo/config"
+// )
 
-//Kafka 对外
-type Kafkaer interface {
-  New(label ...string) (*zgokafka, error)
-  GetConnChan(label ...string) (chan *sarama.AsyncProducer, error)
-  Producer(ctx context.Context, topic string, body []byte) (chan uint8, error)
-  ProducerMulti(ctx context.Context, topic string, body [][]byte) (chan uint8, error)
-  Consumer(topic, groupId string) (*cluster.Consumer, error)
-}
+// var (
+// 	currentLabels = make(map[string][]*config.ConnDetail)
+// 	muLabel       = &sync.RWMutex{}
+// )
 
-func Kafka(label string) Kafkaer {
-  return &zgokafka{
-    res: NewKafkaResourcer(label),
-  }
-}
+// // Kafka 对外
+// type Kafkaer interface {
+// 	New(label ...string) (*zgokafka, error)
+// 	GetConnChan(label ...string) (chan *sarama.AsyncProducer, error)
+// 	Producer(ctx context.Context, topic string, body []byte) (chan uint8, error)
+// 	ProducerMulti(ctx context.Context, topic string, body [][]byte) (chan uint8, error)
+// 	Consumer(topic, groupId string) (*sarama.Consumer, error)
+// }
 
-//zgokafka实现了Kafka的接口
-type zgokafka struct {
-  res KafkaResourcer //使用resource另外的一个接口
-}
+// func Kafka(label string) Kafkaer {
+// 	return &zgokafka{
+// 		res: NewKafkaResourcer(label),
+// 	}
+// }
 
-//InitKafka 初始化连接kafka
-func InitKafka(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgokafka {
-  muLabel.Lock()
-  defer muLabel.Unlock()
+// // zgokafka实现了Kafka的接口
+// type zgokafka struct {
+// 	res KafkaResourcer //使用resource另外的一个接口
+// }
 
-  var hsm map[string][]*config.ConnDetail
+// // InitKafka 初始化连接kafka
+// func InitKafka(hsmIn map[string][]*config.ConnDetail, label ...string) chan *zgokafka {
+// 	muLabel.Lock()
+// 	defer muLabel.Unlock()
 
-  if len(label) > 0 && len(currentLabels) > 0 { //此时是destory操作,传入的hsm是nil
-    //fmt.Println("--destory--前",currentLabels)
-    for _, v := range label {
-      delete(currentLabels, v)
-    }
-    hsm = currentLabels
-    //fmt.Println("--destory--后",currentLabels)
+// 	var hsm map[string][]*config.ConnDetail
 
-  } else { //这是第一次创建操作或etcd中变更时init again操作
-    hsm = hsmIn
-    //currentLabels = hsm	//this operation is error
-    for k, v := range hsm { //so big bug can't set hsm to currentLabels，must be for, may be have old label
-      currentLabels[k] = v
-    }
-  }
+// 	if len(label) > 0 && len(currentLabels) > 0 { //此时是destory操作,传入的hsm是nil
+// 		//fmt.Println("--destory--前",currentLabels)
+// 		for _, v := range label {
+// 			delete(currentLabels, v)
+// 		}
+// 		hsm = currentLabels
+// 		//fmt.Println("--destory--后",currentLabels)
 
-  if len(hsm) == 0 {
-    return nil
-  }
+// 	} else { //这是第一次创建操作或etcd中变更时init again操作
+// 		hsm = hsmIn
+// 		//currentLabels = hsm	//this operation is error
+// 		for k, v := range hsm { //so big bug can't set hsm to currentLabels，must be for, may be have old label
+// 			currentLabels[k] = v
+// 		}
+// 	}
 
-  InitKafkaResource(hsm)
+// 	if len(hsm) == 0 {
+// 		return nil
+// 	}
 
-  //自动为变量初始化对象
-  initLabel := ""
-  for k := range hsm {
-    if k != "" {
-      initLabel = k
-      break
-    }
-  }
-  out := make(chan *zgokafka)
-  go func() {
-    in, err := GetKafka(initLabel)
-    if err != nil {
-      out <- nil
-    }
-    out <- in
-    close(out)
-  }()
-  return out
+// 	InitKafkaResource(hsm)
 
-}
+// 	//自动为变量初始化对象
+// 	initLabel := ""
+// 	for k := range hsm {
+// 		if k != "" {
+// 			initLabel = k
+// 			break
+// 		}
+// 	}
+// 	out := make(chan *zgokafka)
+// 	go func() {
+// 		in, err := GetKafka(initLabel)
+// 		if err != nil {
+// 			out <- nil
+// 		}
+// 		out <- in
+// 		close(out)
+// 	}()
+// 	return out
 
-//GetKafka zgo内部获取一个连接kafka
-func GetKafka(label ...string) (*zgokafka, error) {
-  l, err := comm.GetCurrentLabel(label, muLabel, currentLabels)
-  if err != nil {
-    return nil, err
-  }
-  return &zgokafka{
-    res: NewKafkaResourcer(l),
-  }, nil
-}
+// }
 
-func (n *zgokafka) New(label ...string) (*zgokafka, error) {
-  return GetKafka(label...)
-}
+// // GetKafka zgo内部获取一个连接kafka
+// func GetKafka(label ...string) (*zgokafka, error) {
+// 	l, err := comm.GetCurrentLabel(label, muLabel, currentLabels)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &zgokafka{
+// 		res: NewKafkaResourcer(l),
+// 	}, nil
+// }
 
-//GetConnChan 供用户使用原生连接的chan
-func (n *zgokafka) GetConnChan(label ...string) (chan *sarama.AsyncProducer, error) {
-  l, err := comm.GetCurrentLabel(label, muLabel, currentLabels)
-  if err != nil {
-    return nil, err
-  }
-  return n.res.GetConnChan(l), nil
-}
+// func (n *zgokafka) New(label ...string) (*zgokafka, error) {
+// 	return GetKafka(label...)
+// }
 
-func (n *zgokafka) Producer(ctx context.Context, topic string, body []byte) (chan uint8, error) {
-  return n.res.Producer(ctx, topic, body)
-}
+// // GetConnChan 供用户使用原生连接的chan
+// func (n *zgokafka) GetConnChan(label ...string) (chan *sarama.AsyncProducer, error) {
+// 	l, err := comm.GetCurrentLabel(label, muLabel, currentLabels)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return n.res.GetConnChan(l), nil
+// }
 
-func (n *zgokafka) ProducerMulti(ctx context.Context, topic string, body [][]byte) (chan uint8, error) {
-  return n.res.ProducerMulti(ctx, topic, body)
-}
+// func (n *zgokafka) Producer(ctx context.Context, topic string, body []byte) (chan uint8, error) {
+// 	return n.res.Producer(ctx, topic, body)
+// }
 
-func (n *zgokafka) Consumer(topic, groupId string) (*cluster.Consumer, error) {
-  return n.res.Consumer(topic, groupId)
-}
+// func (n *zgokafka) ProducerMulti(ctx context.Context, topic string, body [][]byte) (chan uint8, error) {
+// 	return n.res.ProducerMulti(ctx, topic, body)
+// }
+
+// func (n *zgokafka) Consumer(topic, groupId string) (*sarama.Consumer, error) {
+// 	return n.res.Consumer(topic, groupId)
+// }
